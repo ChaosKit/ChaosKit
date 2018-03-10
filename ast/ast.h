@@ -3,7 +3,6 @@
 
 #include "Node.h"
 #include "Input.h"
-#include "Number.h"
 #include "Parameter.h"
 #include "UnaryFunction.h"
 #include "util.h"

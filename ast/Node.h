@@ -12,7 +12,7 @@ class Parameter;
 class UnaryFunction;
 
 using Node =
-    mapbox::util::variant<Input, Number, Parameter,
+    mapbox::util::variant<float, Input, Parameter,
                           mapbox::util::recursive_wrapper<UnaryFunction>>;
 
 }  // namespace ast

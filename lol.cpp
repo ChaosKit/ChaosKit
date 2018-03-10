@@ -8,9 +8,9 @@ using namespace chaoskit::ast;
 
 class TestVisitor {
  public:
-  void operator()(const Number &number) {
+  void operator()(float number) {
     handle_depth();
-    std::cout << number.value();
+    std::cout << number;
   }
 
   void operator()(const Input &input) {
