@@ -81,6 +81,60 @@ class TestVisitor {
     depth_--;
   }
 
+  void operator()(const BinaryFunction& function) {
+    handle_depth();
+    std::cout << "binary ";
+    switch (function.type()) {
+      case BinaryFunction::ADD:
+        std::cout << "+";
+        break;
+      case BinaryFunction::SUBTRACT:
+        std::cout << "-";
+        break;
+      case BinaryFunction::MULTIPLY:
+        std::cout << "*";
+        break;
+      case BinaryFunction::DIVIDE:
+        std::cout << "/";
+        break;
+      case BinaryFunction::POWER:
+        std::cout << "pow";
+        break;
+      case BinaryFunction::MODULO:
+        std::cout << "mod";
+        break;
+      case BinaryFunction::AND:
+        std::cout << "&&";
+        break;
+      case BinaryFunction::OR:
+        std::cout << "||";
+        break;
+      case BinaryFunction::LESS_THAN:
+        std::cout << "<";
+        break;
+      case BinaryFunction::GREATER_THAN:
+        std::cout << ">";
+        break;
+      case BinaryFunction::EQUALS:
+        std::cout << "==";
+        break;
+      case BinaryFunction::LESS_THAN_OR_EQUAL:
+        std::cout << "<=";
+        break;
+      case BinaryFunction::GREATER_THAN_OR_EQUAL:
+        std::cout << ">=";
+        break;
+      case BinaryFunction::DISTANCE:
+        std::cout << "distance";
+        break;
+    }
+
+    depth_++;
+    chaoskit::ast::apply_visitor(*this, function.first());
+    chaoskit::ast::apply_visitor(*this, function.second());
+    depth_--;
+  }
+
  private:
   size_t depth_ = 0;
 
@@ -92,7 +146,7 @@ class TestVisitor {
 int main() {
   using namespace chaoskit::ast::helpers;
 
-  chaoskit::ast::Node expression = sin(15.0f);
+  chaoskit::ast::Node expression = pow(sin(2.f) / cos(3.f), 2.f);
 
   TestVisitor visitor;
   chaoskit::ast::apply_visitor(visitor, expression);

@@ -8,5 +8,6 @@ target_sources(ast INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/Node.h
         ${CMAKE_CURRENT_SOURCE_DIR}/Input.h
         ${CMAKE_CURRENT_SOURCE_DIR}/UnaryFunction.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/BinaryFunction.h
         ${CMAKE_CURRENT_SOURCE_DIR}/Parameter.h)
 target_link_libraries(ast INTERFACE variant)
