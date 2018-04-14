@@ -2,6 +2,7 @@
 #define CHAOSKIT_BINARYFUNCTION_H
 
 #include <enum.h>
+#include "util.h"
 #include "Expression.h"
 
 namespace chaoskit {
@@ -19,13 +20,29 @@ class BinaryFunction {
       : type_(type), first_(first), second_(second) {}
 
   Type type() const { return type_; }
-  Expression first() const { return first_; }
-  Expression second() const { return second_; }
+  const Expression& first() const { return first_; }
+  const Expression& second() const { return second_; }
+
+  bool operator==(const BinaryFunction& other) const {
+    return type_ == other.type_ && first_ == other.first_ &&
+           second_ == other.second_;
+  }
 
  private:
   Type type_;
   Expression first_, second_;
 };
+
+GENERATE_NODE_TYPE(BinaryFunction)
+
+std::ostream& operator<<(std::ostream& stream, const BinaryFunction& function) {
+  StreamPrinter printer(stream);
+  stream << node_type(function) << ":" << function.type() << "(";
+  apply_visitor(printer, function.first());
+  stream << ", ";
+  apply_visitor(printer, function.second());
+  return stream << ")";
+}
 
 }  // namespace ast
 }  // namespace chaoskit

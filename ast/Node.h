@@ -2,6 +2,7 @@
 #define CHAOSKIT_NODE_H
 
 #include <mapbox/variant.hpp>
+#include "util.h"
 
 namespace chaoskit {
 namespace ast {

@@ -11,3 +11,7 @@ target_sources(ast INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/BinaryFunction.h
         ${CMAKE_CURRENT_SOURCE_DIR}/Parameter.h)
 target_link_libraries(ast INTERFACE variant better_enums)
+
+add_executable(ast_test ast_test.cpp)
+target_link_libraries(ast_test PRIVATE gmock_main ast)
+add_test(NAME ast_test COMMAND ast_test)

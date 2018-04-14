@@ -2,6 +2,7 @@
 #define CHAOSKIT_UNARYFUNCTION_H
 
 #include <enum.h>
+#include "util.h"
 #include "Expression.h"
 
 namespace chaoskit {
@@ -18,12 +19,25 @@ class UnaryFunction {
       : type_(type), argument_(argument) {}
 
   Type type() const { return type_; }
-  Expression argument() const { return argument_; }
+  const Expression& argument() const { return argument_; }
+
+  bool operator==(const UnaryFunction& other) const {
+    return type_ == other.type_ && argument_ == other.argument_;
+  }
 
  private:
   Type type_;
   Expression argument_;
 };
+
+GENERATE_NODE_TYPE(UnaryFunction)
+
+std::ostream& operator<<(std::ostream& stream, const UnaryFunction& function) {
+  StreamPrinter printer(stream);
+  stream << node_type(function) << ":" << function.type() << "(";
+  apply_visitor(printer, function.argument());
+  return stream << ")";
+}
 
 }  // namespace ast
 }  // namespace chaoskit
