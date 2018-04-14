@@ -10,6 +10,13 @@ target_sources(variant INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/variant/mapbox/variant_visitor.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/variant/mapbox/variant.hpp)
 
+# Better Enums (https://github.com/aantron/better-enums)
+add_library(better_enums INTERFACE)
+target_include_directories(better_enums INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/better_enums)
+target_sources(better_enums INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/better_enums/enum.h)
+
 # Google Test (downloaded and build at configure time)
 # Copied from https://github.com/google/googletest
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
