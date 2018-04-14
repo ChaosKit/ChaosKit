@@ -1,12 +1,16 @@
 #ifndef CHAOSKIT_INPUT_H
 #define CHAOSKIT_INPUT_H
 
+#include <enum.h>
+
 namespace chaoskit {
 namespace ast {
 
+BETTER_ENUM(Input_Type, char, X, Y)
+
 class Input {
  public:
-  enum Type { X, Y };
+  typedef Input_Type Type;
 
   Input(Type type) : type_(type) {}
 
