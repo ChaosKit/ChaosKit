@@ -2,7 +2,7 @@
 #define CHAOSKIT_PARAMETER_H
 
 #include <cstddef>
-#include "util.h"
+#include <ostream>
 
 namespace chaoskit {
 namespace ast {
@@ -21,11 +21,7 @@ class Parameter {
   float index_;
 };
 
-GENERATE_NODE_TYPE(Parameter)
-
-std::ostream& operator<<(std::ostream& stream, const Parameter& parameter) {
-  return stream << node_type(parameter) << "(" << parameter.index() << ")";
-}
+std::ostream& operator<<(std::ostream& stream, const Parameter& parameter);
 
 }  // namespace ast
 }  // namespace chaoskit

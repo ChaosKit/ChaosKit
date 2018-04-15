@@ -1,8 +1,8 @@
 #ifndef CHAOSKIT_BINARYFUNCTION_H
 #define CHAOSKIT_BINARYFUNCTION_H
 
+#include <ostream>
 #include <enum.h>
-#include "util.h"
 #include "Expression.h"
 
 namespace chaoskit {
@@ -33,16 +33,7 @@ class BinaryFunction {
   Expression first_, second_;
 };
 
-GENERATE_NODE_TYPE(BinaryFunction)
-
-std::ostream& operator<<(std::ostream& stream, const BinaryFunction& function) {
-  StreamPrinter printer(stream);
-  stream << node_type(function) << ":" << function.type() << "(";
-  apply_visitor(printer, function.first());
-  stream << ", ";
-  apply_visitor(printer, function.second());
-  return stream << ")";
-}
+std::ostream& operator<<(std::ostream& stream, const BinaryFunction& function);
 
 }  // namespace ast
 }  // namespace chaoskit

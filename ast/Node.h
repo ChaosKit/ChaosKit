@@ -2,22 +2,29 @@
 #define CHAOSKIT_NODE_H
 
 #include <mapbox/variant.hpp>
-#include "util.h"
+#include "Input.h"
+#include "Parameter.h"
+#include "Expression.h"
 
 namespace chaoskit {
 namespace ast {
 
-class Input;
-class Parameter;
 class UnaryFunction;
 class BinaryFunction;
 class Formula;
 
-using Node =
+namespace {
+using NodeAlias =
     mapbox::util::variant<float, Input, Parameter,
                           mapbox::util::recursive_wrapper<UnaryFunction>,
                           mapbox::util::recursive_wrapper<BinaryFunction>,
                           mapbox::util::recursive_wrapper<Formula>>;
+}
+
+struct Node : public NodeAlias {
+  using NodeAlias::NodeAlias;
+  Node(const Expression& expression);
+};
 
 }  // namespace ast
 }  // namespace chaoskit

@@ -3,7 +3,6 @@
 
 #include <ostream>
 #include <enum.h>
-#include "util.h"
 
 namespace chaoskit {
 namespace ast {
@@ -26,11 +25,7 @@ class Input {
   Type type_;
 };
 
-GENERATE_NODE_TYPE(Input)
-
-std::ostream& operator<<(std::ostream& stream, const Input& input) {
-  return stream << node_type(input) << "(" << input.type() << ")";
-}
+std::ostream& operator<<(std::ostream& stream, const Input& input);
 
 }  // namespace ast
 }  // namespace chaoskit

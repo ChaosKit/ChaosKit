@@ -1,17 +1,6 @@
-add_library(ast INTERFACE)
-target_include_directories(ast INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-target_sources(ast INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/helpers.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/util.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Expression.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Node.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Input.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/UnaryFunction.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/BinaryFunction.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Formula.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Parameter.h)
-target_link_libraries(ast INTERFACE variant better_enums)
+add_library(ast Node.cpp ast.h helpers.h util.h Expression.h Node.h Input.h
+        UnaryFunction.h BinaryFunction.h Formula.h Parameter.h types.h Input.cpp Parameter.cpp UnaryFunction.cpp BinaryFunction.cpp Formula.cpp)
+target_link_libraries(ast PUBLIC variant better_enums)
 
 add_executable(ast_test ast_test.cpp)
 target_link_libraries(ast_test PRIVATE gmock_main ast)

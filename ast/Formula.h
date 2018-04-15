@@ -1,8 +1,8 @@
 #ifndef CHAOSKIT_AST_FORMULA_H
 #define CHAOSKIT_AST_FORMULA_H
 
+#include <ostream>
 #include "Expression.h"
-#include "util.h"
 
 namespace chaoskit {
 namespace ast {
@@ -11,10 +11,15 @@ class Formula {
  public:
   Formula(const Expression& x, const Expression& y) : x_(x), y_(y) {}
 
+  template <size_t N>
+  Formula(const Expression(&list)[N]) : x_(list[0]), y_(list[1]) {
+    static_assert(N == 2, "Formula requires 2 Expressions");
+  }
+
   const Expression& x() const { return x_; }
   const Expression& y() const { return y_; }
 
-  bool operator==(const Formula& other) {
+  bool operator==(const Formula& other) const {
     return x_ == other.x_ && y_ == other.y_;
   }
 
@@ -22,16 +27,7 @@ class Formula {
   Expression x_, y_;
 };
 
-GENERATE_NODE_TYPE(Formula)
-
-std::ostream& operator<<(std::ostream& stream, const Formula& formula) {
-  StreamPrinter printer(stream);
-  stream << node_type(formula) << "{";
-  apply_visitor(printer, formula.x());
-  stream << ", ";
-  apply_visitor(printer, formula.y());
-  return stream << "}";
-}
+std::ostream& operator<<(std::ostream& stream, const Formula& formula);
 
 }  // namespace ast
 }  // namespace chaoskit

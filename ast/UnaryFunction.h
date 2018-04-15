@@ -1,8 +1,8 @@
 #ifndef CHAOSKIT_UNARYFUNCTION_H
 #define CHAOSKIT_UNARYFUNCTION_H
 
+#include <ostream>
 #include <enum.h>
-#include "util.h"
 #include "Expression.h"
 
 namespace chaoskit {
@@ -30,14 +30,7 @@ class UnaryFunction {
   Expression argument_;
 };
 
-GENERATE_NODE_TYPE(UnaryFunction)
-
-std::ostream& operator<<(std::ostream& stream, const UnaryFunction& function) {
-  StreamPrinter printer(stream);
-  stream << node_type(function) << ":" << function.type() << "(";
-  apply_visitor(printer, function.argument());
-  return stream << ")";
-}
+std::ostream& operator<<(std::ostream& stream, const UnaryFunction& function);
 
 }  // namespace ast
 }  // namespace chaoskit

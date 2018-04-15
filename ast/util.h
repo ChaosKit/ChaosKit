@@ -1,13 +1,15 @@
 #ifndef CHAOSKIT_AST_UTIL_H
 #define CHAOSKIT_AST_UTIL_H
 
-#include <mapbox/variant.hpp>
 #include <string>
+#include <mapbox/variant.hpp>
+#include <mapbox/variant_cast.hpp>
 
 namespace chaoskit {
 namespace ast {
 
 using mapbox::util::apply_visitor;
+using mapbox::util::static_variant_cast;
 
 class StreamPrinter {
   std::ostream& stream_;
@@ -35,8 +37,6 @@ std::string node_type(const T& node) {
   std::string node_type<type>() { \
     return #type;                 \
   }
-
-GENERATE_NODE_TYPE(float)
 
 class NodeTypeVisitor {
  public:

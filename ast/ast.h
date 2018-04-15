@@ -3,11 +3,7 @@
 
 #include "Node.h"
 #include "Expression.h"
-#include "Input.h"
-#include "Parameter.h"
-#include "UnaryFunction.h"
-#include "BinaryFunction.h"
-#include "Formula.h"
+#include "types.h"
 #include "util.h"
 
 #endif //CHAOSKIT_AST_H

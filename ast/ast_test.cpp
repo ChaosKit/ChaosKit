@@ -55,7 +55,8 @@ class TreeEqualityVisitor {
       return failWithHint(expectedValue, function);
     }
 
-    stack_.push_back(&expectedValue.argument());
+    Node expectedArgument = expectedValue.argument();
+    stack_.push_back(&expectedArgument);
     bool result = apply_visitor(*this, function.argument());
     stack_.pop_back();
     return result;
@@ -73,14 +74,16 @@ class TreeEqualityVisitor {
       return failWithHint(expectedValue, function);
     }
 
-    stack_.push_back(&expectedValue.first());
+    Node expectedFirst = expectedValue.first();
+    stack_.push_back(&expectedFirst);
     bool first = apply_visitor(*this, function.first());
     stack_.pop_back();
     if (!first) {
       return first;
     }
 
-    stack_.push_back(&expectedValue.second());
+    Node expectedSecond = expectedValue.second();
+    stack_.push_back(&expectedSecond);
     bool second = apply_visitor(*this, function.second());
     stack_.pop_back();
     return second;
