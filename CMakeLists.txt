@@ -6,9 +6,10 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(thirdparty)
 add_subdirectory(ast)
+add_subdirectory(library)
 
 add_executable(lol lol.cpp)
-target_link_libraries(lol PRIVATE ast)
+target_link_libraries(lol PRIVATE ast library)
 
 # Tests
 add_executable(lol_test lol_test.cpp)
