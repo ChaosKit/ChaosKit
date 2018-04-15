@@ -7,6 +7,7 @@
 #include "Parameter.h"
 #include "UnaryFunction.h"
 #include "BinaryFunction.h"
+#include "Formula.h"
 #include "util.h"
 
 #endif //CHAOSKIT_AST_H

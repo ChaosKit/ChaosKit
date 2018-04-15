@@ -11,11 +11,13 @@ class Input;
 class Parameter;
 class UnaryFunction;
 class BinaryFunction;
+class Formula;
 
 using Node =
     mapbox::util::variant<float, Input, Parameter,
                           mapbox::util::recursive_wrapper<UnaryFunction>,
-                          mapbox::util::recursive_wrapper<BinaryFunction>>;
+                          mapbox::util::recursive_wrapper<BinaryFunction>,
+                          mapbox::util::recursive_wrapper<Formula>>;
 
 }  // namespace ast
 }  // namespace chaoskit
