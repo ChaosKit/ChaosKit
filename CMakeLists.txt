@@ -4,6 +4,7 @@ project(ChaosKit)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 
+enable_testing()
 add_subdirectory(thirdparty)
 add_subdirectory(ast)
 add_subdirectory(library)
