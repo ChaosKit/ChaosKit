@@ -11,10 +11,7 @@ class Formula {
  public:
   Formula(const Expression& x, const Expression& y) : x_(x), y_(y) {}
 
-  template <size_t N>
-  Formula(const Expression(&list)[N]) : x_(list[0]), y_(list[1]) {
-    static_assert(N == 2, "Formula requires 2 Expressions");
-  }
+  Formula(const Expression(&list)[2]) : x_(list[0]), y_(list[1]) {}
 
   const Expression& x() const { return x_; }
   const Expression& y() const { return y_; }
