@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "Parameter.h"
 #include "Expression.h"
+#include "Transform.h"
 
 namespace chaoskit {
 namespace ast {
@@ -17,7 +18,7 @@ class Blend;
 
 namespace {
 using NodeAlias =
-    mapbox::util::variant<float, Input, Parameter,
+    mapbox::util::variant<float, Input, Parameter, Transform,
                           mapbox::util::recursive_wrapper<UnaryFunction>,
                           mapbox::util::recursive_wrapper<BinaryFunction>,
                           mapbox::util::recursive_wrapper<Formula>,

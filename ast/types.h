@@ -8,5 +8,6 @@
 #include "Formula.h"
 #include "WeightedFormula.h"
 #include "Blend.h"
+#include "Transform.h"
 
 #endif //CHAOSKIT_AST_TYPES_H

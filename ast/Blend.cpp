@@ -8,18 +8,13 @@ namespace ast {
 GENERATE_NODE_TYPE(Blend);
 
 std::ostream &operator<<(std::ostream &stream, const Blend &blend) {
-  stream << node_type(blend) << "[";
+  stream << node_type(blend) << "(" << blend.pre();
 
-  bool prepend_comma = false;
   for (const auto &formula : blend.formulas()) {
-    if (prepend_comma) {
-      stream << ", ";
-    }
-    stream << formula;
-    prepend_comma = true;
+    stream << ", " << formula;
   }
 
-  return stream << "]";
+  return stream << ", " << blend.post() << ")";
 }
 
 }
