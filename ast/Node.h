@@ -15,6 +15,8 @@ class BinaryFunction;
 class Formula;
 class WeightedFormula;
 class Blend;
+class LimitedBlend;
+class System;
 
 namespace {
 using NodeAlias =
@@ -23,7 +25,9 @@ using NodeAlias =
                           mapbox::util::recursive_wrapper<BinaryFunction>,
                           mapbox::util::recursive_wrapper<Formula>,
                           mapbox::util::recursive_wrapper<WeightedFormula>,
-                          mapbox::util::recursive_wrapper<Blend>>;
+                          mapbox::util::recursive_wrapper<Blend>,
+                          mapbox::util::recursive_wrapper<LimitedBlend>,
+                          mapbox::util::recursive_wrapper<System>>;
 }
 
 struct Node : public NodeAlias {

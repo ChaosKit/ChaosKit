@@ -9,5 +9,7 @@
 #include "WeightedFormula.h"
 #include "Blend.h"
 #include "Transform.h"
+#include "LimitedBlend.h"
+#include "System.h"
 
 #endif //CHAOSKIT_AST_TYPES_H

@@ -10,6 +10,7 @@ namespace ast {
 
 class Blend {
  public:
+  Blend() : formulas_(), pre_(), post_() {}
   Blend(std::initializer_list<WeightedFormula> formulas)
       : formulas_(formulas), pre_(), post_() {}
   Blend(std::initializer_list<WeightedFormula> formulas, const Transform &pre,
