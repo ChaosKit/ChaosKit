@@ -6,5 +6,7 @@
 #include "UnaryFunction.h"
 #include "BinaryFunction.h"
 #include "Formula.h"
+#include "WeightedFormula.h"
+#include "Blend.h"
 
 #endif //CHAOSKIT_AST_TYPES_H

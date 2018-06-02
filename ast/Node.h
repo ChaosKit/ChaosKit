@@ -12,13 +12,17 @@ namespace ast {
 class UnaryFunction;
 class BinaryFunction;
 class Formula;
+class WeightedFormula;
+class Blend;
 
 namespace {
 using NodeAlias =
     mapbox::util::variant<float, Input, Parameter,
                           mapbox::util::recursive_wrapper<UnaryFunction>,
                           mapbox::util::recursive_wrapper<BinaryFunction>,
-                          mapbox::util::recursive_wrapper<Formula>>;
+                          mapbox::util::recursive_wrapper<Formula>,
+                          mapbox::util::recursive_wrapper<WeightedFormula>,
+                          mapbox::util::recursive_wrapper<Blend>>;
 }
 
 struct Node : public NodeAlias {
