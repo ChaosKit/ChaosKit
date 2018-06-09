@@ -89,6 +89,57 @@ class TreeEqualityVisitor {
     return second;
   }
 
+  bool operator()(const Formula& formula) {
+    const Node* expected = stack_.back();
+
+    if (!expected->is<Formula>()) {
+      return failWithHint(*expected, formula);
+    }
+
+    const auto& expectedValue = expected->get<Formula>();
+
+    Node expectedX = expectedValue.x();
+    stack_.push_back(&expectedX);
+    bool x = apply_visitor(*this, formula.x());
+    stack_.pop_back();
+    if (!x) {
+      return x;
+    }
+
+    Node expectedY = expectedValue.y();
+    stack_.push_back(&expectedY);
+    bool y = apply_visitor(*this, formula.y());
+    stack_.pop_back();
+    return y;
+  }
+
+  // TODO: finish all the other AST nodes when I'm less lazy
+  //  bool operator()(const Blend &blend) {
+  //    const Node* expected = stack_.back();
+  //
+  //    if (!expected->is<Blend>()) {
+  //      return failWithHint(*expected, blend);
+  //    }
+  //
+  //    const auto& expectedValue = expected->get<Blend>();
+  //
+  //    Node expectedPre = expectedValue.pre();
+  //    stack_.push_back(&expectedPre);
+  //    bool pre = apply_visitor(*this, blend.pre());
+  //    stack_.pop_back();
+  //    if (!pre) {
+  //      return pre;
+  //    }
+  //
+  //    Node expectedPost = expectedValue.post();
+  //    stack_.push_back(&expectedPost);
+  //    bool post = apply_visitor(*this, blend.post());
+  //    stack_.pop_back();
+  //    if (!post) {
+  //      return post;
+  //    }
+  //  }
+
  private:
   template <typename T, typename U>
   bool failWithHint(const T& expected, const U& actual) {
@@ -265,6 +316,24 @@ TEST(AstTest, BinaryMinusOverload) {
 
   Node actual = n(2.f) - 3.f;
   Node expected = BinaryFunction(BinaryFunction_Type::SUBTRACT, 2.f, 3.f);
+
+  ASSERT_THAT(actual, EqualsTree(expected));
+}
+
+TEST(AstTest, MakeSystemWithFormula) {
+  using namespace helpers;
+
+  Formula formula = Formula{1.f, 2.f};
+
+  System expected =
+      System({LimitedBlend(Blend(
+                               {
+                                   WeightedFormula(formula, 1.0f, 1.0f),
+                               },
+                               Transform::identity(), Transform::identity()),
+                           1.0f)},
+             Blend({}, Transform::identity(), Transform::identity()));
+  auto actual = make_system(formula);
 
   ASSERT_THAT(actual, EqualsTree(expected));
 }
