@@ -2,16 +2,30 @@
 #include <string>
 
 #include "ast/ast.h"
-#include "library/DeJong.h"
+#include "ast/helpers.h"
+#include "core/Point.h"
+#include "core/SimpleInterpreter.h"
+
+using chaoskit::ast::Formula;
+using chaoskit::core::Point;
+using chaoskit::core::SimpleInterpreter;
+using namespace chaoskit::ast::helpers;
 
 int main() {
-  chaoskit::ast::Node system =
-      chaoskit::ast::System({chaoskit::ast::LimitedBlend(
-          chaoskit::ast::Blend({chaoskit::ast::WeightedFormula(
-              chaoskit::library::DeJong().source())}),
-          42.f)});
+  InputHelper input;
+  Formula formula{
+    input.x() + 1.f,
+    input.y() + 1.f
+  };
+  auto system = make_system(formula);
 
-  chaoskit::ast::apply_visitor(chaoskit::ast::StreamPrinter(std::cout), system);
+  SimpleInterpreter interpreter(system);
+  interpreter.initialize({0.f, 0.f});
+  interpreter.step();
+  interpreter.step();
+  auto result = interpreter.step();
+
+  std::cout << result << std::endl;
 
   return 0;
 }
