@@ -17,6 +17,13 @@ target_include_directories(better_enums INTERFACE
 target_sources(better_enums INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/better_enums/enum.h)
 
+# randutils.hpp (https://gist.github.com/imneme/540829265469e673d045)
+add_library(randutils INTERFACE)
+target_include_directories(randutils INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/randutils)
+target_sources(randutils INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/randutils/randutils.hpp)
+
 # Google Test (downloaded and build at configure time)
 # Copied from https://github.com/google/googletest
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
