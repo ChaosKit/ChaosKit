@@ -11,14 +11,14 @@ class Parameter {
  public:
   Parameter(size_t index) : index_(index) {}
 
-  float index() const { return index_; }
+  size_t index() const { return index_; }
 
   bool operator==(const Parameter& other) const {
     return index_ == other.index_;
   }
 
  private:
-  float index_;
+  size_t index_;
 };
 
 std::ostream& operator<<(std::ostream& stream, const Parameter& parameter);
