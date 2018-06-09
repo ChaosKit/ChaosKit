@@ -5,7 +5,7 @@
 #include <functional>
 #include <unordered_map>
 #include "SimpleInterpreter.h"
-#include "random.h"
+#include "ThreadLocalRng.h"
 
 namespace chaoskit {
 namespace core {
@@ -16,9 +16,9 @@ using ast::apply_visitor;
 
 namespace {
 
-Point randomPoint() {
+Point randomPoint(Rng *rng) {
   // TODO: reset transforms
-  return Point(randomFloat(-1.f, 1.f), randomFloat(-1.f, 1.f));
+  return Point(rng->randomFloat(-1.f, 1.f), rng->randomFloat(-1.f, 1.f));
 }
 
 const std::unordered_map<char, std::function<float(float)>> UNARY_FUNCTIONS{
@@ -57,9 +57,9 @@ const std::unordered_map<char, std::function<float(float, float)>>
 
 class InterpreterImpl {
  public:
-  InterpreterImpl(Point input, float max_limit,
-                    const std::vector<float> &params)
-      : input_(input), max_limit_(max_limit), params_(params) {}
+  InterpreterImpl(Rng *rng, Point input, float max_limit,
+                  const std::vector<float> &params)
+      : rng_(rng), input_(input), max_limit_(max_limit), params_(params) {}
 
   float operator()(float number) const { return number; }
 
@@ -121,7 +121,7 @@ class InterpreterImpl {
   }
 
   Point operator()(const ast::System &system) {
-    float limit = randomFloat(0, max_limit_);
+    float limit = rng_->randomFloat(0.f, max_limit_);
     const auto &blend =
         std::lower_bound(system.blends().begin(), system.blends().end(), limit,
                          [](const ast::LimitedBlend &blend, float limit) {
@@ -133,6 +133,7 @@ class InterpreterImpl {
   }
 
  private:
+  Rng *rng_;
   Point input_;
   float max_limit_;
   const std::vector<float> &params_;
@@ -141,7 +142,10 @@ class InterpreterImpl {
 }  // namespace
 
 SimpleInterpreter::SimpleInterpreter(ast::System system)
-    : system_(std::move(system)), state_(randomPoint()), params_() {
+    : rng_(new ThreadLocalRng()),
+      system_(std::move(system)),
+      state_(randomPoint(rng_.get())),
+      params_() {
   const auto &blends = system_.blends();
   max_limit_ = blends.empty() ? 0 : blends.back().limit();
 }
@@ -152,8 +156,10 @@ void SimpleInterpreter::setParams(const std::vector<float> &params) {
   params_ = params;
 }
 
+void SimpleInterpreter::setRng(Rng *rng) { rng_.reset(rng); }
+
 Point SimpleInterpreter::step() {
-  InterpreterImpl impl(state_, max_limit_, params_);
+  InterpreterImpl impl(rng_.get(), state_, max_limit_, params_);
   state_ = impl(system_);
   return impl(system_.final_blend());
 }
