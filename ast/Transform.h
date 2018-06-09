@@ -15,6 +15,8 @@ class Transform {
   Transform(float a, float b, float c, float d, float e, float f)
       : params_{a, b, c, d, e, f} {}
 
+  static Transform identity() { return Transform(); }
+
   const std::array<float, 6> &params() const { return params_; }
 
   bool operator==(const Transform &other) const {
