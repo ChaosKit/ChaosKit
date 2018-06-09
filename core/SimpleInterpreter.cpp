@@ -121,6 +121,10 @@ class InterpreterImpl {
   }
 
   Point operator()(const ast::System &system) {
+    if (system.blends().empty()) {
+      return input_;
+    }
+
     float limit = rng_->randomFloat(0.f, max_limit_);
     const auto &blend =
         std::lower_bound(system.blends().begin(), system.blends().end(), limit,
