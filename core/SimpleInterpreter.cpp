@@ -145,16 +145,19 @@ class InterpreterImpl {
 
 }  // namespace
 
-SimpleInterpreter::SimpleInterpreter(ast::System system)
+SimpleInterpreter::SimpleInterpreter(ast::System system, const Point &input)
     : rng_(new ThreadLocalRng()),
       system_(std::move(system)),
-      state_(randomPoint(rng_.get())),
+      state_(input),
       params_() {
   const auto &blends = system_.blends();
   max_limit_ = blends.empty() ? 0 : blends.back().limit();
 }
 
-void SimpleInterpreter::initialize(const Point &input) { state_ = input; }
+SimpleInterpreter::SimpleInterpreter(ast::System system)
+    : SimpleInterpreter(system, {}) {
+  state_ = randomPoint(rng_.get());
+}
 
 void SimpleInterpreter::setParams(const std::vector<float> &params) {
   params_ = params;

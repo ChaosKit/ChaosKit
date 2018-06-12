@@ -16,8 +16,7 @@ TEST(SimpleInterpreterTest, EmptySystem) {
   System system{};
   Point input{0.f, 0.f};
 
-  SimpleInterpreter interpreter(system);
-  interpreter.initialize(input);
+  SimpleInterpreter interpreter(system, input);
 
   ASSERT_THAT(interpreter.step(), Eq(input));
 }

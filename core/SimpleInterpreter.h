@@ -11,7 +11,7 @@ namespace core {
 class SimpleInterpreter {
  public:
   SimpleInterpreter(ast::System system);
-  void initialize(const Point &input);
+  SimpleInterpreter(ast::System system, const Point &input);
   void setRng(Rng *rng);
   void setParams(const std::vector<float> &params);
   Point step();
