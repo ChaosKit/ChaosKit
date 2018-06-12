@@ -10,18 +10,29 @@ namespace core {
 
 class SimpleInterpreter {
  public:
-  SimpleInterpreter(ast::System system);
-  SimpleInterpreter(ast::System system, const Point &input);
-  void setRng(Rng *rng);
+  struct Result {
+    Point next_state;
+    Point output;
+
+    bool operator==(const Result &other) const {
+      return next_state == other.next_state && output == other.output;
+    }
+  };
+
+  SimpleInterpreter(ast::System system, std::vector<float> params = {});
+  SimpleInterpreter(ast::System system, std::vector<float> params, std::shared_ptr<Rng> rng);
+
+  void setSystem(const ast::System &system);
   void setParams(const std::vector<float> &params);
-  Point step();
+  Result step(Point input);
 
  private:
-  std::unique_ptr<Rng> rng_;
   ast::System system_;
-  Point state_;
   std::vector<float> params_;
   float max_limit_;
+  std::shared_ptr<Rng> rng_;
+
+  void updateMaxLimit();
 };
 
 }  // namespace core

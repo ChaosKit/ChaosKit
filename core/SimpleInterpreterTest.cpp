@@ -16,9 +16,10 @@ TEST(SimpleInterpreterTest, EmptySystem) {
   System system{};
   Point input{0.f, 0.f};
 
-  SimpleInterpreter interpreter(system, input);
+  SimpleInterpreter interpreter(system);
 
-  ASSERT_THAT(interpreter.step(), Eq(input));
+  ASSERT_THAT(interpreter.step(input),
+              Eq(SimpleInterpreter::Result{input, input}));
 }
 
 TEST(SimpleInterpreter, InterpretsFormula) {
@@ -26,7 +27,8 @@ TEST(SimpleInterpreter, InterpretsFormula) {
 
   SimpleInterpreter interpreter(make_system(formula));
 
-  ASSERT_THAT(interpreter.step(), Eq(Point(1.f, 2.f)));
+  ASSERT_THAT(interpreter.step({0.f, 0.f}),
+              Eq(SimpleInterpreter::Result{Point(1.f, 2.f), Point(1.f, 2.f)}));
 }
 
 }  // namespace core

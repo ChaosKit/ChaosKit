@@ -3,6 +3,7 @@
 #include <vector>
 #include <QImage>
 #include <cmath>
+#include <core/ThreadLocalRng.h>
 
 #include "ast/ast.h"
 #include "ast/helpers.h"
@@ -18,32 +19,34 @@ using chaoskit::ast::WeightedFormula;
 using chaoskit::ast::LimitedBlend;
 using chaoskit::core::Point;
 using chaoskit::core::SimpleInterpreter;
+using chaoskit::core::ThreadLocalRng;
 using chaoskit::library::DeJong;
 using namespace chaoskit::ast::helpers;
 
 #define CLAMP(X, L, U) std::min(std::max((X), (L)), (U))
 
 int main() {
+  auto rng = std::make_shared<ThreadLocalRng>();
+
   Formula formula = DeJong().source();
-
   Blend final({}, Transform::identity(), Transform(1, 0, 0.5, 0, 2, 1));
+  System system({LimitedBlend(Blend{formula}, 1.0)}, final);
 
-  auto system = System({LimitedBlend(Blend{formula}, 1.0)}, final);
+  Point point{rng->randomFloat(-1.f, 1.f), rng->randomFloat(-1.f, 1.f)};
 
-  SimpleInterpreter interpreter(system);
-  interpreter.setParams({9.379666578024626e-01f, 1.938709271140397e+00f, -1.580897020176053e-01f, -1.430070123635232e+00f});
+  SimpleInterpreter interpreter(system, {9.379666578024626e-01f, 1.938709271140397e+00f, -1.580897020176053e-01f, -1.430070123635232e+00f}, rng);
 
   std::vector<int> buffer(512*512);
 
-  for (int i = 0; i < 10000000; i++) {
-    Point p = interpreter.step();
-    int x = CLAMP(static_cast<int>(p.x() * 128.f + 256.f), 0, 511);
-    int y = CLAMP(static_cast<int>(p.y() * 128.f + 256.f), 0, 511);
+  for (int i = 0; i < 1000000; i++) {
+    auto result = interpreter.step(point);
+    point = result.next_state;
+    int x = CLAMP(static_cast<int>(result.output.x() * 128.f + 256.f), 0, 511);
+    int y = CLAMP(static_cast<int>(result.output.y() * 128.f + 256.f), 0, 511);
 
     buffer[y*512+x]++;
   }
 
-//  int max_value = *std::max_element(buffer.begin(), buffer.end());
   std::transform(buffer.begin(), buffer.end(), buffer.begin(), [](int pixel) {
     return CLAMP(static_cast<int>(std::log10(pixel + 1.f) * 64), 0, 255);
   });

@@ -16,11 +16,6 @@ using ast::apply_visitor;
 
 namespace {
 
-Point randomPoint(Rng *rng) {
-  // TODO: reset transforms
-  return Point(rng->randomFloat(-1.f, 1.f), rng->randomFloat(-1.f, 1.f));
-}
-
 const std::unordered_map<char, std::function<float(float)>> UNARY_FUNCTIONS{
     {UnaryFn::SIN, sinf},
     {UnaryFn::COS, cosf},
@@ -145,30 +140,35 @@ class InterpreterImpl {
 
 }  // namespace
 
-SimpleInterpreter::SimpleInterpreter(ast::System system, const Point &input)
-    : rng_(new ThreadLocalRng()),
-      system_(std::move(system)),
-      state_(input),
-      params_() {
-  const auto &blends = system_.blends();
-  max_limit_ = blends.empty() ? 0 : blends.back().limit();
+SimpleInterpreter::SimpleInterpreter(ast::System system,
+                                     std::vector<float> params,
+                                     std::shared_ptr<Rng> rng)
+    : system_(std::move(system)), params_(std::move(params)), rng_(rng) {
+  updateMaxLimit();
 }
 
-SimpleInterpreter::SimpleInterpreter(ast::System system)
-    : SimpleInterpreter(system, {}) {
-  state_ = randomPoint(rng_.get());
+SimpleInterpreter::SimpleInterpreter(ast::System system,
+                                     std::vector<float> params)
+    : SimpleInterpreter(std::move(system), std::move(params),
+                        std::make_shared<ThreadLocalRng>()) {}
+
+void SimpleInterpreter::updateMaxLimit() {
+  max_limit_ = system_.blends().empty() ? 0 : system_.blends().back().limit();
+}
+
+void SimpleInterpreter::setSystem(const ast::System &system) {
+  system_ = system;
+  updateMaxLimit();
 }
 
 void SimpleInterpreter::setParams(const std::vector<float> &params) {
   params_ = params;
 }
 
-void SimpleInterpreter::setRng(Rng *rng) { rng_.reset(rng); }
-
-Point SimpleInterpreter::step() {
-  InterpreterImpl impl(rng_.get(), state_, max_limit_, params_);
-  state_ = impl(system_);
-  return impl(system_.final_blend());
+SimpleInterpreter::Result SimpleInterpreter::step(Point input) {
+  InterpreterImpl interpreter(rng_.get(), input, max_limit_, params_);
+  Point next_state = interpreter(system_);
+  return {next_state, interpreter(system_.final_blend())};
 }
 
 }  // namespace core
