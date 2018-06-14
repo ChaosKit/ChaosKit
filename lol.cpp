@@ -1,15 +1,15 @@
+#include <QImage>
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <QImage>
-#include <cmath>
-#include <core/ThreadLocalRng.h>
 
 #include "ast/ast.h"
 #include "ast/helpers.h"
-#include "library/DeJong.h"
 #include "core/Point.h"
 #include "core/SimpleInterpreter.h"
+#include "core/ThreadLocalRng.h"
+#include "library/DeJong.h"
 
 using chaoskit::ast::Blend;
 using chaoskit::ast::Formula;
@@ -34,17 +34,21 @@ int main() {
 
   Point point{rng->randomFloat(-1.f, 1.f), rng->randomFloat(-1.f, 1.f)};
 
-  SimpleInterpreter interpreter(system, {9.379666578024626e-01f, 1.938709271140397e+00f, -1.580897020176053e-01f, -1.430070123635232e+00f}, rng);
+  SimpleInterpreter interpreter(
+      system,
+      {9.379666578024626e-01f, 1.938709271140397e+00f, -1.580897020176053e-01f,
+       -1.430070123635232e+00f},
+      rng);
 
-  std::vector<int> buffer(512*512);
+  std::vector<int> buffer(512 * 512);
 
   for (int i = 0; i < 1000000; i++) {
-    auto [next_state, output] = interpreter(point);
+    auto[next_state, output] = interpreter(point);
     point = next_state;
     int x = CLAMP(static_cast<int>(output.x() * 128.f + 256.f), 0, 511);
     int y = CLAMP(static_cast<int>(output.y() * 128.f + 256.f), 0, 511);
 
-    buffer[y*512+x]++;
+    buffer[y * 512 + x]++;
   }
 
   std::transform(buffer.begin(), buffer.end(), buffer.begin(), [](int pixel) {
