@@ -24,7 +24,7 @@ class SimpleInterpreter {
 
   void setSystem(const ast::System &system);
   void setParams(const std::vector<float> &params);
-  Result step(Point input);
+  Result operator()(Point input);
 
  private:
   ast::System system_;

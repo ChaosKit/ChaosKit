@@ -18,7 +18,7 @@ TEST(SimpleInterpreterTest, EmptySystem) {
 
   SimpleInterpreter interpreter(system);
 
-  ASSERT_THAT(interpreter.step(input),
+  ASSERT_THAT(interpreter(input),
               Eq(SimpleInterpreter::Result{input, input}));
 }
 
@@ -27,7 +27,7 @@ TEST(SimpleInterpreter, InterpretsFormula) {
 
   SimpleInterpreter interpreter(make_system(formula));
 
-  ASSERT_THAT(interpreter.step({0.f, 0.f}),
+  ASSERT_THAT(interpreter({0.f, 0.f}),
               Eq(SimpleInterpreter::Result{Point(1.f, 2.f), Point(1.f, 2.f)}));
 }
 

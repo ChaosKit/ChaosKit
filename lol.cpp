@@ -39,10 +39,10 @@ int main() {
   std::vector<int> buffer(512*512);
 
   for (int i = 0; i < 1000000; i++) {
-    auto result = interpreter.step(point);
-    point = result.next_state;
-    int x = CLAMP(static_cast<int>(result.output.x() * 128.f + 256.f), 0, 511);
-    int y = CLAMP(static_cast<int>(result.output.y() * 128.f + 256.f), 0, 511);
+    auto [next_state, output] = interpreter(point);
+    point = next_state;
+    int x = CLAMP(static_cast<int>(output.x() * 128.f + 256.f), 0, 511);
+    int y = CLAMP(static_cast<int>(output.y() * 128.f + 256.f), 0, 511);
 
     buffer[y*512+x]++;
   }

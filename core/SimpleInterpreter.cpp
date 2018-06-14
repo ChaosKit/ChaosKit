@@ -165,7 +165,7 @@ void SimpleInterpreter::setParams(const std::vector<float> &params) {
   params_ = params;
 }
 
-SimpleInterpreter::Result SimpleInterpreter::step(Point input) {
+SimpleInterpreter::Result SimpleInterpreter::operator()(Point input) {
   InterpreterImpl interpreter(rng_.get(), input, max_limit_, params_);
   Point next_state = interpreter(system_);
   return {next_state, interpreter(system_.final_blend())};
