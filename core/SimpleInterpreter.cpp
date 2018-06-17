@@ -50,11 +50,10 @@ const std::unordered_map<char, std::function<float(float, float)>>
         {BinaryFn::DISTANCE, [](float a, float b) { return std::abs(a - b); }},
     };
 
-class InterpreterImpl {
+class BlendInterpreter {
  public:
-  InterpreterImpl(Rng *rng, Point input, float max_limit,
-                  const std::vector<float> &params)
-      : rng_(rng), input_(input), max_limit_(max_limit), params_(params) {}
+  BlendInterpreter(Point input, const Params &params, size_t blend_index)
+      : input_(input), params_(params), index_{blend_index, 0} {}
 
   float operator()(float number) const { return number; }
 
@@ -68,7 +67,7 @@ class InterpreterImpl {
   }
 
   float operator()(const ast::Parameter &param) const {
-    return params_.at(param.index());
+    return params_.at(index_).at(param.index());
   }
 
   float operator()(const ast::UnaryFunction &function) const {
@@ -107,6 +106,7 @@ class InterpreterImpl {
       Point point;
       for (const auto &formula : blend.formulas()) {
         point += (*this)(formula);
+        index_.formula++;
       }
       input_ = point;
     }
@@ -115,40 +115,23 @@ class InterpreterImpl {
     return input_;
   }
 
-  Point operator()(const ast::System &system) {
-    if (system.blends().empty()) {
-      return input_;
-    }
-
-    float limit = rng_->randomFloat(0.f, max_limit_);
-    const auto &blend =
-        std::lower_bound(system.blends().begin(), system.blends().end(), limit,
-                         [](const ast::LimitedBlend &blend, float limit) {
-                           return blend.limit() < limit;
-                         })
-            ->blend();
-
-    return (*this)(blend);
-  }
-
  private:
-  Rng *rng_;
   Point input_;
-  float max_limit_;
-  const std::vector<float> &params_;
+  SystemIndex index_;
+  const Params &params_;
 };
 
 }  // namespace
 
-SimpleInterpreter::SimpleInterpreter(ast::System system,
-                                     std::vector<float> params,
+SimpleInterpreter::SimpleInterpreter(ast::System system, Params params,
                                      std::shared_ptr<Rng> rng)
-    : system_(std::move(system)), params_(std::move(params)), rng_(rng) {
+    : system_(std::move(system)),
+      params_(std::move(params)),
+      rng_(std::move(rng)) {
   updateMaxLimit();
 }
 
-SimpleInterpreter::SimpleInterpreter(ast::System system,
-                                     std::vector<float> params)
+SimpleInterpreter::SimpleInterpreter(ast::System system, Params params)
     : SimpleInterpreter(std::move(system), std::move(params),
                         std::make_shared<ThreadLocalRng>()) {}
 
@@ -161,14 +144,29 @@ void SimpleInterpreter::setSystem(const ast::System &system) {
   updateMaxLimit();
 }
 
-void SimpleInterpreter::setParams(const std::vector<float> &params) {
-  params_ = params;
+void SimpleInterpreter::setParams(Params params) {
+  params_ = std::move(params);
 }
 
 SimpleInterpreter::Result SimpleInterpreter::operator()(Point input) {
-  InterpreterImpl interpreter(rng_.get(), input, max_limit_, params_);
-  Point next_state = interpreter(system_);
-  return {next_state, interpreter(system_.final_blend())};
+  Point next_state = input;
+
+  if (!system_.blends().empty()) {
+    float limit = rng_->randomFloat(0.f, max_limit_);
+    auto blend_iterator = std::lower_bound(
+        system_.blends().begin(), system_.blends().end(), limit,
+        [](const ast::LimitedBlend &blend, float limit) {
+          return blend.limit() < limit;
+        });
+    auto blend_index = static_cast<size_t>(
+        std::distance(system_.blends().begin(), blend_iterator));
+
+    next_state =
+        BlendInterpreter(input, params_, blend_index)(blend_iterator->blend());
+  }
+  return {next_state,
+          BlendInterpreter(next_state, params_,
+                           SystemIndex::FINAL_BLEND)(system_.final_blend())};
 }
 
 }  // namespace core

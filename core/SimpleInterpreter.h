@@ -2,6 +2,7 @@
 #define CHAOSKIT_CORE_SIMPLEINTERPRETER_H
 
 #include <ast/System.h>
+#include "Params.h"
 #include "Point.h"
 #include "Rng.h"
 
@@ -19,16 +20,17 @@ class SimpleInterpreter {
     }
   };
 
-  SimpleInterpreter(ast::System system, std::vector<float> params = {});
-  SimpleInterpreter(ast::System system, std::vector<float> params, std::shared_ptr<Rng> rng);
+  SimpleInterpreter(ast::System system, Params params = Params{});
+  SimpleInterpreter(ast::System system, Params params,
+                    std::shared_ptr<Rng> rng);
 
   void setSystem(const ast::System &system);
-  void setParams(const std::vector<float> &params);
+  void setParams(Params params);
   Result operator()(Point input);
 
  private:
   ast::System system_;
-  std::vector<float> params_;
+  Params params_;
   float max_limit_;
   std::shared_ptr<Rng> rng_;
 

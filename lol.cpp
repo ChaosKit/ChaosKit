@@ -5,10 +5,12 @@
 #include <vector>
 
 #include "ast/ast.h"
+
 #include "ast/helpers.h"
 #include "core/Point.h"
 #include "core/SimpleInterpreter.h"
 #include "core/ThreadLocalRng.h"
+#include "core/util.h"
 #include "library/DeJong.h"
 
 using chaoskit::ast::Blend;
@@ -17,9 +19,11 @@ using chaoskit::ast::Transform;
 using chaoskit::ast::System;
 using chaoskit::ast::WeightedFormula;
 using chaoskit::ast::LimitedBlend;
+using chaoskit::core::Params;
 using chaoskit::core::Point;
 using chaoskit::core::SimpleInterpreter;
 using chaoskit::core::ThreadLocalRng;
+using chaoskit::core::formulaIndex;
 using chaoskit::library::DeJong;
 using namespace chaoskit::ast::helpers;
 
@@ -30,16 +34,16 @@ int main() {
 
   Formula formula = DeJong().source();
   Blend final({}, Transform::identity(), Transform(1, 0, 0.5, 0, 2, 1));
-  System system({LimitedBlend(Blend{formula}, 1.0)}, final);
+  System system({LimitedBlend(Blend{{formula}}, 1.0)}, final);
+
+  Params params;
+  params[*formulaIndex(formula, system)] = {
+      9.379666578024626e-01f, 1.938709271140397e+00f, -1.580897020176053e-01f,
+      -1.430070123635232e+00f};
 
   Point point{rng->randomFloat(-1.f, 1.f), rng->randomFloat(-1.f, 1.f)};
 
-  SimpleInterpreter interpreter(
-      system,
-      {9.379666578024626e-01f, 1.938709271140397e+00f, -1.580897020176053e-01f,
-       -1.430070123635232e+00f},
-      rng);
-
+  SimpleInterpreter interpreter(system, params);
   std::vector<int> buffer(512 * 512);
 
   for (int i = 0; i < 1000000; i++) {
