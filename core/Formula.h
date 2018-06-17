@@ -1,9 +1,9 @@
 #ifndef CHAOSKIT_CORE_FORMULA_H
 #define CHAOSKIT_CORE_FORMULA_H
 
+#include <ast/Formula.h>
+#include <ast/WeightedFormula.h>
 #include <vector>
-#include "../ast/Formula.h"
-#include "../ast/WeightedFormula.h"
 
 namespace chaoskit {
 namespace core {

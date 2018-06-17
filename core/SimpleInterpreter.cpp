@@ -1,4 +1,4 @@
-#include "../ast/ast.h"
+#include <ast/ast.h>
 // ast.h has to be first to satisfy forward declarations
 #include <algorithm>
 #include <cmath>

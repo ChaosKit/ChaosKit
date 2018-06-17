@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 
-#include "../ast/ast.h"
-#include "../ast/helpers.h"
+#include <ast/ast.h>
+#include <ast/helpers.h>
 #include "SimpleInterpreter.h"
 
 namespace chaoskit {

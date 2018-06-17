@@ -1,9 +1,9 @@
 #ifndef CHAOSKIT_CORE_SYSTEM_H
 #define CHAOSKIT_CORE_SYSTEM_H
 
+#include <ast/System.h>
 #include <numeric>
 #include <vector>
-#include "../ast/System.h"
 #include "Blend.h"
 
 namespace chaoskit {

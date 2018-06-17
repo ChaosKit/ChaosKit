@@ -1,8 +1,8 @@
 #ifndef CHAOSKIT_CORE_TRANSFORM_H
 #define CHAOSKIT_CORE_TRANSFORM_H
 
+#include <ast/Transform.h>
 #include <cmath>
-#include "../ast/Transform.h"
 
 namespace chaoskit {
 namespace core {

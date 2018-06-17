@@ -1,8 +1,9 @@
 #ifndef CHAOSKIT_CORE_BLEND_H
 #define CHAOSKIT_CORE_BLEND_H
 
+#include <ast/Blend.h>
 #include <vector>
-#include "../ast/Blend.h"
+
 #include "Formula.h"
 #include "Transform.h"
 

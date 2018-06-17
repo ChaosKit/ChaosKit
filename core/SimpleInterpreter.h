@@ -1,7 +1,7 @@
 #ifndef CHAOSKIT_CORE_SIMPLEINTERPRETER_H
 #define CHAOSKIT_CORE_SIMPLEINTERPRETER_H
 
-#include "../ast/System.h"
+#include <ast/System.h>
 #include "Point.h"
 #include "Rng.h"
 

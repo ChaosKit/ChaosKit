@@ -1,7 +1,7 @@
 #ifndef CHAOSKIT_CORE_RANDOM_H
 #define CHAOSKIT_CORE_RANDOM_H
 
-#include "randutils.hpp"
+#include <randutils.hpp>
 
 namespace chaoskit {
 namespace core {
