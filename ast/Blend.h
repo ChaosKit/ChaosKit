@@ -11,11 +11,11 @@ namespace ast {
 class Blend {
  public:
   Blend() : formulas_(), pre_(), post_() {}
-  Blend(std::initializer_list<WeightedFormula> formulas)
-      : formulas_(formulas), pre_(), post_() {}
-  Blend(std::initializer_list<WeightedFormula> formulas, const Transform &pre,
+  Blend(std::vector<WeightedFormula> formulas)
+      : formulas_(std::move(formulas)), pre_(), post_() {}
+  Blend(std::vector<WeightedFormula> formulas, const Transform &pre,
         const Transform &post)
-      : formulas_(formulas), pre_(pre), post_(post) {}
+      : formulas_(std::move(formulas)), pre_(pre), post_(post) {}
 
   const std::vector<WeightedFormula> &formulas() const { return formulas_; }
   const Transform &pre() const { return pre_; }

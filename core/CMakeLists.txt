@@ -1,5 +1,6 @@
 add_library(core random.h SimpleInterpreter.h SimpleInterpreter.cpp
-        Point.h Point.cpp Rng.h ThreadLocalRng.cpp ThreadLocalRng.h)
+        Point.h Point.cpp Rng.h ThreadLocalRng.cpp ThreadLocalRng.h System.h
+        Formula.h Blend.h Transform.h)
 target_link_libraries(core PUBLIC ast randutils)
 
 add_executable(core_test SimpleInterpreterTest.cpp)

@@ -10,10 +10,10 @@ namespace ast {
 
 class System {
  public:
-  System(std::initializer_list<LimitedBlend> blends)
-      : blends_(blends), final_blend_() {}
-  System(std::initializer_list<LimitedBlend> blends, Blend final_blend)
-      : blends_(blends), final_blend_(std::move(final_blend)) {}
+  System(std::vector<LimitedBlend> blends)
+      : blends_(std::move(blends)), final_blend_() {}
+  System(std::vector<LimitedBlend> blends, Blend final_blend)
+      : blends_(std::move(blends)), final_blend_(std::move(final_blend)) {}
 
   const std::vector<LimitedBlend> &blends() const { return blends_; }
   const Blend &final_blend() const { return final_blend_; }

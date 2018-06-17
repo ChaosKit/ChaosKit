@@ -142,7 +142,7 @@ struct ParameterHelper {
 };
 
 System make_system(const Formula& f) {
-  return System{LimitedBlend(Blend{WeightedFormula(f)}, 1.f)};
+  return System{{LimitedBlend(Blend{{WeightedFormula(f)}}, 1.f)}};
 }
 
 struct Helper {
