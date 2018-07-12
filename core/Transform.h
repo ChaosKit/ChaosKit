@@ -8,28 +8,62 @@ namespace chaoskit {
 namespace core {
 
 struct Transform {
-  float rotation = 0.f;
+  float angle = 0.f;
   float scale_x = 1.f;
   float scale_y = 1.f;
   float translation_x = 0.f;
   float translation_y = 0.f;
 
-  void setScale(float scale) {
+  static Transform identity() { return Transform{}; }
+  static Transform fromRotation(float radians) {
+    return Transform{}.rotate(radians);
+  }
+  static Transform fromScale(float scale) {
+    return Transform{}.setScale(scale);
+  }
+  static Transform fromScale(float x, float y) {
+    return Transform{}.scale(x, y);
+  }
+  static Transform fromTranslation(float x, float y) {
+    return Transform{}.translate(x, y);
+  }
+
+  Transform &setScale(float scale) {
     scale_x = scale;
     scale_y = scale;
+    return *this;
+  }
+  Transform &rotate(float radians) {
+    angle += radians;
+    return *this;
+  }
+  Transform &scale(float scale) {
+    scale_x *= scale;
+    scale_y *= scale;
+    return *this;
+  }
+  Transform &scale(float x, float y) {
+    scale_x *= x;
+    scale_y *= y;
+    return *this;
+  }
+  Transform &translate(float x, float y) {
+    translation_x += x;
+    translation_y += y;
+    return *this;
   }
 
   ast::Transform toSource() const {
-    auto sin = std::sin(rotation);
-    auto cos = std::cos(rotation);
+    auto sin = std::sin(angle);
+    auto cos = std::cos(angle);
 
     return ast::Transform{
         scale_x * cos,
         scale_x * -sin,
-        scale_x * (translation_x * cos - translation_y * sin),
+        translation_x,
         scale_y * sin,
         scale_y * cos,
-        scale_y * (translation_x * sin + translation_y * cos),
+        translation_y
     };
   }
 };

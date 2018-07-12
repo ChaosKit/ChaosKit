@@ -5,6 +5,7 @@
 #include <numeric>
 #include <vector>
 #include "Blend.h"
+#include "Params.h"
 
 namespace chaoskit {
 namespace core {
@@ -14,11 +15,11 @@ struct System {
   Blend final_blend;
 
   ast::System toSource() const {
-    std::vector<float> limits;
-    limits.reserve(blends.size());
-    std::partial_sum(
-        blends.begin(), blends.end(), std::back_inserter(limits),
-        [](const Blend &a, const Blend &b) { return a.weight + b.weight; });
+    std::vector<float> limits(blends.size());
+
+    std::transform(blends.begin(), blends.end(), limits.begin(),
+                   std::mem_fn(&Blend::weight));
+    std::partial_sum(limits.begin(), limits.end(), limits.begin());
 
     std::vector<ast::LimitedBlend> limitedBlends;
     limitedBlends.reserve(blends.size());
@@ -29,6 +30,29 @@ struct System {
                    });
 
     return ast::System{std::move(limitedBlends), final_blend.toSource()};
+  }
+
+  Params params() const {
+    Params result;
+
+    for (size_t i = 0; i < blends.size(); ++i) {
+      const auto &blend = blends[i];
+      for (size_t j = 0; j < blend.formulas.size(); ++j) {
+        const auto &formula = blend.formulas[j];
+        if (!formula.params.empty()) {
+          result[SystemIndex{i, j}] = formula.params;
+        }
+      }
+    }
+
+    for (size_t j = 0; j < final_blend.formulas.size(); ++j) {
+      const auto &formula = final_blend.formulas[j];
+      if (!formula.params.empty()) {
+        result[SystemIndex{SystemIndex::FINAL_BLEND, j}] = formula.params;
+      }
+    }
+
+    return std::move(result);
   }
 };
 

@@ -17,6 +17,11 @@ struct Formula {
   ast::WeightedFormula toSource() const {
     return ast::WeightedFormula{source, weight_x, weight_y};
   }
+
+  template <class Type>
+  static Formula build(std::vector<float> params = {}) {
+    return Formula{Type().source(), std::move(params)};
+  }
 };
 
 }  // namespace core
