@@ -13,6 +13,7 @@ add_subdirectory(thirdparty)
 add_subdirectory(ast)
 add_subdirectory(core)
 add_subdirectory(library)
+add_subdirectory(ui)
 
 add_executable(lol lol.cpp)
 target_link_libraries(lol PRIVATE ast core library Qt5::Core Qt5::Gui)
