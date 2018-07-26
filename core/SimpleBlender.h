@@ -1,5 +1,5 @@
-#ifndef CHAOSKIT_CORE_SIMPLEGENERATOR_H
-#define CHAOSKIT_CORE_SIMPLEGENERATOR_H
+#ifndef CHAOSKIT_CORE_SIMPLEBLENDER_H
+#define CHAOSKIT_CORE_SIMPLEBLENDER_H
 
 #include <stdx/optional.h>
 #include <vector>
@@ -10,20 +10,18 @@
 namespace chaoskit {
 namespace core {
 
-class SimpleGenerator {
+class SimpleBlender {
  public:
-  SimpleGenerator(const System &system, uint32_t width, uint32_t height,
-                  std::shared_ptr<Rng> rng);
-  SimpleGenerator(const System &system, uint32_t width, uint32_t height);
+  SimpleBlender(const System &system, uint32_t width, uint32_t height,
+                std::shared_ptr<Rng> rng);
+  SimpleBlender(const System &system, uint32_t width, uint32_t height);
 
   void setSystem(const System &system);
   void setSize(uint32_t width, uint32_t height);
   void setIterationCount(uint32_t count);
   void setInfiniteIterationCount();
 
-  const float *data() const {
-    return buffer_.data();
-  }
+  const float *data() const { return buffer_.data(); }
 
   void clear();
   void run();
@@ -42,4 +40,4 @@ class SimpleGenerator {
 }  // namespace core
 }  // namespace chaoskit
 
-#endif  // CHAOSKIT_CORE_SIMPLEGENERATOR_H
+#endif  // CHAOSKIT_CORE_SIMPLEBLENDER_H

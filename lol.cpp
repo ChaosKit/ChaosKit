@@ -8,7 +8,7 @@
 
 #include "ast/helpers.h"
 #include "core/Point.h"
-#include "core/SimpleGenerator.h"
+#include "core/SimpleBlender.h"
 #include "core/ThreadLocalRng.h"
 #include "core/util.h"
 #include "library/DeJong.h"
@@ -17,7 +17,7 @@ using chaoskit::core::Blend;
 using chaoskit::core::Formula;
 using chaoskit::core::Params;
 using chaoskit::core::Point;
-using chaoskit::core::SimpleGenerator;
+using chaoskit::core::SimpleBlender;
 using chaoskit::core::System;
 using chaoskit::core::Transform;
 using chaoskit::core::ThreadLocalRng;
@@ -40,7 +40,7 @@ int main() {
 
   System system{{blend}, final};
 
-  SimpleGenerator generator(system, 512, 512, rng);
+  SimpleBlender generator(system, 512, 512, rng);
   generator.setIterationCount(1000000);
   generator.run();
 
