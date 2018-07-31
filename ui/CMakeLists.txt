@@ -1,6 +1,6 @@
 find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets)
 
-add_executable(ChaosKit WIN32 main.cpp ui.qrc MainWindow.h MainWindow.cpp)
+add_executable(ChaosKit WIN32 main.cpp ui.qrc MainWindow.h MainWindow.cpp GLToneMapper.cpp GLToneMapper.h TestWindow.cpp TestWindow.h)
 set_target_properties(ChaosKit PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON)
 target_link_libraries(ChaosKit PRIVATE Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Qml Qt5::Quick Qt5::QuickWidgets)
 
