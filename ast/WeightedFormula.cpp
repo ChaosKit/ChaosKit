@@ -1,4 +1,3 @@
-#include "types.h"
 #include "WeightedFormula.h"
 #include "util.h"
 

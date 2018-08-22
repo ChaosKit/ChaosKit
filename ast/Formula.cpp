@@ -1,4 +1,3 @@
-#include "types.h"
 #include "Formula.h"
 #include "util.h"
 

@@ -1,4 +1,3 @@
-#include "types.h"
 #include "Blend.h"
 #include "util.h"
 
@@ -17,5 +16,5 @@ std::ostream &operator<<(std::ostream &stream, const Blend &blend) {
   return stream << ", " << blend.post() << ")";
 }
 
-}
-}
+}  // namespace ast
+}  // namespace chaoskit

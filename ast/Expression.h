@@ -1,13 +1,13 @@
-#ifndef CHAOSKIT_EXPRESSION_H
-#define CHAOSKIT_EXPRESSION_H
+#ifndef CHAOSKIT_AST_EXPRESSION_H
+#define CHAOSKIT_AST_EXPRESSION_H
 
 #include <mapbox/variant.hpp>
+#include "Input.h"
+#include "Parameter.h"
 
 namespace chaoskit {
 namespace ast {
 
-class Input;
-class Parameter;
 class UnaryFunction;
 class BinaryFunction;
 
@@ -19,4 +19,7 @@ using Expression =
 }  // namespace ast
 }  // namespace chaoskit
 
-#endif  // CHAOSKIT_EXPRESSION_H
+#include "BinaryFunction.h"
+#include "UnaryFunction.h"
+
+#endif  // CHAOSKIT_AST_EXPRESSION_H

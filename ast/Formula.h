@@ -11,7 +11,7 @@ class Formula {
  public:
   Formula(const Expression& x, const Expression& y) : x_(x), y_(y) {}
 
-  Formula(const Expression(&list)[2]) : x_(list[0]), y_(list[1]) {}
+  Formula(const Expression (&list)[2]) : x_(list[0]), y_(list[1]) {}
 
   const Expression& x() const { return x_; }
   const Expression& y() const { return y_; }

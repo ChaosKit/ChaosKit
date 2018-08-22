@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_AST_UTIL_H
 #define CHAOSKIT_AST_UTIL_H
 
+#include <ostream>
 #include <string>
 #include <mapbox/variant.hpp>
 #include <mapbox/variant_cast.hpp>

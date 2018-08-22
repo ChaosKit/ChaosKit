@@ -1,5 +1,5 @@
-#ifndef CHAOSKIT_BINARYFUNCTION_H
-#define CHAOSKIT_BINARYFUNCTION_H
+#ifndef CHAOSKIT_AST_BINARYFUNCTION_H
+#define CHAOSKIT_AST_BINARYFUNCTION_H
 
 #include <ostream>
 #include <enum.h>
@@ -38,4 +38,4 @@ std::ostream& operator<<(std::ostream& stream, const BinaryFunction& function);
 }  // namespace ast
 }  // namespace chaoskit
 
-#endif  // CHAOSKIT_BINARYFUNCTION_H
+#endif  // CHAOSKIT_AST_BINARYFUNCTION_H

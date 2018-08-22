@@ -1,5 +1,5 @@
-#ifndef CHAOSKIT_PARAMETER_H
-#define CHAOSKIT_PARAMETER_H
+#ifndef CHAOSKIT_AST_PARAMETER_H
+#define CHAOSKIT_AST_PARAMETER_H
 
 #include <cstddef>
 #include <ostream>
@@ -26,4 +26,4 @@ std::ostream& operator<<(std::ostream& stream, const Parameter& parameter);
 }  // namespace ast
 }  // namespace chaoskit
 
-#endif  // CHAOSKIT_PARAMETER_H
+#endif  // CHAOSKIT_AST_PARAMETER_H

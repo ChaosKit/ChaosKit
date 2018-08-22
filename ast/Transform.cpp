@@ -1,4 +1,3 @@
-#include "types.h"
 #include "Transform.h"
 #include "util.h"
 
@@ -22,5 +21,5 @@ std::ostream &operator<<(std::ostream &stream, const Transform &transform) {
   return stream << ")";
 }
 
-}
-}
+}  // namespace ast
+}  // namespace chaoskit

@@ -1,4 +1,3 @@
-#include "types.h"
 #include "Input.h"
 #include "util.h"
 

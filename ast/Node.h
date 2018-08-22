@@ -1,17 +1,17 @@
-#ifndef CHAOSKIT_NODE_H
-#define CHAOSKIT_NODE_H
+#ifndef CHAOSKIT_AST_NODE_H
+#define CHAOSKIT_AST_NODE_H
 
 #include <mapbox/variant.hpp>
+#include "BinaryFunction.h"
+#include "Expression.h"
 #include "Input.h"
 #include "Parameter.h"
-#include "Expression.h"
 #include "Transform.h"
+#include "UnaryFunction.h"
 
 namespace chaoskit {
 namespace ast {
 
-class UnaryFunction;
-class BinaryFunction;
 class Formula;
 class WeightedFormula;
 class Blend;
@@ -38,4 +38,10 @@ struct Node : public NodeAlias {
 }  // namespace ast
 }  // namespace chaoskit
 
-#endif  // CHAOSKIT_NODE_H
+#include "Formula.h"
+#include "WeightedFormula.h"
+#include "Blend.h"
+#include "LimitedBlend.h"
+#include "System.h"
+
+#endif  // CHAOSKIT_AST_NODE_H

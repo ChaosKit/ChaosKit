@@ -1,4 +1,3 @@
-#include "types.h"
 #include "System.h"
 #include "util.h"
 
@@ -15,5 +14,5 @@ std::ostream &operator<<(std::ostream &stream, const System &system) {
   return stream << system.final_blend() << ")";
 }
 
-}
-}
+}  // namespace ast
+}  // namespace chaoskit

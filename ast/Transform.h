@@ -2,6 +2,7 @@
 #define CHAOSKIT_AST_TRANSFORM_H
 
 #include <array>
+#include <ostream>
 
 namespace chaoskit {
 namespace ast {
