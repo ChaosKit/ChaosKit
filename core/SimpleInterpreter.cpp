@@ -1,10 +1,11 @@
+#include "SimpleInterpreter.h"
+
 #include <ast/ast.h>
-// ast.h has to be first to satisfy forward declarations
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <unordered_map>
-#include "SimpleInterpreter.h"
+
 #include "ThreadLocalRng.h"
 
 namespace chaoskit {

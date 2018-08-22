@@ -1,5 +1,4 @@
 #include "SimpleBlender.h"
-#include <ast/types.h>
 #include "ThreadLocalRng.h"
 
 namespace chaoskit {
