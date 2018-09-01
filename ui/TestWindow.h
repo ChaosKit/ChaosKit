@@ -2,8 +2,9 @@
 #define CHAOSKIT_UI_TESTWINDOW_H
 
 #include <QOpenGLWindow>
-#include <core/HistogramBuffer.h>
+#include <QKeyEvent>
 #include "GLToneMapper.h"
+#include "HistogramGenerator.h"
 
 namespace chaoskit {
 namespace ui {
@@ -16,13 +17,17 @@ class TestWindow : public QOpenGLWindow {
   void initializeGL() override;
   void resizeGL(int w, int h) override;
   void paintGL() override;
+  void keyPressEvent(QKeyEvent *event) override;
 
  private:
-  core::HistogramBuffer buffer_;
+  HistogramGenerator *histogramGenerator_;
   GLToneMapper *toneMapper_;
+
+ private slots:
+  void syncHistogram();
 };
 
-}
-}
+}  // namespace ui
+}  // namespace chaoskit
 
-#endif //CHAOSKIT_UI_TESTWINDOW_H
+#endif  // CHAOSKIT_UI_TESTWINDOW_H
