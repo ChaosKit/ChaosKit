@@ -10,6 +10,7 @@ namespace core {
 
 class HistogramBuffer {
  public:
+  HistogramBuffer() : HistogramBuffer(0, 0) {}
   HistogramBuffer(size_t width, size_t height)
       : width_(width), height_(height), buffer_(width * height) {}
 
@@ -20,6 +21,8 @@ class HistogramBuffer {
   size_t width() const { return width_; }
   size_t height() const { return height_; }
   size_t size() const { return buffer_.size(); }
+  void clear();
+  void resize(size_t width, size_t height);
 
   HistogramColor* data() { return buffer_.data(); }
   const HistogramColor* data() const { return buffer_.data(); }
