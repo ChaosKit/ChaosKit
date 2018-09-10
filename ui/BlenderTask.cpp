@@ -4,7 +4,6 @@
 using chaoskit::core::Particle;
 using chaoskit::core::Point;
 using chaoskit::core::SimpleInterpreter;
-using chaoskit::core::System;
 
 namespace chaoskit {
 namespace ui {
@@ -19,7 +18,7 @@ float distance(const Point &a, const Point &b) {
 
 }  // namespace
 
-void BlenderTask::setSystem(const System &system) {
+void BlenderTask::setSystem(const core::System &system) {
   interpreter_ = std::make_unique<SimpleInterpreter>(system.toSource(),
                                                      system.params(), rng_);
   resetParticle();

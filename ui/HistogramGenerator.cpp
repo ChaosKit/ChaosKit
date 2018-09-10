@@ -4,7 +4,6 @@
 
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
-using chaoskit::core::System;
 using chaoskit::core::ThreadLocalRng;
 
 namespace chaoskit {
@@ -43,7 +42,7 @@ void HistogramGenerator::withHistogram(
   gathererTask_->withHistogram(action);
 }
 
-void HistogramGenerator::setSystem(const System &system) {
+void HistogramGenerator::setSystem(const core::System &system) {
   QMetaObject::invokeMethod(blenderTask_,
                             [=] { blenderTask_->setSystem(system); });
 }

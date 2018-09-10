@@ -5,7 +5,6 @@
 using chaoskit::core::Blend;
 using chaoskit::core::Formula;
 using chaoskit::core::HistogramBuffer;
-using chaoskit::core::System;
 using chaoskit::core::Transform;
 using chaoskit::library::DeJong;
 
@@ -16,18 +15,11 @@ TestWindow::TestWindow() {
   setTitle(QStringLiteral("ChaosKit (Test Window)"));
   setBaseSize(QSize(512, 512));
 
-  Formula formula = Formula::build<DeJong>(
-      {9.379666578024626e-01f, 1.938709271140397e+00f, -1.580897020176053e-01f,
-       -1.430070123635232e+00f});
-  Blend final{Transform::identity(),
-              Transform::fromScale(.5f, 1.f).translate(0.3f, 0.5f)};
-  Blend blend;
-  blend.formulas.push_back(formula);
-  System system{{blend}, final};
+  System system;
 
   histogramGenerator_ = new HistogramGenerator(this);
   histogramGenerator_->setSize(512, 512);
-  histogramGenerator_->setSystem(system);
+  histogramGenerator_->setSystem(system.system());
   histogramGenerator_->setTtl(20);
   toneMapper_ = new GLToneMapper(this);
 
