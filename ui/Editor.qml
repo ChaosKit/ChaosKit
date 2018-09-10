@@ -8,11 +8,12 @@ Rectangle {
 
     SystemView {
         id: systemview
+        objectName: "systemview"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
 
-        width: 512
-        height: 512
+        width: 1024
+        height: 1024
         ttl: 20
         scale: 1.0 / Screen.devicePixelRatio
     }

@@ -20,6 +20,8 @@ class HistogramGenerator : public QObject {
   void withHistogram(
       const std::function<void(const core::HistogramBuffer &)> &action);
 
+  bool running() const { return running_; }
+
  public slots:
   void setSystem(const chaoskit::core::System &system);
   void setSize(quint32 width, quint32 height);
@@ -36,6 +38,7 @@ class HistogramGenerator : public QObject {
   QThread *thread_;
   BlenderTask *blenderTask_;
   GathererTask *gathererTask_;
+  bool running_ = false;
 };
 
 }  // namespace ui

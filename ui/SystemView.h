@@ -23,18 +23,23 @@ class SystemView : public QQuickFramebufferObject {
       const std::function<void(const core::HistogramBuffer &)> &action) const;
 
   int ttl() const { return ttl_; }
-  void setTtl(int ttl);
-
   float gamma() const { return gamma_; }
-  void setGamma(float gamma);
-
   float exposure() const { return exposure_; }
-  void setExposure(float exposure);
-
   float vibrancy() const { return vibrancy_; }
+  bool running() const { return generator_->running(); }
+
+ public slots:
+  void start();
+  void stop();
+  void clear();
+  void setTtl(int ttl);
+  void setGamma(float gamma);
+  void setExposure(float exposure);
   void setVibrancy(float vibrancy);
 
  signals:
+  void started();
+  void stopped();
   void ttlChanged();
   void gammaChanged();
   void exposureChanged();

@@ -21,9 +21,9 @@ class HistogramRenderer : public QQuickFramebufferObject::Renderer {
  protected:
   void synchronize(QQuickFramebufferObject *object) override {
     systemView_ = dynamic_cast<const SystemView *>(object);
-    gamma_ = systemView_->gamma();
-    exposure_ = systemView_->exposure();
-    vibrancy_ = systemView_->vibrancy();
+    toneMapper_.setGamma(systemView_->gamma());
+    toneMapper_.setExposure(systemView_->exposure());
+    toneMapper_.setVibrancy(systemView_->vibrancy());
   }
 
   void render() override {
@@ -40,10 +40,6 @@ class HistogramRenderer : public QQuickFramebufferObject::Renderer {
  private:
   GLToneMapper toneMapper_;
   const SystemView *systemView_;
-
-  float gamma_;
-  float exposure_;
-  float vibrancy_;
 };
 
 }  // namespace
@@ -53,6 +49,8 @@ SystemView::SystemView(QQuickItem *parent) : QQuickFramebufferObject(parent) {
 
   connect(this, &QQuickItem::widthChanged, this, &SystemView::updateBufferSize);
   connect(this, &QQuickItem::heightChanged, this, &SystemView::updateBufferSize);
+  connect(generator_, &HistogramGenerator::started, this, &SystemView::started);
+  connect(generator_, &HistogramGenerator::stopped, this, &SystemView::stopped);
 }
 
 void SystemView::withHistogram(
@@ -62,6 +60,18 @@ void SystemView::withHistogram(
 
 QQuickFramebufferObject::Renderer *SystemView::createRenderer() const {
   return new HistogramRenderer(this);
+}
+
+void SystemView::start() {
+  generator_->start();
+}
+
+void SystemView::stop() {
+  generator_->stop();
+}
+
+void SystemView::clear() {
+  generator_->clear();
 }
 
 void SystemView::setTtl(int ttl) {
@@ -77,7 +87,7 @@ void SystemView::setTtl(int ttl) {
 }
 
 void SystemView::setGamma(float gamma) {
-  if (gamma_ == gamma) {
+  if (qFuzzyCompare(gamma_, gamma)) {
     return;
   }
 
@@ -87,7 +97,7 @@ void SystemView::setGamma(float gamma) {
 }
 
 void SystemView::setExposure(float exposure) {
-  if (exposure_ == exposure) {
+  if (qFuzzyCompare(exposure_, exposure)) {
     return;
   }
 
@@ -97,7 +107,7 @@ void SystemView::setExposure(float exposure) {
 }
 
 void SystemView::setVibrancy(float vibrancy) {
-  if (vibrancy_ == vibrancy) {
+  if (qFuzzyCompare(vibrancy_, vibrancy)) {
     return;
   }
 

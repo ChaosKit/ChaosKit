@@ -58,10 +58,12 @@ void HistogramGenerator::setTtl(int32_t ttl) {
 
 void HistogramGenerator::start() {
   QMetaObject::invokeMethod(blenderTask_, &BlenderTask::start);
+  running_ = true;
 }
 
 void HistogramGenerator::stop() {
   QMetaObject::invokeMethod(blenderTask_, &BlenderTask::stop);
+  running_ = false;
 }
 
 void HistogramGenerator::clear() {
