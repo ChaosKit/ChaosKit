@@ -23,12 +23,6 @@ TestWindow::TestWindow() {
   histogramGenerator_->setTtl(20);
   toneMapper_ = new GLToneMapper(this);
 
-  QSurfaceFormat format;
-  format.setMajorVersion(3);
-  format.setMinorVersion(2);
-  format.setProfile(QSurfaceFormat::CoreProfile);
-  setFormat(format);
-
   connect(this, &QOpenGLWindow::frameSwapped, this, &TestWindow::syncHistogram);
 }
 
