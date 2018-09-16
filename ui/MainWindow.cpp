@@ -1,5 +1,8 @@
 #include "MainWindow.h"
+#include <QDockWidget>
+#include "EmptyOptionsForm.h"
 #include "RenderingForm.h"
+#include "StructureForm.h"
 #include "SystemView.h"
 #include "ui_MainWindow.h"
 
@@ -10,8 +13,21 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
+  structureForm_ = new StructureForm(this);
+  addDockWidget(Qt::RightDockWidgetArea, structureForm_);
+
+  auto *toolOptions = new QDockWidget(this);
+  toolOptions->setWindowTitle("Tool Options");
+  addDockWidget(Qt::RightDockWidgetArea, toolOptions);
+
+  auto *emptyOptionsForm = new EmptyOptionsForm(toolOptions);
+  toolOptions->setWidget(emptyOptionsForm);
+
   renderingForm_ = new RenderingForm(this);
   addDockWidget(Qt::RightDockWidgetArea, renderingForm_);
+
+  tabifyDockWidget(structureForm_, renderingForm_);
+  structureForm_->raise();
 
   auto *systemView = findSystemView();
   connect(systemView, &SystemView::started, this,

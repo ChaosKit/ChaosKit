@@ -16,6 +16,8 @@ add_executable(ChaosKit WIN32
         SystemView.h SystemView.cpp
         RenderingForm.cpp RenderingForm.h
         SystemModel.cpp SystemModel.h
+        StructureForm.cpp StructureForm.h
+        EmptyOptionsForm.cpp EmptyOptionsForm.h
 )
 set_target_properties(ChaosKit PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON)
 target_link_libraries(ChaosKit PRIVATE core Qt5::Core Qt5::Gui Qt5::Widgets
@@ -25,4 +27,6 @@ add_custom_target(ChaosKitUI SOURCES
         Editor.qml
         MainWindow.ui
         RenderingForm.ui
+        StructureForm.ui
+        EmptyOptionsForm.ui
 )

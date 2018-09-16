@@ -11,6 +11,7 @@ namespace chaoskit {
 namespace ui {
 
 class RenderingForm;
+class StructureForm;
 class SystemView;
 
 class MainWindow : public QMainWindow {
@@ -23,6 +24,7 @@ class MainWindow : public QMainWindow {
  private:
   Ui::MainWindow *ui;
   RenderingForm *renderingForm_;
+  StructureForm *structureForm_;
 
   SystemView *findSystemView() const;
 

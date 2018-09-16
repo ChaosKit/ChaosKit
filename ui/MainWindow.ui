@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>ChaosKit</string>
   </property>
+  <property name="documentMode">
+   <bool>true</bool>
+  </property>
   <property name="dockOptions">
    <set>QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::GroupedDragging</set>
   </property>
