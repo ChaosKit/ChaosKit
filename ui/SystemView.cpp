@@ -20,6 +20,10 @@ class HistogramRenderer : public QQuickFramebufferObject::Renderer {
 
  protected:
   void synchronize(QQuickFramebufferObject *object) override {
+    systemView_->withHistogram([this](const HistogramBuffer &histogram) {
+      toneMapper_.syncBuffer(histogram);
+    });
+
     systemView_ = dynamic_cast<const SystemView *>(object);
     toneMapper_.setGamma(systemView_->gamma());
     toneMapper_.setExposure(systemView_->exposure());
@@ -27,10 +31,6 @@ class HistogramRenderer : public QQuickFramebufferObject::Renderer {
   }
 
   void render() override {
-    systemView_->withHistogram([this](const HistogramBuffer &histogram) {
-      toneMapper_.syncBuffer(histogram);
-    });
-
     toneMapper_.map();
     update();
 

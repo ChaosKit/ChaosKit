@@ -247,5 +247,12 @@ QVariant SystemModel::postTransformData(const core::Transform &transform,
   return QVariant();
 }
 
+FlatteningModel* SystemModel::childModel(int index) {
+  auto *model = new FlatteningModel();
+  model->setSourceModel(this);
+  model->setRootIndex(this->index(index, 0, QModelIndex()));
+  return model;
+}
+
 }  // namespace ui
 }  // namespace chaoskit

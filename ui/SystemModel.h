@@ -2,6 +2,7 @@
 #define CHAOSKIT_UI_SYSTEMMODEL_H
 
 #include <QAbstractItemModel>
+#include "FlatteningModel.h"
 #include "System.h"
 
 namespace chaoskit {
@@ -21,6 +22,8 @@ class SystemModel : public QAbstractItemModel {
   QModelIndex index(int row, int column,
                     const QModelIndex &parent) const override;
   QModelIndex parent(const QModelIndex &child) const override;
+
+  Q_INVOKABLE FlatteningModel *childModel(int index);
 
  private:
   core::System system_;

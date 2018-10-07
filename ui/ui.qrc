@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/">
+        <file>Theme.js</file>
         <file>Editor.qml</file>
+        <file>MainWindow.qml</file>
+        <file>RenderingForm.qml</file>
+        <file>StructureForm.qml</file>
     </qresource>
 </RCC>
