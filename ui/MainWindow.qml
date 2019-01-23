@@ -1,21 +1,14 @@
 import QtQuick 2.11
 import QtQuick.Controls 2.4
-import QtQuick.Controls.Material 2.4
 import QtQuick.Layouts 1.11
 import app.chaoskit 1.0
 
 ApplicationWindow {
   id: root
   title: "ChaosKit"
-  width: 800
-  height: 600
+  width: 1024
+  height: 768
   visible: true
-
-  Material.theme: Material.Dark
-  Material.primary: Material.BlueGrey
-  Material.accent: Material.LightGreen
-  Material.background: Material.color(Material.BlueGrey, Material.Shade800)
-  Material.foreground: Material.White
 
   SystemModel {
     id: systemModel
@@ -39,7 +32,7 @@ ApplicationWindow {
     Item {
       Layout.fillHeight: true
       Layout.minimumWidth: 240
-      Layout.preferredWidth: 240
+      Layout.preferredWidth: 300
 
       ColumnLayout {
         spacing: 0
@@ -71,7 +64,7 @@ ApplicationWindow {
         }
 
         Rectangle {
-          color: Material.color(Material.BlueGrey, Material.Shade900)
+          color: "#fff"
           Layout.fillWidth: true
           Layout.minimumHeight: 30
           Layout.preferredHeight: 200

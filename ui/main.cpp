@@ -21,8 +21,6 @@ int main(int argc, char* argv[]) {
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication app(argc, argv);
 
-  QQuickStyle::setStyle("Material");
-
   QSurfaceFormat format;
   format.setMajorVersion(3);
   format.setMinorVersion(2);
