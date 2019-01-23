@@ -11,8 +11,12 @@ namespace ui {
 class SystemModel : public QAbstractItemModel {
   Q_OBJECT
  public:
+  enum SystemRoles {
+    WeightRole = Qt::UserRole + 1,
+  };
   explicit SystemModel(QObject *parent = nullptr);
 
+  QHash<int, QByteArray> roleNames() const override;
   int rowCount(const QModelIndex &parent) const override;
   int columnCount(const QModelIndex &parent) const override;
   QVariant data(const QModelIndex &index, int role) const override;
@@ -28,14 +32,10 @@ class SystemModel : public QAbstractItemModel {
  private:
   core::System system_;
 
-  QVariant blendData(const core::Blend &blend, int column, int role) const;
-  QVariant finalBlendData(const core::Blend &blend, int column, int role) const;
+  QVariant blendData(const core::Blend &blend, bool isFinal, int column,
+                     int role) const;
   QVariant formulaData(const core::Formula &formula, int column,
                        int role) const;
-  QVariant preTransformData(const core::Transform &transform, int column,
-                            int role) const;
-  QVariant postTransformData(const core::Transform &transform, int column,
-                             int role) const;
 };
 
 }  // namespace ui

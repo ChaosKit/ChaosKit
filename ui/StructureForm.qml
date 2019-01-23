@@ -42,7 +42,7 @@ ListView {  // TODO: make a custom control with selecting etc
         Layout.preferredWidth: 100
         Layout.fillHeight: true
 
-        value: 0.6
+        value: weight
       }
     }
   }
@@ -89,7 +89,7 @@ ListView {  // TODO: make a custom control with selecting etc
         Layout.preferredWidth: 100
         Layout.fillHeight: true
 
-        value: 0.5
+        value: weight
       }
 
       // Formulas

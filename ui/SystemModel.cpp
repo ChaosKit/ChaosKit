@@ -11,8 +11,6 @@ enum RowType {
   UNDEFINED = 0,
   BLEND = 1,
   FORMULA = 2,
-  PRE_TRANSFORM = 3,
-  POST_TRANSFORM = 4,
 };
 
 const uint64_t FINAL_BLEND_INDEX = 0x00000fffffffffff;
@@ -20,14 +18,8 @@ const uint64_t FINAL_BLEND_INDEX = 0x00000fffffffffff;
 constexpr quintptr makeIdForBlend(uint64_t blendIndex) {
   return blendIndex << 20;
 }
-constexpr quintptr makeIdForPre(uint64_t blendIndex) {
-  return blendIndex << 20 | 0x10000;
-}
-constexpr quintptr makeIdForPost(uint64_t blendIndex) {
-  return blendIndex << 20 | 0x20000;
-}
 constexpr quintptr makeIdForFormula(uint64_t blendIndex, int formulaIndex) {
-  return blendIndex << 20 | 0x30000 | (formulaIndex & 0xffff);
+  return blendIndex << 20 | 0x10000 | (formulaIndex & 0xffff);
 }
 
 constexpr RowType rowTypeForId(quintptr id) {
@@ -37,10 +29,6 @@ constexpr RowType rowTypeForId(quintptr id) {
     case 0:
       return BLEND;
     case 1:
-      return PRE_TRANSFORM;
-    case 2:
-      return POST_TRANSFORM;
-    case 3:
       return FORMULA;
     default:
       return UNDEFINED;
@@ -81,19 +69,13 @@ QModelIndex SystemModel::index(int row, int column,
   auto parentId = parent.internalId();
   auto blendIndex = blendIndexForId(parentId);
 
-  if (row == 0) {
-    return createIndex(row, column, makeIdForPre(blendIndex));
-  }
-
   const auto &parentBlend = (blendIndex == FINAL_BLEND_INDEX)
                                 ? system_.final_blend
                                 : system_.blends.at(blendIndex);
   auto formulaCount = parentBlend.formulas.size();
 
-  if (row == formulaCount + 1) {
-    return createIndex(row, column, makeIdForPost(blendIndex));
-  } else if (row <= formulaCount) {
-    return createIndex(row, column, makeIdForFormula(blendIndex, row - 1));
+  if (row < formulaCount) {
+    return createIndex(row, column, makeIdForFormula(blendIndex, row));
   }
 
   return QModelIndex();
@@ -137,14 +119,20 @@ int SystemModel::rowCount(const QModelIndex &parent) const {
                                   ? system_.final_blend
                                   : system_.blends[blendIndex];
 
-    // Extra 2 are for the transforms.
-    return static_cast<int>(parentBlend.formulas.size()) + 2;
+    return static_cast<int>(parentBlend.formulas.size());
   }
 
   return 0;
 }
 
 int SystemModel::columnCount(const QModelIndex &parent) const { return 1; }
+
+QHash<int, QByteArray> SystemModel::roleNames() const {
+  QHash<int, QByteArray> names;
+  names[Qt::DisplayRole] = "display";
+  names[WeightRole] = "weight";
+  return names;
+}
 
 QVariant SystemModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid()) {
@@ -159,18 +147,15 @@ QVariant SystemModel::data(const QModelIndex &index, int role) const {
 
   switch (rowTypeForId(id)) {
     case RowType::BLEND: {
-      if (blendIndex == FINAL_BLEND_INDEX) {
-        return finalBlendData(system_.final_blend, index.column(), role);
-      }
-      return blendData(system_.blends[blendIndex], index.column(), role);
+      auto isFinalBlend = (blendIndex == FINAL_BLEND_INDEX);
+
+      return blendData(
+          isFinalBlend ? system_.final_blend : system_.blends[blendIndex],
+          isFinalBlend, index.column(), role);
     }
     case RowType::FORMULA:
       return formulaData(blend.formulas[formulaIndexForId(id)], index.column(),
                          role);
-    case RowType::PRE_TRANSFORM:
-      return preTransformData(blend.pre, index.column(), role);
-    case RowType::POST_TRANSFORM:
-      return postTransformData(blend.post, index.column(), role);
     case RowType::UNDEFINED:
       return QVariant();
   }
@@ -185,69 +170,38 @@ QVariant SystemModel::headerData(int section, Qt::Orientation orientation,
 Qt::ItemFlags SystemModel::flags(const QModelIndex &index) const {
   return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
-
-QVariant SystemModel::blendData(const core::Blend &blend, int column,
-                                int role) const {
+QVariant SystemModel::blendData(const core::Blend &blend, bool isFinal,
+                                int column, int role) const {
   if (column == 0) {
     switch (role) {
       case Qt::DisplayRole:
-        return QStringLiteral("Blend");  // TODO: change
+        // TODO: change this
+        return isFinal ? QStringLiteral("Final Blend")
+                       : QStringLiteral("Blend");
+      case WeightRole:
+        return blend.weight;
       default:;
     }
   }
 
   return QVariant();
 }
-QVariant SystemModel::finalBlendData(const core::Blend &blend, int column,
-                                     int role) const {
-  if (column == 0) {
-    switch (role) {
-      case Qt::DisplayRole:
-        return QStringLiteral("Final Blend");
-      default:;
-    }
-  }
 
-  return QVariant();
-}
 QVariant SystemModel::formulaData(const core::Formula &formula, int column,
                                   int role) const {
   if (column == 0) {
     switch (role) {
       case Qt::DisplayRole:
         return QStringLiteral("Formula");  // TODO: change
+      case WeightRole:
+        return formula.weight_x;  // TODO: support weight_y
       default:;
     }
   }
 
   return QVariant();
 }
-QVariant SystemModel::preTransformData(const core::Transform &transform,
-                                       int column, int role) const {
-  if (column == 0) {
-    switch (role) {
-      case Qt::DisplayRole:
-        return QStringLiteral("Pre Transform");
-      default:;
-    }
-  }
-
-  return QVariant();
-}
-QVariant SystemModel::postTransformData(const core::Transform &transform,
-                                        int column, int role) const {
-  if (column == 0) {
-    switch (role) {
-      case Qt::DisplayRole:
-        return QStringLiteral("Post Transform");
-      default:;
-    }
-  }
-
-  return QVariant();
-}
-
-FlatteningModel* SystemModel::childModel(int index) {
+FlatteningModel *SystemModel::childModel(int index) {
   auto *model = new FlatteningModel();
   model->setSourceModel(this);
   model->setRootIndex(this->index(index, 0, QModelIndex()));
