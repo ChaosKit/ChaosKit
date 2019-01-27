@@ -125,10 +125,10 @@ ListView {  // TODO: make a custom control with selecting etc
               symbol: Icons.faPlus
             }
 
-            Label {
+            ComboBox {
               Layout.fillWidth: true
               Layout.fillHeight: true
-              text: "TODO Formula Picker"
+              model: formulaList
             }
 
             Item {
