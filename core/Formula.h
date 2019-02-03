@@ -14,10 +14,6 @@ struct Formula {
   float weight_x = 1.f;
   float weight_y = 1.f;
 
-  ast::WeightedFormula toSource() const {
-    return ast::WeightedFormula{source, weight_x, weight_y};
-  }
-
   template <class Type>
   static Formula build(std::vector<float> params = {}) {
     return Formula{Type().source(), std::move(params)};

@@ -14,24 +14,6 @@ struct System {
   std::vector<Blend> blends;
   Blend final_blend;
 
-  ast::System toSource() const {
-    std::vector<float> limits(blends.size());
-
-    std::transform(blends.begin(), blends.end(), limits.begin(),
-                   std::mem_fn(&Blend::weight));
-    std::partial_sum(limits.begin(), limits.end(), limits.begin());
-
-    std::vector<ast::LimitedBlend> limitedBlends;
-    limitedBlends.reserve(blends.size());
-    std::transform(blends.begin(), blends.end(), limits.begin(),
-                   std::back_inserter(limitedBlends),
-                   [](const Blend &blend, float limit) {
-                     return ast::LimitedBlend{blend.toSource(), limit};
-                   });
-
-    return ast::System{std::move(limitedBlends), final_blend.toSource()};
-  }
-
   Params params() const {
     Params result;
 

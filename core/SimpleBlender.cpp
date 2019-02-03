@@ -1,5 +1,6 @@
 #include "SimpleBlender.h"
 #include "ThreadLocalRng.h"
+#include "toSource.h"
 
 namespace chaoskit {
 namespace core {
@@ -10,7 +11,7 @@ SimpleBlender::SimpleBlender(const System &system, uint32_t width,
       height_(height),
       buffer_(width * height),
       iteration_count_(stdx::nullopt),
-      interpreter_(system.toSource(), system.params()),
+      interpreter_(toSource(system), system.params()),
       rng_(std::move(rng)) {}
 
 SimpleBlender::SimpleBlender(const System &system, uint32_t width,
@@ -19,7 +20,7 @@ SimpleBlender::SimpleBlender(const System &system, uint32_t width,
 }
 
 void SimpleBlender::setSystem(const System &system) {
-  interpreter_.setSystem(system.toSource());
+  interpreter_.setSystem(toSource(system));
   interpreter_.setParams(system.params());
 }
 

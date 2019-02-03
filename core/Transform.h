@@ -52,20 +52,6 @@ struct Transform {
     translation_y += y;
     return *this;
   }
-
-  ast::Transform toSource() const {
-    auto sin = std::sin(angle);
-    auto cos = std::cos(angle);
-
-    return ast::Transform{
-        scale_x * cos,
-        scale_x * -sin,
-        translation_x,
-        scale_y * sin,
-        scale_y * cos,
-        translation_y
-    };
-  }
 };
 
 }  // namespace core
