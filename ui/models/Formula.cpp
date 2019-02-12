@@ -58,7 +58,7 @@ void Formula::expandParams(int size) {
 }
 
 void Formula::setWeightX(float weight) {
-  if (weight_x_ == weight) {
+  if (qFuzzyCompare(weight_x_, weight)) {
     return;
   }
 
@@ -67,7 +67,7 @@ void Formula::setWeightX(float weight) {
 }
 
 void Formula::setWeightY(float weight) {
-  if (weight_y_ == weight) {
+  if (qFuzzyCompare(weight_y_, weight)) {
     return;
   }
 
