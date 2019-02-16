@@ -5,14 +5,6 @@
 namespace chaoskit {
 namespace ui {
 
-void Formula::setName(const QString &name) {
-  if (name_ == name) {
-    return;
-  }
-  name_ = name;
-  emit nameChanged();
-}
-
 void Formula::setType(const QString &typeName) {
   // throws std::runtime_error if the type is missing
   setType(library::FormulaType::_from_string(typeName.toUtf8()));
@@ -23,8 +15,8 @@ void Formula::setType(const library::FormulaType &type) {
     return;
   }
 
-  auto currentCount = library::createFormula(type_)->paramCount();
-  auto newCount = library::createFormula(type)->paramCount();
+  auto currentCount = library::paramCount(type_);
+  auto newCount = library::paramCount(type);
 
   if (currentCount < newCount) {
     expandParams(newCount);
@@ -73,11 +65,6 @@ void Formula::setWeightY(float weight) {
 
   weight_y_ = weight;
   emit weightChanged();
-}
-
-core::Formula Formula::toCoreFormula() const {
-  return {library::createFormula(type_)->source(), params_.toStdVector(),
-          weight_x_, weight_y_};
 }
 
 }  // namespace ui

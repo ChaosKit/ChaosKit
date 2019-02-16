@@ -12,8 +12,7 @@ namespace ui {
 class Formula : public QObject {
   Q_OBJECT
  public:
-  const QString &name() const { return name_; }
-  void setName(const QString &name);
+  explicit Formula(QObject *parent = nullptr) : QObject(parent) {}
 
   const library::FormulaType &type() const { return type_; }
   void setType(const QString &typeName);
@@ -28,17 +27,13 @@ class Formula : public QObject {
   const float weightY() const { return weight_y_; }
   void setWeightY(float weight);
 
-  core::Formula toCoreFormula() const;
-
  signals:
-  void nameChanged();
   void typeChanged();
   void paramsChanged();
   void weightChanged();
 
  private:
-  QString name_;
-  library::FormulaType type_;
+  library::FormulaType type_ = library::FormulaType::Invalid;
   QVector<float> params_;
   float weight_x_ = 1.f;
   float weight_y_ = 1.f;
