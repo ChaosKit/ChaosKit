@@ -1,14 +1,18 @@
 #include "System.h"
 
+using chaoskit::core::Params;
+using chaoskit::core::SystemIndex;
+
 namespace chaoskit {
 namespace ui {
 namespace models {
 
-using chaoskit::core::Params;
-using chaoskit::core::SystemIndex;
+System::System(QObject *parent) : QObject(parent) {
+  final_blend_ = new Blend();
+}
 
 Blend *System::addBlend() {
-  auto *blend = new Blend;
+  auto *blend = new Blend();
   addBlend(blend);
   return blend;
 }
