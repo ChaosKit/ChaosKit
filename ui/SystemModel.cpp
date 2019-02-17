@@ -1,6 +1,8 @@
 #include "SystemModel.h"
+#include <QDebug>
+#include <QTransform>
 
-using chaoskit::core::Blend;
+using chaoskit::ui::models::System;
 
 namespace chaoskit {
 namespace ui {
@@ -45,7 +47,26 @@ constexpr int formulaIndexForId(quintptr id) {
 
 SystemModel::SystemModel(QObject *parent) : QAbstractItemModel(parent) {
   // TODO: replace this with something else maybe
-  system_ = System().system();
+  auto *formula = new Formula();
+  formula->setType(QStringLiteral("DeJong"));
+  formula->setParams({9.379666578024626e-01f, 1.938709271140397e+00f,
+                      -1.580897020176053e-01f, -1.430070123635232e+00f});
+
+  auto *blend = new Blend();
+  blend->addFormula(formula);
+
+  auto *finalBlend = new Blend();
+  finalBlend->setPost(QTransform::fromScale(.5, 1).translate(.5, .5));
+
+  system_ = new System(this);
+  system_->addBlend(blend);
+  system_->setFinalBlend(finalBlend);
+}
+
+const Blend *SystemModel::getBlendForId(uint64_t id) const {
+  auto index = blendIndexForId(id);
+  return index == FINAL_BLEND_INDEX ? system_->finalBlend()
+                                    : system_->blends()[index];
 }
 
 QModelIndex SystemModel::index(int row, int column,
@@ -56,9 +77,9 @@ QModelIndex SystemModel::index(int row, int column,
 
   // Root level
   if (!parent.isValid()) {
-    if (row < system_.blends.size()) {
+    if (row < system_->blends().size()) {
       return createIndex(row, column, makeIdForBlend(static_cast<size_t>(row)));
-    } else if (row == system_.blends.size()) {
+    } else if (row == system_->blends().size()) {
       return createIndex(row, column, makeIdForBlend(FINAL_BLEND_INDEX));
     } else {
       return QModelIndex();
@@ -67,15 +88,11 @@ QModelIndex SystemModel::index(int row, int column,
 
   // Blend level
   auto parentId = parent.internalId();
-  auto blendIndex = blendIndexForId(parentId);
-
-  const auto &parentBlend = (blendIndex == FINAL_BLEND_INDEX)
-                                ? system_.final_blend
-                                : system_.blends.at(blendIndex);
-  auto formulaCount = parentBlend.formulas.size();
+  auto formulaCount = getBlendForId(parentId)->formulas().size();
 
   if (row < formulaCount) {
-    return createIndex(row, column, makeIdForFormula(blendIndex, row));
+    return createIndex(row, column,
+                       makeIdForFormula(blendIndexForId(parentId), row));
   }
 
   return QModelIndex();
@@ -93,7 +110,7 @@ QModelIndex SystemModel::parent(const QModelIndex &child) const {
 
   uint64_t blendIndex = blendIndexForId(childId);
   if (blendIndex == FINAL_BLEND_INDEX) {
-    return createIndex(static_cast<int>(system_.blends.size()), 0,
+    return createIndex(system_->blends().size(), 0,
                        makeIdForBlend(FINAL_BLEND_INDEX));
   }
   return createIndex(static_cast<int>(blendIndex), 0,
@@ -108,18 +125,13 @@ int SystemModel::rowCount(const QModelIndex &parent) const {
   // Root level
   if (!parent.isValid()) {
     // Extra one is for the final blend.
-    return static_cast<int>(system_.blends.size()) + 1;
+    return system_->blends().size() + 1;
   }
 
   // Blend level
   auto parentId = parent.internalId();
   if (rowTypeForId(parentId) == RowType::BLEND) {
-    uint64_t blendIndex = blendIndexForId(parentId);
-    const auto &parentBlend = (blendIndex == FINAL_BLEND_INDEX)
-                                  ? system_.final_blend
-                                  : system_.blends[blendIndex];
-
-    return static_cast<int>(parentBlend.formulas.size());
+    return getBlendForId(parentId)->formulas().size();
   }
 
   return 0;
@@ -140,22 +152,17 @@ QVariant SystemModel::data(const QModelIndex &index, int role) const {
   }
 
   auto id = index.internalId();
-  uint64_t blendIndex = blendIndexForId(id);
-  const auto &blend = (blendIndex == FINAL_BLEND_INDEX)
-                          ? system_.final_blend
-                          : system_.blends[blendIndex];
+  const auto *blend = getBlendForId(id);
 
   switch (rowTypeForId(id)) {
     case RowType::BLEND: {
-      auto isFinalBlend = (blendIndex == FINAL_BLEND_INDEX);
+      auto isFinalBlend = (blendIndexForId(id) == FINAL_BLEND_INDEX);
 
-      return blendData(
-          isFinalBlend ? system_.final_blend : system_.blends[blendIndex],
-          isFinalBlend, index.column(), role);
+      return blendData(blend, isFinalBlend, index.column(), role);
     }
     case RowType::FORMULA:
-      return formulaData(blend.formulas[formulaIndexForId(id)], index.column(),
-                         role);
+      return formulaData(blend->formulas()[formulaIndexForId(id)],
+                         index.column(), role);
     case RowType::UNDEFINED:
       return QVariant();
   }
@@ -170,8 +177,9 @@ QVariant SystemModel::headerData(int section, Qt::Orientation orientation,
 Qt::ItemFlags SystemModel::flags(const QModelIndex &index) const {
   return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
-QVariant SystemModel::blendData(const core::Blend &blend, bool isFinal,
-                                int column, int role) const {
+
+QVariant SystemModel::blendData(const Blend *blend, bool isFinal, int column,
+                                int role) const {
   if (column == 0) {
     switch (role) {
       case Qt::DisplayRole:
@@ -179,7 +187,7 @@ QVariant SystemModel::blendData(const core::Blend &blend, bool isFinal,
         return isFinal ? QStringLiteral("Final Blend")
                        : QStringLiteral("Blend");
       case WeightRole:
-        return blend.weight;
+        return blend->weight();
       default:;
     }
   }
@@ -187,20 +195,21 @@ QVariant SystemModel::blendData(const core::Blend &blend, bool isFinal,
   return QVariant();
 }
 
-QVariant SystemModel::formulaData(const core::Formula &formula, int column,
+QVariant SystemModel::formulaData(const Formula *formula, int column,
                                   int role) const {
   if (column == 0) {
     switch (role) {
       case Qt::DisplayRole:
-        return QStringLiteral("Formula");  // TODO: change
+        return QString(formula->type()._to_string());
       case WeightRole:
-        return formula.weight_x;  // TODO: support weight_y
+        return formula->weightX();  // TODO: support weight_y
       default:;
     }
   }
 
   return QVariant();
 }
+
 FlatteningModel *SystemModel::childModel(int index) {
   auto *model = new FlatteningModel();
   model->setSourceModel(this);

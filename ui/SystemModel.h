@@ -3,13 +3,17 @@
 
 #include <QAbstractItemModel>
 #include "FlatteningModel.h"
-#include "System.h"
+#include "models/Blend.h"
+#include "models/Formula.h"
+#include "models/System.h"
 
 namespace chaoskit {
 namespace ui {
 
 class SystemModel : public QAbstractItemModel {
   Q_OBJECT
+  Q_PROPERTY(
+      chaoskit::ui::models::System *system READ system NOTIFY systemChanged)
  public:
   enum SystemRoles {
     WeightRole = Qt::UserRole + 1,
@@ -29,13 +33,19 @@ class SystemModel : public QAbstractItemModel {
 
   Q_INVOKABLE FlatteningModel *childModel(int index);
 
- private:
-  core::System system_;
+  models::System *system() const { return system_; }
 
-  QVariant blendData(const core::Blend &blend, bool isFinal, int column,
+ signals:
+  void systemChanged();
+
+ private:
+  models::System *system_;
+
+  const Blend *getBlendForId(uint64_t id) const;
+
+  QVariant blendData(const Blend *blend, bool isFinal, int column,
                      int role) const;
-  QVariant formulaData(const core::Formula &formula, int column,
-                       int role) const;
+  QVariant formulaData(const Formula *formula, int column, int role) const;
 };
 
 }  // namespace ui

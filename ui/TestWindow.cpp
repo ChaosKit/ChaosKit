@@ -1,12 +1,10 @@
 #include "TestWindow.h"
-#include <library/DeJong.h>
 #include <QTimer>
+#include "models/Blend.h"
+#include "models/Formula.h"
+#include "models/System.h"
 
-using chaoskit::core::Blend;
-using chaoskit::core::Formula;
 using chaoskit::core::HistogramBuffer;
-using chaoskit::core::Transform;
-using chaoskit::library::DeJong;
 
 namespace chaoskit {
 namespace ui {
@@ -15,11 +13,24 @@ TestWindow::TestWindow() {
   setTitle(QStringLiteral("ChaosKit (Test Window)"));
   setBaseSize(QSize(512, 512));
 
-  System system;
+  auto *formula = new Formula();
+  formula->setType(QStringLiteral("DeJong"));
+  formula->setParams({9.379666578024626e-01f, 1.938709271140397e+00f,
+                      -1.580897020176053e-01f, -1.430070123635232e+00f});
+
+  auto *blend = new Blend();
+  blend->addFormula(formula);
+
+  auto *finalBlend = new Blend();
+  blend->setPost(QTransform::fromScale(.5, 1).translate(.5, .5));
+
+  auto *system = new models::System(this);
+  system->addBlend(blend);
+  system->setFinalBlend(finalBlend);
 
   histogramGenerator_ = new HistogramGenerator(this);
   histogramGenerator_->setSize(512, 512);
-  histogramGenerator_->setSystem(system.system());
+  histogramGenerator_->setSystem(system);
   histogramGenerator_->setTtl(20);
   toneMapper_ = new GLToneMapper(this);
 

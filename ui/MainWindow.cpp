@@ -30,9 +30,9 @@ MainWindow::MainWindow(QWidget *parent)
   structureForm_->raise();
 
   auto *systemView = findSystemView();
-  connect(systemView, &SystemView::started, this,
+  connect(systemView, &SystemView::runningChanged, this,
           &MainWindow::forwardRunStatus);
-  connect(systemView, &SystemView::stopped, this,
+  connect(systemView, &SystemView::runningChanged, this,
           &MainWindow::forwardRunStatus);
   connect(renderingForm_, &RenderingForm::startStopClicked, this,
           &MainWindow::toggleGeneration);

@@ -20,6 +20,7 @@ ApplicationWindow {
 
     Editor {
       id: editor
+      system: systemModel.system
       refreshInterval: 100
       gamma: renderingForm.gamma
       exposure: renderingForm.exposure
@@ -27,6 +28,10 @@ ApplicationWindow {
 
       Layout.fillWidth: true
       Layout.fillHeight: true
+
+      Component.onCompleted: {
+        running = true;
+      }
     }
 
     Item {

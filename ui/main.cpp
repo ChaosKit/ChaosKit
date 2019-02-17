@@ -7,16 +7,16 @@
 #include "HistogramBuffer.h"
 #include "MainWindow.h"
 #include "Point.h"
-#include "System.h"
 #include "SystemModel.h"
 #include "SystemView.h"
+#include "models/System.h"
 
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
-using chaoskit::core::System;
 using chaoskit::ui::FlatteningModel;
 using chaoskit::ui::SystemModel;
 using chaoskit::ui::SystemView;
+using chaoskit::ui::models::System;
 using chaoskit::library::FormulaType;
 
 QStringList createFormulaList() {
@@ -42,12 +42,12 @@ int main(int argc, char* argv[]) {
 
   qRegisterMetaType<HistogramBuffer>();
   qRegisterMetaType<Point>();
-  qRegisterMetaType<System>();
 
   qmlRegisterInterface<FlatteningModel>("FlatteningModel");
 
   qmlRegisterType<SystemModel>("app.chaoskit", 1, 0, "SystemModel");
   qmlRegisterType<SystemView>("app.chaoskit", 1, 0, "SystemView");
+  qmlRegisterType<System>("app.chaoskit", 1, 0, "System");
 
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty(

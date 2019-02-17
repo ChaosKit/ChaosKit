@@ -8,6 +8,8 @@ Rectangle {
 
     property bool autoRefresh: true
     property int refreshInterval: 100
+    property alias running: systemView.running
+    property alias system: systemView.system
     property alias gamma: systemView.gamma
     property alias exposure: systemView.exposure
     property alias vibrancy: systemView.vibrancy
@@ -27,7 +29,7 @@ Rectangle {
 
     Timer {
         interval: parent.refreshInterval
-        running: parent.autoRefresh
+        running: parent.autoRefresh && systemView.running
         repeat: true
         onTriggered: systemView.update();
     }

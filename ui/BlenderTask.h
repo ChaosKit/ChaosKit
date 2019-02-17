@@ -4,7 +4,7 @@
 #include <core/SimpleInterpreter.h>
 #include <QObject>
 #include "Particle.h"
-#include "System.h"
+#include "models/System.h"
 
 namespace chaoskit {
 namespace ui {
@@ -17,7 +17,7 @@ class BlenderTask : public QObject {
       : interpreter_(), particle_{}, ttl_(ttl), rng_(std::move(rng)) {}
 
  public slots:
-  void setSystem(const chaoskit::core::System &system);
+  void setSystem(const chaoskit::ui::models::System *system);
   void start();
   void stop();
   void setTtl(int32_t ttl);

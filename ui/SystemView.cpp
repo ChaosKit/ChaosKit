@@ -1,7 +1,7 @@
 #include "SystemView.h"
 #include <QOpenGLFramebufferObjectFormat>
-#include <QQuickWindow>
 #include <QQuickItem>
+#include <QQuickWindow>
 #include "GLToneMapper.h"
 
 using chaoskit::core::HistogramBuffer;
@@ -48,9 +48,12 @@ SystemView::SystemView(QQuickItem *parent) : QQuickFramebufferObject(parent) {
   generator_ = new HistogramGenerator(this);
 
   connect(this, &QQuickItem::widthChanged, this, &SystemView::updateBufferSize);
-  connect(this, &QQuickItem::heightChanged, this, &SystemView::updateBufferSize);
-  connect(generator_, &HistogramGenerator::started, this, &SystemView::started);
-  connect(generator_, &HistogramGenerator::stopped, this, &SystemView::stopped);
+  connect(this, &QQuickItem::heightChanged, this,
+          &SystemView::updateBufferSize);
+  connect(generator_, &HistogramGenerator::started, this,
+          &SystemView::runningChanged);
+  connect(generator_, &HistogramGenerator::stopped, this,
+          &SystemView::runningChanged);
 }
 
 void SystemView::withHistogram(
@@ -62,16 +65,33 @@ QQuickFramebufferObject::Renderer *SystemView::createRenderer() const {
   return new HistogramRenderer(this);
 }
 
-void SystemView::start() {
-  generator_->start();
+void SystemView::start() { generator_->start(); }
+
+void SystemView::stop() { generator_->stop(); }
+
+void SystemView::clear() { generator_->clear(); }
+
+void SystemView::setRunning(bool running) {
+  if (generator_->running() == running) {
+    return;
+  }
+
+  if (running) {
+    start();
+  } else {
+    stop();
+  }
 }
 
-void SystemView::stop() {
-  generator_->stop();
-}
+void SystemView::setSystem(models::System *system) {
+  if (system == system_) {
+    return;
+  }
 
-void SystemView::clear() {
+  generator_->setSystem(system);
   generator_->clear();
+  update();
+  emit systemChanged();
 }
 
 void SystemView::setTtl(int ttl) {
@@ -114,15 +134,6 @@ void SystemView::setVibrancy(float vibrancy) {
   vibrancy_ = vibrancy;
   update();
   emit vibrancyChanged();
-}
-
-void SystemView::componentComplete() {
-  QQuickItem::componentComplete();
-
-  System system;
-  generator_->setSystem(system.system());
-  generator_->setTtl(ttl_);
-  generator_->start();
 }
 
 void SystemView::updateBufferSize() {

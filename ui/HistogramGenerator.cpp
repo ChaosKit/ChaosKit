@@ -42,7 +42,7 @@ void HistogramGenerator::withHistogram(
   gathererTask_->withHistogram(action);
 }
 
-void HistogramGenerator::setSystem(const core::System &system) {
+void HistogramGenerator::setSystem(const models::System *system) {
   QMetaObject::invokeMethod(blenderTask_,
                             [=] { blenderTask_->setSystem(system); });
 }
