@@ -183,9 +183,13 @@ QVariant SystemModel::blendData(const Blend *blend, bool isFinal, int column,
   if (column == 0) {
     switch (role) {
       case Qt::DisplayRole:
-        // TODO: change this
-        return isFinal ? QStringLiteral("Final Blend")
-                       : QStringLiteral("Blend");
+        if (isFinal) {
+          return QStringLiteral("Final Blend");
+        }
+        if (blend->name().isEmpty()) {
+          return QStringLiteral("(unnamed)");
+        }
+        return blend->name();
       case WeightRole:
         return blend->weight();
       default:;

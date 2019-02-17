@@ -3,6 +3,15 @@
 namespace chaoskit {
 namespace ui {
 
+void Blend::setName(const QString &name) {
+  if (name == name_) {
+    return;
+  }
+
+  name_ = name;
+  emit nameChanged();
+}
+
 void Blend::setPre(const QTransform &pre) {
   if (qFuzzyCompare(pre, pre_)) {
     return;

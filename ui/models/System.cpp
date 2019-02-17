@@ -9,6 +9,7 @@ namespace models {
 
 System::System(QObject *parent) : QObject(parent) {
   final_blend_ = new Blend();
+  final_blend_->setName("Final Blend");
 }
 
 Blend *System::addBlend() {

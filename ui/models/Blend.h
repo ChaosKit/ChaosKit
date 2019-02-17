@@ -12,6 +12,9 @@ namespace ui {
 class Blend : public QObject {
   Q_OBJECT
  public:
+  const QString &name() const { return name_; }
+  void setName(const QString &name);
+
   const QTransform &pre() const { return pre_; }
   void setPre(const QTransform &pre);
 
@@ -25,12 +28,14 @@ class Blend : public QObject {
   void setWeight(float weight);
 
  signals:
+  void nameChanged();
   void preChanged();
   void postChanged();
   void formulasChanged();
   void weightChanged();
 
  private:
+  QString name_;
   QTransform pre_, post_;
   QVector<QPointer<Formula>> formulas_;
   float weight_ = 1.f;
