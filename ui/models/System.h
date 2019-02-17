@@ -17,8 +17,9 @@ class System : public QObject {
   const QVector<QPointer<Blend>> &blends() const { return blends_; }
   Blend *addBlend();
   void addBlend(Blend *blend);
+  Blend *blendAt(int index) const { return blends_[index]; }
 
-  const Blend *finalBlend() const { return final_blend_; }
+  Blend *finalBlend() const { return final_blend_; }
   void setFinalBlend(Blend *blend);
 
   core::Params params() const;

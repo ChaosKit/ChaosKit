@@ -43,6 +43,7 @@ ListView {  // TODO: make a custom control with selecting etc
         Layout.fillHeight: true
 
         value: weight
+        onMoved: model.weight = value
       }
     }
   }
@@ -76,13 +77,31 @@ ListView {  // TODO: make a custom control with selecting etc
         onClicked: itemRoot.open = !itemRoot.open
       }
 
-      Label {
+      Component {
+        id: nameLabel
+
+        Label {
+          text: display
+          verticalAlignment: Text.AlignVCenter
+          elide: Text.ElideRight
+        }
+      }
+
+      Component {
+        id: nameTextField
+
+        TextField {
+          text: edit
+          placeholderText: "(unnamed)"
+          onAccepted: model.edit = text
+        }
+      }
+
+      Loader {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        text: display
-        verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideRight
+        sourceComponent: isFinalBlend ? nameLabel : nameTextField
       }
 
       Slider {
@@ -90,6 +109,8 @@ ListView {  // TODO: make a custom control with selecting etc
         Layout.fillHeight: true
 
         value: weight
+        visible: !isFinalBlend
+        onMoved: model.weight = value
       }
 
       // Formulas

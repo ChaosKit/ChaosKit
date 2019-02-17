@@ -63,10 +63,12 @@ SystemModel::SystemModel(QObject *parent) : QAbstractItemModel(parent) {
   system_->setFinalBlend(finalBlend);
 }
 
-const Blend *SystemModel::getBlendForId(uint64_t id) const {
+Blend *SystemModel::getBlendForId(uint64_t id) const {
   auto index = blendIndexForId(id);
-  return index == FINAL_BLEND_INDEX ? system_->finalBlend()
-                                    : system_->blends()[index];
+  if (index == FINAL_BLEND_INDEX) {
+    return system_->finalBlend();
+  }
+  return system_->blendAt(static_cast<int>(index));
 }
 
 QModelIndex SystemModel::index(int row, int column,
@@ -140,14 +142,14 @@ int SystemModel::rowCount(const QModelIndex &parent) const {
 int SystemModel::columnCount(const QModelIndex &parent) const { return 1; }
 
 QHash<int, QByteArray> SystemModel::roleNames() const {
-  QHash<int, QByteArray> names;
-  names[Qt::DisplayRole] = "display";
+  QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
   names[WeightRole] = "weight";
+  names[IsFinalBlendRole] = "isFinalBlend";
   return names;
 }
 
 QVariant SystemModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid()) {
+  if (!index.isValid() || index.column() != 0) {
     return QVariant();
   }
 
@@ -155,18 +157,43 @@ QVariant SystemModel::data(const QModelIndex &index, int role) const {
   const auto *blend = getBlendForId(id);
 
   switch (rowTypeForId(id)) {
-    case RowType::BLEND: {
-      auto isFinalBlend = (blendIndexForId(id) == FINAL_BLEND_INDEX);
-
-      return blendData(blend, isFinalBlend, index.column(), role);
-    }
+    case RowType::BLEND:
+      return blendData(blend, role);
     case RowType::FORMULA:
-      return formulaData(blend->formulas()[formulaIndexForId(id)],
-                         index.column(), role);
+      return formulaData(blend->formulas()[formulaIndexForId(id)], role);
     case RowType::UNDEFINED:
       return QVariant();
   }
   return QVariant();
+}
+
+bool SystemModel::setData(const QModelIndex &index, const QVariant &value,
+                          int role) {
+  if (!index.isValid() || index.column() != 0) {
+    return false;
+  }
+
+  auto id = index.internalId();
+  auto *blend = getBlendForId(id);
+  bool success = false;
+
+  switch (rowTypeForId(id)) {
+    case RowType::BLEND:
+      success = setBlendData(blend, role, value);
+      break;
+    case RowType::FORMULA:
+      success =
+          setFormulaData(blend->formulas()[formulaIndexForId(id)], role, value);
+      break;
+    case RowType::UNDEFINED:
+      return false;
+  }
+
+  if (success) {
+    emit dataChanged(index, index, {role});
+  }
+
+  return success;
 }
 
 QVariant SystemModel::headerData(int section, Qt::Orientation orientation,
@@ -174,44 +201,87 @@ QVariant SystemModel::headerData(int section, Qt::Orientation orientation,
   return QVariant();
 }
 
+bool SystemModel::setHeaderData(int section, Qt::Orientation orientation,
+                                const QVariant &value, int role) {
+  return false;
+}
+
 Qt::ItemFlags SystemModel::flags(const QModelIndex &index) const {
-  return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+  if (!index.isValid()) {
+    return nullptr;
+  }
+
+  return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
 }
 
-QVariant SystemModel::blendData(const Blend *blend, bool isFinal, int column,
-                                int role) const {
-  if (column == 0) {
-    switch (role) {
-      case Qt::DisplayRole:
-        if (isFinal) {
-          return QStringLiteral("Final Blend");
-        }
-        if (blend->name().isEmpty()) {
-          return QStringLiteral("(unnamed)");
-        }
-        return blend->name();
-      case WeightRole:
-        return blend->weight();
-      default:;
-    }
+QVariant SystemModel::blendData(const Blend *blend, int role) const {
+  switch (role) {
+    case Qt::DisplayRole:
+      if (blend == system_->finalBlend()) {
+        return QStringLiteral("Final Blend");
+      }
+      if (blend->name().isEmpty()) {
+        return QStringLiteral("(unnamed)");
+      }
+    case Qt::EditRole:
+      return blend->name();
+    case WeightRole:
+      return blend->weight();
+    case IsFinalBlendRole:
+      return blend == system_->finalBlend();
+    default:;
   }
 
   return QVariant();
 }
 
-QVariant SystemModel::formulaData(const Formula *formula, int column,
-                                  int role) const {
-  if (column == 0) {
-    switch (role) {
-      case Qt::DisplayRole:
-        return QString(formula->type()._to_string());
-      case WeightRole:
-        return formula->weightX();  // TODO: support weight_y
-      default:;
-    }
+bool SystemModel::setBlendData(Blend *blend, int role,
+                               const QVariant &value) const {
+  if (blend == system_->finalBlend()) {
+    return false;
+  }
+
+  switch (role) {
+    case Qt::EditRole:
+      blend->setName(value.toString());
+      return true;
+    case WeightRole:
+      blend->setWeight(value.toFloat());
+      return true;
+    default:;
+  }
+
+  return false;
+}
+
+QVariant SystemModel::formulaData(const Formula *formula, int role) const {
+  switch (role) {
+    case Qt::DisplayRole:
+    case Qt::EditRole:
+      return QString(formula->type()._to_string());
+    case WeightRole:
+      return formula->weightX();  // TODO: support weight_y
+    case IsFinalBlendRole:
+      return false;
+    default:;
   }
 
   return QVariant();
+}
+
+bool SystemModel::setFormulaData(Formula *formula, int role,
+                                 const QVariant &value) const {
+  switch (role) {
+    case WeightRole: {
+      float weight = value.toFloat();
+      formula->setWeightX(weight);
+      formula->setWeightY(weight);
+      return true;
+    }
+    default:;
+  }
+
+  return false;
 }
 
 FlatteningModel *SystemModel::childModel(int index) {
