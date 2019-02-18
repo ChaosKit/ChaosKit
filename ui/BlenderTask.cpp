@@ -20,7 +20,7 @@ float distance(const Point &a, const Point &b) {
 
 }  // namespace
 
-void BlenderTask::setSystem(const models::System *system) {
+void BlenderTask::setSystem(const System *system) {
   interpreter_ = std::make_unique<SimpleInterpreter>(toSource(system),
                                                      system->params(), rng_);
   resetParticle();

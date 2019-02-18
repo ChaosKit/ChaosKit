@@ -83,7 +83,7 @@ void SystemView::setRunning(bool running) {
   }
 }
 
-void SystemView::setSystem(models::System *system) {
+void SystemView::setSystem(System *system) {
   if (system == system_) {
     return;
   }

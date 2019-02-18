@@ -16,7 +16,7 @@ using chaoskit::core::Point;
 using chaoskit::ui::FlatteningModel;
 using chaoskit::ui::SystemModel;
 using chaoskit::ui::SystemView;
-using chaoskit::ui::models::System;
+using chaoskit::ui::System;
 using chaoskit::library::FormulaType;
 
 QStringList createFormulaList() {

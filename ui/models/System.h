@@ -7,7 +7,6 @@
 
 namespace chaoskit {
 namespace ui {
-namespace models {
 
 class System : public QObject {
   Q_OBJECT
@@ -33,7 +32,6 @@ class System : public QObject {
   QPointer<Blend> final_blend_;
 };
 
-}  // namespace models
 }  // namespace ui
 }  // namespace chaoskit
 

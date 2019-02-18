@@ -16,7 +16,7 @@ namespace ui {
 ast::Blend toSource(const Blend *blend);
 ast::WeightedFormula toSource(const Formula *formula);
 ast::Transform toSource(const QTransform &transform);
-ast::System toSource(const models::System *system);
+ast::System toSource(const System *system);
 
 }  // namespace ui
 }  // namespace chaoskit

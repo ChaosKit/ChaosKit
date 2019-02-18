@@ -13,7 +13,7 @@ namespace ui {
 class SystemModel : public QAbstractItemModel {
   Q_OBJECT
   Q_PROPERTY(
-      chaoskit::ui::models::System *system READ system NOTIFY systemChanged)
+      chaoskit::ui::System *system READ system NOTIFY systemChanged)
  public:
   enum SystemRoles {
     WeightRole = Qt::UserRole + 1,
@@ -38,13 +38,13 @@ class SystemModel : public QAbstractItemModel {
 
   Q_INVOKABLE FlatteningModel *childModel(int index);
 
-  models::System *system() const { return system_; }
+  System *system() const { return system_; }
 
  signals:
   void systemChanged();
 
  private:
-  models::System *system_;
+  System *system_;
 
   Blend *getBlendForId(uint64_t id) const;
 

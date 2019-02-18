@@ -17,7 +17,7 @@ class BlenderTask : public QObject {
       : interpreter_(), particle_{}, ttl_(ttl), rng_(std::move(rng)) {}
 
  public slots:
-  void setSystem(const chaoskit::ui::models::System *system);
+  void setSystem(const chaoskit::ui::System *system);
   void start();
   void stop();
   void setTtl(int32_t ttl);

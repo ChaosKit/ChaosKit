@@ -24,7 +24,7 @@ TestWindow::TestWindow() {
   auto *finalBlend = new Blend();
   blend->setPost(QTransform::fromScale(.5, 1).translate(.5, .5));
 
-  auto *system = new models::System(this);
+  auto *system = new System(this);
   system->addBlend(blend);
   system->setFinalBlend(finalBlend);
 

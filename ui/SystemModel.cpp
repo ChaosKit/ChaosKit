@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QTransform>
 
-using chaoskit::ui::models::System;
+using chaoskit::ui::System;
 
 namespace chaoskit {
 namespace ui {

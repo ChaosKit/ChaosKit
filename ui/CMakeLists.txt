@@ -10,7 +10,6 @@ add_executable(ChaosKit WIN32
         TestWindow.cpp TestWindow.h
         HistogramGenerator.cpp HistogramGenerator.h
         BlenderTask.cpp BlenderTask.h
-        System.h System.cpp
         Point.h
         Particle.h
         GathererTask.cpp GathererTask.h

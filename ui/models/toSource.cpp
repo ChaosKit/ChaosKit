@@ -31,7 +31,7 @@ ast::Transform toSource(const QTransform &transform) {
       static_cast<float>(transform.m22()), static_cast<float>(transform.m32())};
 }
 
-ast::System toSource(const models::System *system) {
+ast::System toSource(const System *system) {
   // Generate a monotonically increasing vector of limits
   std::vector<float> limits(static_cast<size_t>(system->blends().size()));
   std::transform(system->blends().begin(), system->blends().end(),

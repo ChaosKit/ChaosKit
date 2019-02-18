@@ -5,7 +5,6 @@ using chaoskit::core::SystemIndex;
 
 namespace chaoskit {
 namespace ui {
-namespace models {
 
 System::System(QObject *parent) : QObject(parent) {
   final_blend_ = new Blend();
@@ -55,6 +54,5 @@ Params System::params() const {
   return params;
 }
 
-}  // namespace models
 }  // namespace ui
 }  // namespace chaoskit

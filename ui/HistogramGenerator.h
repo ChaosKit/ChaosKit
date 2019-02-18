@@ -23,7 +23,7 @@ class HistogramGenerator : public QObject {
   bool running() const { return running_; }
 
  public slots:
-  void setSystem(const chaoskit::ui::models::System *system);
+  void setSystem(const chaoskit::ui::System *system);
   void setSize(quint32 width, quint32 height);
   void setTtl(int32_t ttl);
   void start();
