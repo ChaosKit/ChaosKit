@@ -3,6 +3,32 @@
 namespace chaoskit {
 namespace ui {
 
+void FlatteningModel::setSourceModel(QAbstractItemModel *model) {
+  beginResetModel();
+
+  if (sourceModel()) {
+    sourceModel()->disconnect(this);
+  }
+
+  QAbstractProxyModel::setSourceModel(model);
+
+  if (model) {
+    connect(model, &QAbstractItemModel::dataChanged, this,
+            &FlatteningModel::sourceDataChanged);
+    connect(model, &QAbstractItemModel::rowsAboutToBeInserted, this,
+            &FlatteningModel::sourceRowsAboutToBeInserted);
+    connect(model, &QAbstractItemModel::rowsInserted, this,
+            &FlatteningModel::sourceRowsInserted);
+    connect(model, &QAbstractItemModel::rowsAboutToBeRemoved, this,
+            &FlatteningModel::sourceRowsAboutToBeRemoved);
+    connect(model, &QAbstractItemModel::rowsRemoved, this,
+            &FlatteningModel::sourceRowsRemoved);
+  }
+
+  resetInternalData();
+  endResetModel();
+}
+
 void FlatteningModel::setRootIndex(const QModelIndex &index) {
   if (rootIndex_ == index) {
     return;
@@ -14,11 +40,13 @@ void FlatteningModel::setRootIndex(const QModelIndex &index) {
 
 QModelIndex FlatteningModel::mapFromSource(
     const QModelIndex &sourceIndex) const {
-  if (sourceModel() == nullptr || !sourceIndex.isValid() || sourceIndex.parent() != rootIndex_) {
+  if (sourceModel() == nullptr || !sourceIndex.isValid() ||
+      sourceIndex.parent() != rootIndex_) {
     return QModelIndex();
   }
 
-  return createIndex(sourceIndex.row(), sourceIndex.column(), sourceIndex.internalPointer());
+  return createIndex(sourceIndex.row(), sourceIndex.column(),
+                     sourceIndex.internalPointer());
 }
 
 QModelIndex FlatteningModel::mapToSource(const QModelIndex &proxyIndex) const {
@@ -56,6 +84,55 @@ int FlatteningModel::rowCount(const QModelIndex &parent) const {
 
 int FlatteningModel::columnCount(const QModelIndex &parent) const {
   return sourceModel()->columnCount(mapToSource(parent));
+}
+
+void FlatteningModel::sourceDataChanged(const QModelIndex &topLeft,
+                                        const QModelIndex &bottomRight,
+                                        const QVector<int> &roles) {
+  QModelIndex targetTopLeft = mapFromSource(topLeft);
+  QModelIndex targetBottomRight = mapFromSource(bottomRight);
+
+  if (!topLeft.isValid() || !bottomRight.isValid()) {
+    return;
+  }
+
+  emit dataChanged(targetTopLeft, targetBottomRight, roles);
+}
+
+void FlatteningModel::sourceRowsAboutToBeInserted(
+    const QModelIndex &sourceParent, int start, int end) {
+  if (sourceParent != rootIndex_) {
+    return;
+  }
+
+  beginInsertRows(QModelIndex(), start, end);
+}
+
+void FlatteningModel::sourceRowsInserted(const QModelIndex &sourceParent,
+                                         int start, int end) {
+  if (sourceParent != rootIndex_) {
+    return;
+  }
+
+  endInsertRows();
+}
+
+void FlatteningModel::sourceRowsAboutToBeRemoved(
+    const QModelIndex &sourceParent, int start, int end) {
+  if (sourceParent != rootIndex_) {
+    return;
+  }
+
+  beginRemoveRows(QModelIndex(), start, end);
+}
+
+void FlatteningModel::sourceRowsRemoved(const QModelIndex &sourceParent,
+                                        int start, int end) {
+  if (sourceParent != rootIndex_) {
+    return;
+  }
+
+  endRemoveRows();
 }
 
 }  // namespace ui
