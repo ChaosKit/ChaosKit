@@ -22,8 +22,6 @@ ListView {  // TODO: make a custom control with selecting etc
       property bool itemEnabled: true  // TODO: use the model
 
       SymbolButton {
-        Layout.fillHeight: true
-
         symbol: itemRoot.itemEnabled ? Icons.faEye : Icons.faEyeSlash
         onClicked: itemRoot.itemEnabled = !itemRoot.itemEnabled
       }
@@ -64,15 +62,11 @@ ListView {  // TODO: make a custom control with selecting etc
       property bool open: false
 
       SymbolButton {
-        Layout.fillHeight: true
-
         symbol: itemRoot.itemEnabled ? Icons.faEye : Icons.faEyeSlash
         onClicked: itemRoot.itemEnabled = !itemRoot.itemEnabled
       }
 
       SymbolButton {
-        Layout.fillHeight: true
-
         symbol: itemRoot.open ? Icons.faCaretDown : Icons.faCaretRight
         onClicked: itemRoot.open = !itemRoot.open
       }
@@ -142,7 +136,6 @@ ListView {  // TODO: make a custom control with selecting etc
             anchors.right: parent.right
 
             SymbolButton {
-              Layout.fillHeight: true
               symbol: Icons.faPlus
             }
 
@@ -167,7 +160,6 @@ ListView {  // TODO: make a custom control with selecting etc
             }
 
             SymbolButton {
-              Layout.fillHeight: true
               symbol: Icons.faLock
             }
           }
