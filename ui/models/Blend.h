@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_UI_BLEND_H
 #define CHAOSKIT_UI_BLEND_H
 
+#include <library/FormulaType.h>
 #include <QObject>
 #include <QPointer>
 #include <QtGui/QTransform>
@@ -12,7 +13,7 @@ namespace ui {
 class Blend : public QObject {
   Q_OBJECT
  public:
-  Blend(QObject *parent = nullptr): QObject(parent) {}
+  Blend(QObject *parent = nullptr) : QObject(parent) {}
 
   const QString &name() const { return name_; }
   void setName(const QString &name);
@@ -24,9 +25,10 @@ class Blend : public QObject {
   void setPost(const QTransform &post);
 
   const QVector<QPointer<Formula>> &formulas() const { return formulas_; }
-  Formula *addFormula();
+  Formula *addFormula(library::FormulaType type);
   void addFormula(Formula *formula);
-  Formula *formulaAt(int index) const { return formulas_[index]; }
+  Formula *formulaAt(int index) const { return formulas_.at(index); }
+  int formulaCount() const { return formulas_.size(); }
   void removeFormula(Formula *formula);
   void removeFormulaAt(int index);
 

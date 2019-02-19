@@ -1,5 +1,7 @@
 #include "Blend.h"
 
+using chaoskit::library::FormulaType;
+
 namespace chaoskit {
 namespace ui {
 
@@ -30,8 +32,9 @@ void Blend::setPost(const QTransform &post) {
   emit postChanged();
 }
 
-Formula *Blend::addFormula() {
-  auto *formula = new Formula();
+Formula *Blend::addFormula(FormulaType type) {
+  auto *formula = new Formula(this);
+  formula->setType(type);
   addFormula(formula);
   return formula;
 }

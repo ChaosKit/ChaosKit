@@ -7,7 +7,7 @@ namespace chaoskit {
 namespace ui {
 
 System::System(QObject *parent) : QObject(parent) {
-  final_blend_ = new Blend();
+  final_blend_ = new Blend(this);
   final_blend_->setName("Final Blend");
 
   connect(final_blend_, &Blend::preChanged, this,
@@ -21,7 +21,7 @@ System::System(QObject *parent) : QObject(parent) {
 }
 
 Blend *System::addBlend() {
-  auto *blend = new Blend();
+  auto *blend = new Blend(this);
   addBlend(blend);
   return blend;
 }
@@ -53,9 +53,10 @@ Params System::params() const {
   Params params;
 
   for (size_t i = 0; i < blends_.size(); ++i) {
-    const auto &formulas = blends_[i]->formulas();
-    for (size_t j = 0; j < formulas.size(); ++j) {
-      const auto &formulaParams = formulas[j]->params();
+    const Blend *blend = blends_[i];
+    for (size_t j = 0; j < blend->formulaCount(); ++j) {
+      const auto &formulaParams =
+          blend->formulaAt(static_cast<int>(j))->params();
       if (!formulaParams.empty()) {
         params[SystemIndex{i, j}] = formulaParams.toStdVector();
       }
@@ -66,8 +67,9 @@ Params System::params() const {
     return params;
   }
 
-  for (size_t j = 0; j < final_blend_->formulas().size(); ++j) {
-    const auto &formulaParams = final_blend_->formulas()[j]->params();
+  for (size_t j = 0; j < final_blend_->formulaCount(); ++j) {
+    const auto &formulaParams =
+        final_blend_->formulaAt(static_cast<int>(j))->params();
     if (!formulaParams.empty()) {
       params[SystemIndex{SystemIndex::FINAL_BLEND, j}] =
           formulaParams.toStdVector();

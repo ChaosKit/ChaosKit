@@ -16,7 +16,8 @@ class System : public QObject {
   const QVector<QPointer<Blend>> &blends() const { return blends_; }
   Blend *addBlend();
   void addBlend(Blend *blend);
-  Blend *blendAt(int index) const { return blends_[index]; }
+  Blend *blendAt(int index) const { return blends_.at(index); }
+  int blendCount() const { return blends_.size(); }
   void removeBlend(Blend *blend);
   void removeBlendAt(int index);
 

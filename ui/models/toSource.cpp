@@ -1,5 +1,6 @@
 #include "toSource.h"
 #include <library/util.h>
+#include <QDebug>
 
 namespace chaoskit {
 namespace ui {
@@ -10,7 +11,7 @@ ast::Blend toSource(const Blend *blend) {
   }
 
   std::vector<ast::WeightedFormula> weighted_formulas;
-  weighted_formulas.reserve(static_cast<size_t>(blend->formulas().size()));
+  weighted_formulas.reserve(static_cast<size_t>(blend->formulaCount()));
   for (const auto &formula : blend->formulas()) {
     weighted_formulas.push_back(toSource(formula));
   }
@@ -33,14 +34,14 @@ ast::Transform toSource(const QTransform &transform) {
 
 ast::System toSource(const System *system) {
   // Generate a monotonically increasing vector of limits
-  std::vector<float> limits(static_cast<size_t>(system->blends().size()));
+  std::vector<float> limits(static_cast<size_t>(system->blendCount()));
   std::transform(system->blends().begin(), system->blends().end(),
                  limits.begin(), std::mem_fn(&Blend::weight));
   std::partial_sum(limits.begin(), limits.end(), limits.begin());
 
   // Combine blends and limits into LimitedBlends
   std::vector<ast::LimitedBlend> limitedBlends;
-  limitedBlends.reserve(static_cast<size_t>(system->blends().size()));
+  limitedBlends.reserve(static_cast<size_t>(system->blendCount()));
   std::transform(system->blends().begin(), system->blends().end(),
                  limits.begin(), std::back_inserter(limitedBlends),
                  [](const Blend *blend, float limit) {
