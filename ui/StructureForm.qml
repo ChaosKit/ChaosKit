@@ -43,6 +43,11 @@ ListView {  // TODO: make a custom control with selecting etc
         value: weight
         onMoved: model.weight = value
       }
+
+      SymbolButton {
+        symbol: Icons.faTrashAlt
+        onClicked: rootListView.model.removeFormula(blendIndex, index)
+      }
     }
   }
 
@@ -137,9 +142,14 @@ ListView {  // TODO: make a custom control with selecting etc
 
             SymbolButton {
               symbol: Icons.faPlus
+              onClicked: {
+                rootListView.model.addFormula(
+                    index, formulaTypePicker.currentText);
+              }
             }
 
             ComboBox {
+              id: formulaTypePicker
               Layout.fillWidth: true
               Layout.fillHeight: true
               model: formulaList
