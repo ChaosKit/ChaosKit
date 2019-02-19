@@ -17,6 +17,8 @@ class System : public QObject {
   Blend *addBlend();
   void addBlend(Blend *blend);
   Blend *blendAt(int index) const { return blends_[index]; }
+  void removeBlend(Blend *blend);
+  void removeBlendAt(int index);
 
   Blend *finalBlend() const { return final_blend_; }
 

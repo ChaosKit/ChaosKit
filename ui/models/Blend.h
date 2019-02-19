@@ -27,6 +27,8 @@ class Blend : public QObject {
   Formula *addFormula();
   void addFormula(Formula *formula);
   Formula *formulaAt(int index) const { return formulas_[index]; }
+  void removeFormula(Formula *formula);
+  void removeFormulaAt(int index);
 
   float weight() const { return weight_; }
   void setWeight(float weight);

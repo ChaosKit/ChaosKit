@@ -37,6 +37,18 @@ void System::addBlend(Blend *blend) {
   connect(blend, &Blend::weightChanged, this, &System::paramsChanged);
 }
 
+void System::removeBlend(Blend *blend) {
+  blend->disconnect(this);
+  blends_.removeOne(blend);
+  emit sourceChanged();
+}
+
+void System::removeBlendAt(int index) {
+  blends_.at(index)->disconnect(this);
+  blends_.remove(index);
+  emit sourceChanged();
+}
+
 Params System::params() const {
   Params params;
 

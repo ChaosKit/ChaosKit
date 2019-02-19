@@ -45,6 +45,18 @@ void Blend::addFormula(Formula *formula) {
   connect(formula, &Formula::weightChanged, this, &Blend::paramsChanged);
 }
 
+void Blend::removeFormula(Formula *formula) {
+  formula->disconnect(this);
+  formulas_.removeOne(formula);
+  emit sourceChanged();
+}
+
+void Blend::removeFormulaAt(int index) {
+  formulas_.at(index)->disconnect(this);
+  formulas_.remove(index);
+  emit sourceChanged();
+}
+
 void Blend::setWeight(float weight) {
   if (qFuzzyCompare(weight, weight_)) {
     return;
