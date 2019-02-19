@@ -24,7 +24,7 @@ class HistogramRenderer : public QQuickFramebufferObject::Renderer {
       toneMapper_.syncBuffer(histogram);
     });
 
-    systemView_ = dynamic_cast<const SystemView *>(object);
+    systemView_ = qobject_cast<const SystemView *>(object);
     toneMapper_.setGamma(systemView_->gamma());
     toneMapper_.setExposure(systemView_->exposure());
     toneMapper_.setVibrancy(systemView_->vibrancy());
