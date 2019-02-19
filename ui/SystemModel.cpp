@@ -153,7 +153,9 @@ QVariant SystemModel::data(const QModelIndex &index, int role) const {
 
   // Return the blend index for all types.
   if (role == BlendIndexRole) {
-    return blendIndexForId(id);
+    auto blendIndex = blendIndexForId(id);
+    return blendIndex == FINAL_BLEND_INDEX ? system_->blendCount()
+                                           : static_cast<int>(blendIndex);
   }
 
   switch (rowTypeForId(id)) {
@@ -354,7 +356,9 @@ FlatteningModel *SystemModel::childModel(int index) {
 }
 
 void SystemModel::addFormula(int blendIndex, const QString &type) {
-  Blend *blend = system_->blendAt(blendIndex);
+  Blend *blend = blendIndex == system_->blendCount()
+                     ? system_->finalBlend()
+                     : system_->blendAt(blendIndex);
   int lastIndex = blend->formulaCount();
 
   formulaTypeForAdding = library::FormulaType::_from_string(type.toUtf8());
@@ -362,7 +366,9 @@ void SystemModel::addFormula(int blendIndex, const QString &type) {
 }
 
 void SystemModel::removeFormula(int blendIndex, int formulaIndex) {
-  Blend *blend = system_->blendAt(blendIndex);
+  Blend *blend = blendIndex == system_->blendCount()
+                     ? system_->finalBlend()
+                     : system_->blendAt(blendIndex);
   if (formulaIndex < 0 || formulaIndex >= blend->formulaCount()) {
     return;
   }
