@@ -13,20 +13,13 @@ TestWindow::TestWindow() {
   setTitle(QStringLiteral("ChaosKit (Test Window)"));
   setBaseSize(QSize(512, 512));
 
-  auto *formula = new Formula();
+  auto *system = new System(this);
+  auto *formula = system->addBlend()->addFormula();
   formula->setType(QStringLiteral("DeJong"));
   formula->setParams({9.379666578024626e-01f, 1.938709271140397e+00f,
-                      -1.580897020176053e-01f, -1.430070123635232e+00f});
-
-  auto *blend = new Blend();
-  blend->addFormula(formula);
-
-  auto *finalBlend = new Blend();
-  blend->setPost(QTransform::fromScale(.5, 1).translate(.5, .5));
-
-  auto *system = new System(this);
-  system->addBlend(blend);
-  system->setFinalBlend(finalBlend);
+                         -1.580897020176053e-01f, -1.430070123635232e+00f});
+  system->finalBlend()->setPost(
+      QTransform::fromScale(.5, 1).translate(.5, .5));
 
   histogramGenerator_ = new HistogramGenerator(this);
   histogramGenerator_->setSize(512, 512);

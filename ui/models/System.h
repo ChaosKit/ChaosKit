@@ -19,13 +19,14 @@ class System : public QObject {
   Blend *blendAt(int index) const { return blends_[index]; }
 
   Blend *finalBlend() const { return final_blend_; }
-  void setFinalBlend(Blend *blend);
 
   core::Params params() const;
 
  signals:
-  void blendsChanged();
-  void finalBlendChanged();
+  void sourceChanged();
+  void paramsChanged();
+  void finalBlendSourceChanged();
+  void finalBlendParamsChanged();
 
  private:
   QVector<QPointer<Blend>> blends_;

@@ -30,9 +30,19 @@ void Blend::setPost(const QTransform &post) {
   emit postChanged();
 }
 
+Formula *Blend::addFormula() {
+  auto *formula = new Formula();
+  addFormula(formula);
+  return formula;
+}
+
 void Blend::addFormula(Formula *formula) {
   formulas_.append(formula);
-  emit formulasChanged();
+  emit sourceChanged();
+
+  connect(formula, &Formula::typeChanged, this, &Blend::sourceChanged);
+  connect(formula, &Formula::paramsChanged, this, &Blend::paramsChanged);
+  connect(formula, &Formula::weightChanged, this, &Blend::paramsChanged);
 }
 
 void Blend::setWeight(float weight) {

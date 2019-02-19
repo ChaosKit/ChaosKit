@@ -47,20 +47,13 @@ constexpr int formulaIndexForId(quintptr id) {
 
 SystemModel::SystemModel(QObject *parent) : QAbstractItemModel(parent) {
   // TODO: replace this with something else maybe
-  auto *formula = new Formula();
+  system_ = new System(this);
+  auto *formula = system_->addBlend()->addFormula();
   formula->setType(QStringLiteral("DeJong"));
   formula->setParams({9.379666578024626e-01f, 1.938709271140397e+00f,
                       -1.580897020176053e-01f, -1.430070123635232e+00f});
-
-  auto *blend = new Blend();
-  blend->addFormula(formula);
-
-  auto *finalBlend = new Blend();
-  finalBlend->setPost(QTransform::fromScale(.5, 1).translate(.5, .5));
-
-  system_ = new System(this);
-  system_->addBlend(blend);
-  system_->setFinalBlend(finalBlend);
+  system_->finalBlend()->setPost(
+      QTransform::fromScale(.5, 1).translate(.5, .5));
 }
 
 Blend *SystemModel::getBlendForId(uint64_t id) const {

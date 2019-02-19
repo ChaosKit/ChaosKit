@@ -9,6 +9,15 @@ namespace ui {
 System::System(QObject *parent) : QObject(parent) {
   final_blend_ = new Blend();
   final_blend_->setName("Final Blend");
+
+  connect(final_blend_, &Blend::preChanged, this,
+          &System::finalBlendParamsChanged);
+  connect(final_blend_, &Blend::postChanged, this,
+          &System::finalBlendParamsChanged);
+  connect(final_blend_, &Blend::sourceChanged, this,
+          &System::finalBlendSourceChanged);
+  connect(final_blend_, &Blend::paramsChanged, this,
+          &System::finalBlendParamsChanged);
 }
 
 Blend *System::addBlend() {
@@ -19,12 +28,13 @@ Blend *System::addBlend() {
 
 void System::addBlend(Blend *blend) {
   blends_.append(blend);
-  emit blendsChanged();
-}
+  emit sourceChanged();
 
-void System::setFinalBlend(Blend *blend) {
-  final_blend_ = blend;
-  emit finalBlendChanged();
+  connect(blend, &Blend::preChanged, this, &System::paramsChanged);
+  connect(blend, &Blend::postChanged, this, &System::paramsChanged);
+  connect(blend, &Blend::sourceChanged, this, &System::sourceChanged);
+  connect(blend, &Blend::paramsChanged, this, &System::paramsChanged);
+  connect(blend, &Blend::weightChanged, this, &System::paramsChanged);
 }
 
 Params System::params() const {

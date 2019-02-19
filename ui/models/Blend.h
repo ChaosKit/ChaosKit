@@ -12,6 +12,8 @@ namespace ui {
 class Blend : public QObject {
   Q_OBJECT
  public:
+  Blend(QObject *parent = nullptr): QObject(parent) {}
+
   const QString &name() const { return name_; }
   void setName(const QString &name);
 
@@ -22,7 +24,9 @@ class Blend : public QObject {
   void setPost(const QTransform &post);
 
   const QVector<QPointer<Formula>> &formulas() const { return formulas_; }
+  Formula *addFormula();
   void addFormula(Formula *formula);
+  Formula *formulaAt(int index) const { return formulas_[index]; }
 
   float weight() const { return weight_; }
   void setWeight(float weight);
@@ -31,7 +35,8 @@ class Blend : public QObject {
   void nameChanged();
   void preChanged();
   void postChanged();
-  void formulasChanged();
+  void sourceChanged();
+  void paramsChanged();
   void weightChanged();
 
  private:
