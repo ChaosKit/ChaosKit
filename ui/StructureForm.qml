@@ -29,7 +29,7 @@ ListView {  // TODO: make a custom control with selecting etc
       Label {
         Layout.fillWidth: true
         Layout.fillHeight: true
-        Layout.leftMargin: 20
+        Layout.leftMargin: 12
 
         text: display
         verticalAlignment: Text.AlignVCenter
@@ -76,31 +76,13 @@ ListView {  // TODO: make a custom control with selecting etc
         onClicked: itemRoot.open = !itemRoot.open
       }
 
-      Component {
-        id: nameLabel
-
-        Label {
-          text: display
-          verticalAlignment: Text.AlignVCenter
-          elide: Text.ElideRight
-        }
-      }
-
-      Component {
-        id: nameTextField
-
-        TextField {
-          text: edit
-          placeholderText: "(unnamed)"
-          onAccepted: model.edit = text
-        }
-      }
-
-      Loader {
+      Label {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        sourceComponent: isFinalBlend ? nameLabel : nameTextField
+        text: display
+        verticalAlignment: Text.AlignVCenter
+        elide: Text.ElideRight
       }
 
       Slider {
