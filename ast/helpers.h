@@ -101,6 +101,10 @@ inline BinaryFunction gte(const Expression& first, const Expression& second) {
                         second);
 }
 
+inline BinaryFunction plus(const Expression& first, const Expression& second) {
+  return BinaryFunction(BinaryFunction_Type::ADD, first, second);
+}
+
 inline BinaryFunction operator+(const Expression& first,
                                 const Expression& second) {
   return BinaryFunction(BinaryFunction_Type::ADD, first, second);
