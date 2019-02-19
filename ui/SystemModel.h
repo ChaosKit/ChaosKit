@@ -12,11 +12,11 @@ namespace ui {
 
 class SystemModel : public QAbstractItemModel {
   Q_OBJECT
-  Q_PROPERTY(
-      chaoskit::ui::System *system READ system NOTIFY systemChanged)
+  Q_PROPERTY(chaoskit::ui::System *system READ system NOTIFY systemChanged)
  public:
   enum SystemRoles {
     WeightRole = Qt::UserRole + 1,
+    BlendIndexRole,
     IsFinalBlendRole,
   };
   explicit SystemModel(QObject *parent = nullptr);
@@ -35,8 +35,12 @@ class SystemModel : public QAbstractItemModel {
   QModelIndex index(int row, int column,
                     const QModelIndex &parent) const override;
   QModelIndex parent(const QModelIndex &child) const override;
+  bool insertRows(int row, int count, const QModelIndex &parent) override;
+  bool removeRows(int row, int count, const QModelIndex &parent) override;
 
   Q_INVOKABLE FlatteningModel *childModel(int index);
+  Q_INVOKABLE void addFormula(int blendIndex, const QString &type);
+  Q_INVOKABLE void removeFormula(int blendIndex, int formulaIndex);
 
   System *system() const { return system_; }
 
@@ -45,6 +49,7 @@ class SystemModel : public QAbstractItemModel {
 
  private:
   System *system_;
+  library::FormulaType formulaTypeForAdding = library::FormulaType::Invalid;
 
   Blend *getBlendForId(uint64_t id) const;
 

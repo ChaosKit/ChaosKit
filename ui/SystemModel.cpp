@@ -1,8 +1,10 @@
 #include "SystemModel.h"
+#include <library/FormulaType.h>
 #include <QDebug>
 #include <QTransform>
 
 using chaoskit::ui::System;
+using chaoskit::library::FormulaType;
 
 namespace chaoskit {
 namespace ui {
@@ -48,8 +50,7 @@ constexpr int formulaIndexForId(quintptr id) {
 SystemModel::SystemModel(QObject *parent) : QAbstractItemModel(parent) {
   // TODO: replace this with something else maybe
   system_ = new System(this);
-  auto *formula = system_->addBlend()->addFormula();
-  formula->setType(QStringLiteral("DeJong"));
+  auto *formula = system_->addBlend()->addFormula(FormulaType::DeJong);
   formula->setParams({9.379666578024626e-01f, 1.938709271140397e+00f,
                       -1.580897020176053e-01f, -1.430070123635232e+00f});
   system_->finalBlend()->setPost(
@@ -72,9 +73,9 @@ QModelIndex SystemModel::index(int row, int column,
 
   // Root level
   if (!parent.isValid()) {
-    if (row < system_->blends().size()) {
+    if (row < system_->blendCount()) {
       return createIndex(row, column, makeIdForBlend(static_cast<size_t>(row)));
-    } else if (row == system_->blends().size()) {
+    } else if (row == system_->blendCount()) {
       return createIndex(row, column, makeIdForBlend(FINAL_BLEND_INDEX));
     } else {
       return QModelIndex();
@@ -83,7 +84,7 @@ QModelIndex SystemModel::index(int row, int column,
 
   // Blend level
   auto parentId = parent.internalId();
-  auto formulaCount = getBlendForId(parentId)->formulas().size();
+  auto formulaCount = getBlendForId(parentId)->formulaCount();
 
   if (row < formulaCount) {
     return createIndex(row, column,
@@ -105,7 +106,7 @@ QModelIndex SystemModel::parent(const QModelIndex &child) const {
 
   uint64_t blendIndex = blendIndexForId(childId);
   if (blendIndex == FINAL_BLEND_INDEX) {
-    return createIndex(system_->blends().size(), 0,
+    return createIndex(system_->blendCount(), 0,
                        makeIdForBlend(FINAL_BLEND_INDEX));
   }
   return createIndex(static_cast<int>(blendIndex), 0,
@@ -120,13 +121,13 @@ int SystemModel::rowCount(const QModelIndex &parent) const {
   // Root level
   if (!parent.isValid()) {
     // Extra one is for the final blend.
-    return system_->blends().size() + 1;
+    return system_->blendCount() + 1;
   }
 
   // Blend level
   auto parentId = parent.internalId();
   if (rowTypeForId(parentId) == RowType::BLEND) {
-    return getBlendForId(parentId)->formulas().size();
+    return getBlendForId(parentId)->formulaCount();
   }
 
   return 0;
@@ -137,6 +138,7 @@ int SystemModel::columnCount(const QModelIndex &parent) const { return 1; }
 QHash<int, QByteArray> SystemModel::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
   names[WeightRole] = "weight";
+  names[BlendIndexRole] = "blendIndex";
   names[IsFinalBlendRole] = "isFinalBlend";
   return names;
 }
@@ -149,11 +151,16 @@ QVariant SystemModel::data(const QModelIndex &index, int role) const {
   auto id = index.internalId();
   const auto *blend = getBlendForId(id);
 
+  // Return the blend index for all types.
+  if (role == BlendIndexRole) {
+    return blendIndexForId(id);
+  }
+
   switch (rowTypeForId(id)) {
     case RowType::BLEND:
       return blendData(blend, role);
     case RowType::FORMULA:
-      return formulaData(blend->formulas()[formulaIndexForId(id)], role);
+      return formulaData(blend->formulaAt(formulaIndexForId(id)), role);
     case RowType::UNDEFINED:
       return QVariant();
   }
@@ -176,7 +183,7 @@ bool SystemModel::setData(const QModelIndex &index, const QVariant &value,
       break;
     case RowType::FORMULA:
       success =
-          setFormulaData(blend->formulas()[formulaIndexForId(id)], role, value);
+          setFormulaData(blend->formulaAt(formulaIndexForId(id)), role, value);
       break;
     case RowType::UNDEFINED:
       return false;
@@ -187,6 +194,68 @@ bool SystemModel::setData(const QModelIndex &index, const QVariant &value,
   }
 
   return success;
+}
+
+bool SystemModel::insertRows(int row, int count, const QModelIndex &parent) {
+  // Adding blends
+  if (!parent.isValid()) {
+    // We can only append.
+    if (row != system_->blendCount()) {
+      return false;
+    }
+
+    beginInsertRows(parent, row, row + count - 1);
+    for (int i = 0; i < count; ++i) {
+      system_->addBlend();
+    }
+    endInsertRows();
+    return true;
+  }
+
+  // Adding formulas
+  if (rowTypeForId(parent.internalId()) == RowType::BLEND) {
+    auto *blend = getBlendForId(parent.internalId());
+
+    // We can only append.
+    if (row != blend->formulaCount()) {
+      return false;
+    }
+
+    beginInsertRows(parent, row, row + count - 1);
+    for (int i = 0; i < count; ++i) {
+      blend->addFormula(formulaTypeForAdding);
+    }
+    endInsertRows();
+    return true;
+  }
+
+  return false;
+}
+
+bool SystemModel::removeRows(int row, int count, const QModelIndex &parent) {
+  // Removing blends
+  if (!parent.isValid()) {
+    beginRemoveRows(parent, row, row + count - 1);
+    for (int i = 0; i < count; ++i) {
+      system_->removeBlendAt(row);
+    }
+    endRemoveRows();
+    return true;
+  }
+
+  // Removing formulas
+  if (rowTypeForId(parent.internalId()) == RowType::BLEND) {
+    auto *blend = getBlendForId(parent.internalId());
+
+    beginRemoveRows(parent, row, row + count - 1);
+    for (int i = 0; i < count; ++i) {
+      blend->removeFormulaAt(row);
+    }
+    endRemoveRows();
+    return true;
+  }
+
+  return false;
 }
 
 QVariant SystemModel::headerData(int section, Qt::Orientation orientation,
@@ -282,6 +351,23 @@ FlatteningModel *SystemModel::childModel(int index) {
   model->setSourceModel(this);
   model->setRootIndex(this->index(index, 0, QModelIndex()));
   return model;
+}
+
+void SystemModel::addFormula(int blendIndex, const QString &type) {
+  Blend *blend = system_->blendAt(blendIndex);
+  int lastIndex = blend->formulaCount();
+
+  formulaTypeForAdding = library::FormulaType::_from_string(type.toUtf8());
+  insertRow(lastIndex, index(blendIndex, 0, QModelIndex()));
+}
+
+void SystemModel::removeFormula(int blendIndex, int formulaIndex) {
+  Blend *blend = system_->blendAt(blendIndex);
+  if (formulaIndex < 0 || formulaIndex >= blend->formulaCount()) {
+    return;
+  }
+
+  removeRow(formulaIndex, index(blendIndex, 0, QModelIndex()));
 }
 
 }  // namespace ui
