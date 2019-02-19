@@ -60,6 +60,7 @@ class SystemView : public QQuickFramebufferObject {
   float vibrancy_ = 0.f;
 
  private slots:
+  void updateSystem();
   void updateBufferSize();
 };
 

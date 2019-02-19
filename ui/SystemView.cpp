@@ -88,10 +88,26 @@ void SystemView::setSystem(System *system) {
     return;
   }
 
-  generator_->setSystem(system);
+  if (system_ != nullptr) {
+    system_->disconnect(this);
+  }
+
+  system_ = system;
+  updateSystem();
+  emit systemChanged();
+
+  connect(system, &System::sourceChanged, this, &SystemView::updateSystem);
+  connect(system, &System::paramsChanged, this, &SystemView::updateSystem);
+  connect(system, &System::finalBlendSourceChanged, this,
+          &SystemView::updateSystem);
+  connect(system, &System::finalBlendParamsChanged, this,
+          &SystemView::updateSystem);
+}
+
+void SystemView::updateSystem() {
+  generator_->setSystem(system_);
   generator_->clear();
   update();
-  emit systemChanged();
 }
 
 void SystemView::setTtl(int ttl) {
