@@ -5,7 +5,6 @@
 #include <QSurfaceFormat>
 #include "FlatteningModel.h"
 #include "HistogramBuffer.h"
-#include "MainWindow.h"
 #include "Point.h"
 #include "SystemModel.h"
 #include "SystemView.h"
