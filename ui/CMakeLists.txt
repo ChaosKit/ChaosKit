@@ -1,26 +1,50 @@
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets QuickControls2)
+find_package(Qt5 REQUIRED
+        COMPONENTS
+        Core Gui Qml Quick QuickControls2
+        OPTIONAL_COMPONENTS Widgets)
 
 add_subdirectory(models)
+
+add_library(ui_common
+        BlenderTask.cpp BlenderTask.h
+        GathererTask.cpp GathererTask.h
+        GLToneMapper.cpp GLToneMapper.h
+        HistogramBuffer.h
+        HistogramGenerator.cpp HistogramGenerator.h
+        Point.h
+        Particle.h
+        )
+set_target_properties(ui_common PROPERTIES AUTOMOC ON)
+target_link_libraries(ui_common PUBLIC
+        core
+        ui_models
+        Qt5::Core Qt5::Gui
+        )
 
 add_executable(ChaosKit WIN32
         main.cpp
         ui.qrc
-        GLToneMapper.cpp GLToneMapper.h
-        TestWindow.cpp TestWindow.h
-        HistogramGenerator.cpp HistogramGenerator.h
-        BlenderTask.cpp BlenderTask.h
-        Point.h
-        Particle.h
-        GathererTask.cpp GathererTask.h
-        HistogramBuffer.h
         SystemView.h SystemView.cpp
         SystemModel.cpp SystemModel.h
-        FlatteningModel.cpp FlatteningModel.h)
+        FlatteningModel.cpp FlatteningModel.h
+        )
 set_target_properties(ChaosKit PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON)
 target_link_libraries(ChaosKit PRIVATE
         core
         library
-        ChaosKit_Models
-        Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Qml Qt5::Quick Qt5::QuickWidgets
-        Qt5::QuickControls2
+        ui_common
+        ui_models
+        Qt5::Core Qt5::Gui Qt5::Qml Qt5::Quick Qt5::QuickControls2
+        )
+
+add_executable(TestWindow WIN32
+        test.cpp
+        TestWindow.cpp TestWindow.h
+        )
+set_target_properties(TestWindow PROPERTIES AUTOMOC ON)
+target_link_libraries(TestWindow PRIVATE
+        core
+        library
+        ui_common
+        Qt5::Core Qt5::Gui Qt5::Widgets
         )
