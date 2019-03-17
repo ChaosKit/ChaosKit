@@ -2,8 +2,8 @@ import QtQuick 2.11
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.11
 import QtQml.Models 2.11
-import "controls"
-import "resources"
+import "../controls"
+import "../resources"
 
 ListView {  // TODO: make a custom control with selecting etc
   id: rootListView

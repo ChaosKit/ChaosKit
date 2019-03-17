@@ -1,12 +1,12 @@
 <RCC>
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
-        <file>Editor.qml</file>
-        <file>MainWindow.qml</file>
-        <file>RenderingForm.qml</file>
-        <file>StructureForm.qml</file>
         <file>controls/SymbolButton.qml</file>
         <file>controls/Slider.qml</file>
+        <file>forms/Editor.qml</file>
+        <file>forms/MainWindow.qml</file>
+        <file>forms/RenderingForm.qml</file>
+        <file>forms/StructureForm.qml</file>
         <file>resources/Constants.qml</file>
         <file>resources/Font Awesome 5 Free-Regular-400.otf</file>
         <file>resources/Font Awesome 5 Free-Solid-900.otf</file>

@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty(
       QStringLiteral("formulaList"), QVariant::fromValue(createFormulaList()));
-  engine.load(QUrl(QStringLiteral("qrc:/MainWindow.qml")));
+  engine.load(QUrl(QStringLiteral("qrc:/forms/MainWindow.qml")));
 
   return QGuiApplication::exec();
 }
