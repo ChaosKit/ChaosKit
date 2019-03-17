@@ -68,8 +68,7 @@ ApplicationWindow {
           }
         }
 
-        Rectangle {
-          color: "#fff"
+        Pane {
           Layout.fillWidth: true
           Layout.minimumHeight: 30
           Layout.preferredHeight: 200
