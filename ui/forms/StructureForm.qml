@@ -31,5 +31,8 @@ ColumnLayout {
     Layout.fillWidth: true
     Layout.minimumHeight: 30
     Layout.preferredHeight: 200
+
+    rootModel: listView.model
+    selectionModel: rootSelectionModel
   }
 }
