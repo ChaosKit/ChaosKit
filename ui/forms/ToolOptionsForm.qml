@@ -20,6 +20,8 @@ Pane {
         label.text = "Nothing selected";
       } else if (current.parent.valid) {
         label.text = `Formula number ${current.row}`;
+      } else if (rootModel.isFinalBlend(current)) {
+        label.text = "Final blend";
       } else {
         label.text = `Blend number ${current.row}`;
       }
