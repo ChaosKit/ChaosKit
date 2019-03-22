@@ -45,7 +45,7 @@ MouseArea {
       Layout.fillHeight: true
       Layout.leftMargin: 12
 
-      text: display
+      text: display || ""
       verticalAlignment: Text.AlignVCenter
       elide: Text.ElideRight
     }
@@ -54,7 +54,7 @@ MouseArea {
       Layout.preferredWidth: 100
       Layout.fillHeight: true
 
-      value: weight
+      value: weight || 0
       onMoved: model.weight = value
     }
   }
