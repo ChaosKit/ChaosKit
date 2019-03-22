@@ -2,6 +2,8 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import app.chaoskit 1.0
+import "../controls"
+import "../resources"
 
 ApplicationWindow {
   id: root
@@ -32,6 +34,16 @@ ApplicationWindow {
     }
   }
 
+  SymbolButton {
+    id: showButton
+    anchors.top: parent.top
+    anchors.right: parent.right
+    anchors.topMargin: 5
+    anchors.rightMargin: 4
+    symbol: Icons.faChevronLeft
+    onClicked: drawer.open()
+  }
+
   Drawer {
     id: drawer
     edge: Qt.RightEdge
@@ -40,10 +52,22 @@ ApplicationWindow {
     modal: false
     visible: true
 
+    SymbolButton {
+      id: hideButton
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.topMargin: 5
+      anchors.leftMargin: 4
+      symbol: Icons.faChevronRight
+      onClicked: drawer.close()
+    }
+
     TabBar {
       id: editorTabs
       anchors.top: parent.top
-      width: parent.width
+      anchors.left: hideButton.right
+      anchors.right: parent.right
+      anchors.leftMargin: 4
 
       TabButton {
         text: qsTr("Structure")
