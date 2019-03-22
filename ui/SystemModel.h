@@ -39,6 +39,7 @@ class SystemModel : public QAbstractItemModel {
   bool removeRows(int row, int count, const QModelIndex &parent) override;
 
   Q_INVOKABLE FlatteningModel *childModel(int index);
+  Q_INVOKABLE QModelIndex modelIndexForSelection(int index);
   Q_INVOKABLE void addFormula(int blendIndex, const QString &type);
   Q_INVOKABLE void removeFormula(int blendIndex, int formulaIndex);
 

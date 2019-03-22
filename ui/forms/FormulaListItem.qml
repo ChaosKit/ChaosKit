@@ -1,41 +1,66 @@
-import QtQuick 2.11
+import QtQml.Models 2.12
+import QtQuick 2.12
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.11
+import QtQuick.Controls.Material 2.12
 import "../controls"
 import "../resources"
 
-RowLayout {
+MouseArea {
   id: itemRoot
-  spacing: 0
+  implicitHeight: contents.implicitHeight
+  hoverEnabled: true
 
   property bool itemEnabled: true  // TODO: use the model
   property var rootModel: null
+  property var blendModel: null
+  property var selectionModel: null
+  readonly property var selectionIndex: blendModel.modelIndexForSelection(index)
 
-  SymbolButton {
-    symbol: itemRoot.itemEnabled ? Icons.faEye : Icons.faEyeSlash
-    onClicked: itemRoot.itemEnabled = !itemRoot.itemEnabled
+  onClicked: {
+    selectionModel.setCurrentIndex(
+        selectionIndex, ItemSelectionModel.ClearAndSelect);
   }
 
-  Label {
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-    Layout.leftMargin: 12
-
-    text: display
-    verticalAlignment: Text.AlignVCenter
-    elide: Text.ElideRight
+  Rectangle {
+    id: background
+    anchors.fill: parent
+    color: Material.foreground
+    opacity: selectionModel.currentIndex == selectionIndex ? 0.25 :
+        (parent.containsMouse ? 0.1 : 0.0)
   }
 
-  Slider {
-    Layout.preferredWidth: 100
-    Layout.fillHeight: true
+  RowLayout {
+    id: contents
+    anchors.fill: parent
+    spacing: 0
 
-    value: weight
-    onMoved: model.weight = value
-  }
+    SymbolButton {
+      symbol: itemRoot.itemEnabled ? Icons.faEye : Icons.faEyeSlash
+      onClicked: itemRoot.itemEnabled = !itemRoot.itemEnabled
+    }
 
-  SymbolButton {
-    symbol: Icons.faTrashAlt
-    onClicked: rootModel.removeFormula(blendIndex, index)
+    Label {
+      Layout.fillWidth: true
+      Layout.fillHeight: true
+      Layout.leftMargin: 12
+
+      text: display
+      verticalAlignment: Text.AlignVCenter
+      elide: Text.ElideRight
+    }
+
+    Slider {
+      Layout.preferredWidth: 100
+      Layout.fillHeight: true
+
+      value: weight
+      onMoved: model.weight = value
+    }
+
+    SymbolButton {
+      symbol: Icons.faTrashAlt
+      onClicked: rootModel.removeFormula(blendIndex, index)
+    }
   }
 }

@@ -22,6 +22,8 @@ class FlatteningModel : public QAbstractProxyModel {
   QModelIndex rootIndex() const { return rootIndex_; }
   void setRootIndex(const QModelIndex &index);
 
+  Q_INVOKABLE QModelIndex modelIndexForSelection(int index);
+
  signals:
   void rootIndexChanged();
 

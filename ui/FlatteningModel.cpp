@@ -135,5 +135,9 @@ void FlatteningModel::sourceRowsRemoved(const QModelIndex &sourceParent,
   endRemoveRows();
 }
 
+QModelIndex FlatteningModel::modelIndexForSelection(int index) {
+  return mapToSource(this->index(index, 0, QModelIndex()));
+}
+
 }  // namespace ui
 }  // namespace chaoskit

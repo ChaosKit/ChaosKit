@@ -376,5 +376,9 @@ void SystemModel::removeFormula(int blendIndex, int formulaIndex) {
   removeRow(formulaIndex, index(blendIndex, 0, QModelIndex()));
 }
 
+QModelIndex SystemModel::modelIndexForSelection(int index) {
+  return this->index(index, 0, QModelIndex());
+}
+
 }  // namespace ui
 }  // namespace chaoskit
