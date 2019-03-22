@@ -40,39 +40,31 @@ ApplicationWindow {
     modal: false
     visible: true
 
-    ColumnLayout {
-      spacing: 0
-      anchors.fill: parent
+    TabBar {
+      id: editorTabs
+      anchors.top: parent.top
+      width: parent.width
 
-      TabBar {
-        id: editorTabs
-        Layout.fillWidth: true
-
-        TabButton {
-          text: qsTr("Structure")
-        }
-        TabButton {
-          text: qsTr("Rendering")
-        }
+      TabButton {
+        text: qsTr("Structure")
       }
-
-      StackLayout {
-        currentIndex: editorTabs.currentIndex
-        Layout.fillWidth: true
-        Layout.margins: 8
-        StructureForm {
-          id: structureForm
-          model: systemModel
-        }
-        RenderingForm {
-          id: renderingForm
-        }
+      TabButton {
+        text: qsTr("Rendering")
       }
+    }
 
-      ToolOptionsForm {
-        Layout.fillWidth: true
-        Layout.minimumHeight: 30
-        Layout.preferredHeight: 200
+    StackLayout {
+      currentIndex: editorTabs.currentIndex
+      anchors.top: editorTabs.bottom
+      anchors.bottom: parent.bottom
+      width: parent.width
+
+      StructureForm {
+        id: structureForm
+        model: systemModel
+      }
+      RenderingForm {
+        id: renderingForm
       }
     }
   }
