@@ -237,6 +237,11 @@ bool SystemModel::insertRows(int row, int count, const QModelIndex &parent) {
 bool SystemModel::removeRows(int row, int count, const QModelIndex &parent) {
   // Removing blends
   if (!parent.isValid()) {
+    // Disallow removing the final blend
+    if (row == system_->blendCount()) {
+      return false;
+    }
+
     beginRemoveRows(parent, row, row + count - 1);
     for (int i = 0; i < count; ++i) {
       system_->removeBlendAt(row);
@@ -355,6 +360,11 @@ FlatteningModel *SystemModel::childModel(int index) {
   return model;
 }
 
+void SystemModel::addBlend() {
+  int targetRow = system_->blendCount();
+  insertRow(targetRow, QModelIndex());
+}
+
 void SystemModel::addFormula(int blendIndex, const QString &type) {
   Blend *blend = blendIndex == system_->blendCount()
                      ? system_->finalBlend()
@@ -365,15 +375,13 @@ void SystemModel::addFormula(int blendIndex, const QString &type) {
   insertRow(lastIndex, index(blendIndex, 0, QModelIndex()));
 }
 
-void SystemModel::removeFormula(int blendIndex, int formulaIndex) {
-  Blend *blend = blendIndex == system_->blendCount()
-                     ? system_->finalBlend()
-                     : system_->blendAt(blendIndex);
-  if (formulaIndex < 0 || formulaIndex >= blend->formulaCount()) {
-    return;
-  }
+void SystemModel::removeRowAtIndex(const QModelIndex &index) {
+  removeRow(index.row(), index.parent());
+}
 
-  removeRow(formulaIndex, index(blendIndex, 0, QModelIndex()));
+bool SystemModel::isFinalBlend(const QModelIndex &index) {
+  return index.isValid() && !index.parent().isValid() &&
+         index.row() == system_->blendCount();
 }
 
 QModelIndex SystemModel::modelIndexForSelection(int index) {

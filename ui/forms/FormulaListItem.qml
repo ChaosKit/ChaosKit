@@ -57,10 +57,5 @@ MouseArea {
       value: weight
       onMoved: model.weight = value
     }
-
-    SymbolButton {
-      symbol: Icons.faTrashAlt
-      onClicked: rootModel.removeFormula(blendIndex, index)
-    }
   }
 }

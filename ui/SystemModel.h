@@ -40,8 +40,10 @@ class SystemModel : public QAbstractItemModel {
 
   Q_INVOKABLE FlatteningModel *childModel(int index);
   Q_INVOKABLE QModelIndex modelIndexForSelection(int index);
+  Q_INVOKABLE void addBlend();
   Q_INVOKABLE void addFormula(int blendIndex, const QString &type);
-  Q_INVOKABLE void removeFormula(int blendIndex, int formulaIndex);
+  Q_INVOKABLE void removeRowAtIndex(const QModelIndex &index);
+  Q_INVOKABLE bool isFinalBlend(const QModelIndex &index);
 
   System *system() const { return system_; }
 
