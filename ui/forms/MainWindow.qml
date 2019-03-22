@@ -1,6 +1,6 @@
-import QtQuick 2.11
-import QtQuick.Controls 2.4
-import QtQuick.Layouts 1.11
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import app.chaoskit 1.0
 
 ApplicationWindow {
@@ -14,69 +14,69 @@ ApplicationWindow {
     id: systemModel
   }
 
-  RowLayout {
-    spacing: 0
+  Editor {
+    id: editor
+    system: systemModel.system
+    refreshInterval: 100
+    gamma: renderingForm.gamma
+    exposure: renderingForm.exposure
+    vibrancy: renderingForm.vibrancy
+
     anchors.fill: parent
-
-    Editor {
-      id: editor
-      system: systemModel.system
-      refreshInterval: 100
-      gamma: renderingForm.gamma
-      exposure: renderingForm.exposure
-      vibrancy: renderingForm.vibrancy
-
-      Layout.fillWidth: true
-      Layout.fillHeight: true
-
-      Component.onCompleted: {
-        running = true;
-      }
+    transform: Translate {
+      x: drawer.position * drawer.width * -0.33
     }
 
-    Item {
-      Layout.fillHeight: true
-      Layout.minimumWidth: 240
-      Layout.preferredWidth: 300
+    Component.onCompleted: {
+      running = true;
+    }
+  }
 
-      ColumnLayout {
-        spacing: 0
-        anchors.fill: parent
+  Drawer {
+    id: drawer
+    edge: Qt.RightEdge
+    width: 300
+    height: root.height
+    modal: false
+    visible: true
 
-        TabBar {
-          id: editorTabs
-          Layout.fillWidth: true
+    ColumnLayout {
+      spacing: 0
+      anchors.fill: parent
 
-          TabButton {
-            text: qsTr("Structure")
-          }
-          TabButton {
-            text: qsTr("Rendering")
-          }
+      TabBar {
+        id: editorTabs
+        Layout.fillWidth: true
+
+        TabButton {
+          text: qsTr("Structure")
         }
-
-        StackLayout {
-          currentIndex: editorTabs.currentIndex
-          Layout.fillWidth: true
-          Layout.margins: 8
-          StructureForm {
-            id: structureForm
-            model: systemModel
-          }
-          RenderingForm {
-            id: renderingForm
-          }
+        TabButton {
+          text: qsTr("Rendering")
         }
+      }
 
-        Pane {
-          Layout.fillWidth: true
-          Layout.minimumHeight: 30
-          Layout.preferredHeight: 200
+      StackLayout {
+        currentIndex: editorTabs.currentIndex
+        Layout.fillWidth: true
+        Layout.margins: 8
+        StructureForm {
+          id: structureForm
+          model: systemModel
+        }
+        RenderingForm {
+          id: renderingForm
+        }
+      }
 
-          Label {
-            text: "Tool Window"
-            anchors.centerIn: parent
-          }
+      Pane {
+        Layout.fillWidth: true
+        Layout.minimumHeight: 30
+        Layout.preferredHeight: 200
+
+        Label {
+          text: "Tool Window"
+          anchors.centerIn: parent
         }
       }
     }

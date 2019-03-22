@@ -1,11 +1,8 @@
 import QtQuick 2.0
 import QtQuick.Window 2.2
-import QtQuick.Controls.Material 2.4
 import app.chaoskit 1.0
 
-Rectangle {
-    color: Material.color(Material.BlueGrey, Material.Shade700)
-
+Item {
     property bool autoRefresh: true
     property int refreshInterval: 100
     property alias running: systemView.running
