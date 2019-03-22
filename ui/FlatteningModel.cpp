@@ -101,7 +101,7 @@ void FlatteningModel::sourceDataChanged(const QModelIndex &topLeft,
 
 void FlatteningModel::sourceRowsAboutToBeInserted(
     const QModelIndex &sourceParent, int start, int end) {
-  if (sourceParent != rootIndex_) {
+  if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
   }
 
@@ -110,7 +110,7 @@ void FlatteningModel::sourceRowsAboutToBeInserted(
 
 void FlatteningModel::sourceRowsInserted(const QModelIndex &sourceParent,
                                          int start, int end) {
-  if (sourceParent != rootIndex_) {
+  if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
   }
 
@@ -119,7 +119,7 @@ void FlatteningModel::sourceRowsInserted(const QModelIndex &sourceParent,
 
 void FlatteningModel::sourceRowsAboutToBeRemoved(
     const QModelIndex &sourceParent, int start, int end) {
-  if (sourceParent != rootIndex_) {
+  if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
   }
 
@@ -128,7 +128,7 @@ void FlatteningModel::sourceRowsAboutToBeRemoved(
 
 void FlatteningModel::sourceRowsRemoved(const QModelIndex &sourceParent,
                                         int start, int end) {
-  if (sourceParent != rootIndex_) {
+  if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
   }
 
