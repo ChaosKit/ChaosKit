@@ -10,6 +10,7 @@
         <file>forms/MainWindow.qml</file>
         <file>forms/RenderingForm.qml</file>
         <file>forms/StructureForm.qml</file>
+        <file>forms/ToolOptionsForm.qml</file>
         <file>resources/Constants.qml</file>
         <file>resources/Font Awesome 5 Free-Regular-400.otf</file>
         <file>resources/Font Awesome 5 Free-Solid-900.otf</file>

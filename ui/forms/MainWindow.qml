@@ -69,15 +69,10 @@ ApplicationWindow {
         }
       }
 
-      Pane {
+      ToolOptionsForm {
         Layout.fillWidth: true
         Layout.minimumHeight: 30
         Layout.preferredHeight: 200
-
-        Label {
-          text: "Tool Window"
-          anchors.centerIn: parent
-        }
       }
     }
   }
