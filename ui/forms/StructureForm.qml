@@ -6,25 +6,27 @@ ColumnLayout {
   id: root
   spacing: 0
 
-  property alias model: listView.model
+  property alias model: repeater.model
 
   ItemSelectionModel {
     id: rootSelectionModel
-    model: listView.model
+    model: repeater.model
   }
 
-  ListView {
-    id: listView
+  Repeater {
+    id: repeater
+    delegate: BlendListItem {
+      Layout.fillWidth: true
+      rootModel: repeater.model
+      selectionModel: rootSelectionModel
+    }
+  }
+
+  MouseArea {
     Layout.fillWidth: true
     Layout.fillHeight: true
 
-    delegate: BlendListItem {
-      anchors.left: parent.left
-      anchors.right: parent.right
-      rootModel: listView.model
-      selectionModel: rootSelectionModel
-    }
-    currentIndex: -1
+    onClicked: rootSelectionModel.clear()
   }
 
   ToolOptionsForm {
@@ -32,7 +34,7 @@ ColumnLayout {
     Layout.minimumHeight: 30
     Layout.preferredHeight: 200
 
-    rootModel: listView.model
+    rootModel: repeater.model
     selectionModel: rootSelectionModel
   }
 }
