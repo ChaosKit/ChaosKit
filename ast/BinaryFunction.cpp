@@ -8,11 +8,12 @@ GENERATE_NODE_TYPE(BinaryFunction)
 
 std::ostream &operator<<(std::ostream &stream, const BinaryFunction &function) {
   StreamPrinter printer(stream);
-  stream << node_type(function) << ":" << function.type() << "(";
+  stream << node_type(function) << " " << function.type() << " (" << indent
+         << indentation;
   apply_visitor(printer, function.first());
-  stream << ", ";
+  stream << indentation;
   apply_visitor(printer, function.second());
-  return stream << ")";
+  return stream << outdent << indentation << ")";
 }
 
 }  // namespace ast

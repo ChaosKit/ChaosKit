@@ -7,9 +7,10 @@ namespace ast {
 GENERATE_NODE_TYPE(WeightedFormula);
 
 std::ostream &operator<<(std::ostream &stream, const WeightedFormula &formula) {
-  return stream << node_type(formula) << "(" << formula.formula() << ", "
-                << formula.weight_x() << ", " << formula.weight_y()
-                << ")";
+  return stream << node_type(formula) << " (" << indent << indentation
+                << "weight: [" << formula.weight_x() << ", "
+                << formula.weight_y() << "]" << indentation << formula.formula()
+                << outdent << indentation << ")";
 }
 
 }  // namespace ast

@@ -8,9 +8,10 @@ GENERATE_NODE_TYPE(UnaryFunction)
 
 std::ostream &operator<<(std::ostream &stream, const UnaryFunction &function) {
   StreamPrinter printer(stream);
-  stream << node_type(function) << ":" << function.type() << "(";
+  stream << node_type(function) << " " << function.type() << " (" << indent
+         << indentation;
   apply_visitor(printer, function.argument());
-  return stream << ")";
+  return stream << outdent << indentation << ")";
 }
 
 }  // namespace ast

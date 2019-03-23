@@ -7,13 +7,14 @@ namespace ast {
 GENERATE_NODE_TYPE(Blend);
 
 std::ostream &operator<<(std::ostream &stream, const Blend &blend) {
-  stream << node_type(blend) << "(" << blend.pre();
+  stream << node_type(blend) << " (" << indent << indentation
+         << "pre: " << blend.pre() << indentation << "post: " << blend.post();
 
   for (const auto &formula : blend.formulas()) {
-    stream << ", " << formula;
+    stream << indentation << formula;
   }
 
-  return stream << ", " << blend.post() << ")";
+  return stream << outdent << indentation << ")";
 }
 
 }  // namespace ast

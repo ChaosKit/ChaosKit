@@ -7,11 +7,12 @@ namespace ast {
 GENERATE_NODE_TYPE(System);
 
 std::ostream &operator<<(std::ostream &stream, const System &system) {
-  stream << node_type(system) << "(";
+  stream << node_type(system) << " (" << indent;
   for (const auto &blend : system.blends()) {
-    stream << blend << ", ";
+    stream << indentation << blend;
   }
-  return stream << system.final_blend() << ")";
+  return stream << indentation << "final: " << system.final_blend() << outdent
+                << indentation << ")";
 }
 
 }  // namespace ast
