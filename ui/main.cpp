@@ -3,7 +3,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QSurfaceFormat>
-#include "FlatteningModel.h"
+#include "BlendModel.h"
 #include "HistogramBuffer.h"
 #include "Point.h"
 #include "SystemModel.h"
@@ -12,7 +12,7 @@
 
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
-using chaoskit::ui::FlatteningModel;
+using chaoskit::ui::BlendModel;
 using chaoskit::ui::SystemModel;
 using chaoskit::ui::SystemView;
 using chaoskit::ui::System;
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
   qRegisterMetaType<HistogramBuffer>();
   qRegisterMetaType<Point>();
 
-  qmlRegisterInterface<FlatteningModel>("FlatteningModel");
+  qmlRegisterInterface<BlendModel>("BlendModel");
 
   qmlRegisterType<SystemModel>("app.chaoskit", 1, 0, "SystemModel");
   qmlRegisterType<SystemView>("app.chaoskit", 1, 0, "SystemView");

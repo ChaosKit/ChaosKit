@@ -353,8 +353,8 @@ bool SystemModel::setFormulaData(Formula *formula, int role,
   return false;
 }
 
-FlatteningModel *SystemModel::childModel(int index) {
-  auto *model = new FlatteningModel();
+BlendModel *SystemModel::childModel(int index) {
+  auto *model = new BlendModel();
   model->setSourceModel(this);
   model->setRootIndex(this->index(index, 0, QModelIndex()));
   return model;

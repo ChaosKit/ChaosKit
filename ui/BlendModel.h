@@ -6,7 +6,7 @@
 namespace chaoskit {
 namespace ui {
 
-class FlatteningModel : public QAbstractProxyModel {
+class BlendModel : public QAbstractProxyModel {
   Q_OBJECT
   Q_PROPERTY(QModelIndex rootIndex READ rootIndex WRITE setRootIndex NOTIFY
                  rootIndexChanged)

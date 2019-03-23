@@ -1,9 +1,9 @@
-#include "FlatteningModel.h"
+#include "BlendModel.h"
 
 namespace chaoskit {
 namespace ui {
 
-void FlatteningModel::setSourceModel(QAbstractItemModel *model) {
+void BlendModel::setSourceModel(QAbstractItemModel *model) {
   beginResetModel();
 
   if (sourceModel()) {
@@ -14,22 +14,22 @@ void FlatteningModel::setSourceModel(QAbstractItemModel *model) {
 
   if (model) {
     connect(model, &QAbstractItemModel::dataChanged, this,
-            &FlatteningModel::sourceDataChanged);
+            &BlendModel::sourceDataChanged);
     connect(model, &QAbstractItemModel::rowsAboutToBeInserted, this,
-            &FlatteningModel::sourceRowsAboutToBeInserted);
+            &BlendModel::sourceRowsAboutToBeInserted);
     connect(model, &QAbstractItemModel::rowsInserted, this,
-            &FlatteningModel::sourceRowsInserted);
+            &BlendModel::sourceRowsInserted);
     connect(model, &QAbstractItemModel::rowsAboutToBeRemoved, this,
-            &FlatteningModel::sourceRowsAboutToBeRemoved);
+            &BlendModel::sourceRowsAboutToBeRemoved);
     connect(model, &QAbstractItemModel::rowsRemoved, this,
-            &FlatteningModel::sourceRowsRemoved);
+            &BlendModel::sourceRowsRemoved);
   }
 
   resetInternalData();
   endResetModel();
 }
 
-void FlatteningModel::setRootIndex(const QModelIndex &index) {
+void BlendModel::setRootIndex(const QModelIndex &index) {
   if (rootIndex_ == index) {
     return;
   }
@@ -38,8 +38,7 @@ void FlatteningModel::setRootIndex(const QModelIndex &index) {
   emit rootIndexChanged();
 }
 
-QModelIndex FlatteningModel::mapFromSource(
-    const QModelIndex &sourceIndex) const {
+QModelIndex BlendModel::mapFromSource(const QModelIndex &sourceIndex) const {
   if (sourceModel() == nullptr || !sourceIndex.isValid() ||
       sourceIndex.parent() != rootIndex_) {
     return QModelIndex();
@@ -49,7 +48,7 @@ QModelIndex FlatteningModel::mapFromSource(
                      sourceIndex.internalPointer());
 }
 
-QModelIndex FlatteningModel::mapToSource(const QModelIndex &proxyIndex) const {
+QModelIndex BlendModel::mapToSource(const QModelIndex &proxyIndex) const {
   if (!proxyIndex.isValid()) {
     return rootIndex_;
   }
@@ -57,8 +56,8 @@ QModelIndex FlatteningModel::mapToSource(const QModelIndex &proxyIndex) const {
   return rootIndex_.child(proxyIndex.row(), proxyIndex.column());
 }
 
-QModelIndex FlatteningModel::index(int row, int column,
-                                   const QModelIndex &parent) const {
+QModelIndex BlendModel::index(int row, int column,
+                              const QModelIndex &parent) const {
   if (sourceModel() == nullptr) {
     return QModelIndex();
   }
@@ -68,7 +67,7 @@ QModelIndex FlatteningModel::index(int row, int column,
   return mapFromSource(sourceIndex);
 }
 
-QModelIndex FlatteningModel::parent(const QModelIndex &child) const {
+QModelIndex BlendModel::parent(const QModelIndex &child) const {
   if (sourceModel() == nullptr) {
     return QModelIndex();
   }
@@ -78,17 +77,17 @@ QModelIndex FlatteningModel::parent(const QModelIndex &child) const {
   return mapFromSource(sourceParent);
 }
 
-int FlatteningModel::rowCount(const QModelIndex &parent) const {
+int BlendModel::rowCount(const QModelIndex &parent) const {
   return sourceModel()->rowCount(mapToSource(parent));
 }
 
-int FlatteningModel::columnCount(const QModelIndex &parent) const {
+int BlendModel::columnCount(const QModelIndex &parent) const {
   return sourceModel()->columnCount(mapToSource(parent));
 }
 
-void FlatteningModel::sourceDataChanged(const QModelIndex &topLeft,
-                                        const QModelIndex &bottomRight,
-                                        const QVector<int> &roles) {
+void BlendModel::sourceDataChanged(const QModelIndex &topLeft,
+                                   const QModelIndex &bottomRight,
+                                   const QVector<int> &roles) {
   QModelIndex targetTopLeft = mapFromSource(topLeft);
   QModelIndex targetBottomRight = mapFromSource(bottomRight);
 
@@ -99,8 +98,8 @@ void FlatteningModel::sourceDataChanged(const QModelIndex &topLeft,
   emit dataChanged(targetTopLeft, targetBottomRight, roles);
 }
 
-void FlatteningModel::sourceRowsAboutToBeInserted(
-    const QModelIndex &sourceParent, int start, int end) {
+void BlendModel::sourceRowsAboutToBeInserted(const QModelIndex &sourceParent,
+                                             int start, int end) {
   if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
   }
@@ -108,8 +107,8 @@ void FlatteningModel::sourceRowsAboutToBeInserted(
   beginInsertRows(QModelIndex(), start, end);
 }
 
-void FlatteningModel::sourceRowsInserted(const QModelIndex &sourceParent,
-                                         int start, int end) {
+void BlendModel::sourceRowsInserted(const QModelIndex &sourceParent, int start,
+                                    int end) {
   if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
   }
@@ -117,8 +116,8 @@ void FlatteningModel::sourceRowsInserted(const QModelIndex &sourceParent,
   endInsertRows();
 }
 
-void FlatteningModel::sourceRowsAboutToBeRemoved(
-    const QModelIndex &sourceParent, int start, int end) {
+void BlendModel::sourceRowsAboutToBeRemoved(const QModelIndex &sourceParent,
+                                            int start, int end) {
   if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
   }
@@ -126,8 +125,8 @@ void FlatteningModel::sourceRowsAboutToBeRemoved(
   beginRemoveRows(QModelIndex(), start, end);
 }
 
-void FlatteningModel::sourceRowsRemoved(const QModelIndex &sourceParent,
-                                        int start, int end) {
+void BlendModel::sourceRowsRemoved(const QModelIndex &sourceParent, int start,
+                                   int end) {
   if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
   }
@@ -135,7 +134,7 @@ void FlatteningModel::sourceRowsRemoved(const QModelIndex &sourceParent,
   endRemoveRows();
 }
 
-QModelIndex FlatteningModel::modelIndexForSelection(int index) {
+QModelIndex BlendModel::modelIndexForSelection(int index) {
   return mapToSource(this->index(index, 0, QModelIndex()));
 }
 
