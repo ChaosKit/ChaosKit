@@ -1,7 +1,10 @@
 #include "SystemModel.h"
+#include <ast/ast.h>
 #include <library/FormulaType.h>
 #include <QDebug>
 #include <QTransform>
+#include <sstream>
+#include "models/toSource.h"
 
 using chaoskit::ui::System;
 using chaoskit::library::FormulaType;
@@ -55,6 +58,16 @@ SystemModel::SystemModel(QObject *parent) : QAbstractItemModel(parent) {
                       -1.580897020176053e-01f, -1.430070123635232e+00f});
   system_->finalBlend()->setPost(
       QTransform::fromScale(.5, 1).translate(.5, .5));
+
+  connect(system_, &System::sourceChanged, this, &SystemModel::sourceChanged);
+  connect(system_, &System::finalBlendSourceChanged, this, &SystemModel::sourceChanged);
+}
+
+QString SystemModel::source() const {
+  auto sourceAst = toSource(system_);
+  std::stringstream stream;
+  stream << sourceAst;
+  return QString::fromStdString(stream.str());
 }
 
 Blend *SystemModel::getBlendForId(uint64_t id) const {
@@ -383,7 +396,6 @@ bool SystemModel::isFinalBlend(const QModelIndex &index) {
   return index.isValid() && !index.parent().isValid() &&
          index.row() == system_->blendCount();
 }
-
 QModelIndex SystemModel::modelIndexForSelection(int index) {
   return this->index(index, 0, QModelIndex());
 }

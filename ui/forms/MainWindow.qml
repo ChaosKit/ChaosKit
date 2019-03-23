@@ -44,8 +44,30 @@ ApplicationWindow {
     onClicked: drawer.open()
   }
 
+  Button {
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.leftMargin: 8
+    anchors.bottomMargin: 4
+    text: "AST Inspector"
+
+    onClicked: astInspectorLoader.active = true
+
+    Loader {
+      id: astInspectorLoader
+      active: false
+      sourceComponent: AstInspector {
+        anchors.centerIn: Overlay.overlay
+        source: systemModel.source
+
+        onClosed: astInspectorLoader.active = false
+      }
+    }
+  }
+
   Drawer {
     id: drawer
+    closePolicy: Popup.NoAutoClose
     edge: Qt.RightEdge
     width: 300
     height: root.height

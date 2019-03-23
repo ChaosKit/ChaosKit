@@ -13,6 +13,7 @@ namespace ui {
 class SystemModel : public QAbstractItemModel {
   Q_OBJECT
   Q_PROPERTY(chaoskit::ui::System *system READ system NOTIFY systemChanged)
+  Q_PROPERTY(QString source READ source NOTIFY sourceChanged)
  public:
   enum SystemRoles {
     WeightRole = Qt::UserRole + 1,
@@ -46,9 +47,11 @@ class SystemModel : public QAbstractItemModel {
   Q_INVOKABLE bool isFinalBlend(const QModelIndex &index);
 
   System *system() const { return system_; }
+  QString source() const;
 
  signals:
   void systemChanged();
+  void sourceChanged();
 
  private:
   System *system_;
