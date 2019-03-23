@@ -1,4 +1,5 @@
 #include <library/FormulaType.h>
+#include <QFontDatabase>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -48,9 +49,15 @@ int main(int argc, char* argv[]) {
   qmlRegisterType<SystemView>("app.chaoskit", 1, 0, "SystemView");
   qmlRegisterType<System>("app.chaoskit", 1, 0, "System");
 
+  const QFont monospaceFont =
+      QFontDatabase::systemFont(QFontDatabase::FixedFont);
+
   QQmlApplicationEngine engine;
-  engine.rootContext()->setContextProperty(
-      QStringLiteral("formulaList"), QVariant::fromValue(createFormulaList()));
+  engine.rootContext()->setContextProperties(
+      {{QStringLiteral("formulaList"),
+        QVariant::fromValue(createFormulaList())},
+       {QStringLiteral("monospaceFont"),
+        QVariant::fromValue(monospaceFont)}});
   engine.load(QUrl(QStringLiteral("qrc:/forms/MainWindow.qml")));
 
   return QGuiApplication::exec();
