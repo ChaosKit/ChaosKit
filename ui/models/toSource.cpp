@@ -21,7 +21,7 @@ ast::Blend toSource(const Blend *blend) {
 }
 
 ast::WeightedFormula toSource(const Formula *formula) {
-  return ast::WeightedFormula{library::createFormula(formula->type())->source(),
+  return ast::WeightedFormula{library::source(formula->type()),
                               formula->weightX(), formula->weightY()};
 }
 

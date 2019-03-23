@@ -9,6 +9,8 @@
 namespace chaoskit {
 namespace library {
 
+namespace {
+
 std::unique_ptr<Formula> createFormula(FormulaType type) {
   switch (type._value) {
     case FormulaType::DeJong:
@@ -23,6 +25,10 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
                                type._to_string());
   }
 }
+
+}  // namespace
+
+ast::Formula source(FormulaType type) { return createFormula(type)->source(); }
 
 uint32_t paramCount(FormulaType type) {
   if (type == +FormulaType::Invalid) {
