@@ -1,6 +1,10 @@
 #include "toSource.h"
+#include <library/Linear.h>
 #include <library/util.h>
 #include <QDebug>
+#include <algorithm>
+
+using chaoskit::library::Linear;
 
 namespace chaoskit {
 namespace ui {
@@ -11,9 +15,26 @@ ast::Blend toSource(const Blend *blend) {
   }
 
   std::vector<ast::WeightedFormula> weighted_formulas;
-  weighted_formulas.reserve(static_cast<size_t>(blend->formulaCount()));
-  for (const auto &formula : blend->formulas()) {
+
+  if (blend->formulaCount() == 1) {
+    // Modifying weight of one formula also causes scaling the image. This is
+    // technically correct, but undesirable.
+    // This mitigates that by balancing it with a linear formula, but only if
+    // the weights are smaller than 1.
+    Formula *formula = blend->formulaAt(0);
     weighted_formulas.push_back(toSource(formula));
+
+    float linearWeightX = std::max(0.f, 1.f - formula->weightX());
+    float linearWeightY = std::max(0.f, 1.f - formula->weightY());
+    if (linearWeightX > 0.f || linearWeightY > 0.f) {
+      weighted_formulas.emplace_back(library::source<Linear>(), linearWeightX,
+                                     linearWeightY);
+    }
+  } else {
+    weighted_formulas.reserve(static_cast<size_t>(blend->formulaCount()));
+    for (const Formula *formula : blend->formulas()) {
+      weighted_formulas.push_back(toSource(formula));
+    }
   }
 
   return ast::Blend{std::move(weighted_formulas), toSource(blend->pre()),
