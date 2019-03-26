@@ -3,6 +3,7 @@
 
 #include <QAbstractItemModel>
 #include "BlendModel.h"
+#include "SystemElement.h"
 #include "models/Blend.h"
 #include "models/Formula.h"
 #include "models/System.h"
@@ -45,6 +46,7 @@ class SystemModel : public QAbstractItemModel {
   Q_INVOKABLE void addFormula(int blendIndex, const QString &type);
   Q_INVOKABLE void removeRowAtIndex(const QModelIndex &index);
   Q_INVOKABLE bool isFinalBlend(const QModelIndex &index);
+  Q_INVOKABLE SystemElement *modelAtIndex(const QModelIndex &index);
 
   System *system() const { return system_; }
   QString source() const;
@@ -60,9 +62,11 @@ class SystemModel : public QAbstractItemModel {
   Blend *getBlendForId(uint64_t id) const;
 
   QVariant blendData(const Blend *blend, int role) const;
-  bool setBlendData(Blend *blend, int role, const QVariant &value) const;
+  QVector<int> setBlendData(Blend *blend, int role,
+                            const QVariant &value) const;
   QVariant formulaData(const Formula *formula, int role) const;
-  bool setFormulaData(Formula *blend, int role, const QVariant &value) const;
+  QVector<int> setFormulaData(Formula *blend, int role,
+                              const QVariant &value) const;
 };
 
 }  // namespace ui

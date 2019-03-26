@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QTransform>
 #include <sstream>
+#include "SystemElement.h"
 #include "models/toSource.h"
 
 using chaoskit::ui::System;
@@ -60,7 +61,8 @@ SystemModel::SystemModel(QObject *parent) : QAbstractItemModel(parent) {
       QTransform::fromScale(.5, 1).translate(.5, .5));
 
   connect(system_, &System::sourceChanged, this, &SystemModel::sourceChanged);
-  connect(system_, &System::finalBlendSourceChanged, this, &SystemModel::sourceChanged);
+  connect(system_, &System::finalBlendSourceChanged, this,
+          &SystemModel::sourceChanged);
 }
 
 QString SystemModel::source() const {
@@ -190,25 +192,25 @@ bool SystemModel::setData(const QModelIndex &index, const QVariant &value,
 
   auto id = index.internalId();
   auto *blend = getBlendForId(id);
-  bool success = false;
+  QVector<int> affectedRoles;
 
   switch (rowTypeForId(id)) {
     case RowType::BLEND:
-      success = setBlendData(blend, role, value);
+      affectedRoles = setBlendData(blend, role, value);
       break;
     case RowType::FORMULA:
-      success =
+      affectedRoles =
           setFormulaData(blend->formulaAt(formulaIndexForId(id)), role, value);
       break;
     case RowType::UNDEFINED:
       return false;
   }
 
-  if (success) {
-    emit dataChanged(index, index, {role});
+  if (!affectedRoles.isEmpty()) {
+    emit dataChanged(index, index, affectedRoles);
   }
 
-  return success;
+  return !affectedRoles.isEmpty();
 }
 
 bool SystemModel::insertRows(int row, int count, const QModelIndex &parent) {
@@ -317,23 +319,23 @@ QVariant SystemModel::blendData(const Blend *blend, int role) const {
   return QVariant();
 }
 
-bool SystemModel::setBlendData(Blend *blend, int role,
-                               const QVariant &value) const {
+QVector<int> SystemModel::setBlendData(Blend *blend, int role,
+                                       const QVariant &value) const {
   if (blend == system_->finalBlend()) {
-    return false;
+    return {};
   }
 
   switch (role) {
     case Qt::EditRole:
       blend->setName(value.toString());
-      return true;
+      return {Qt::EditRole, Qt::DisplayRole};
     case WeightRole:
       blend->setWeight(value.toFloat());
-      return true;
+      return {WeightRole};
     default:;
   }
 
-  return false;
+  return {};
 }
 
 QVariant SystemModel::formulaData(const Formula *formula, int role) const {
@@ -351,19 +353,19 @@ QVariant SystemModel::formulaData(const Formula *formula, int role) const {
   return QVariant();
 }
 
-bool SystemModel::setFormulaData(Formula *formula, int role,
-                                 const QVariant &value) const {
+QVector<int> SystemModel::setFormulaData(Formula *blend, int role,
+                                         const QVariant &value) const {
   switch (role) {
     case WeightRole: {
       float weight = value.toFloat();
-      formula->setWeightX(weight);
-      formula->setWeightY(weight);
-      return true;
+      blend->setWeightX(weight);
+      blend->setWeightY(weight);
+      return {WeightRole};
     }
     default:;
   }
 
-  return false;
+  return {};
 }
 
 BlendModel *SystemModel::childModel(int index) {
@@ -393,11 +395,37 @@ void SystemModel::removeRowAtIndex(const QModelIndex &index) {
 }
 
 bool SystemModel::isFinalBlend(const QModelIndex &index) {
-  return index.isValid() && !index.parent().isValid() &&
-         index.row() == system_->blendCount();
+  auto id = index.internalId();
+  return blendIndexForId(id) == FINAL_BLEND_INDEX;
 }
+
 QModelIndex SystemModel::modelIndexForSelection(int index) {
   return this->index(index, 0, QModelIndex());
+}
+
+SystemElement *SystemModel::modelAtIndex(const QModelIndex &index) {
+  if (!index.isValid()) {
+    // TODO: do we even have to manipulate the system?
+    return nullptr;
+  }
+
+  auto *systemElement = new SystemElement(this, index);
+
+  auto id = index.internalId();
+  auto *blend = getBlendForId(id);
+  switch (rowTypeForId(id)) {
+    case RowType::BLEND:
+      systemElement->proxyElement(blend);
+      break;
+    case RowType::FORMULA:
+      systemElement->proxyElement(blend->formulaAt(formulaIndexForId(id)));
+      break;
+    case UNDEFINED:
+      // Don't proxy.
+      break;
+  }
+
+  return systemElement;
 }
 
 }  // namespace ui
