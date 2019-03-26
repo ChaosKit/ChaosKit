@@ -11,6 +11,8 @@ namespace ui {
 
 class Formula : public QObject {
   Q_OBJECT
+  Q_PROPERTY(float weightX READ weightX WRITE setWeightX NOTIFY weightChanged)
+  Q_PROPERTY(float weightY READ weightY WRITE setWeightY NOTIFY weightChanged)
  public:
   explicit Formula(QObject *parent = nullptr) : QObject(parent) {}
 

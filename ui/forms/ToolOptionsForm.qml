@@ -7,23 +7,30 @@ Pane {
   property var rootModel: null
   property var selectionModel: null
 
-  Label {
-    id: label
-    text: "Nothing selected"
-    anchors.centerIn: parent
+  Loader {
+    id: loader
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    source: "DocumentOptionsForm.qml"
   }
 
   Connections {
     target: selectionModel
     onCurrentChanged: {
       if (!current.valid) {
-        label.text = "Nothing selected";
+        loader.setSource(
+            'DocumentOptionsForm.qml',
+            {system: rootModel.modelAtIndex(current)});
       } else if (current.parent.valid) {
-        label.text = `Formula number ${current.row}`;
-      } else if (rootModel.isFinalBlend(current)) {
-        label.text = "Final blend";
+        loader.setSource(
+            'FormulaOptionsForm.qml',
+            {formula: rootModel.modelAtIndex(current)});
       } else {
-        label.text = `Blend number ${current.row}`;
+        loader.setSource(
+            'BlendOptionsForm.qml', {
+              blend: rootModel.modelAtIndex(current),
+              isFinalBlend: rootModel.isFinalBlend(current)});
       }
     }
   }
