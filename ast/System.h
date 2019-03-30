@@ -10,7 +10,7 @@ namespace ast {
 
 class System {
  public:
-  System(std::vector<LimitedBlend> blends)
+  System(std::vector<LimitedBlend> blends = {})
       : blends_(std::move(blends)), final_blend_() {}
   System(std::vector<LimitedBlend> blends, Blend final_blend)
       : blends_(std::move(blends)), final_blend_(std::move(final_blend)) {}
