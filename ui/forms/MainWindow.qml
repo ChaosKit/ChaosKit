@@ -1,3 +1,4 @@
+import QtQml.Models 2.12
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
@@ -14,6 +15,15 @@ ApplicationWindow {
 
   SystemModel {
     id: systemModel
+  }
+
+  ItemSelectionModel {
+    id: selectionModel
+    model: systemModel
+
+    onCurrentChanged: {
+      editor.selectedElement = systemModel.modelAtIndex(current);
+    }
   }
 
   Editor {
@@ -108,6 +118,7 @@ ApplicationWindow {
       StructureForm {
         id: structureForm
         model: systemModel
+        selectionModel: selectionModel
       }
       RenderingForm {
         id: renderingForm

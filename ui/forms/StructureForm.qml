@@ -1,6 +1,5 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
-import QtQml.Models 2.12
 import "../controls"
 import "../resources"
 
@@ -8,19 +7,16 @@ ColumnLayout {
   id: root
   spacing: 0
 
-  property alias model: repeater.model
-
-  ItemSelectionModel {
-    id: rootSelectionModel
-    model: repeater.model
-  }
+  property alias model: toolOptions.rootModel
+  property alias selectionModel: toolOptions.selectionModel
 
   Repeater {
     id: repeater
+    model: root.model
     delegate: BlendListItem {
       Layout.fillWidth: true
-      rootModel: repeater.model
-      selectionModel: rootSelectionModel
+      rootModel: root.model
+      selectionModel: root.selectionModel
     }
   }
 
@@ -28,7 +24,7 @@ ColumnLayout {
     Layout.fillWidth: true
     Layout.fillHeight: true
 
-    onClicked: rootSelectionModel.clear()
+    onClicked: selectionModel.clear()
   }
 
   RowLayout {
@@ -45,19 +41,17 @@ ColumnLayout {
     }
 
     SymbolButton {
-      enabled: rootSelectionModel.currentIndex.valid &&
-          !model.isFinalBlend(rootSelectionModel.currentIndex)
+      enabled: selectionModel.currentIndex.valid &&
+          !model.isFinalBlend(selectionModel.currentIndex)
       symbol: Icons.faTrashAlt
-      onClicked: model.removeRowAtIndex(rootSelectionModel.currentIndex)
+      onClicked: model.removeRowAtIndex(selectionModel.currentIndex)
     }
   }
 
   ToolOptionsForm {
+    id: toolOptions
     Layout.fillWidth: true
     Layout.minimumHeight: 30
     Layout.preferredHeight: 200
-
-    rootModel: model
-    selectionModel: rootSelectionModel
   }
 }
