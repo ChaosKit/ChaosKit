@@ -7,8 +7,8 @@
 #include "SystemElement.h"
 #include "models/toSource.h"
 
-using chaoskit::ui::System;
 using chaoskit::library::FormulaType;
+using chaoskit::ui::System;
 
 namespace chaoskit {
 namespace ui {
@@ -155,6 +155,7 @@ QHash<int, QByteArray> SystemModel::roleNames() const {
   names[WeightRole] = "weight";
   names[BlendIndexRole] = "blendIndex";
   names[IsFinalBlendRole] = "isFinalBlend";
+  names[ElementTypeRole] = "elementType";
   return names;
 }
 
@@ -307,12 +308,15 @@ QVariant SystemModel::blendData(const Blend *blend, int role) const {
       if (blend->name().isEmpty()) {
         return QStringLiteral("(unnamed)");
       }
+      [[fallthrough]];
     case Qt::EditRole:
       return blend->name();
     case WeightRole:
       return blend->weight();
     case IsFinalBlendRole:
       return blend == system_->finalBlend();
+    case ElementTypeRole:
+      return RowType::BLEND;
     default:;
   }
 
@@ -347,6 +351,8 @@ QVariant SystemModel::formulaData(const Formula *formula, int role) const {
       return formula->weightX();  // TODO: support weight_y
     case IsFinalBlendRole:
       return false;
+    case ElementTypeRole:
+      return RowType::FORMULA;
     default:;
   }
 

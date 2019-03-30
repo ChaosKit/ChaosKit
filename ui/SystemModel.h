@@ -20,6 +20,7 @@ class SystemModel : public QAbstractItemModel {
     WeightRole = Qt::UserRole + 1,
     BlendIndexRole,
     IsFinalBlendRole,
+    ElementTypeRole,
   };
   explicit SystemModel(QObject *parent = nullptr);
 
