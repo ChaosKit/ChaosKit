@@ -3,6 +3,7 @@
         <file>qtquickcontrols2.conf</file>
         <file>controls/SymbolButton.qml</file>
         <file>controls/Slider.qml</file>
+        <file>controls/TransformControl.qml</file>
         <file>forms/AddFormulaForm.qml</file>
         <file>forms/AstInspector.qml</file>
         <file>forms/BlendListItem.qml</file>
