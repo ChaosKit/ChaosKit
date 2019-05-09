@@ -1,8 +1,7 @@
 #include "UnaryFunction.h"
 #include "util.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 GENERATE_NODE_TYPE(UnaryFunction)
 
@@ -14,5 +13,4 @@ std::ostream &operator<<(std::ostream &stream, const UnaryFunction &function) {
   return stream << outdent << indentation << ")";
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

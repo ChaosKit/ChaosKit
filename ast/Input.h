@@ -4,8 +4,7 @@
 #include <enum.h>
 #include <ostream>
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 BETTER_ENUM(Input_Type, char, X, Y)
 
@@ -25,7 +24,6 @@ class Input {
 
 std::ostream& operator<<(std::ostream& stream, const Input& input);
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_INPUT_H

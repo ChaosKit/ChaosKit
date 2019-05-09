@@ -5,8 +5,7 @@
 #include <vector>
 #include "LimitedBlend.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 class System {
  public:
@@ -29,7 +28,6 @@ class System {
 
 std::ostream &operator<<(std::ostream &stream, const System &system);
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_SYSTEM_H

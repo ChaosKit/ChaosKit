@@ -7,8 +7,7 @@
 #include "HistogramBuffer.h"
 #include "Point.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class GathererTask : public QObject {
   Q_OBJECT
@@ -27,7 +26,6 @@ class GathererTask : public QObject {
   core::HistogramBuffer buffer_;
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_GATHERERTASK_H

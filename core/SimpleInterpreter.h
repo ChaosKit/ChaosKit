@@ -6,8 +6,7 @@
 #include "Point.h"
 #include "Rng.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 class SimpleInterpreter {
  public:
@@ -37,7 +36,6 @@ class SimpleInterpreter {
   void updateMaxLimit();
 };
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_SIMPLEINTERPRETER_H

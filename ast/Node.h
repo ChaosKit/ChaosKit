@@ -9,8 +9,7 @@
 #include "Transform.h"
 #include "UnaryFunction.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 class Formula;
 class WeightedFormula;
@@ -35,13 +34,12 @@ struct Node : public NodeAlias {
   Node(const Expression& expression);
 };
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
-#include "Formula.h"
-#include "WeightedFormula.h"
 #include "Blend.h"
+#include "Formula.h"
 #include "LimitedBlend.h"
 #include "System.h"
+#include "WeightedFormula.h"
 
 #endif  // CHAOSKIT_AST_NODE_H

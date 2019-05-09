@@ -7,8 +7,7 @@
 #include "Formula.h"
 #include "Transform.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 struct Blend {
   Transform pre, post;
@@ -16,7 +15,6 @@ struct Blend {
   float weight = 1.f;
 };
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_BLEND_H

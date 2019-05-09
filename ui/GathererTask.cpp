@@ -1,8 +1,7 @@
 #include "GathererTask.h"
 #include <QColor>
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 using core::HistogramBuffer;
 using core::HistogramColor;
@@ -44,5 +43,4 @@ void GathererTask::withHistogram(
   action(buffer_);
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

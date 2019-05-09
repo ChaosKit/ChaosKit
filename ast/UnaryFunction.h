@@ -1,12 +1,11 @@
 #ifndef CHAOSKIT_AST_UNARYFUNCTION_H
 #define CHAOSKIT_AST_UNARYFUNCTION_H
 
-#include <ostream>
 #include <enum.h>
+#include <ostream>
 #include "Expression.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 BETTER_ENUM(UnaryFunction_Type, char, SIN, COS, TAN, MINUS, SQRT, ATAN, TRUNC,
             EXP, FLOOR, CEIL, SIGNUM, ABS, NOT)
@@ -32,7 +31,6 @@ class UnaryFunction {
 
 std::ostream& operator<<(std::ostream& stream, const UnaryFunction& function);
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_UNARYFUNCTION_H

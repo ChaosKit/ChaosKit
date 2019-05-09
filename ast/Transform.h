@@ -4,8 +4,7 @@
 #include <array>
 #include <ostream>
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 class Transform {
  public:
@@ -30,7 +29,6 @@ class Transform {
 
 std::ostream &operator<<(std::ostream &stream, const Transform &transform);
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_TRANSFORM_H

@@ -1,8 +1,7 @@
 #include "Formula.h"
 #include "util.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 GENERATE_NODE_TYPE(Formula)
 
@@ -15,5 +14,4 @@ std::ostream &operator<<(std::ostream &stream, const Formula &formula) {
   return stream << outdent << indentation << ")";
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

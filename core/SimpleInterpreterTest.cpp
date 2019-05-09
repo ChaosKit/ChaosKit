@@ -4,8 +4,7 @@
 #include <ast/helpers.h>
 #include "SimpleInterpreter.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 using ast::Formula;
 using ast::System;
@@ -18,8 +17,7 @@ TEST(SimpleInterpreterTest, EmptySystem) {
 
   SimpleInterpreter interpreter(system);
 
-  ASSERT_THAT(interpreter(input),
-              Eq(SimpleInterpreter::Result{input, input}));
+  ASSERT_THAT(interpreter(input), Eq(SimpleInterpreter::Result{input, input}));
 }
 
 TEST(SimpleInterpreter, InterpretsFormula) {
@@ -31,5 +29,4 @@ TEST(SimpleInterpreter, InterpretsFormula) {
               Eq(SimpleInterpreter::Result{Point(1.f, 2.f), Point(1.f, 2.f)}));
 }
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core

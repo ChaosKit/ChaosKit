@@ -1,8 +1,7 @@
 #include "Blend.h"
 #include "util.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 GENERATE_NODE_TYPE(Blend);
 
@@ -17,5 +16,4 @@ std::ostream &operator<<(std::ostream &stream, const Blend &blend) {
   return stream << outdent << indentation << ")";
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

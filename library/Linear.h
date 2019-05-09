@@ -8,9 +8,7 @@ namespace library {
 
 class Linear : public Formula {
  public:
-  ast::Formula source() override {
-    return {input.x(), input.y()};
-  }
+  ast::Formula source() override { return {input.x(), input.y()}; }
 
   uint32_t paramCount() override { return 0; }
 };
@@ -18,4 +16,4 @@ class Linear : public Formula {
 }  // namespace library
 }  // namespace chaoskit
 
-#endif //CHAOSKIT_LIBRARY_LINEAR_H
+#endif  // CHAOSKIT_LIBRARY_LINEAR_H

@@ -2,8 +2,7 @@
 #include "ThreadLocalRng.h"
 #include "toSource.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 SimpleBlender::SimpleBlender(const System &system, uint32_t width,
                              uint32_t height, std::shared_ptr<Rng> rng)
@@ -45,7 +44,7 @@ void SimpleBlender::run() {
   Point point{rng_->randomFloat(-1.f, 1.f), rng_->randomFloat(-1.f, 1.f)};
 
   for (size_t i = 0; !iteration_count_ || i < *iteration_count_; i++) {
-    auto[next_state, output] = interpreter_(point);
+    auto [next_state, output] = interpreter_(point);
     point = next_state;
     add(output);
   }
@@ -67,5 +66,4 @@ void SimpleBlender::add(uint32_t x, uint32_t y, float factor) {
   buffer_[y * width_ + x] += factor;
 }
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core

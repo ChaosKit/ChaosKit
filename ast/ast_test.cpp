@@ -6,8 +6,7 @@
 #include "ast.h"
 #include "helpers.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 template <>
 std::string node_type(const Node& node) {
@@ -338,5 +337,4 @@ TEST(AstTest, MakeSystemWithFormula) {
   ASSERT_THAT(actual, EqualsTree(expected));
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

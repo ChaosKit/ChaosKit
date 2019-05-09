@@ -14,9 +14,7 @@ class DeJong : public Formula {
             sin(params[2] * input.x()) - cos(params[3] * input.y())};
   }
 
-  uint32_t paramCount() override {
-    return 4;
-  }
+  uint32_t paramCount() override { return 4; }
 };
 
 }  // namespace library

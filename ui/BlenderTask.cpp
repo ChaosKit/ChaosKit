@@ -7,8 +7,7 @@ using chaoskit::core::Point;
 using chaoskit::core::SimpleInterpreter;
 using chaoskit::ui::toSource;
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 namespace {
 
@@ -50,7 +49,7 @@ void BlenderTask::calculate() {
     return;
   }
 
-  auto[next_state, output] = (*interpreter_)(particle_.point);
+  auto [next_state, output] = (*interpreter_)(particle_.point);
   // TODO: calculate color in AST
   float unused;
   particle_.color = modf(distance(particle_.point, next_state) * .2f, &unused);
@@ -85,5 +84,4 @@ void BlenderTask::resetParticle() {
                                                : rng_->randomInt(1, ttl_);
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

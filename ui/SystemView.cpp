@@ -6,8 +6,7 @@
 
 using chaoskit::core::HistogramBuffer;
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 namespace {
 
@@ -157,5 +156,4 @@ void SystemView::updateBufferSize() {
                       static_cast<quint32>(height()));
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

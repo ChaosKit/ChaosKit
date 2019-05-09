@@ -5,8 +5,7 @@
 #include <ast/WeightedFormula.h>
 #include <vector>
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 struct Formula {
   ast::Formula source;
@@ -20,7 +19,6 @@ struct Formula {
   }
 };
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_FORMULA_H

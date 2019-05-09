@@ -6,8 +6,7 @@
 #include "Drain.h"
 #include "Linear.h"
 
-namespace chaoskit {
-namespace library {
+namespace chaoskit::library {
 
 namespace {
 
@@ -38,5 +37,4 @@ uint32_t paramCount(FormulaType type) {
   return createFormula(type)->paramCount();
 }
 
-}  // namespace library
-}  // namespace chaoskit
+}  // namespace chaoskit::library

@@ -14,12 +14,12 @@
 
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
+using chaoskit::library::FormulaType;
 using chaoskit::ui::BlendModel;
 using chaoskit::ui::System;
 using chaoskit::ui::SystemElement;
 using chaoskit::ui::SystemModel;
 using chaoskit::ui::SystemView;
-using chaoskit::library::FormulaType;
 
 QStringList createFormulaList() {
   QStringList result;

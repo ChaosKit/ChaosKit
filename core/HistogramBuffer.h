@@ -5,8 +5,7 @@
 #include <vector>
 #include "HistogramColor.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 class HistogramBuffer {
  public:
@@ -34,7 +33,6 @@ class HistogramBuffer {
   std::vector<HistogramColor> buffer_;
 };
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_HISTOGRAMBUFFER_H

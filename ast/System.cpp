@@ -1,8 +1,7 @@
 #include "System.h"
 #include "util.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 GENERATE_NODE_TYPE(System);
 
@@ -15,5 +14,4 @@ std::ostream &operator<<(std::ostream &stream, const System &system) {
                 << indentation << ")";
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

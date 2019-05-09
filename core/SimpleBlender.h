@@ -7,8 +7,7 @@
 #include "SimpleInterpreter.h"
 #include "System.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 class SimpleBlender {
  public:
@@ -37,7 +36,6 @@ class SimpleBlender {
   void add(uint32_t x, uint32_t y, float factor = 1);
 };
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_SIMPLEBLENDER_H

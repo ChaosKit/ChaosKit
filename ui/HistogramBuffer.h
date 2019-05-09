@@ -6,4 +6,4 @@
 
 Q_DECLARE_METATYPE(chaoskit::core::HistogramBuffer);
 
-#endif //CHAOSKIT_UI_HISTOGRAMBUFFER_H
+#endif  // CHAOSKIT_UI_HISTOGRAMBUFFER_H

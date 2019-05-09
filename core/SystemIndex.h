@@ -23,7 +23,8 @@ struct SystemIndex {
 }  // namespace chaoskit
 
 namespace std {
-template <> struct hash<chaoskit::core::SystemIndex> {
+template <>
+struct hash<chaoskit::core::SystemIndex> {
   typedef chaoskit::core::SystemIndex argument_type;
   typedef std::size_t result_type;
 
@@ -31,6 +32,6 @@ template <> struct hash<chaoskit::core::SystemIndex> {
     return (index.formula & 0xffff) | (index.blend << 16);
   }
 };
-}
+}  // namespace std
 
 #endif  // CHAOSKIT_CORE_SYSTEMINDEX_H

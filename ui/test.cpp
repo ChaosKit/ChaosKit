@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
   format.setProfile(QSurfaceFormat::CoreProfile);
   QSurfaceFormat::setDefaultFormat(format);
 
-  auto *window = new TestWindow();
+  auto* window = new TestWindow();
   window->show();
 
   return QApplication::exec();

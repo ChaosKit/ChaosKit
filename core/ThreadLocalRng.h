@@ -3,8 +3,7 @@
 
 #include "Rng.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 class ThreadLocalRng : public Rng {
  public:
@@ -12,7 +11,6 @@ class ThreadLocalRng : public Rng {
   int randomInt(int min, int max) override;
 };
 
-}
-}
+}  // namespace chaoskit::core
 
-#endif //CHAOSKIT_CORE_THREADLOCALRNG_H
+#endif  // CHAOSKIT_CORE_THREADLOCALRNG_H

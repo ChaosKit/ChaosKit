@@ -8,8 +8,7 @@
 #include "models/Formula.h"
 #include "models/System.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class SystemModel : public QAbstractItemModel {
   Q_OBJECT
@@ -70,7 +69,6 @@ class SystemModel : public QAbstractItemModel {
                               const QVariant &value) const;
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_SYSTEMMODEL_H

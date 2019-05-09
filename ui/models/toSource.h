@@ -10,15 +10,13 @@
 #include "Formula.h"
 #include "System.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 ast::Blend toSource(const Blend *blend);
 ast::WeightedFormula toSource(const Formula *formula);
 ast::Transform toSource(const QTransform &transform);
 ast::System toSource(const System *system);
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_TOSOURCE_H

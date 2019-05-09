@@ -7,8 +7,7 @@
 #include "Blend.h"
 #include "Params.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 struct System {
   std::vector<Blend> blends;
@@ -38,7 +37,6 @@ struct System {
   }
 };
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_SYSTEM_H

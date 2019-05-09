@@ -2,8 +2,7 @@
 
 #include "randutils.hpp"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 namespace {
 thread_local randutils::mt19937_rng rng;
@@ -17,5 +16,4 @@ int ThreadLocalRng::randomInt(int min, int max) {
   return rng.uniform(min, max);
 }
 
-}
-}
+}  // namespace chaoskit::core

@@ -3,8 +3,7 @@
 
 #include <QAbstractProxyModel>
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class BlendModel : public QAbstractProxyModel {
   Q_OBJECT
@@ -42,7 +41,6 @@ class BlendModel : public QAbstractProxyModel {
   void sourceRowsRemoved(const QModelIndex &sourceParent, int start, int end);
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_FLATTENINGMODEL_H

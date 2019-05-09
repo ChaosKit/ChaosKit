@@ -2,8 +2,7 @@
 #include <QMetaProperty>
 #include "SystemModel.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 SystemElement::SystemElement(SystemModel *model, const QModelIndex &index)
     : QQmlPropertyMap(this, model), model_(model), index_(index) {
@@ -40,5 +39,4 @@ void SystemElement::handleValueChanged(const QString &key,
   }
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

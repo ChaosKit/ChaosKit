@@ -15,13 +15,13 @@
 
 using chaoskit::core::Blend;
 using chaoskit::core::Formula;
+using chaoskit::core::formulaIndex;
 using chaoskit::core::Params;
 using chaoskit::core::Point;
 using chaoskit::core::SimpleBlender;
 using chaoskit::core::System;
-using chaoskit::core::Transform;
 using chaoskit::core::ThreadLocalRng;
-using chaoskit::core::formulaIndex;
+using chaoskit::core::Transform;
 using chaoskit::library::DeJong;
 using namespace chaoskit::ast::helpers;
 

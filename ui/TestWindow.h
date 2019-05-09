@@ -1,13 +1,12 @@
 #ifndef CHAOSKIT_UI_TESTWINDOW_H
 #define CHAOSKIT_UI_TESTWINDOW_H
 
-#include <QOpenGLWindow>
 #include <QKeyEvent>
+#include <QOpenGLWindow>
 #include "GLToneMapper.h"
 #include "HistogramGenerator.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class TestWindow : public QOpenGLWindow {
  public:
@@ -27,7 +26,6 @@ class TestWindow : public QOpenGLWindow {
   void syncHistogram();
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_TESTWINDOW_H

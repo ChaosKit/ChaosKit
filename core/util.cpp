@@ -2,8 +2,7 @@
 
 #include "util.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 stdx::optional<size_t> formulaIndex(const ast::Formula &formula,
                                     const ast::Blend &blend) {
@@ -39,5 +38,4 @@ stdx::optional<SystemIndex> formulaIndex(const ast::Formula &formula,
   return stdx::nullopt;
 }
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core

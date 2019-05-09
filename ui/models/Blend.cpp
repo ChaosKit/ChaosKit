@@ -2,8 +2,7 @@
 
 using chaoskit::library::FormulaType;
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 void Blend::setName(const QString &name) {
   if (name == name_) {
@@ -69,5 +68,4 @@ void Blend::setWeight(float weight) {
   emit weightChanged();
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

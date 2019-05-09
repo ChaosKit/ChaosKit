@@ -8,8 +8,7 @@
 using chaoskit::core::HistogramBuffer;
 using chaoskit::library::FormulaType;
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 TestWindow::TestWindow() {
   setTitle(QStringLiteral("ChaosKit (Test Window)"));
@@ -65,5 +64,4 @@ void TestWindow::syncHistogram() {
   update();
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

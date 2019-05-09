@@ -1,8 +1,7 @@
 #include "WeightedFormula.h"
 #include "util.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 GENERATE_NODE_TYPE(WeightedFormula);
 
@@ -13,5 +12,4 @@ std::ostream &operator<<(std::ostream &stream, const WeightedFormula &formula) {
                 << outdent << indentation << ")";
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

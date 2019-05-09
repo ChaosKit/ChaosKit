@@ -6,8 +6,7 @@
 
 using chaoskit::library::Linear;
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 ast::Blend toSource(const Blend *blend) {
   if (blend == nullptr) {
@@ -72,5 +71,4 @@ ast::System toSource(const System *system) {
   return ast::System{std::move(limitedBlends), toSource(system->finalBlend())};
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

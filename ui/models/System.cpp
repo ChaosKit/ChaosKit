@@ -3,8 +3,7 @@
 using chaoskit::core::Params;
 using chaoskit::core::SystemIndex;
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 System::System(QObject *parent) : QObject(parent) {
   final_blend_ = new Blend(this);
@@ -78,5 +77,4 @@ Params System::params() const {
   return params;
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

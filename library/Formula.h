@@ -4,8 +4,7 @@
 #include "ast/Formula.h"
 #include "ast/helpers.h"
 
-namespace chaoskit {
-namespace library {
+namespace chaoskit::library {
 
 class Formula {
  public:
@@ -18,7 +17,6 @@ class Formula {
   ast::helpers::ParameterHelper params;
 };
 
-}  // namespace library
-}  // namespace chaoskit
+}  // namespace chaoskit::library
 
 #endif  // CHAOSKIT_LIBRARY_FORMULA_H

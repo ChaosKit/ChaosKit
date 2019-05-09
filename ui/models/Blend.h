@@ -7,8 +7,7 @@
 #include <QtGui/QTransform>
 #include "Formula.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class Blend : public QObject {
   Q_OBJECT
@@ -50,7 +49,6 @@ class Blend : public QObject {
   float weight_ = 1.f;
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_BLEND_H

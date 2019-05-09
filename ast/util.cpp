@@ -2,8 +2,7 @@
 #include <algorithm>
 #include <string>
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 int StreamPrinter::indentLocation = std::ios_base::xalloc();
 
@@ -18,5 +17,4 @@ std::ios_base &outdent(std::ios_base &os) {
   return os;
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

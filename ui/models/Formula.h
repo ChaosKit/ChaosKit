@@ -6,8 +6,7 @@
 #include <QObject>
 #include <QVector>
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class Formula : public QObject {
   Q_OBJECT
@@ -43,7 +42,6 @@ class Formula : public QObject {
   void expandParams(int size);
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_FORMULA_H

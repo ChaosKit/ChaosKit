@@ -1,7 +1,6 @@
 #include "BlendModel.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 void BlendModel::setSourceModel(QAbstractItemModel *model) {
   beginResetModel();
@@ -138,5 +137,4 @@ QModelIndex BlendModel::modelIndexForSelection(int index) {
   return mapToSource(this->index(index, 0, QModelIndex()));
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

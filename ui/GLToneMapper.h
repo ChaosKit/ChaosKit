@@ -5,13 +5,12 @@
 #include <QOpenGLFunctions_3_2_Core>
 #include <QOpenGLShaderProgram>
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class GLToneMapper : public QObject, protected QOpenGLFunctions_3_2_Core {
   Q_OBJECT
  public:
-  explicit GLToneMapper(QObject *parent = nullptr): QObject(parent) {}
+  explicit GLToneMapper(QObject *parent = nullptr) : QObject(parent) {}
 
   void initializeGL();
   void setGamma(float gamma);
@@ -35,7 +34,6 @@ class GLToneMapper : public QObject, protected QOpenGLFunctions_3_2_Core {
   void getUniformLocation(const char *name, GLuint *output);
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_GLTONEMAPPER_H

@@ -2,8 +2,7 @@
 #include <library/util.h>
 #include <QRandomGenerator>
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 void Formula::setType(const QString &typeName) {
   // throws std::runtime_error if the type is missing
@@ -67,5 +66,4 @@ void Formula::setWeightY(float weight) {
   emit weightChanged();
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

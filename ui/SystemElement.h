@@ -4,8 +4,7 @@
 #include <QPersistentModelIndex>
 #include <QQmlPropertyMap>
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class SystemModel;
 
@@ -24,7 +23,6 @@ class SystemElement : public QQmlPropertyMap {
   void handleValueChanged(const QString &key, const QVariant &value);
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_SYSTEMELEMENT_H

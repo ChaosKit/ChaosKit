@@ -1,8 +1,7 @@
 #include "BinaryFunction.h"
 #include "util.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 GENERATE_NODE_TYPE(BinaryFunction)
 
@@ -16,5 +15,4 @@ std::ostream &operator<<(std::ostream &stream, const BinaryFunction &function) {
   return stream << outdent << indentation << ")";
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

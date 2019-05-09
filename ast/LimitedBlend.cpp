@@ -1,8 +1,7 @@
 #include "LimitedBlend.h"
 #include "util.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 GENERATE_NODE_TYPE(LimitedBlend);
 
@@ -12,5 +11,4 @@ std::ostream &operator<<(std::ostream &stream, const LimitedBlend &blend) {
                 << outdent << indentation << ")";
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

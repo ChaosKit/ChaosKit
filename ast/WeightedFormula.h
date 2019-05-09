@@ -4,8 +4,7 @@
 #include <ostream>
 #include "Formula.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 class WeightedFormula {
  public:
@@ -33,7 +32,6 @@ class WeightedFormula {
 
 std::ostream& operator<<(std::ostream& stream, const WeightedFormula& formula);
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_WEIGHTEDFORMULA_H

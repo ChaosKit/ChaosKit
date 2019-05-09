@@ -10,8 +10,7 @@
 using chaoskit::library::FormulaType;
 using chaoskit::ui::System;
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 namespace {
 
@@ -434,5 +433,4 @@ SystemElement *SystemModel::modelAtIndex(const QModelIndex &index) {
   return systemElement;
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

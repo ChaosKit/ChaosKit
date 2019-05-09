@@ -4,8 +4,7 @@
 #include <ast/Formula.h>
 #include "FormulaType.h"
 
-namespace chaoskit {
-namespace library {
+namespace chaoskit::library {
 
 ast::Formula source(FormulaType type);
 template <class T>
@@ -19,7 +18,6 @@ uint32_t paramCount() {
   return T().paramCount();
 }
 
-}  // namespace library
-}  // namespace chaoskit
+}  // namespace chaoskit::library
 
 #endif  // CHAOSKIT_LIBRARY_UTIL_H

@@ -7,15 +7,13 @@
 #include <stdx/optional.h>
 #include "SystemIndex.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 stdx::optional<size_t> formulaIndex(const ast::Formula &formula,
                                     const ast::Blend &blend);
 stdx::optional<SystemIndex> formulaIndex(const ast::Formula &formula,
                                          const ast::System &system);
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_UTIL_H

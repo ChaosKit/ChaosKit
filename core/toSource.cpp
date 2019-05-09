@@ -3,8 +3,7 @@
 #include <cmath>
 #include <vector>
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 ast::Blend toSource(const Blend &blend) {
   std::vector<ast::WeightedFormula> weighted_formulas;
@@ -50,5 +49,4 @@ ast::System toSource(const System &system) {
   return ast::System{std::move(limitedBlends), toSource(system.final_blend)};
 }
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core

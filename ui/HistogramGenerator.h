@@ -8,8 +8,7 @@
 #include "HistogramBuffer.h"
 #include "models/System.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class HistogramGenerator : public QObject {
   Q_OBJECT
@@ -41,7 +40,6 @@ class HistogramGenerator : public QObject {
   bool running_ = false;
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_HISTOGRAMGENERATOR_H

@@ -6,8 +6,7 @@ using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
 using chaoskit::core::ThreadLocalRng;
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 HistogramGenerator::HistogramGenerator(QObject *parent) : QObject(parent) {
   thread_ = new QThread();
@@ -71,5 +70,4 @@ void HistogramGenerator::clear() {
   gathererTask_->clear();
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

@@ -1,12 +1,11 @@
 #ifndef CHAOSKIT_AST_BINARYFUNCTION_H
 #define CHAOSKIT_AST_BINARYFUNCTION_H
 
-#include <ostream>
 #include <enum.h>
+#include <ostream>
 #include "Expression.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 BETTER_ENUM(BinaryFunction_Type, char, ADD, SUBTRACT, MULTIPLY, DIVIDE, POWER,
             MODULO, AND, OR, LESS_THAN, GREATER_THAN, EQUALS,
@@ -35,7 +34,6 @@ class BinaryFunction {
 
 std::ostream& operator<<(std::ostream& stream, const BinaryFunction& function);
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_BINARYFUNCTION_H

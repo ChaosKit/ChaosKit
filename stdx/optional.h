@@ -5,7 +5,7 @@
 
 #include <optional>
 namespace stdx {
-  using namespace ::std;
+using namespace ::std;
 }
 
 #elif __has_include(<experimental/optional>)
@@ -14,10 +14,10 @@ namespace stdx {
 namespace stdx {
 using namespace ::std;
 using namespace ::std::experimental;
-}
+}  // namespace stdx
 
 #else
 #error C++17 Optionals are required.
 #endif
 
-#endif //CHAOSKIT_OPTIONAL_H
+#endif  // CHAOSKIT_OPTIONAL_H

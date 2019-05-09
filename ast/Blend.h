@@ -5,8 +5,7 @@
 #include "Transform.h"
 #include "WeightedFormula.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 class Blend {
  public:
@@ -33,7 +32,6 @@ class Blend {
 
 std::ostream &operator<<(std::ostream &stream, const Blend &blend);
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_BLEND_H

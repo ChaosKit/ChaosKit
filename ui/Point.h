@@ -6,4 +6,4 @@
 
 Q_DECLARE_METATYPE(chaoskit::core::Point);
 
-#endif //CHAOSKIT_UI_POINT_H
+#endif  // CHAOSKIT_UI_POINT_H

@@ -1,8 +1,7 @@
 #include "Transform.h"
 #include "util.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 GENERATE_NODE_TYPE(Transform);
 
@@ -21,5 +20,4 @@ std::ostream &operator<<(std::ostream &stream, const Transform &transform) {
   return stream << ")";
 }
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast

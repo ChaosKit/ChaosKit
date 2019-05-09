@@ -8,8 +8,7 @@
 
 #include "ThreadLocalRng.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 using UnaryFn = ast::UnaryFunction_Type;
 using BinaryFn = ast::BinaryFunction_Type;
@@ -170,5 +169,4 @@ SimpleInterpreter::Result SimpleInterpreter::operator()(Point input) {
                            SystemIndex::FINAL_BLEND)(system_.final_blend())};
 }
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core

@@ -1,7 +1,6 @@
 #include "GLToneMapper.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 namespace {
 
@@ -130,5 +129,4 @@ void GLToneMapper::map() {
   program_->release();
 }
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui

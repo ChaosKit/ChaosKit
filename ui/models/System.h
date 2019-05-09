@@ -5,8 +5,7 @@
 #include <QObject>
 #include "Blend.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class System : public QObject {
   Q_OBJECT
@@ -36,7 +35,6 @@ class System : public QObject {
   QPointer<Blend> final_blend_;
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_MODELS_SYSTEM_H

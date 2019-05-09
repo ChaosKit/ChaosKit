@@ -4,13 +4,12 @@
 #include <QQuickFramebufferObject>
 #include "HistogramGenerator.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class SystemView : public QQuickFramebufferObject {
   Q_OBJECT
-  Q_PROPERTY(chaoskit::ui::System *system READ system WRITE setSystem
-                 NOTIFY systemChanged)
+  Q_PROPERTY(chaoskit::ui::System *system READ system WRITE setSystem NOTIFY
+                 systemChanged)
   Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
   Q_PROPERTY(int ttl READ ttl WRITE setTtl NOTIFY ttlChanged)
   Q_PROPERTY(float gamma READ gamma WRITE setGamma NOTIFY gammaChanged)
@@ -64,7 +63,6 @@ class SystemView : public QQuickFramebufferObject {
   void updateBufferSize();
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_SYSTEMVIEW_H

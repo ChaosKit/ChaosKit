@@ -6,8 +6,7 @@
 #include <ostream>
 #include <string>
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 using mapbox::util::apply_visitor;
 using mapbox::util::static_variant_cast;
@@ -60,7 +59,6 @@ class NodeTypeVisitor {
   }
 };
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_UTIL_H

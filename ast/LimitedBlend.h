@@ -4,8 +4,7 @@
 #include <ostream>
 #include "Blend.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 class LimitedBlend {
  public:
@@ -26,7 +25,6 @@ class LimitedBlend {
 
 std::ostream &operator<<(std::ostream &stream, const LimitedBlend &blend);
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_LIMITEDBLEND_H

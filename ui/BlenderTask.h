@@ -6,8 +6,7 @@
 #include "Particle.h"
 #include "models/System.h"
 
-namespace chaoskit {
-namespace ui {
+namespace chaoskit::ui {
 
 class BlenderTask : public QObject {
   Q_OBJECT
@@ -41,7 +40,6 @@ class BlenderTask : public QObject {
   void resetParticle();
 };
 
-}  // namespace ui
-}  // namespace chaoskit
+}  // namespace chaoskit::ui
 
 #endif  // CHAOSKIT_UI_BLENDERTASK_H

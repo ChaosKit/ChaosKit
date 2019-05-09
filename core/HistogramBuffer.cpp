@@ -1,7 +1,6 @@
 #include "HistogramBuffer.h"
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 void HistogramBuffer::clear() {
   std::fill(buffer_.begin(), buffer_.end(), HistogramColor::zero());
@@ -14,5 +13,4 @@ void HistogramBuffer::resize(size_t width, size_t height) {
   height_ = height;
 }
 
-}
-}
+}  // namespace chaoskit::core

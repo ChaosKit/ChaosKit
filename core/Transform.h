@@ -4,8 +4,7 @@
 #include <ast/Transform.h>
 #include <cmath>
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 struct Transform {
   float angle = 0.f;
@@ -54,7 +53,6 @@ struct Transform {
   }
 };
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_TRANSFORM_H

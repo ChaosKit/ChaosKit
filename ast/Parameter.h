@@ -4,8 +4,7 @@
 #include <cstddef>
 #include <ostream>
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 class Parameter {
  public:
@@ -23,7 +22,6 @@ class Parameter {
 
 std::ostream& operator<<(std::ostream& stream, const Parameter& parameter);
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_PARAMETER_H

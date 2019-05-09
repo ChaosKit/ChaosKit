@@ -3,8 +3,7 @@
 
 #include <ostream>
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 class Point {
  public:
@@ -35,7 +34,6 @@ class Point {
 
 std::ostream &operator<<(std::ostream &stream, const Point &point);
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_POINT_H
