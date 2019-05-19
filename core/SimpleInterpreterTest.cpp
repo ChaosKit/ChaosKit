@@ -6,13 +6,11 @@
 
 namespace chaoskit::core {
 
-using ast::Formula;
-using ast::System;
 using ast::helpers::make_system;
 using testing::Eq;
 
 TEST(SimpleInterpreterTest, EmptySystem) {
-  System system{};
+  ast::System system{};
   Point input{0.f, 0.f};
 
   SimpleInterpreter interpreter(system);
@@ -21,7 +19,7 @@ TEST(SimpleInterpreterTest, EmptySystem) {
 }
 
 TEST(SimpleInterpreter, InterpretsFormula) {
-  Formula formula{1.f, 2.f};
+  ast::Formula formula{1.f, 2.f};
 
   SimpleInterpreter interpreter(make_system(formula));
 

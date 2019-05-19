@@ -1,6 +1,6 @@
+add_subdirectory(structures)
+
 add_library(core
-        Blend.h
-        Formula.h
         HistogramBuffer.h HistogramBuffer.cpp
         HistogramColor.h
         Params.h
@@ -9,14 +9,12 @@ add_library(core
         Rng.h
         SimpleBlender.h SimpleBlender.cpp
         SimpleInterpreter.h SimpleInterpreter.cpp
-        System.h
         SystemIndex.h
         ThreadLocalRng.h ThreadLocalRng.cpp
-        Transform.h
         random.h
         toSource.h toSource.cpp
         util.h util.cpp)
-target_link_libraries(core PUBLIC ast stdx randutils)
+target_link_libraries(core PUBLIC ast stdx randutils INTERFACE core_structures)
 
 add_executable(core_test SimpleInterpreterTest.cpp)
 target_link_libraries(core_test PRIVATE gmock gmock_main ast core)

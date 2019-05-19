@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "SimpleInterpreter.h"
-#include "System.h"
+#include "structures/System.h"
 
 namespace chaoskit::core {
 

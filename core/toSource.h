@@ -4,10 +4,10 @@
 #include <ast/System.h>
 #include <ast/Transform.h>
 #include <ast/WeightedFormula.h>
-#include "Blend.h"
-#include "Formula.h"
-#include "System.h"
-#include "Transform.h"
+#include "structures/Blend.h"
+#include "structures/Formula.h"
+#include "structures/System.h"
+#include "structures/Transform.h"
 
 namespace chaoskit::core {
 

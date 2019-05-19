@@ -1,7 +1,7 @@
 #ifndef CHAOSKIT_UI_FORMULA_H
 #define CHAOSKIT_UI_FORMULA_H
 
-#include <core/Formula.h>
+#include <core/structures/Formula.h>
 #include <library/FormulaType.h>
 #include <QObject>
 #include <QVector>

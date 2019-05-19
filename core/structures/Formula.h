@@ -14,8 +14,11 @@ struct Formula {
   float weight_y = 1.f;
 
   template <class Type>
-  static Formula build(std::vector<float> params = {}) {
-    return Formula{Type().source(), std::move(params)};
+  static std::shared_ptr<Formula> build(const std::vector<float>& params = {}) {
+    auto formula = std::make_shared<Formula>();
+    formula->source = Type().source();
+    formula->params = params;
+    return formula;
   }
 };
 

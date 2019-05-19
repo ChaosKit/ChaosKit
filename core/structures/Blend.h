@@ -2,6 +2,7 @@
 #define CHAOSKIT_CORE_BLEND_H
 
 #include <ast/Blend.h>
+#include <memory>
 #include <vector>
 
 #include "Formula.h"
@@ -11,7 +12,7 @@ namespace chaoskit::core {
 
 struct Blend {
   Transform pre, post;
-  std::vector<Formula> formulas;
+  std::vector<std::shared_ptr<Formula>> formulas;
   float weight = 1.f;
 };
 

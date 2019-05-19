@@ -10,7 +10,7 @@ SimpleBlender::SimpleBlender(const System &system, uint32_t width,
       height_(height),
       buffer_(width * height),
       iteration_count_(stdx::nullopt),
-      interpreter_(toSource(system), system.params()),
+      interpreter_(toSource(system), Params::fromSystem(system)),
       rng_(std::move(rng)) {}
 
 SimpleBlender::SimpleBlender(const System &system, uint32_t width,
@@ -20,7 +20,7 @@ SimpleBlender::SimpleBlender(const System &system, uint32_t width,
 
 void SimpleBlender::setSystem(const System &system) {
   interpreter_.setSystem(toSource(system));
-  interpreter_.setParams(system.params());
+  interpreter_.setParams(Params::fromSystem(system));
 }
 
 void SimpleBlender::setSize(uint32_t width, uint32_t height) {
