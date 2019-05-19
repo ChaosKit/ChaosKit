@@ -1,4 +1,5 @@
 add_subdirectory(structures)
+add_subdirectory(models)
 
 add_library(core
         HistogramBuffer.h HistogramBuffer.cpp
@@ -13,8 +14,10 @@ add_library(core
         ThreadLocalRng.h ThreadLocalRng.cpp
         random.h
         toSource.h toSource.cpp
-        util.h util.cpp)
-target_link_libraries(core PUBLIC ast stdx randutils INTERFACE core_structures)
+        util.h util.cpp transforms.cpp transforms.h)
+target_link_libraries(core
+        PUBLIC ast stdx randutils core_models
+        INTERFACE core_structures)
 
 add_executable(core_test SimpleInterpreterTest.cpp)
 target_link_libraries(core_test PRIVATE gmock gmock_main ast core)

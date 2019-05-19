@@ -17,17 +17,12 @@ ast::Blend toSource(const Blend &blend) {
 }
 
 ast::WeightedFormula toSource(const Formula &formula) {
-  return ast::WeightedFormula{formula.source, formula.weight_x,
-                              formula.weight_y};
+  return ast::WeightedFormula{formula.source, formula.weight.x,
+                              formula.weight.y};
 }
 
 ast::Transform toSource(const Transform &transform) {
-  float sin = std::sin(transform.angle);
-  float cos = std::cos(transform.angle);
-
-  return ast::Transform{transform.scale_x * cos, transform.scale_x * -sin,
-                        transform.translation_x, transform.scale_y * sin,
-                        transform.scale_y * cos, transform.translation_y};
+  return ast::Transform(transform.values);
 }
 
 ast::System toSource(const System &system) {
@@ -46,7 +41,7 @@ ast::System toSource(const System &system) {
                    return ast::LimitedBlend{toSource(*blend), limit};
                  });
 
-  return ast::System{std::move(limitedBlends), toSource(*system.final_blend)};
+  return ast::System{std::move(limitedBlends), toSource(*system.finalBlend)};
 }
 
 }  // namespace chaoskit::core

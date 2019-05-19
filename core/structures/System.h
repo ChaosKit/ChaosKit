@@ -12,7 +12,7 @@ namespace chaoskit::core {
 
 struct System {
   std::vector<std::shared_ptr<Blend>> blends;
-  std::shared_ptr<Blend> final_blend;
+  std::shared_ptr<Blend> finalBlend;
 };
 
 }  // namespace chaoskit::core

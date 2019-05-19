@@ -26,8 +26,8 @@ class Params {
       }
     }
 
-    for (size_t j = 0; j < system.final_blend->formulas.size(); ++j) {
-      const auto &formula = system.final_blend->formulas[j];
+    for (size_t j = 0; j < system.finalBlend->formulas.size(); ++j) {
+      const auto &formula = system.finalBlend->formulas[j];
       if (!formula->params.empty()) {
         result[SystemIndex{SystemIndex::FINAL_BLEND, j}] = formula->params;
       }

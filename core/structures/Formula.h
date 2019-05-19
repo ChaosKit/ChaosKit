@@ -8,18 +8,14 @@
 namespace chaoskit::core {
 
 struct Formula {
+  struct Weight {
+    float x;
+    float y;
+  };
+
   ast::Formula source;
   std::vector<float> params;
-  float weight_x = 1.f;
-  float weight_y = 1.f;
-
-  template <class Type>
-  static std::shared_ptr<Formula> build(const std::vector<float>& params = {}) {
-    auto formula = std::make_shared<Formula>();
-    formula->source = Type().source();
-    formula->params = params;
-    return formula;
-  }
+  Weight weight = {1.f, 1.f};
 };
 
 }  // namespace chaoskit::core

@@ -1,55 +1,27 @@
 #ifndef CHAOSKIT_CORE_TRANSFORM_H
 #define CHAOSKIT_CORE_TRANSFORM_H
 
-#include <ast/Transform.h>
+#include <array>
 #include <cmath>
 
 namespace chaoskit::core {
 
 struct Transform {
-  float angle = 0.f;
-  float scale_x = 1.f;
-  float scale_y = 1.f;
-  float translation_x = 0.f;
-  float translation_y = 0.f;
+  std::array<float, 6> values;
 
-  static Transform identity() { return Transform{}; }
-  static Transform fromRotation(float radians) {
-    return Transform{}.rotate(radians);
-  }
-  static Transform fromScale(float scale) {
-    return Transform{}.setScale(scale);
-  }
-  static Transform fromScale(float x, float y) {
-    return Transform{}.scale(x, y);
-  }
-  static Transform fromTranslation(float x, float y) {
-    return Transform{}.translate(x, y);
-  }
+  constexpr Transform() : values{1, 0, 0, 0, 1, 0} {}
+  constexpr explicit Transform(std::array<float, 6> &&values)
+      : values(std::forward<std::array<float, 6>>(values)) {}
 
-  Transform &setScale(float scale) {
-    scale_x = scale;
-    scale_y = scale;
-    return *this;
-  }
-  Transform &rotate(float radians) {
-    angle += radians;
-    return *this;
-  }
-  Transform &scale(float scale) {
-    scale_x *= scale;
-    scale_y *= scale;
-    return *this;
-  }
-  Transform &scale(float x, float y) {
-    scale_x *= x;
-    scale_y *= y;
-    return *this;
-  }
-  Transform &translate(float x, float y) {
-    translation_x += x;
-    translation_y += y;
-    return *this;
+  Transform operator*(const Transform &other) const {
+    return Transform({
+        values[0] * other.values[0] + values[1] * other.values[3],
+        values[0] * other.values[1] + values[1] * other.values[4],
+        values[0] * other.values[2] + values[1] * other.values[5] + values[2],
+        values[3] * other.values[0] + values[4] * other.values[3],
+        values[3] * other.values[1] + values[4] * other.values[4],
+        values[3] * other.values[2] + values[4] * other.values[5] + values[5],
+    });
   }
 };
 
