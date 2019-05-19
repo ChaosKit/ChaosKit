@@ -16,4 +16,4 @@ add_subdirectory(library)
 add_subdirectory(ui)
 
 add_executable(lol lol.cpp)
-target_link_libraries(lol PRIVATE core_models)
+target_link_libraries(lol PRIVATE core library)
