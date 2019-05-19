@@ -8,7 +8,7 @@ add_library(core
         Particle.h
         Point.h Point.cpp
         Rng.h
-        SimpleBlender.h SimpleBlender.cpp
+        SimpleHistogramGenerator.h SimpleHistogramGenerator.cpp
         SimpleInterpreter.h SimpleInterpreter.cpp
         SystemIndex.h
         ThreadLocalRng.h ThreadLocalRng.cpp

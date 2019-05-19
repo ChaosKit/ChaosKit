@@ -16,4 +16,4 @@ add_subdirectory(library)
 add_subdirectory(ui)
 
 add_executable(lol lol.cpp)
-target_link_libraries(lol PRIVATE core library)
+target_link_libraries(lol PRIVATE core library Qt5::Gui)

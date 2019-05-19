@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "SystemIndex.h"
+#include "models/SystemModel.h"
 #include "structures/System.h"
 
 namespace chaoskit::core {
@@ -34,6 +35,10 @@ class Params {
     }
 
     return result;
+  }
+
+  static Params fromSystem(const SystemModel &system) {
+    return fromSystem(*system.data().lock());
   }
 
   std::vector<float> &operator[](const SystemIndex &index) {
