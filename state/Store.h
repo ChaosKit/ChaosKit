@@ -32,6 +32,17 @@ class Store {
     return id;
   }
 
+  template <typename T, typename Fn>
+  const Id create(Fn updater) {
+    Id id = nextId<T>();
+    auto [it, ok] = entities_.emplace(id, T());
+
+    T* entity = &mapbox::util::get_unchecked<T>(it->second);
+    updater(entity);
+
+    return id;
+  }
+
   template <typename T>
   const Id lastId() const {
     uint32_t type = Entity::template which<T>();

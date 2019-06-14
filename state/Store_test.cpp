@@ -53,6 +53,15 @@ TEST_F(StoreTest, AssignsUniqueTypesAcrossTypes) {
   EXPECT_NE(one, two);
 }
 
+TEST_F(StoreTest, AllowsToModifyObjectAfterCreation) {
+  Store<Simple> store;
+
+  Id id = store.create<Simple>([](Simple *simple) { simple->property = 42; });
+
+  EXPECT_THAT(store.find<Simple>(id),
+              Pointee(Field(&Simple::property, Eq(42))));
+}
+
 // Store::find()
 
 TEST_F(StoreTest, FindsEntities) {
