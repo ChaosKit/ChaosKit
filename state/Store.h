@@ -10,9 +10,14 @@
 
 namespace chaoskit::state {
 
-class IdTypeMismatch : public std::logic_error {
+class IdTypeMismatchError : public std::logic_error {
  public:
-  explicit IdTypeMismatch(const char* what) : std::logic_error(what) {}
+  explicit IdTypeMismatchError(const char* what) : std::logic_error(what) {}
+};
+
+class MissingIdError : public std::logic_error {
+ public:
+  explicit MissingIdError(const char* what) : std::logic_error(what) {}
 };
 
 template <typename... Ts>
@@ -56,7 +61,7 @@ class Store {
   template <typename T>
   const T* find(Id id) const {
     if (!matchesType<T>(id)) {
-      throw IdTypeMismatch("in Store::find()");
+      throw IdTypeMismatchError("in Store::find()");
     }
 
     auto it = entities_.find(id);
@@ -83,26 +88,26 @@ class Store {
   size_t size() const { return entities_.size(); }
 
   template <typename T, typename Fn>
-  bool update(Id id, Fn updater) {
+  void update(Id id, Fn updater) {
     if (!matchesType<T>(id)) {
-      throw IdTypeMismatch("in Store::update()");
+      throw IdTypeMismatchError("in Store::update()");
     }
 
     auto it = entities_.find(id);
     if (it == entities_.end()) {
-      return false;
+      throw MissingIdError("in Store::update()");
     }
 
     T* entity = &mapbox::util::get_unchecked<T>(it->second);
     updater(entity);
-    return true;
   }
 
   void remove(Id id) {
     auto it = entities_.find(id);
-    if (it != entities_.end()) {
-      entities_.erase(it);
+    if (it == entities_.end()) {
+      throw MissingIdError("in Store::remove()");
     }
+    entities_.erase(it);
   }
 
   template <typename T>

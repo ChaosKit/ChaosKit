@@ -8,7 +8,8 @@
 #include "Id.h"
 
 using chaoskit::state::Id;
-using chaoskit::state::IdTypeMismatch;
+using chaoskit::state::IdTypeMismatchError;
+using chaoskit::state::MissingIdError;
 using chaoskit::state::Store;
 using testing::Eq;
 using testing::Field;
@@ -87,7 +88,7 @@ TEST_F(StoreTest, ThrowsWhenFindingDifferentTypeThanStoredInId) {
   Store<Simple> store;
   Id id{0, 0};
 
-  EXPECT_THROW(store.find<Simple>(id), IdTypeMismatch);
+  EXPECT_THROW(store.find<Simple>(id), IdTypeMismatchError);
 }
 
 // Store::lastId()
@@ -138,22 +139,19 @@ TEST_F(StoreTest, UpdatesFields) {
   Store<Simple> store;
   Id id = store.create<Simple>();
 
-  bool isUpdated =
-      store.update<Simple>(id, [](Simple *s) { s->property = 42; });
+  store.update<Simple>(id, [](Simple *s) { s->property = 42; });
   auto *entity = store.find<Simple>(id);
 
-  EXPECT_TRUE(isUpdated);
   EXPECT_THAT(entity, Pointee(Field(&Simple::property, Eq(42))));
 }
 
-TEST_F(StoreTest, DoesNotUpdateMissingEntities) {
+TEST_F(StoreTest, ThrowsWhenUpdatingMissingEntities) {
   Store<Simple> store;
   Id missing = store.lastId<Simple>();
 
-  bool isUpdated =
-      store.update<Simple>(missing, [](Simple *s) { s->property = 42; });
-
-  EXPECT_FALSE(isUpdated);
+  EXPECT_THROW(
+      store.update<Simple>(missing, [](Simple *s) { s->property = 42; }),
+      MissingIdError);
 }
 
 TEST_F(StoreTest, ThrowsWhenUpdatingDifferentTypeThanStoredInId) {
@@ -161,7 +159,7 @@ TEST_F(StoreTest, ThrowsWhenUpdatingDifferentTypeThanStoredInId) {
   Id differentType{2137, 2};
 
   EXPECT_THROW(store.update<Simple>(differentType, [](Simple *s) {}),
-               IdTypeMismatch);
+               IdTypeMismatchError);
 }
 
 // Store::has()
@@ -217,6 +215,14 @@ TEST_F(StoreTest, RemovesEntities) {
   store.remove(id);
 
   EXPECT_FALSE(store.has(id));
+}
+
+TEST_F(StoreTest, ThrowsWhenRemovingMissingEntities) {
+  Store<Simple> store;
+  Id id = store.create<Simple>();
+  store.remove(id);
+
+  EXPECT_THROW(store.remove(id), MissingIdError);
 }
 
 // Store::clear()
