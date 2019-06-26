@@ -105,7 +105,8 @@ class Store {
   size_t size() const { return entities_.size(); }
 
   template <typename T, typename Fn>
-  void update(Id id, Fn updater) {
+  auto update(Id id, Fn updater)
+      -> decltype(updater(static_cast<T*>(nullptr))) {
     if (!matchesType<T>(id)) {
       throw IdTypeMismatchError("in Store::update()");
     }
@@ -124,7 +125,7 @@ class Store {
     }
 
     T* entity = &mapbox::util::get_unchecked<T>(it->second);
-    updater(entity);
+    return updater(entity);
   }
 
   void remove(Id id) {

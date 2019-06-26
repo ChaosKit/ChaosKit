@@ -153,6 +153,15 @@ TEST_F(StoreTest, UpdatesFields) {
   EXPECT_THAT(entity, Pointee(Field(&Simple::property, Eq(42))));
 }
 
+TEST_F(StoreTest, UpdateReturnsWhatTheUpdaterReturns) {
+  Store<Simple> store;
+  Id id = store.create<Simple>();
+
+  int result = store.update<Simple>(id, [](Simple *s) { return 42; });
+
+  EXPECT_EQ(42, result);
+}
+
 TEST_F(StoreTest, ThrowsWhenUpdatingMissingEntities) {
   Store<Simple> store;
   Id missing = store.lastId<Simple>();
