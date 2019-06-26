@@ -11,8 +11,10 @@ using chaoskit::state::Id;
 using chaoskit::state::IdTypeMismatchError;
 using chaoskit::state::MissingIdError;
 using chaoskit::state::Store;
+using testing::AllOf;
 using testing::Eq;
 using testing::Field;
+using testing::Ne;
 using testing::NotNull;
 using testing::Pointee;
 
@@ -24,6 +26,12 @@ struct Another {
 };
 
 class StoreTest : public ::testing::Test {};
+
+template <typename... Ts>
+void triggerStoreException(Store<Ts...> &store) {
+  Id invalid;
+  store.remove(invalid);
+}
 
 // Store::create()
 
@@ -257,6 +265,106 @@ TEST_F(StoreTest, ClearsEverything) {
   EXPECT_FALSE(store.has(simple2));
   EXPECT_FALSE(store.has(another1));
   EXPECT_FALSE(store.has(another2));
+}
+
+// Store::transaction()
+
+TEST_F(StoreTest, ExecutesOperations) {
+  Store<Simple> store;
+
+  bool success = store.transaction([&store]() {
+    Id id = store.create<Simple>();
+    store.update<Simple>(id, [](Simple *s) { s->property = 1; });
+  });
+
+  EXPECT_TRUE(success);
+  const auto *entity = store.find<Simple>(store.lastId<Simple>());
+  EXPECT_THAT(entity, Pointee(Field(&Simple::property, Eq(1))));
+}
+
+TEST_F(StoreTest, AbortsTransactionOnUpdateFailure) {
+  Store<Simple> store;
+
+  bool success = store.transaction([&store]() {
+    Id invalid;
+    store.update<Simple>(invalid, [](Simple *s) {});
+  });
+
+  EXPECT_FALSE(success);
+}
+
+TEST_F(StoreTest, AbortsTransactionOnRemoveFailure) {
+  Store<Simple> store;
+
+  bool success = store.transaction([&store]() {
+    Id invalid;
+    store.remove(invalid);
+  });
+
+  EXPECT_FALSE(success);
+}
+
+TEST_F(StoreTest, TransactionRollsBackCreates) {
+  Store<Simple> store;
+
+  store.transaction([&store]() {
+    store.create<Simple>();
+    triggerStoreException(store);
+  });
+
+  EXPECT_EQ(0, store.size());
+}
+
+TEST_F(StoreTest, TransactionRollsBackUpdates) {
+  Store<Simple> store;
+  Id id = store.create<Simple>();
+
+  store.transaction([&store, id]() {
+    store.update<Simple>(id, [](Simple *s) { s->property = 21; });
+    store.update<Simple>(id, [](Simple *s) { s->property = 42; });
+    triggerStoreException(store);
+  });
+
+  const auto *entity = store.find<Simple>(id);
+  EXPECT_THAT(entity, Pointee(Field(&Simple::property, AllOf(Ne(21), Ne(42)))));
+}
+
+TEST_F(StoreTest, TransactionRollsBackRemovals) {
+  Store<Simple> store;
+  Id id = store.create<Simple>();
+
+  store.transaction([&store, id]() {
+    store.remove(id);
+    triggerStoreException(store);
+  });
+
+  EXPECT_TRUE(store.has(id));
+}
+
+TEST_F(StoreTest, TransactionRollsBackClears) {
+  Store<Simple> store;
+  store.create<Simple>();
+  store.create<Simple>();
+
+  store.transaction([&store]() {
+    store.clear<Simple>();
+    triggerStoreException(store);
+  });
+
+  EXPECT_EQ(2, store.size());
+}
+
+TEST_F(StoreTest, TransactionRollsBackClearAlls) {
+  Store<Simple, Another> store;
+  store.create<Simple>();
+  store.create<Another>();
+
+  store.transaction([&store]() {
+    store.clearAll();
+    triggerStoreException(store);
+  });
+
+  EXPECT_EQ(2, store.size());
 }
 
 #pragma clang diagnostic pop

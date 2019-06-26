@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <mapbox/variant.hpp>
@@ -24,16 +25,28 @@ template <typename... Ts>
 class Store {
   using Entity = mapbox::util::variant<Ts...>;
 
+  struct TransactionData {
+    std::unordered_set<Id> created;
+    std::unordered_map<Id, Entity> updated;
+    std::unordered_map<Id, Entity> removed;
+  };
+
   std::unordered_map<Id, Entity> entities_;
   std::vector<uint32_t> counters_;
+  std::unique_ptr<TransactionData> currentTransaction_;
 
  public:
-  Store() : entities_(), counters_(sizeof...(Ts), 0) {}
+  Store() : entities_(), counters_(sizeof...(Ts), 0), currentTransaction_() {}
 
   template <typename T>
   const Id create() {
     Id id = nextId<T>();
     entities_.emplace(id, T());
+
+    if (currentTransaction_) {
+      currentTransaction_->created.insert(id);
+    }
+
     return id;
   }
 
@@ -44,6 +57,10 @@ class Store {
 
     T* entity = &mapbox::util::get_unchecked<T>(it->second);
     updater(entity);
+
+    if (currentTransaction_) {
+      currentTransaction_->created.insert(id);
+    }
 
     return id;
   }
@@ -98,6 +115,14 @@ class Store {
       throw MissingIdError("in Store::update()");
     }
 
+    if (currentTransaction_) {
+      auto& updated = currentTransaction_->updated;
+      auto updatedIt = updated.find(it->first);
+      if (updatedIt == updated.end()) {
+        updated.insert(*it);
+      }
+    }
+
     T* entity = &mapbox::util::get_unchecked<T>(it->second);
     updater(entity);
   }
@@ -107,13 +132,22 @@ class Store {
     if (it == entities_.end()) {
       throw MissingIdError("in Store::remove()");
     }
-    entities_.erase(it);
+
+    if (currentTransaction_) {
+      auto node = entities_.extract(it);
+      currentTransaction_->removed.insert(std::move(node));
+    } else {
+      entities_.erase(it);
+    }
   }
 
   template <typename T>
   void clear() {
     for (auto it = entities_.begin(); it != entities_.end();) {
       if (matchesType<T>(it->first)) {
+        if (currentTransaction_) {
+          currentTransaction_->removed.insert(std::move(*it));
+        }
         it = entities_.erase(it);
       } else {
         it++;
@@ -121,7 +155,41 @@ class Store {
     }
   }
 
-  void clearAll() { entities_.clear(); }
+  void clearAll() {
+    if (currentTransaction_) {
+      currentTransaction_->removed.insert(entities_.begin(), entities_.end());
+    }
+    entities_.clear();
+  }
+
+  template <typename Fn>
+  bool transaction(Fn runner) {
+    currentTransaction_ = std::make_unique<TransactionData>();
+    bool success = true;
+    try {
+      runner();
+    } catch (std::logic_error& e) {
+      {
+        auto& removed = currentTransaction_->removed;
+        entities_.insert(removed.begin(), removed.end());
+      }
+
+      {
+        auto& updated = currentTransaction_->updated;
+        for (auto it = updated.begin(); it != updated.end(); it++) {
+          entities_[it->first] = std::move(it->second);
+        }
+      }
+
+      for (auto id : currentTransaction_->created) {
+        entities_.erase(id);
+      }
+
+      success = false;
+    }
+    currentTransaction_.reset();
+    return success;
+  }
 
  private:
   template <typename T>
