@@ -128,7 +128,12 @@ class Store {
     return updater(entity);
   }
 
+  template <typename T>
   void remove(Id id) {
+    if (!matchesType<T>(id)) {
+      throw IdTypeMismatchError("in Store::remove()");
+    }
+
     auto it = entities_.find(id);
     if (it == entities_.end()) {
       throw MissingIdError("in Store::remove()");

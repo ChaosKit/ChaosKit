@@ -27,10 +27,10 @@ struct Another {
 
 class StoreTest : public ::testing::Test {};
 
-template <typename... Ts>
-void triggerStoreException(Store<Ts...> &store) {
+template <typename T, typename... Ts>
+void triggerStoreException(Store<T, Ts...> &store) {
   Id invalid;
-  store.remove(invalid);
+  store.template remove<T>(invalid);
 }
 
 // Store::create()
@@ -229,7 +229,7 @@ TEST_F(StoreTest, RemovesEntities) {
   Store<Simple> store;
   Id id = store.create<Simple>();
 
-  store.remove(id);
+  store.remove<Simple>(id);
 
   EXPECT_FALSE(store.has(id));
 }
@@ -237,9 +237,16 @@ TEST_F(StoreTest, RemovesEntities) {
 TEST_F(StoreTest, ThrowsWhenRemovingMissingEntities) {
   Store<Simple> store;
   Id id = store.create<Simple>();
-  store.remove(id);
+  store.remove<Simple>(id);
 
-  EXPECT_THROW(store.remove(id), MissingIdError);
+  EXPECT_THROW(store.remove<Simple>(id), MissingIdError);
+}
+
+TEST_F(StoreTest, ThrowsWhenRemovedIdTypeDoesNotMatch) {
+  Store<Simple, Another> store;
+  Id id = store.create<Simple>();
+
+  EXPECT_THROW(store.remove<Another>(id), IdTypeMismatchError);
 }
 
 // Store::clear()
@@ -307,7 +314,7 @@ TEST_F(StoreTest, AbortsTransactionOnRemoveFailure) {
 
   bool success = store.transaction([&store]() {
     Id invalid;
-    store.remove(invalid);
+    store.remove<Simple>(invalid);
   });
 
   EXPECT_FALSE(success);
@@ -343,7 +350,7 @@ TEST_F(StoreTest, TransactionRollsBackRemovals) {
   Id id = store.create<Simple>();
 
   store.transaction([&store, id]() {
-    store.remove(id);
+    store.remove<Simple>(id);
     triggerStoreException(store);
   });
 
