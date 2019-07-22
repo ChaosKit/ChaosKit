@@ -283,6 +283,16 @@ TEST_F(StoreTest, ClearsEverything) {
   EXPECT_FALSE(store.has(another2));
 }
 
+// Store::containsType()
+
+TEST_F(StoreTest, ContainsTypeReturnsTrueIfStoreContainsType) {
+  EXPECT_TRUE(Store<Simple>::containsType<Simple>());
+}
+
+TEST_F(StoreTest, ContainsTypeReturnsFalseIfStoreDoesNotContainType) {
+  EXPECT_FALSE(Store<Simple>::containsType<Another>());
+}
+
 // Store::transaction()
 
 TEST_F(StoreTest, ExecutesOperations) {

@@ -2,6 +2,7 @@
 #define CHAOSKIT_STATE_STORE_H
 
 #include <stdexcept>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -10,6 +11,13 @@
 #include "Id.h"
 
 namespace chaoskit::state {
+
+namespace detail {
+
+template <typename T, typename... Ts>
+struct Contains : std::disjunction<std::is_same<T, Ts>...> {};
+
+}  // namespace detail
 
 class IdTypeMismatchError : public std::logic_error {
  public:
@@ -197,12 +205,22 @@ class Store {
     return success;
   }
 
- private:
   template <typename T>
-  bool matchesType(Id id) const {
-    return Entity::template which<T>() + 1 == id.type;
+  constexpr static bool containsType() {
+    return detail::Contains<T, Ts...>::value;
   }
 
+ protected:
+  template <typename T>
+  bool matchesType(Id id) const {
+    if constexpr (containsType<T>()) {
+      return Entity::template which<T>() + 1 == id.type;
+    } else {
+      return false;
+    }
+  }
+
+ private:
   template <typename T>
   Id nextId() {
     return nextId(Entity::template which<T>());
