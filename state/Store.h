@@ -33,15 +33,21 @@ template <typename... Ts>
 class Store {
   using Entity = mapbox::util::variant<Ts...>;
 
-  struct TransactionData {
+  struct Changes {
     std::unordered_set<Id> created;
     std::unordered_map<Id, Entity> updated;
     std::unordered_map<Id, Entity> removed;
+
+    void reset() {
+      created.clear();
+      updated.clear();
+      removed.clear();
+    }
   };
 
   std::unordered_map<Id, Entity> entities_;
   std::vector<uint32_t> counters_;
-  std::unique_ptr<TransactionData> currentTransaction_;
+  std::unique_ptr<Changes> currentTransaction_;
 
  public:
   Store() : entities_(), counters_(sizeof...(Ts), 0), currentTransaction_() {}
@@ -178,7 +184,7 @@ class Store {
 
   template <typename Fn>
   bool transaction(Fn runner) {
-    currentTransaction_ = std::make_unique<TransactionData>();
+    currentTransaction_ = std::make_unique<Changes>();
     bool success = true;
     try {
       runner();
