@@ -39,7 +39,7 @@ class HierarchicalStore : public Store<Ts...> {
   }
 
   template <typename P>
-  const Id associateNewChildWith(Id parentId) {
+  Id associateNewChildWith(Id parentId) {
     static_assert(isParent<P>());
     using ChildType = typename ChildOf<P>::Type;
 

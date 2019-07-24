@@ -65,7 +65,7 @@ class Store {
   Store() : entities_(), counters_(sizeof...(Ts), 0), currentTransaction_() {}
 
   template <typename T>
-  const Id create() {
+  Id create() {
     Id id = nextId<T>();
     entities_.emplace(id, T());
 
@@ -77,7 +77,7 @@ class Store {
   }
 
   template <typename T, typename Fn>
-  const Id create(Fn updater) {
+  Id create(Fn updater) {
     Id id = nextId<T>();
     auto [it, ok] = entities_.emplace(id, T());
 
@@ -92,12 +92,12 @@ class Store {
   }
 
   template <typename T>
-  const Id lastId() const {
+  Id lastId() const {
     uint32_t type = Entity::template which<T>();
     return {type + 1, counters_[type]};
   }
 
-  constexpr bool isValid(const Id& id) const {
+  [[nodiscard]] constexpr bool isValid(const Id& id) const {
     return id.type > 0 && id.id > 0 && id.type <= sizeof...(Ts);
   }
 
@@ -115,10 +115,12 @@ class Store {
     return &mapbox::util::get_unchecked<T>(it->second);
   }
 
-  bool has(Id id) const { return entities_.find(id) != entities_.end(); }
+  [[nodiscard]] bool has(Id id) const {
+    return entities_.find(id) != entities_.end();
+  }
 
   template <typename T>
-  size_t count() const {
+  [[nodiscard]] size_t count() const {
     size_t result = 0;
     for (auto it = entities_.begin(); it != entities_.end(); it++) {
       if (matchesType<T>(it->first)) {
@@ -128,7 +130,7 @@ class Store {
     return result;
   }
 
-  size_t size() const { return entities_.size(); }
+  [[nodiscard]] size_t size() const { return entities_.size(); }
 
   template <typename T, typename Fn>
   auto update(Id id, Fn updater)
@@ -243,7 +245,7 @@ class Store {
 
  protected:
   template <typename T>
-  bool matchesType(Id id) const {
+  [[nodiscard]] bool matchesType(Id id) const {
     if constexpr (containsType<T>()) {
       return Entity::template which<T>() + 1 == id.type;
     } else {
