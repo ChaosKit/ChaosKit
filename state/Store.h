@@ -31,12 +31,29 @@ class MissingIdError : public std::logic_error {
 
 template <typename... Ts>
 class Store {
+ public:
   using Entity = mapbox::util::variant<Ts...>;
 
   struct Changes {
     std::unordered_set<Id> created;
     std::unordered_map<Id, Entity> updated;
     std::unordered_map<Id, Entity> removed;
+
+    void merge(Changes& other) {
+      // TODO: update to use unordered_{map,set}::merge() once Apple supports it
+
+      for (auto it = other.created.begin(); it != other.created.end(); ++it) {
+        created.insert(std::move(other.created.extract(it)));
+      }
+
+      for (auto it = other.updated.begin(); it != other.updated.end(); ++it) {
+        updated.insert(std::move(other.updated.extract(it)));
+      }
+
+      for (auto it = other.removed.begin(); it != other.removed.end(); ++it) {
+        removed.insert(std::move(other.removed.extract(it)));
+      }
+    }
 
     void reset() {
       created.clear();
@@ -45,11 +62,6 @@ class Store {
     }
   };
 
-  std::unordered_map<Id, Entity> entities_;
-  std::vector<uint32_t> counters_;
-  std::unique_ptr<Changes> currentTransaction_;
-
- public:
   Store() : entities_(), counters_(sizeof...(Ts), 0), currentTransaction_() {}
 
   template <typename T>
@@ -57,8 +69,8 @@ class Store {
     Id id = nextId<T>();
     entities_.emplace(id, T());
 
-    if (currentTransaction_) {
-      currentTransaction_->created.insert(id);
+    if (trackingChanges()) {
+      currentChanges().created.insert(id);
     }
 
     return id;
@@ -72,8 +84,8 @@ class Store {
     T* entity = &mapbox::util::get_unchecked<T>(it->second);
     updater(entity);
 
-    if (currentTransaction_) {
-      currentTransaction_->created.insert(id);
+    if (trackingChanges()) {
+      currentChanges().created.insert(id);
     }
 
     return id;
@@ -130,8 +142,8 @@ class Store {
       throw MissingIdError("in Store::update()");
     }
 
-    if (currentTransaction_) {
-      auto& updated = currentTransaction_->updated;
+    if (trackingChanges()) {
+      auto& updated = currentChanges().updated;
       auto updatedIt = updated.find(it->first);
       if (updatedIt == updated.end()) {
         updated.insert(*it);
@@ -153,9 +165,9 @@ class Store {
       throw MissingIdError("in Store::remove()");
     }
 
-    if (currentTransaction_) {
+    if (trackingChanges()) {
       auto node = entities_.extract(it);
-      currentTransaction_->removed.insert(std::move(node));
+      currentChanges().removed.insert(std::move(node));
     } else {
       entities_.erase(it);
     }
@@ -165,8 +177,8 @@ class Store {
   void clear() {
     for (auto it = entities_.begin(); it != entities_.end();) {
       if (matchesType<T>(it->first)) {
-        if (currentTransaction_) {
-          currentTransaction_->removed.insert(std::move(*it));
+        if (trackingChanges()) {
+          currentChanges().removed.insert(std::move(*it));
         }
         it = entities_.erase(it);
       } else {
@@ -176,8 +188,8 @@ class Store {
   }
 
   void clearAll() {
-    if (currentTransaction_) {
-      currentTransaction_->removed.insert(entities_.begin(), entities_.end());
+    if (trackingChanges()) {
+      currentChanges().removed.insert(entities_.begin(), entities_.end());
     }
     entities_.clear();
   }
@@ -207,6 +219,9 @@ class Store {
 
       success = false;
     }
+    if (trackingChanges_) {
+      changes_.merge(*currentTransaction_);
+    }
     currentTransaction_.reset();
     return success;
   }
@@ -214,6 +229,16 @@ class Store {
   template <typename T>
   constexpr static bool containsType() {
     return detail::Contains<T, Ts...>::value;
+  }
+
+  const Changes& changes() const { return changes_; }
+  void resetChanges() { changes_.reset(); }
+
+  void setTrackingChanges(bool trackingChanges) {
+    trackingChanges_ = trackingChanges;
+  }
+  bool trackingChanges() const {
+    return trackingChanges_ || currentTransaction_;
   }
 
  protected:
@@ -227,6 +252,19 @@ class Store {
   }
 
  private:
+  std::unordered_map<Id, Entity> entities_;
+  std::vector<uint32_t> counters_;
+  std::unique_ptr<Changes> currentTransaction_;
+  Changes changes_;
+  bool trackingChanges_ = false;
+
+  Changes& currentChanges() {
+    if (currentTransaction_) {
+      return *currentTransaction_;
+    }
+    return changes_;
+  }
+
   template <typename T>
   Id nextId() {
     return nextId(Entity::template which<T>());

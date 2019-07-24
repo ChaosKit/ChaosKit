@@ -12,14 +12,20 @@ using chaoskit::state::IdTypeMismatchError;
 using chaoskit::state::MissingIdError;
 using chaoskit::state::Store;
 using testing::AllOf;
+using testing::ElementsAre;
 using testing::Eq;
 using testing::Field;
 using testing::Ne;
 using testing::NotNull;
+using testing::Pair;
 using testing::Pointee;
 
 struct Simple {
   int property = 0;
+
+  bool operator==(const Simple &other) const {
+    return property == other.property;
+  }
 };
 struct Another {
   float field = 0;
@@ -391,6 +397,103 @@ TEST_F(StoreTest, TransactionRollsBackClearAlls) {
   });
 
   EXPECT_EQ(2, store.size());
+}
+
+// Store::trackingChanges()
+
+TEST_F(StoreTest, TracksChangesIfThereIsATransaction) {
+  Store<Simple> store;
+
+  store.transaction([&store]() { EXPECT_TRUE(store.trackingChanges()); });
+}
+
+TEST_F(StoreTest, TracksChangesIfEnabledExplicitly) {
+  Store<Simple> store;
+  store.setTrackingChanges(true);
+
+  EXPECT_TRUE(store.trackingChanges());
+}
+
+TEST_F(StoreTest, DoesNotTrackChangesByDefault) {
+  Store<Simple> store;
+
+  EXPECT_FALSE(store.trackingChanges());
+}
+
+class StoreChangeTrackingTest : public ::testing::Test {
+ protected:
+  Store<Simple> store;
+
+  void SetUp() override { store.setTrackingChanges(true); }
+
+  void TearDown() override {
+    store.resetChanges();
+    store.setTrackingChanges(false);
+    store.clearAll();
+  }
+};
+
+// Store::changes()
+
+TEST_F(StoreChangeTrackingTest, TracksAdditions) {
+  Id id = store.create<Simple>();
+
+  EXPECT_THAT(store.changes().created, ElementsAre(id));
+}
+
+TEST_F(StoreChangeTrackingTest, TracksUpdates) {
+  Id id = store.create<Simple>();
+  store.update<Simple>(id, [](Simple *s) { s->property = 42; });
+
+  EXPECT_THAT(store.changes().updated, ElementsAre(Pair(id, Simple{0})));
+}
+
+TEST_F(StoreChangeTrackingTest, TracksOnlyFirstPreUpdateValue) {
+  Id id = store.create<Simple>();
+  store.update<Simple>(id, [](Simple *s) { s->property = 42; });
+  store.update<Simple>(id, [](Simple *s) { s->property = 2137; });
+
+  EXPECT_THAT(store.changes().updated, ElementsAre(Pair(id, Simple{0})));
+}
+
+TEST_F(StoreChangeTrackingTest, TracksRemovals) {
+  Id id = store.create<Simple>();
+  store.remove<Simple>(id);
+
+  EXPECT_THAT(store.changes().removed, ElementsAre(Pair(id, Simple{0})));
+}
+
+TEST_F(StoreChangeTrackingTest, TracksTransactions) {
+  store.transaction([this]() {
+    Id id = store.create<Simple>();
+    store.update<Simple>(id, [](Simple *s) { s->property = 42; });
+    store.remove<Simple>(id);
+  });
+
+  using Changes = Store<Simple>::Changes;
+  Id id = store.lastId<Simple>();
+  EXPECT_THAT(store.changes(),
+              AllOf(Field("created", &Changes::created, ElementsAre(id)),
+                    Field("updated", &Changes::updated,
+                          ElementsAre(Pair(id, Simple{0}))),
+                    Field("removed", &Changes::removed,
+                          ElementsAre(Pair(id, Simple{42})))));
+}
+
+// Store::resetChanges()
+
+TEST_F(StoreChangeTrackingTest, ResetsChanges) {
+  Id id = store.create<Simple>();
+  store.update<Simple>(id, [](Simple *s) { s->property = 42; });
+  store.remove<Simple>(id);
+
+  store.resetChanges();
+
+  using Changes = Store<Simple>::Changes;
+  EXPECT_THAT(store.changes(),
+              AllOf(Field("created", &Changes::created, ElementsAre()),
+                    Field("updated", &Changes::updated, ElementsAre()),
+                    Field("removed", &Changes::removed, ElementsAre())));
 }
 
 #pragma clang diagnostic pop
