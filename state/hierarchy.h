@@ -9,9 +9,9 @@
  * all the types for the specified relationship.
  *
  * Usage:
- * DEFINE_RELATION(Parent, Child, &Parent::child);
+ * CHAOSKIT_DEFINE_RELATION(Parent, Child, &Parent::child);
  */
-#define DEFINE_RELATION(ParentType, ChildType, ChildField) \
+#define CHAOSKIT_DEFINE_RELATION(ParentType, ChildType, ChildField) \
   namespace chaoskit::state {                              \
   template <>                                              \
   struct Relation<ParentType, ChildType> {                 \
@@ -31,9 +31,9 @@
  * children for the given ParentType.
  *
  * Usage:
- * DEFINE_CHILDREN(Parent, Child, AnotherChild);
+ * CHAOSKIT_DEFINE_CHILDREN(Parent, Child, AnotherChild);
  */
-#define DEFINE_CHILDREN(ParentType, ...)                \
+#define CHAOSKIT_DEFINE_CHILDREN(ParentType, ...)       \
   namespace chaoskit::state {                           \
   template <>                                           \
   struct ChildrenOf<ParentType> {                       \

@@ -32,12 +32,12 @@ struct HasMany {
   Two* two;
 };
 
-DEFINE_RELATION(HasOne, One, &HasOne::one);
-DEFINE_RELATION(HasMany, HasOne, &HasMany::hasOnes);
-DEFINE_RELATION(HasMany, Two, &HasMany::two);
+CHAOSKIT_DEFINE_RELATION(HasOne, One, &HasOne::one);
+CHAOSKIT_DEFINE_RELATION(HasMany, HasOne, &HasMany::hasOnes);
+CHAOSKIT_DEFINE_RELATION(HasMany, Two, &HasMany::two);
 
-DEFINE_CHILDREN(HasOne, One);
-DEFINE_CHILDREN(HasMany, HasOne, Two);
+CHAOSKIT_DEFINE_CHILDREN(HasOne, One);
+CHAOSKIT_DEFINE_CHILDREN(HasMany, HasOne, Two);
 
 class HierarchicalStoreTest : public testing::Test {};
 
