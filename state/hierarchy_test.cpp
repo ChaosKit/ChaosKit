@@ -22,6 +22,18 @@ using testing::Field;
 using testing::IsNull;
 using testing::Pointee;
 
+// The hierarchy represented in these tests looks as follows:
+//
+//   +---> One <---+---> Two
+//   |   1     *   |   *
+//   |             |
+//   + 1         1 + 1
+// HasOne <-+-> HasMany
+//        1 | 1
+//          |
+//        1 + 1
+//         Top
+
 struct One {
   int one = 1;
 };
@@ -32,16 +44,28 @@ struct HasOne {
   One* one;
 };
 struct HasMany {
-  std::vector<const HasOne*> hasOnes = {};
-  Two* two;
+  std::vector<const One*> ones = {};
+  std::vector<const Two*> twos = {};
+};
+struct Top {
+  HasOne* hasOne;
+  HasMany* hasMany;
 };
 
 CHAOSKIT_DEFINE_RELATION(HasOne, One, &HasOne::one);
-CHAOSKIT_DEFINE_RELATION(HasMany, HasOne, &HasMany::hasOnes);
-CHAOSKIT_DEFINE_RELATION(HasMany, Two, &HasMany::two);
+CHAOSKIT_DEFINE_RELATION(HasMany, One, &HasMany::ones);
+CHAOSKIT_DEFINE_RELATION(HasMany, Two, &HasMany::twos);
+CHAOSKIT_DEFINE_RELATION(Top, HasOne, &Top::hasOne);
+CHAOSKIT_DEFINE_RELATION(Top, HasMany, &Top::hasMany);
 
 CHAOSKIT_DEFINE_CHILDREN(HasOne, One);
-CHAOSKIT_DEFINE_CHILDREN(HasMany, HasOne, Two);
+CHAOSKIT_DEFINE_CHILDREN(HasMany, One, Two);
+CHAOSKIT_DEFINE_CHILDREN(Top, HasOne, HasMany);
+
+CHAOSKIT_DEFINE_PARENTS(One, HasOne, HasMany);
+CHAOSKIT_DEFINE_PARENTS(Two, HasMany);
+CHAOSKIT_DEFINE_PARENTS(HasOne, Top);
+CHAOSKIT_DEFINE_PARENTS(HasMany, Top);
 
 class HierarchyTest : public testing::Test {};
 
@@ -50,52 +74,63 @@ TEST_F(HierarchyTest, IsParent) {
   EXPECT_FALSE(isParent<Two>());
   EXPECT_TRUE(isParent<HasOne>());
   EXPECT_TRUE(isParent<HasMany>());
+  EXPECT_TRUE(isParent<Top>());
 }
 
 TEST_F(HierarchyTest, IsChild) {
   EXPECT_TRUE(isChild<One>());
   EXPECT_TRUE(isChild<Two>());
   EXPECT_TRUE(isChild<HasOne>());
-  EXPECT_FALSE(isChild<HasMany>());
+  EXPECT_TRUE(isChild<HasMany>());
+  EXPECT_FALSE(isChild<Top>());
 }
 
 TEST_F(HierarchyTest, IsParentOf) {
   EXPECT_TRUE((isParentOf<One, HasOne>()));
-  EXPECT_TRUE((isParentOf<HasOne, HasMany>()));
+  EXPECT_TRUE((isParentOf<One, HasMany>()));
+  EXPECT_TRUE((isParentOf<HasOne, Top>()));
   EXPECT_TRUE((isParentOf<Two, HasMany>()));
-  EXPECT_FALSE((isParentOf<One, HasMany>()));
+  EXPECT_TRUE((isParentOf<HasMany, Top>()));
+
   EXPECT_FALSE((isParentOf<HasMany, HasOne>()));
   EXPECT_FALSE((isParentOf<Two, One>()));
+  EXPECT_FALSE((isParentOf<Top, One>()));
 }
 
 TEST_F(HierarchyTest, IsChildOf) {
   EXPECT_TRUE((isChildOf<HasOne, One>()));
-  EXPECT_TRUE((isChildOf<HasMany, HasOne>()));
+  EXPECT_TRUE((isChildOf<HasMany, One>()));
   EXPECT_TRUE((isChildOf<HasMany, Two>()));
-  EXPECT_FALSE((isChildOf<HasMany, One>()));
+  EXPECT_TRUE((isChildOf<Top, HasOne>()));
+  EXPECT_TRUE((isChildOf<Top, HasMany>()));
+
   EXPECT_FALSE((isChildOf<HasOne, HasMany>()));
   EXPECT_FALSE((isChildOf<One, Two>()));
+  EXPECT_FALSE((isChildOf<Top, Two>()));
 }
 
 TEST_F(HierarchyTest, IsValidRelation) {
   EXPECT_TRUE((isValidRelation<HasOne, One>()));
-  EXPECT_TRUE((isValidRelation<HasMany, HasOne>()));
+  EXPECT_TRUE((isValidRelation<HasMany, One>()));
   EXPECT_TRUE((isValidRelation<HasMany, Two>()));
-  EXPECT_FALSE((isValidRelation<HasMany, One>()));
+
+  EXPECT_FALSE((isValidRelation<HasMany, HasOne>()));
   EXPECT_FALSE((isValidRelation<HasOne, HasMany>()));
   EXPECT_FALSE((isValidRelation<One, Two>()));
 }
 
 TEST_F(HierarchyTest, IsHasManyRelationship) {
   EXPECT_FALSE((isHasManyRelationship<HasOne, One>()));
-  EXPECT_FALSE((isHasManyRelationship<HasMany, Two>()));
-  EXPECT_TRUE((isHasManyRelationship<HasMany, HasOne>()));
+  EXPECT_FALSE((isHasManyRelationship<Top, HasMany>()));
+  EXPECT_TRUE((isHasManyRelationship<HasMany, One>()));
+  EXPECT_TRUE((isHasManyRelationship<HasMany, Two>()));
 }
 
 TEST_F(HierarchyTest, IsHasOneRelationship) {
   EXPECT_TRUE((isHasOneRelationship<HasOne, One>()));
-  EXPECT_TRUE((isHasOneRelationship<HasMany, Two>()));
-  EXPECT_FALSE((isHasOneRelationship<HasMany, HasOne>()));
+  EXPECT_TRUE((isHasOneRelationship<Top, HasMany>()));
+  EXPECT_FALSE((isHasOneRelationship<HasMany, One>()));
+  EXPECT_FALSE((isHasOneRelationship<HasMany, Two>()));
 }
 
 TEST_F(HierarchyTest, GetChild) {
@@ -106,17 +141,17 @@ TEST_F(HierarchyTest, GetChild) {
 }
 
 TEST_F(HierarchyTest, GetChildren) {
-  HasOne child{};
+  One child{};
   HasMany parent{{&child}};
 
-  EXPECT_EQ(parent.hasOnes, getChildren<HasOne>(parent));
+  EXPECT_EQ(parent.ones, getChildren<One>(parent));
 }
 
 TEST_F(HierarchyTest, GetSecondChild) {
   Two child;
-  HasMany parent{{}, &child};
+  HasMany parent{{}, {&child}};
 
-  EXPECT_EQ(parent.two, getChildren<Two>(parent));
+  EXPECT_EQ(parent.twos, getChildren<Two>(parent));
 }
 
 TEST_F(HierarchyTest, AssociateChildForHasOne) {
@@ -125,16 +160,16 @@ TEST_F(HierarchyTest, AssociateChildForHasOne) {
 
   associateChild(parent, &child);
 
-  EXPECT_THAT(parent, Field(&HasOne::one, Eq(&child)));
+  EXPECT_THAT(parent.one, Eq(&child));
 }
 
 TEST_F(HierarchyTest, AssociateChildForHasMany) {
-  HasOne child{};
+  One child{};
   HasMany parent{};
 
   associateChild(parent, &child);
 
-  EXPECT_THAT(parent, Field(&HasMany::hasOnes, ElementsAre(&child)));
+  EXPECT_THAT(parent.ones, ElementsAre(&child));
 }
 
 TEST_F(HierarchyTest, DissociateChildForHasOne) {
@@ -143,29 +178,41 @@ TEST_F(HierarchyTest, DissociateChildForHasOne) {
 
   dissociateChild(parent, &child);
 
-  EXPECT_THAT(parent, Field(&HasOne::one, IsNull()));
+  EXPECT_THAT(parent.one, IsNull());
 }
 
 TEST_F(HierarchyTest, DissociateChildForHasMany) {
-  HasOne child{};
+  One child{};
   HasMany parent{{&child}};
 
   dissociateChild(parent, &child);
 
-  EXPECT_THAT(parent, Field(&HasMany::hasOnes, ElementsAre()));
+  EXPECT_THAT(parent.ones, ElementsAre());
 }
 
 TEST_F(HierarchyTest, CountOfChildren) {
   EXPECT_EQ(0, chaoskit::state::ChildrenOf<One>::count);
+  EXPECT_EQ(0, chaoskit::state::ChildrenOf<Two>::count);
   EXPECT_EQ(1, chaoskit::state::ChildrenOf<HasOne>::count);
   EXPECT_EQ(2, chaoskit::state::ChildrenOf<HasMany>::count);
+  EXPECT_EQ(2, chaoskit::state::ChildrenOf<Top>::count);
+}
+
+TEST_F(HierarchyTest, CountOfParents) {
+  EXPECT_EQ(2, chaoskit::state::ParentsOf<One>::count);
+  EXPECT_EQ(1, chaoskit::state::ParentsOf<Two>::count);
+  EXPECT_EQ(1, chaoskit::state::ParentsOf<HasOne>::count);
+  EXPECT_EQ(1, chaoskit::state::ParentsOf<HasMany>::count);
+  EXPECT_EQ(0, chaoskit::state::ParentsOf<Top>::count);
 }
 
 class MockFn {
  public:
   MOCK_METHOD(void, callOne, ());
   MOCK_METHOD(void, callHasOne, ());
+  MOCK_METHOD(void, callHasMany, ());
   MOCK_METHOD(void, callTwo, ());
+  MOCK_METHOD(void, callTop, ());
 
   template <typename T>
   void operator()(T) {}
@@ -179,29 +226,56 @@ class MockFn {
     callHasOne();
   }
   template <>
+  void operator()(HasMany*) {
+    callHasMany();
+  }
+  template <>
   void operator()(Two*) {
     callTwo();
   }
+  template <>
+  void operator()(Top*) {
+    callTop();
+  }
 };
 
-TEST_F(HierarchyTest, ForEachChildWorksForOneChild) {
+TEST_F(HierarchyTest, ForEachWorksForOneChild) {
   MockFn fn;
   EXPECT_CALL(fn, callOne);
-  EXPECT_CALL(fn, callHasOne).Times(0);
   EXPECT_CALL(fn, callTwo).Times(0);
-  using ChildList = chaoskit::state::ChildrenOf<HasOne>::List;
+  EXPECT_CALL(fn, callHasOne).Times(0);
+  using Connections = chaoskit::state::ChildrenOf<HasOne>::List;
 
-  ChildList::forEachChild(fn);
+  Connections::forEach(fn);
 }
 
-TEST_F(HierarchyTest, ForEachChildWorksForManyChildren) {
+TEST_F(HierarchyTest, ForEachWorksForManyChildren) {
+  MockFn fn;
+  EXPECT_CALL(fn, callOne);
+  EXPECT_CALL(fn, callTwo);
+  EXPECT_CALL(fn, callHasMany).Times(0);
+  using Connections = chaoskit::state::ChildrenOf<HasMany>::List;
+
+  Connections::forEach(fn);
+}
+
+TEST_F(HierarchyTest, ForEachWorksForOneParent) {
+  MockFn fn;
+  EXPECT_CALL(fn, callTwo).Times(0);
+  EXPECT_CALL(fn, callHasMany);
+  using Connections = chaoskit::state::ParentsOf<Two>::List;
+
+  Connections::forEach(fn);
+}
+
+TEST_F(HierarchyTest, ForEachWorksForManyParents) {
   MockFn fn;
   EXPECT_CALL(fn, callOne).Times(0);
   EXPECT_CALL(fn, callHasOne);
-  EXPECT_CALL(fn, callTwo);
-  using ChildList = chaoskit::state::ChildrenOf<HasMany>::List;
+  EXPECT_CALL(fn, callHasMany);
+  using Connections = chaoskit::state::ParentsOf<One>::List;
 
-  ChildList::forEachChild(fn);
+  Connections::forEach(fn);
 }
 
 #pragma clang diagnostic pop

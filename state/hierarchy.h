@@ -5,57 +5,68 @@
 #include <vector>
 
 /**
- * Macro that specifies the Relation and ParentOf templates to correctly resolve
- * all the types for the specified relationship.
+ * Macro that specifies the Relation template to correctly resolve all the types
+ * for the specified relation.
  *
  * Usage:
  * CHAOSKIT_DEFINE_RELATION(Parent, Child, &Parent::child);
  */
 #define CHAOSKIT_DEFINE_RELATION(ParentType, ChildType, ChildField) \
-  namespace chaoskit::state {                              \
-  template <>                                              \
-  struct Relation<ParentType, ChildType> {                 \
-    using Parent = ParentType;                             \
-    using Child = ChildType;                               \
-    using FieldPtr = decltype(ChildField);                 \
-    constexpr static FieldPtr field = ChildField;          \
-  };                                                       \
-  template <>                                              \
-  struct ParentOf<ChildType> {                             \
-    using Type = ParentType;                               \
-  };                                                       \
+  namespace chaoskit::state {                                       \
+  template <>                                                       \
+  struct Relation<ParentType, ChildType> {                          \
+    using Parent = ParentType;                                      \
+    using Child = ChildType;                                        \
+    using FieldPtr = decltype(ChildField);                          \
+    constexpr static FieldPtr field = ChildField;                   \
+  };                                                                \
   }
 
 /**
- * Additional macro that specifies the ChildrenOf template with the list of
+ * Additional macro that specifies the ChildrenOf template with a list of
  * children for the given ParentType.
  *
  * Usage:
  * CHAOSKIT_DEFINE_CHILDREN(Parent, Child, AnotherChild);
  */
-#define CHAOSKIT_DEFINE_CHILDREN(ParentType, ...)       \
-  namespace chaoskit::state {                           \
-  template <>                                           \
-  struct ChildrenOf<ParentType> {                       \
-    using List = ChildList<ParentType, __VA_ARGS__>;    \
-    inline constexpr static size_t count = List::count; \
-  };                                                    \
+#define CHAOSKIT_DEFINE_CHILDREN(ParentType, ...)                           \
+  namespace chaoskit::state {                                               \
+  template <>                                                               \
+  struct ChildrenOf<ParentType> {                                           \
+    using List =                                                            \
+        Connections<detail::ParentChildPredicate, ParentType, __VA_ARGS__>; \
+    inline constexpr static size_t count = List::count;                     \
+  };                                                                        \
   }
 
+/**
+ * Additional macro that specifies the ParentsOf template with a list of
+ * children for the given ChildType.
+ *
+ * Usage:
+ * CHAOSKIT_DEFINE_CHILDREN(Parent, Child, AnotherChild);
+ */
+#define CHAOSKIT_DEFINE_PARENTS(ChildType, ...)                            \
+  namespace chaoskit::state {                                              \
+  template <>                                                              \
+  struct ParentsOf<ChildType> {                                            \
+    using List =                                                           \
+        Connections<detail::ChildParentPredicate, ChildType, __VA_ARGS__>; \
+    inline constexpr static size_t count = List::count;                    \
+  };                                                                       \
+  }
+
+/**
+ * Macro that defines a simple relation where a single parent has a single
+ * child. If the situation gets more complicated, it needs to be replaced by
+ * the DEFINE_* macros themselves.
+ */
+#define CHAOSKIT_DEFINE_SIMPLE_RELATION(ParentType, ChildType, ChildField) \
+  CHAOSKIT_DEFINE_RELATION(ParentType, ChildType, ChildField)              \
+  CHAOSKIT_DEFINE_CHILDREN(ParentType, ChildType)                          \
+  CHAOSKIT_DEFINE_PARENTS(ChildType, ParentType)
+
 namespace chaoskit::state {
-
-namespace detail {
-template <typename>
-struct IsVector : std::false_type {};
-template <typename T, typename A>
-struct IsVector<std::vector<T, A>> : std::true_type {};
-}  // namespace detail
-
-/** Structure that tells the type of the parent of a given type. */
-template <typename C>
-struct ParentOf {
-  using Type = void;
-};
 
 /**
  * Structure that tells the type and location of a field containing the parent's
@@ -79,41 +90,76 @@ constexpr bool isValidRelation() {
          !std::is_void_v<typename CD::Child>;
 }
 
-/** A list of types Cs that are defined as children of P. */
-template <typename P, typename... Cs>
-struct ChildList;
+namespace detail {
+template <typename>
+struct IsVector : std::false_type {};
+template <typename T, typename A>
+struct IsVector<std::vector<T, A>> : std::true_type {};
 
-template <typename P, typename C, typename... Cs>
-struct ChildList<P, C, Cs...> {
-  inline constexpr static size_t count = sizeof...(Cs) + 1;
-
-  /**
-   * Calls the supplied callable for each type that is a child of P.
-   *
-   * The first argument passed to the callable is a null pointer of type C*.
-   * This is used only for the purpose of picking proper type overloads.
-   */
-  template <typename Fn>
-  constexpr static void forEachChild(Fn&& fn) {
-    if constexpr (isValidRelation<P, C>()) {
-      fn(static_cast<C*>(nullptr));
-    }
-    ChildList<P, Cs...>::forEachChild(std::forward<Fn>(fn));
+struct ParentChildPredicate {
+  template <typename P, typename C>
+  constexpr static bool valid() {
+    return isValidRelation<P, C>();
   }
 };
 
-template <typename P>
-struct ChildList<P> {
+struct ChildParentPredicate {
+  template <typename C, typename P>
+  constexpr static bool valid() {
+    return isValidRelation<P, C>();
+  }
+};
+}  // namespace detail
+
+/**
+ * A list of Destinations that are connected to Source while satisfying the
+ * Predicate.
+ */
+template <typename Predicate, typename Source, typename... Destinations>
+struct Connections;
+
+template <typename Predicate, typename Source, typename Destination,
+          typename... Destinations>
+struct Connections<Predicate, Source, Destination, Destinations...> {
+  inline constexpr static size_t count = sizeof...(Destinations) + 1;
+
+  /**
+   * Calls the supplied callable for each Destination that matches the
+   * Predicate.
+   *
+   * The first argument passed to the callable is a null pointer of type
+   * Destination*. This is used only for the purpose of picking proper type
+   * overloads.
+   */
+  template <typename Fn>
+  constexpr static void forEach(Fn&& fn) {
+    if constexpr (Predicate::template valid<Source, Destination>()) {
+      fn(static_cast<Destination*>(nullptr));
+    }
+    Connections<Predicate, Source, Destinations...>::forEach(
+        std::forward<Fn>(fn));
+  }
+};
+
+template <typename Predicate, typename Source>
+struct Connections<Predicate, Source> {
   constexpr static size_t count = 0;
 
   template <typename Fn>
-  static void forEachChild(Fn&& fn) {}
+  static void forEach(Fn&& fn) {}
+};
+
+/** Structure that tells the type of the parent of a given type. */
+template <typename C>
+struct ParentsOf {
+  using List = Connections<detail::ChildParentPredicate, C>;
+  constexpr static size_t count = 0;
 };
 
 /** Structure that tells the types and count of all children types of P. */
 template <typename P>
 struct ChildrenOf {
-  using List = ChildList<P>;
+  using List = Connections<detail::ParentChildPredicate, P>;
   constexpr static size_t count = 0;
 };
 
@@ -126,7 +172,7 @@ constexpr bool isParent() {
 /** Checks if P is a child of anything. */
 template <typename C>
 constexpr bool isChild() {
-  return !std::is_void_v<typename ParentOf<C>::Type>;
+  return ParentsOf<C>::count > 0;
 }
 
 /** Checks if P is a parent of C. */

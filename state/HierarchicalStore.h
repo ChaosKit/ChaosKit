@@ -11,7 +11,7 @@ namespace chaoskit::state {
 template <typename... Ts>
 class HierarchicalStore : public Store<Ts...> {
   std::unordered_multimap<Id, Id> children_;
-  std::unordered_map<Id, Id> parents_;
+  std::unordered_multimap<Id, Id> parents_;
 
  public:
   template <typename P, typename C>
@@ -65,22 +65,31 @@ class HierarchicalStore : public Store<Ts...> {
     }
 
     if constexpr (isChild<T>()) {
-      using ParentType = typename ParentOf<T>::Type;
-      if constexpr (Store<Ts...>::template containsType<ParentType>()) {
-        auto parentIt = parents_.find(id);
-        if (parentIt != parents_.end()) {
-          T* child = const_cast<T*>(this->template find<T>(id));
-          this->template update<ParentType>(
-              parentIt->second,
-              [child](ParentType* parent) { dissociateChild(*parent, child); });
-          parents_.erase(parentIt);
+      ParentsOf<T>::List::forEach([this, id](auto type) {
+        using ParentType = std::remove_pointer_t<decltype(type)>;
+
+        if constexpr (Store<Ts...>::template containsType<ParentType>()) {
+          for (auto it = parents_.begin(); it != parents_.end();) {
+            if (it->first != id ||
+                !this->template matchesType<ParentType>(it->second)) {
+              ++it;
+              continue;
+            }
+
+            T* child = const_cast<T*>(this->template find<T>(id));
+            this->template update<ParentType>(it->second,
+                                              [child](ParentType* parent) {
+                                                dissociateChild(*parent, child);
+                                              });
+            it = parents_.erase(it);
+          }
         }
-      }
+      });
     }
 
     if constexpr (isParent<T>()) {
-      ChildrenOf<T>::List::forEachChild([this, id](auto field) {
-        using ChildType = std::remove_pointer_t<decltype(field)>;
+      ChildrenOf<T>::List::forEach([this, id](auto type) {
+        using ChildType = std::remove_pointer_t<decltype(type)>;
 
         if constexpr (Store<Ts...>::template containsType<ChildType>()) {
           // We can't use equal_range here because it might get invalidated when

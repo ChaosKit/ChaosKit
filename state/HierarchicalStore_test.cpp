@@ -18,6 +18,18 @@ using testing::Field;
 using testing::IsNull;
 using testing::Pointee;
 
+// The hierarchy represented in these tests looks as follows:
+//
+//   +---> One <---+---> Two
+//   |   1     *   |   *
+//   |             |
+//   + 1         1 + 1
+// HasOne <-+-> HasMany
+//        1 | 1
+//          |
+//        1 + 1
+//         Top
+
 struct One {
   int one = 1;
 };
@@ -28,16 +40,28 @@ struct HasOne {
   One* one;
 };
 struct HasMany {
-  std::vector<const HasOne*> hasOnes = {};
-  Two* two;
+  std::vector<const One*> ones = {};
+  std::vector<const Two*> twos = {};
+};
+struct Top {
+  HasOne* hasOne;
+  HasMany* hasMany;
 };
 
 CHAOSKIT_DEFINE_RELATION(HasOne, One, &HasOne::one);
-CHAOSKIT_DEFINE_RELATION(HasMany, HasOne, &HasMany::hasOnes);
-CHAOSKIT_DEFINE_RELATION(HasMany, Two, &HasMany::two);
+CHAOSKIT_DEFINE_RELATION(HasMany, One, &HasMany::ones);
+CHAOSKIT_DEFINE_RELATION(HasMany, Two, &HasMany::twos);
+CHAOSKIT_DEFINE_RELATION(Top, HasOne, &Top::hasOne);
+CHAOSKIT_DEFINE_RELATION(Top, HasMany, &Top::hasMany);
 
 CHAOSKIT_DEFINE_CHILDREN(HasOne, One);
-CHAOSKIT_DEFINE_CHILDREN(HasMany, HasOne, Two);
+CHAOSKIT_DEFINE_CHILDREN(HasMany, One, Two);
+CHAOSKIT_DEFINE_CHILDREN(Top, HasOne, HasMany);
+
+CHAOSKIT_DEFINE_PARENTS(One, HasOne, HasMany);
+CHAOSKIT_DEFINE_PARENTS(Two, HasMany);
+CHAOSKIT_DEFINE_PARENTS(HasOne, Top);
+CHAOSKIT_DEFINE_PARENTS(HasMany, Top);
 
 class HierarchicalStoreTest : public testing::Test {};
 
@@ -52,19 +76,19 @@ TEST_F(HierarchicalStoreTest, AssociatesExistingChildInHasOneRelation) {
 
   const auto* parent = store.find<HasOne>(parentId);
   const auto* child = store.find<One>(childId);
-  EXPECT_THAT(parent, Field(&HasOne::one, Eq(child)));
+  EXPECT_THAT(parent->one, Eq(child));
 }
 
 TEST_F(HierarchicalStoreTest, AssociatesExistingChildInHasManyRelation) {
-  HierarchicalStore<HasOne, HasMany> store;
+  HierarchicalStore<One, HasMany> store;
   Id parentId = store.create<HasMany>();
-  Id childId = store.create<HasOne>();
+  Id childId = store.create<One>();
 
-  store.associateChildWith<HasMany, HasOne>(parentId, childId);
+  store.associateChildWith<HasMany, One>(parentId, childId);
 
   const auto* parent = store.find<HasMany>(parentId);
-  const auto* child = store.find<HasOne>(childId);
-  EXPECT_THAT(parent, Field(&HasMany::hasOnes, ElementsAre(child)));
+  const auto* child = store.find<One>(childId);
+  EXPECT_THAT(parent->ones, ElementsAre(child));
 }
 
 TEST_F(HierarchicalStoreTest,
@@ -116,19 +140,19 @@ TEST_F(HierarchicalStoreTest, AssociatesNewChildInHasOneRelation) {
   const Id childId = store.lastId<One>();
   const auto* parent = store.find<HasOne>(parentId);
   const auto* child = store.find<One>(childId);
-  EXPECT_THAT(parent, Field(&HasOne::one, Eq(child)));
+  EXPECT_THAT(parent->one, Eq(child));
 }
 
 TEST_F(HierarchicalStoreTest, AssociatesNewChildInHasManyRelation) {
-  HierarchicalStore<HasOne, HasMany> store;
+  HierarchicalStore<One, HasMany> store;
   Id parentId = store.create<HasMany>();
 
-  store.associateNewChildWith<HasMany, HasOne>(parentId);
+  store.associateNewChildWith<HasMany, One>(parentId);
 
-  const Id childId = store.lastId<HasOne>();
+  const Id childId = store.lastId<One>();
   const auto* parent = store.find<HasMany>(parentId);
-  const auto* child = store.find<HasOne>(childId);
-  EXPECT_THAT(parent, Field(&HasMany::hasOnes, ElementsAre(child)));
+  const auto* child = store.find<One>(childId);
+  EXPECT_THAT(parent->ones, ElementsAre(child));
 }
 
 TEST_F(HierarchicalStoreTest,
@@ -167,31 +191,49 @@ TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromParentInHasOneCase) {
   store.remove<One>(childId);
 
   const auto* parent = store.find<HasOne>(parentId);
-  EXPECT_THAT(parent, Field(&HasOne::one, IsNull()));
+  EXPECT_THAT(parent->one, IsNull());
 }
 
 TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromParentInHasManyCase) {
-  HierarchicalStore<HasOne, HasMany> store;
+  HierarchicalStore<One, HasMany> store;
   Id parentId = store.create<HasMany>();
-  Id childId = store.create<HasOne>();
-  store.associateChildWith<HasMany, HasOne>(parentId, childId);
+  Id childId = store.create<One>();
+  store.associateChildWith<HasMany, One>(parentId, childId);
 
-  store.remove<HasOne>(childId);
+  store.remove<One>(childId);
 
   const auto* parent = store.find<HasMany>(parentId);
-  EXPECT_THAT(parent, Field(&HasMany::hasOnes, ElementsAre()));
+  EXPECT_THAT(parent->ones, ElementsAre());
+}
+
+TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromAllParents) {
+  HierarchicalStore<One, HasOne, HasMany> store;
+  Id hasOneId = store.create<HasOne>();
+  Id hasManyId = store.create<HasMany>();
+  Id oneId = store.create<One>();
+  store.associateChildWith<HasOne, One>(hasOneId, oneId);
+  store.associateChildWith<HasMany, One>(hasManyId, oneId);
+
+  store.remove<One>(oneId);
+
+  const auto* hasOne = store.find<HasOne>(hasOneId);
+  const auto* hasMany = store.find<HasMany>(hasManyId);
+  EXPECT_THAT(hasOne->one, IsNull());
+  EXPECT_THAT(hasMany->ones, ElementsAre());
 }
 
 TEST_F(HierarchicalStoreTest, RecursivelyRemovesChildren) {
-  HierarchicalStore<One, HasOne, HasMany, Two> store;
-  Id top = store.create<HasMany>();
-  Id middle = store.create<HasOne>();
+  HierarchicalStore<One, HasOne, HasMany, Two, Top> store;
+  Id top = store.create<Top>();
+  Id middleOne = store.create<HasOne>();
+  Id middleMany = store.create<HasMany>();
   Id bottom = store.create<One>();
-  store.associateChildWith<HasMany, HasOne>(top, middle);
-  store.associateNewChildWith<HasMany, Two>(top);
-  store.associateChildWith<HasOne, One>(middle, bottom);
+  store.associateChildWith<Top, HasOne>(top, middleOne);
+  store.associateChildWith<Top, HasMany>(top, middleMany);
+  store.associateNewChildWith<HasMany, Two>(middleMany);
+  store.associateChildWith<HasOne, One>(middleOne, bottom);
 
-  store.remove<HasMany>(top);
+  store.remove<Top>(top);
 
   EXPECT_EQ(0, store.size());
 }
