@@ -47,6 +47,7 @@ class HierarchyTest : public testing::Test {};
 
 TEST_F(HierarchyTest, IsParent) {
   EXPECT_FALSE(isParent<One>());
+  EXPECT_FALSE(isParent<Two>());
   EXPECT_TRUE(isParent<HasOne>());
   EXPECT_TRUE(isParent<HasMany>());
 }
