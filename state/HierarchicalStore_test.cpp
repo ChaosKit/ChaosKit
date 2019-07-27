@@ -21,15 +21,23 @@ using testing::Pointee;
 struct One {
   int one = 1;
 };
+struct Two {
+  int two = 2;
+};
 struct HasOne {
   One* one;
 };
 struct HasMany {
   std::vector<const HasOne*> hasOnes = {};
+  Two* two;
 };
 
-DEFINE_RELATIONSHIP(HasOne, One, &HasOne::one);
-DEFINE_RELATIONSHIP(HasMany, HasOne, &HasMany::hasOnes);
+DEFINE_RELATION(HasOne, One, &HasOne::one);
+DEFINE_RELATION(HasMany, HasOne, &HasMany::hasOnes);
+DEFINE_RELATION(HasMany, Two, &HasMany::two);
+
+DEFINE_CHILDREN(HasOne, One);
+DEFINE_CHILDREN(HasMany, HasOne, Two);
 
 class HierarchicalStoreTest : public testing::Test {};
 
@@ -40,7 +48,7 @@ TEST_F(HierarchicalStoreTest, AssociatesExistingChildInHasOneRelation) {
   Id parentId = store.create<HasOne>();
   Id childId = store.create<One>();
 
-  store.associateChildWith<HasOne>(parentId, childId);
+  store.associateChildWith<HasOne, One>(parentId, childId);
 
   const auto* parent = store.find<HasOne>(parentId);
   const auto* child = store.find<One>(childId);
@@ -52,7 +60,7 @@ TEST_F(HierarchicalStoreTest, AssociatesExistingChildInHasManyRelation) {
   Id parentId = store.create<HasMany>();
   Id childId = store.create<HasOne>();
 
-  store.associateChildWith<HasMany>(parentId, childId);
+  store.associateChildWith<HasMany, HasOne>(parentId, childId);
 
   const auto* parent = store.find<HasMany>(parentId);
   const auto* child = store.find<HasOne>(childId);
@@ -65,7 +73,7 @@ TEST_F(HierarchicalStoreTest,
   Id notParentId = store.create<One>();
   Id childId = store.create<One>();
 
-  EXPECT_THROW(store.associateChildWith<HasOne>(notParentId, childId),
+  EXPECT_THROW((store.associateChildWith<HasOne, One>(notParentId, childId)),
                IdTypeMismatchError);
 }
 
@@ -75,7 +83,7 @@ TEST_F(HierarchicalStoreTest,
   Id parentId = store.create<HasOne>();
   Id notChildId = store.create<HasOne>();
 
-  EXPECT_THROW(store.associateChildWith<HasOne>(parentId, notChildId),
+  EXPECT_THROW((store.associateChildWith<HasOne, One>(parentId, notChildId)),
                IdTypeMismatchError);
 }
 
@@ -84,7 +92,7 @@ TEST_F(HierarchicalStoreTest, AssociateChildWithThrowsWhenChildIsMissing) {
   Id parentId = store.create<HasOne>();
   Id childId = store.lastId<One>();
 
-  EXPECT_THROW(store.associateChildWith<HasOne>(parentId, childId),
+  EXPECT_THROW((store.associateChildWith<HasOne, One>(parentId, childId)),
                MissingIdError);
 }
 
@@ -94,7 +102,7 @@ TEST_F(HierarchicalStoreTest, CreatesNewChild) {
   HierarchicalStore<HasOne, One> store;
   Id parentId = store.create<HasOne>();
 
-  store.associateNewChildWith<HasOne>(parentId);
+  store.associateNewChildWith<HasOne, One>(parentId);
 
   EXPECT_EQ(1, store.count<One>());
 }
@@ -103,7 +111,7 @@ TEST_F(HierarchicalStoreTest, AssociatesNewChildInHasOneRelation) {
   HierarchicalStore<HasOne, One> store;
   Id parentId = store.create<HasOne>();
 
-  store.associateNewChildWith<HasOne>(parentId);
+  store.associateNewChildWith<HasOne, One>(parentId);
 
   const Id childId = store.lastId<One>();
   const auto* parent = store.find<HasOne>(parentId);
@@ -115,7 +123,7 @@ TEST_F(HierarchicalStoreTest, AssociatesNewChildInHasManyRelation) {
   HierarchicalStore<HasOne, HasMany> store;
   Id parentId = store.create<HasMany>();
 
-  store.associateNewChildWith<HasMany>(parentId);
+  store.associateNewChildWith<HasMany, HasOne>(parentId);
 
   const Id childId = store.lastId<HasOne>();
   const auto* parent = store.find<HasMany>(parentId);
@@ -128,7 +136,7 @@ TEST_F(HierarchicalStoreTest,
   HierarchicalStore<HasOne, One> store;
   Id notParentId = store.create<One>();
 
-  EXPECT_THROW(store.associateNewChildWith<HasOne>(notParentId),
+  EXPECT_THROW((store.associateNewChildWith<HasOne, One>(notParentId)),
                IdTypeMismatchError);
 }
 
@@ -154,7 +162,7 @@ TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromParentInHasOneCase) {
   HierarchicalStore<HasOne, One> store;
   Id parentId = store.create<HasOne>();
   Id childId = store.create<One>();
-  store.associateChildWith<HasOne>(parentId, childId);
+  store.associateChildWith<HasOne, One>(parentId, childId);
 
   store.remove<One>(childId);
 
@@ -166,7 +174,7 @@ TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromParentInHasManyCase) {
   HierarchicalStore<HasOne, HasMany> store;
   Id parentId = store.create<HasMany>();
   Id childId = store.create<HasOne>();
-  store.associateChildWith<HasMany>(parentId, childId);
+  store.associateChildWith<HasMany, HasOne>(parentId, childId);
 
   store.remove<HasOne>(childId);
 
@@ -175,12 +183,13 @@ TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromParentInHasManyCase) {
 }
 
 TEST_F(HierarchicalStoreTest, RecursivelyRemovesChildren) {
-  HierarchicalStore<One, HasOne, HasMany> store;
+  HierarchicalStore<One, HasOne, HasMany, Two> store;
   Id top = store.create<HasMany>();
   Id middle = store.create<HasOne>();
   Id bottom = store.create<One>();
-  store.associateChildWith<HasMany>(top, middle);
-  store.associateChildWith<HasOne>(middle, bottom);
+  store.associateChildWith<HasMany, HasOne>(top, middle);
+  store.associateNewChildWith<HasMany, Two>(top);
+  store.associateChildWith<HasOne, One>(middle, bottom);
 
   store.remove<HasMany>(top);
 
