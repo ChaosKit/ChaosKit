@@ -21,6 +21,17 @@ target_link_libraries(ui_common PUBLIC
         Qt5::Core Qt5::Gui
         )
 
+add_library(ui_state
+        DocumentModel.cpp DocumentModel.h
+        GlobalStore.cpp GlobalStore.h
+        )
+set_target_properties(ui_state PROPERTIES AUTOMOC ON)
+target_link_libraries(ui_state PUBLIC
+        core
+        state
+        Qt5::Core
+        )
+
 add_executable(ChaosKit WIN32
         main.cpp
         ui.qrc
@@ -35,6 +46,17 @@ target_link_libraries(ChaosKit PRIVATE
         ui_common
         ui_models
         Qt5::Core Qt5::Gui Qt5::Qml Qt5::Quick Qt5::QuickControls2
+        )
+
+add_executable(ModelTest WIN32
+        modeltest.cpp
+        ModelTestWindow.cpp ModelTestWindow.h
+        )
+set_target_properties(ModelTest PROPERTIES AUTOMOC ON)
+target_link_libraries(ModelTest PRIVATE
+        core
+        ui_state
+        Qt5::Core Qt5::Gui Qt5::Widgets
         )
 
 add_executable(TestWindow WIN32

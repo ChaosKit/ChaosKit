@@ -39,6 +39,10 @@ class Store {
     std::unordered_map<Id, Entity> updated;
     std::unordered_map<Id, Entity> removed;
 
+    bool empty() const {
+      return created.empty() && updated.empty() && removed.empty();
+    }
+
     void merge(Changes& other) {
       // TODO: update to use unordered_{map,set}::merge() once Apple supports it
 
