@@ -5,15 +5,14 @@
 #include <vector>
 
 #include "SystemIndex.h"
-#include "models/SystemModel.h"
 #include "structures/System.h"
 
 namespace chaoskit::core {
 
 class Params {
- public:
-  Params() : values_() {}
+  std::unordered_map<SystemIndex, std::vector<float>> values_;
 
+ public:
   static Params fromSystem(const System &system) {
     Params result;
 
@@ -37,21 +36,14 @@ class Params {
     return result;
   }
 
-  static Params fromSystem(const SystemModel &system) {
-    return fromSystem(*system.data().lock());
-  }
-
   std::vector<float> &operator[](const SystemIndex &index) {
     return values_[index];
   }
   std::vector<float> &operator[](SystemIndex &&index) { return values_[index]; }
   std::vector<float> &at(const SystemIndex &index) { return values_.at(index); }
-  const std::vector<float> &at(const SystemIndex &index) const {
+  [[nodiscard]] const std::vector<float> &at(const SystemIndex &index) const {
     return values_.at(index);
   }
-
- private:
-  std::unordered_map<SystemIndex, std::vector<float>> values_;
 };
 
 }  // namespace chaoskit::core

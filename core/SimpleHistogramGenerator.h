@@ -5,23 +5,23 @@
 #include <vector>
 
 #include "SimpleInterpreter.h"
-#include "models/SystemModel.h"
+#include "structures/System.h"
 
 namespace chaoskit::core {
 
 class SimpleHistogramGenerator {
  public:
-  SimpleHistogramGenerator(const SystemModel &system, uint32_t width,
+  SimpleHistogramGenerator(const System &system, uint32_t width,
                            uint32_t height, std::shared_ptr<Rng> rng);
-  SimpleHistogramGenerator(const SystemModel &system, uint32_t width,
+  SimpleHistogramGenerator(const System &system, uint32_t width,
                            uint32_t height);
 
-  void setSystem(const SystemModel &system);
+  void setSystem(const System &system);
   void setSize(uint32_t width, uint32_t height);
   void setIterationCount(uint32_t count);
   void setInfiniteIterationCount();
 
-  const float *data() const { return buffer_.data(); }
+  [[nodiscard]] const float *data() const { return buffer_.data(); }
 
   void clear();
   void run();

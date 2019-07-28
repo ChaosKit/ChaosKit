@@ -2,7 +2,6 @@
 #define CHAOSKIT_CORE_FORMULA_H
 
 #include <ast/Formula.h>
-#include <ast/WeightedFormula.h>
 #include <vector>
 
 namespace chaoskit::core {
