@@ -114,6 +114,14 @@ class HierarchicalStore : public Store<Ts...> {
 
     Store<Ts...>::template remove<T>(id);
   }
+
+  // TODO: implement clear<T>()
+
+  void clearAll() {
+    parents_.clear();
+    children_.clear();
+    Store<Ts...>::clearAll();
+  }
 };
 
 }  // namespace chaoskit::state
