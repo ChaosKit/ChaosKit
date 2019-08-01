@@ -6,4 +6,4 @@ target_sources(core_structures INTERFACE
         "${CMAKE_CURRENT_SOURCE_DIR}/System.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/Transform.h"
         )
-target_link_libraries(core_structures INTERFACE ast state)
+target_link_libraries(core_structures INTERFACE ast library state)
