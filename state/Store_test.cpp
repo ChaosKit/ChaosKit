@@ -299,6 +299,29 @@ TEST_F(StoreTest, ContainsTypeReturnsFalseIfStoreDoesNotContainType) {
   EXPECT_FALSE(Store<Simple>::containsType<Another>());
 }
 
+// Store::matchesType()
+
+TEST_F(StoreTest, MatchesTypeReturnsTrueIfIdMatchesType) {
+  Store<Simple> store;
+  Id id = store.lastId<Simple>();
+
+  EXPECT_TRUE(Store<Simple>::matchesType<Simple>(id));
+}
+
+TEST_F(StoreTest, MatchesTypeReturnsFalseIfIdDoesNotMatchType) {
+  Store<Simple, Another> store;
+  Id id = store.lastId<Simple>();
+
+  EXPECT_FALSE(Store<Simple>::matchesType<Another>(id));
+}
+
+TEST_F(StoreTest, MatchesTypeReturnsFalseIfIdDoesNotExistInStore) {
+  Store<Simple> store;
+  Id id = store.lastId<Simple>();
+
+  EXPECT_FALSE(Store<Simple>::matchesType<Another>(id));
+}
+
 // Store::transaction()
 
 TEST_F(StoreTest, ExecutesOperations) {

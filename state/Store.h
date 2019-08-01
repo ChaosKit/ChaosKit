@@ -96,7 +96,7 @@ class Store {
   }
 
   template <typename T>
-  Id lastId() const {
+  [[nodiscard]] Id lastId() const {
     uint32_t type = Entity::template which<T>();
     return {type + 1, counters_[type]};
   }
@@ -247,9 +247,8 @@ class Store {
     return trackingChanges_ || currentTransaction_;
   }
 
- protected:
   template <typename T>
-  [[nodiscard]] bool matchesType(Id id) const {
+  static bool matchesType(Id id) {
     if constexpr (containsType<T>()) {
       return Entity::template which<T>() + 1 == id.type;
     } else {
