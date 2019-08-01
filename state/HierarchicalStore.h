@@ -2,6 +2,7 @@
 #define CHAOSKIT_STATE_HIERARCHICALSTORE_H
 
 #include <unordered_map>
+#include <utility>
 #include "Store.h"
 #include "hierarchy.h"
 
@@ -121,6 +122,50 @@ class HierarchicalStore : public Store<Ts...> {
     parents_.clear();
     children_.clear();
     Store<Ts...>::clearAll();
+  }
+
+  // TODO: implement unit tests for those
+  [[nodiscard]] bool hasAnyChildren(Id parentId) const {
+    return children_.find(parentId) != children_.end();
+  }
+
+  template <typename C>
+  [[nodiscard]] size_t countChildren(Id parentId) const {
+    if constexpr (isChild<C>()) {
+      auto [begin, end] = children_.equal_range(parentId);
+      return std::count_if(begin, end, [](const std::pair<Id, Id>& child) {
+        return Store<Ts...>::template matchesType<C>(child.second);
+      });
+    } else {
+      return 0;
+    }
+  }
+
+  [[nodiscard]] size_t countAllChildren(Id parentId) const {
+    return children_.count(parentId);
+  }
+
+  // TODO: make this not return vectors ;_;
+  template <typename C>
+  [[nodiscard]] std::vector<Id> children(Id parentId) const {
+    std::vector<Id> result;
+    if constexpr (isChild<C>()) {
+      auto [begin, end] = children_.equal_range(parentId);
+      for (auto it = begin; it != end; ++it) {
+        if (Store<Ts...>::template matchesType<C>(it->second)) {
+          result.push_back(it->second);
+        }
+      }
+    }
+    return result;
+  }
+
+  [[nodiscard]] const Id* parent(Id childId) const {
+    auto it = parents_.find(childId);
+    if (it != parents_.end()) {
+      return &it->second;
+    }
+    return nullptr;
   }
 };
 
