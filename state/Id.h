@@ -7,9 +7,10 @@
 namespace chaoskit::state {
 
 struct Id {
-  uint32_t type = 0;
-  uint32_t id = 0;
+  uint32_t type;
+  uint32_t id;
 
+  Id() : type(0), id(0) {}
   explicit Id(uint64_t value) : type(value >> 32u), id(value & 0xffffffff) {}
   Id(uint32_t type, uint32_t id) : type(type), id(id) {}
 
