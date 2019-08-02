@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <utility>
+#include <vector>
 #include "Store.h"
 #include "hierarchy.h"
 
@@ -11,7 +12,7 @@ namespace chaoskit::state {
 /** Store that manages a predefined hierarchy of types. */
 template <typename... Ts>
 class HierarchicalStore : public Store<Ts...> {
-  std::unordered_multimap<Id, Id> children_;
+  std::unordered_map<Id, std::vector<Id>> children_;
   std::unordered_multimap<Id, Id> parents_;
 
  public:
@@ -33,7 +34,7 @@ class HierarchicalStore : public Store<Ts...> {
       throw MissingIdError("childId in HierarchicalStore::addChild()");
     }
 
-    children_.emplace(parentId, childId);
+    addChild(parentId, childId);
     parents_.emplace(childId, parentId);
     this->template update<P>(
         parentId, [child](P* parent) { associateChild(*parent, child); });
@@ -51,7 +52,7 @@ class HierarchicalStore : public Store<Ts...> {
 
     const Id childId = this->template create<C>();
     auto* child = const_cast<C*>(this->template find<C>(childId));
-    children_.emplace(parentId, childId);
+    addChild(parentId, childId);
     parents_.emplace(childId, parentId);
     this->template update<P>(
         parentId, [child](P* parent) { associateChild(*parent, child); });
@@ -93,21 +94,19 @@ class HierarchicalStore : public Store<Ts...> {
         using ChildType = std::remove_pointer_t<decltype(type)>;
 
         if constexpr (Store<Ts...>::template containsType<ChildType>()) {
-          // We can't use equal_range here because it might get invalidated when
-          // we remove entities recursively.
-          for (;;) {
-            auto it = std::find_if(
-                children_.begin(), children_.end(),
-                [this, id](const std::pair<const Id, Id>& childPair) {
-                  return childPair.first == id &&
-                         this->template matchesType<ChildType>(
-                             childPair.second);
-                });
-            if (it == children_.end()) {
-              break;
+          auto it = children_.find(id);
+          if (it == children_.end()) {
+            return;
+          }
+
+          auto& children = it->second;
+          for (auto childIt = children.begin(); childIt != children.end();) {
+            if (Store<Ts...>::template matchesType<ChildType>(*childIt)) {
+              remove<ChildType>(*childIt);
+              childIt = children.erase(childIt);
+            } else {
+              ++childIt;
             }
-            remove<ChildType>(it->second);
-            children_.erase(it);
           }
         }
       });
@@ -132,17 +131,26 @@ class HierarchicalStore : public Store<Ts...> {
   template <typename C>
   [[nodiscard]] size_t countChildren(Id parentId) const {
     if constexpr (isChild<C>()) {
-      auto [begin, end] = children_.equal_range(parentId);
-      return std::count_if(begin, end, [](const std::pair<Id, Id>& child) {
-        return Store<Ts...>::template matchesType<C>(child.second);
-      });
+      auto it = children_.find(parentId);
+      if (it == children_.end()) {
+        return 0;
+      }
+      return std::count_if(
+          it->second.begin(), it->second.end(), [](const Id& child) {
+            return Store<Ts...>::template matchesType<C>(child);
+          });
     } else {
       return 0;
     }
   }
 
   [[nodiscard]] size_t countAllChildren(Id parentId) const {
-    return children_.count(parentId);
+    auto it = children_.find(parentId);
+    if (it == children_.end()) {
+      return 0;
+    } else {
+      return it->second.size();
+    }
   }
 
   // TODO: make this not return vectors ;_;
@@ -150,11 +158,12 @@ class HierarchicalStore : public Store<Ts...> {
   [[nodiscard]] std::vector<Id> children(Id parentId) const {
     std::vector<Id> result;
     if constexpr (isChild<C>()) {
-      auto [begin, end] = children_.equal_range(parentId);
-      for (auto it = begin; it != end; ++it) {
-        if (Store<Ts...>::template matchesType<C>(it->second)) {
-          result.push_back(it->second);
-        }
+      auto it = children_.find(parentId);
+      if (it != children_.end()) {
+        std::copy_if(it->second.begin(), it->second.end(),
+                     std::back_inserter(result), [](const Id& id) {
+                       return Store<Ts...>::template matchesType<C>(id);
+                     });
       }
     }
     return result;
@@ -166,6 +175,16 @@ class HierarchicalStore : public Store<Ts...> {
       return &it->second;
     }
     return nullptr;
+  }
+
+ private:
+  void addChild(Id key, Id value) {
+    auto it = children_.find(key);
+    if (it == children_.end()) {
+      children_.emplace(key, std::vector<Id>{value});
+    } else {
+      it->second.push_back(value);
+    }
   }
 };
 
