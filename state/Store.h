@@ -81,7 +81,7 @@ class Store {
   }
 
   template <typename T, typename Fn>
-  Id create(Fn updater) {
+  Id create(Fn&& updater) {
     Id id = nextId<T>();
     auto [it, ok] = entities_.emplace(id, T());
 

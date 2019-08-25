@@ -146,7 +146,7 @@ struct Connections<Predicate, Source> {
   constexpr static size_t count = 0;
 
   template <typename Fn>
-  static void forEach(Fn&& fn) {}
+  constexpr static void forEach(Fn&& fn) {}
 };
 
 /** Structure that tells the type of the parent of a given type. */

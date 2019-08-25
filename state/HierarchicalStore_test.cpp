@@ -131,6 +131,17 @@ TEST_F(HierarchicalStoreTest, CreatesNewChild) {
   EXPECT_EQ(1, store.count<One>());
 }
 
+TEST_F(HierarchicalStoreTest, CreatesAndUpdatesNewChild) {
+  HierarchicalStore<HasOne, One> store;
+  Id parentId = store.create<HasOne>();
+
+  Id childId = store.associateNewChildWith<HasOne, One>(
+      parentId, [](One* one) { one->one = 111; });
+
+  const auto* child = store.find<One>(childId);
+  EXPECT_EQ(111, child->one);
+}
+
 TEST_F(HierarchicalStoreTest, AssociatesNewChildInHasOneRelation) {
   HierarchicalStore<HasOne, One> store;
   Id parentId = store.create<HasOne>();
