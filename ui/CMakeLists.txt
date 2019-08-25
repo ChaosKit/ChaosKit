@@ -37,7 +37,7 @@ add_executable(ChaosKit WIN32
         ui.qrc
         SystemView.h SystemView.cpp
         SystemModel.cpp SystemModel.h
-        BlendModel.cpp BlendModel.h
+        SubtreeModel.cpp SubtreeModel.h
         SystemElement.cpp SystemElement.h)
 set_target_properties(ChaosKit PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON)
 target_link_libraries(ChaosKit PRIVATE

@@ -5,7 +5,7 @@
 
 namespace chaoskit::ui {
 
-class BlendModel : public QAbstractProxyModel {
+class SubtreeModel : public QAbstractProxyModel {
   Q_OBJECT
   Q_PROPERTY(QModelIndex rootIndex READ rootIndex WRITE setRootIndex NOTIFY
                  rootIndexChanged)

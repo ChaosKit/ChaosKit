@@ -1,8 +1,8 @@
-#include "BlendModel.h"
+#include "SubtreeModel.h"
 
 namespace chaoskit::ui {
 
-void BlendModel::setSourceModel(QAbstractItemModel *model) {
+void SubtreeModel::setSourceModel(QAbstractItemModel *model) {
   beginResetModel();
 
   if (sourceModel()) {
@@ -13,22 +13,22 @@ void BlendModel::setSourceModel(QAbstractItemModel *model) {
 
   if (model) {
     connect(model, &QAbstractItemModel::dataChanged, this,
-            &BlendModel::sourceDataChanged);
+            &SubtreeModel::sourceDataChanged);
     connect(model, &QAbstractItemModel::rowsAboutToBeInserted, this,
-            &BlendModel::sourceRowsAboutToBeInserted);
+            &SubtreeModel::sourceRowsAboutToBeInserted);
     connect(model, &QAbstractItemModel::rowsInserted, this,
-            &BlendModel::sourceRowsInserted);
+            &SubtreeModel::sourceRowsInserted);
     connect(model, &QAbstractItemModel::rowsAboutToBeRemoved, this,
-            &BlendModel::sourceRowsAboutToBeRemoved);
+            &SubtreeModel::sourceRowsAboutToBeRemoved);
     connect(model, &QAbstractItemModel::rowsRemoved, this,
-            &BlendModel::sourceRowsRemoved);
+            &SubtreeModel::sourceRowsRemoved);
   }
 
   resetInternalData();
   endResetModel();
 }
 
-void BlendModel::setRootIndex(const QModelIndex &index) {
+void SubtreeModel::setRootIndex(const QModelIndex &index) {
   if (rootIndex_ == index) {
     return;
   }
@@ -37,7 +37,7 @@ void BlendModel::setRootIndex(const QModelIndex &index) {
   emit rootIndexChanged();
 }
 
-QModelIndex BlendModel::mapFromSource(const QModelIndex &sourceIndex) const {
+QModelIndex SubtreeModel::mapFromSource(const QModelIndex &sourceIndex) const {
   if (sourceModel() == nullptr || !sourceIndex.isValid() ||
       sourceIndex.parent() != rootIndex_) {
     return QModelIndex();
@@ -47,7 +47,7 @@ QModelIndex BlendModel::mapFromSource(const QModelIndex &sourceIndex) const {
                      sourceIndex.internalPointer());
 }
 
-QModelIndex BlendModel::mapToSource(const QModelIndex &proxyIndex) const {
+QModelIndex SubtreeModel::mapToSource(const QModelIndex &proxyIndex) const {
   if (!proxyIndex.isValid()) {
     return rootIndex_;
   }
@@ -55,7 +55,7 @@ QModelIndex BlendModel::mapToSource(const QModelIndex &proxyIndex) const {
   return rootIndex_.child(proxyIndex.row(), proxyIndex.column());
 }
 
-QModelIndex BlendModel::index(int row, int column,
+QModelIndex SubtreeModel::index(int row, int column,
                               const QModelIndex &parent) const {
   if (sourceModel() == nullptr) {
     return QModelIndex();
@@ -66,7 +66,7 @@ QModelIndex BlendModel::index(int row, int column,
   return mapFromSource(sourceIndex);
 }
 
-QModelIndex BlendModel::parent(const QModelIndex &child) const {
+QModelIndex SubtreeModel::parent(const QModelIndex &child) const {
   if (sourceModel() == nullptr) {
     return QModelIndex();
   }
@@ -76,15 +76,15 @@ QModelIndex BlendModel::parent(const QModelIndex &child) const {
   return mapFromSource(sourceParent);
 }
 
-int BlendModel::rowCount(const QModelIndex &parent) const {
+int SubtreeModel::rowCount(const QModelIndex &parent) const {
   return sourceModel()->rowCount(mapToSource(parent));
 }
 
-int BlendModel::columnCount(const QModelIndex &parent) const {
+int SubtreeModel::columnCount(const QModelIndex &parent) const {
   return sourceModel()->columnCount(mapToSource(parent));
 }
 
-void BlendModel::sourceDataChanged(const QModelIndex &topLeft,
+void SubtreeModel::sourceDataChanged(const QModelIndex &topLeft,
                                    const QModelIndex &bottomRight,
                                    const QVector<int> &roles) {
   QModelIndex targetTopLeft = mapFromSource(topLeft);
@@ -97,7 +97,7 @@ void BlendModel::sourceDataChanged(const QModelIndex &topLeft,
   emit dataChanged(targetTopLeft, targetBottomRight, roles);
 }
 
-void BlendModel::sourceRowsAboutToBeInserted(const QModelIndex &sourceParent,
+void SubtreeModel::sourceRowsAboutToBeInserted(const QModelIndex &sourceParent,
                                              int start, int end) {
   if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
@@ -106,7 +106,7 @@ void BlendModel::sourceRowsAboutToBeInserted(const QModelIndex &sourceParent,
   beginInsertRows(QModelIndex(), start, end);
 }
 
-void BlendModel::sourceRowsInserted(const QModelIndex &sourceParent, int start,
+void SubtreeModel::sourceRowsInserted(const QModelIndex &sourceParent, int start,
                                     int end) {
   if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
@@ -115,7 +115,7 @@ void BlendModel::sourceRowsInserted(const QModelIndex &sourceParent, int start,
   endInsertRows();
 }
 
-void BlendModel::sourceRowsAboutToBeRemoved(const QModelIndex &sourceParent,
+void SubtreeModel::sourceRowsAboutToBeRemoved(const QModelIndex &sourceParent,
                                             int start, int end) {
   if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
@@ -124,7 +124,7 @@ void BlendModel::sourceRowsAboutToBeRemoved(const QModelIndex &sourceParent,
   beginRemoveRows(QModelIndex(), start, end);
 }
 
-void BlendModel::sourceRowsRemoved(const QModelIndex &sourceParent, int start,
+void SubtreeModel::sourceRowsRemoved(const QModelIndex &sourceParent, int start,
                                    int end) {
   if (!sourceParent.isValid() || sourceParent != rootIndex_) {
     return;
@@ -133,7 +133,7 @@ void BlendModel::sourceRowsRemoved(const QModelIndex &sourceParent, int start,
   endRemoveRows();
 }
 
-QModelIndex BlendModel::modelIndexForSelection(int index) {
+QModelIndex SubtreeModel::modelIndexForSelection(int index) {
   return mapToSource(this->index(index, 0, QModelIndex()));
 }
 

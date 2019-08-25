@@ -373,8 +373,8 @@ QVector<int> SystemModel::setFormulaData(Formula *blend, int role,
   return {};
 }
 
-BlendModel *SystemModel::childModel(int index) {
-  auto *model = new BlendModel();
+SubtreeModel *SystemModel::childModel(int index) {
+  auto *model = new SubtreeModel();
   model->setSourceModel(this);
   model->setRootIndex(this->index(index, 0, QModelIndex()));
   return model;

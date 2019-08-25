@@ -2,7 +2,7 @@
 #define CHAOSKIT_UI_SYSTEMMODEL_H
 
 #include <QAbstractItemModel>
-#include "BlendModel.h"
+#include "SubtreeModel.h"
 #include "SystemElement.h"
 #include "models/Blend.h"
 #include "models/Formula.h"
@@ -40,7 +40,7 @@ class SystemModel : public QAbstractItemModel {
   bool insertRows(int row, int count, const QModelIndex &parent) override;
   bool removeRows(int row, int count, const QModelIndex &parent) override;
 
-  Q_INVOKABLE BlendModel *childModel(int index);
+  Q_INVOKABLE SubtreeModel *childModel(int index);
   Q_INVOKABLE QModelIndex modelIndexForSelection(int index);
   Q_INVOKABLE void addBlend();
   Q_INVOKABLE void addFormula(int blendIndex, const QString &type);

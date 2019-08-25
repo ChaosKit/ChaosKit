@@ -4,9 +4,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QSurfaceFormat>
-#include "BlendModel.h"
 #include "HistogramBuffer.h"
 #include "Point.h"
+#include "SubtreeModel.h"
 #include "SystemElement.h"
 #include "SystemModel.h"
 #include "SystemView.h"
@@ -15,7 +15,7 @@
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
 using chaoskit::library::FormulaType;
-using chaoskit::ui::BlendModel;
+using chaoskit::ui::SubtreeModel;
 using chaoskit::ui::System;
 using chaoskit::ui::SystemElement;
 using chaoskit::ui::SystemModel;
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
   qRegisterMetaType<HistogramBuffer>();
   qRegisterMetaType<Point>();
 
-  qmlRegisterInterface<BlendModel>("BlendModel");
+  qmlRegisterInterface<SubtreeModel>("SubtreeModel");
   qmlRegisterInterface<SystemElement>("SystemElement");
 
   qmlRegisterType<System>("app.chaoskit", 1, 0, "System");
