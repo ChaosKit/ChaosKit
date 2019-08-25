@@ -23,7 +23,6 @@ target_link_libraries(ui_common PUBLIC
 
 add_library(ui_state
         DocumentModel.cpp DocumentModel.h
-        GlobalStore.cpp GlobalStore.h
         )
 set_target_properties(ui_state PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_state PUBLIC
