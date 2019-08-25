@@ -9,6 +9,29 @@
 
 namespace chaoskit::state {
 
+namespace detail {
+
+/** Makes it possible to remove entries without passing in a type explicitly. */
+template <typename HStore, typename... AllTypes>
+struct Remover;
+
+template <typename HStore, typename T, typename... Rest>
+struct Remover<HStore, T, Rest...> {
+  static void remove(HStore& store, Id id) {
+    if (store.template matchesType<T>(id)) {
+      store.template removeWithType<T>(id);
+    }
+    Remover<HStore, Rest...>::remove(store, id);
+  }
+};
+
+template <typename HStore>
+struct Remover<HStore> {
+  static void remove(HStore&, Id) {}
+};
+
+}  // namespace detail
+
 /** Store that manages a predefined hierarchy of types. */
 template <typename... Ts>
 class HierarchicalStore : public Store<Ts...> {
@@ -80,10 +103,10 @@ class HierarchicalStore : public Store<Ts...> {
   }
 
   template <typename T>
-  void remove(Id id) {
+  void removeWithType(Id id) {
     static_assert(Store<Ts...>::template containsType<T>());
     if (!this->template matchesType<T>(id)) {
-      throw IdTypeMismatchError("in HierarchicalStore::remove()");
+      throw IdTypeMismatchError("in HierarchicalStore::removeWithType()");
     }
 
     if constexpr (isChild<T>()) {
@@ -124,13 +147,17 @@ class HierarchicalStore : public Store<Ts...> {
           // and the temporary copy prevents breakage caused by that.
           auto childrenCopy = it->second.at(typeIndex<ChildType>());
           for (const auto& childId : childrenCopy) {
-            remove<ChildType>(childId);
+            removeWithType<ChildType>(childId);
           }
         }
       });
     }
 
-    Store<Ts...>::template remove<T>(id);
+    Store<Ts...>::remove(id);
+  }
+
+  void remove(Id id) {
+    detail::Remover<decltype(*this), Ts...>::remove(*this, id);
   }
 
   // TODO: implement clear<T>()

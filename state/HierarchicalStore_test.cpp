@@ -177,11 +177,32 @@ TEST_F(HierarchicalStoreTest,
 
 // HierarchicalStore::remove()
 
+TEST_F(HierarchicalStoreTest, RemovesEntitiesWithoutHavingToPassType) {
+  HierarchicalStore<HasOne, One> store;
+  Id id = store.create<One>();
+
+  store.remove(id);
+
+  EXPECT_FALSE(store.has(id));
+}
+
+TEST_F(HierarchicalStoreTest, TypelessRemoveWorksRecursively) {
+  HierarchicalStore<HasOne, One> store;
+  Id id = store.create<HasOne>();
+  store.associateNewChildWith<HasOne, One>(id);
+
+  store.remove(id);
+
+  EXPECT_EQ(0, store.size());
+}
+
+// HierarchicalStore::removeWithType()
+
 TEST_F(HierarchicalStoreTest, RemovesEntities) {
   HierarchicalStore<HasOne, One> store;
   Id id = store.create<One>();
 
-  store.remove<One>(id);
+  store.removeWithType<One>(id);
 
   EXPECT_FALSE(store.has(id));
 }
@@ -190,7 +211,7 @@ TEST_F(HierarchicalStoreTest, ThrowsWhenRemovedIdTypeDoesNotMatch) {
   HierarchicalStore<HasOne, One> store;
   Id id = store.create<One>();
 
-  EXPECT_THROW(store.remove<HasOne>(id), IdTypeMismatchError);
+  EXPECT_THROW(store.removeWithType<HasOne>(id), IdTypeMismatchError);
 }
 
 TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromParentInHasOneCase) {
@@ -199,7 +220,7 @@ TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromParentInHasOneCase) {
   Id childId = store.create<One>();
   store.associateChildWith<HasOne, One>(parentId, childId);
 
-  store.remove<One>(childId);
+  store.removeWithType<One>(childId);
 
   const auto* parent = store.find<HasOne>(parentId);
   EXPECT_THAT(parent->one, IsNull());
@@ -211,7 +232,7 @@ TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromParentInHasManyCase) {
   Id childId = store.create<One>();
   store.associateChildWith<HasMany, One>(parentId, childId);
 
-  store.remove<One>(childId);
+  store.removeWithType<One>(childId);
 
   const auto* parent = store.find<HasMany>(parentId);
   EXPECT_THAT(parent->ones, ElementsAre());
@@ -225,7 +246,7 @@ TEST_F(HierarchicalStoreTest, RemoveDissociatesChildFromAllParents) {
   store.associateChildWith<HasOne, One>(hasOneId, oneId);
   store.associateChildWith<HasMany, One>(hasManyId, oneId);
 
-  store.remove<One>(oneId);
+  store.removeWithType<One>(oneId);
 
   const auto* hasOne = store.find<HasOne>(hasOneId);
   const auto* hasMany = store.find<HasMany>(hasManyId);
@@ -244,7 +265,7 @@ TEST_F(HierarchicalStoreTest, RecursivelyRemovesChildren) {
   store.associateNewChildWith<HasMany, Two>(middleMany);
   store.associateChildWith<HasOne, One>(middleOne, bottom);
 
-  store.remove<Top>(top);
+  store.removeWithType<Top>(top);
 
   EXPECT_EQ(0, store.size());
 }

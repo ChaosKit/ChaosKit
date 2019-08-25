@@ -33,10 +33,10 @@ struct Another {
 
 class StoreTest : public ::testing::Test {};
 
-template <typename T, typename... Ts>
-void triggerStoreException(Store<T, Ts...> &store) {
+template <typename... Ts>
+void triggerStoreException(Store<Ts...> &store) {
   Id invalid;
-  store.template remove<T>(invalid);
+  store.remove(invalid);
 }
 
 // Store::create()
@@ -235,7 +235,7 @@ TEST_F(StoreTest, RemovesEntities) {
   Store<Simple> store;
   Id id = store.create<Simple>();
 
-  store.remove<Simple>(id);
+  store.remove(id);
 
   EXPECT_FALSE(store.has(id));
 }
@@ -243,16 +243,9 @@ TEST_F(StoreTest, RemovesEntities) {
 TEST_F(StoreTest, ThrowsWhenRemovingMissingEntities) {
   Store<Simple> store;
   Id id = store.create<Simple>();
-  store.remove<Simple>(id);
+  store.remove(id);
 
-  EXPECT_THROW(store.remove<Simple>(id), MissingIdError);
-}
-
-TEST_F(StoreTest, ThrowsWhenRemovedIdTypeDoesNotMatch) {
-  Store<Simple, Another> store;
-  Id id = store.create<Simple>();
-
-  EXPECT_THROW(store.remove<Another>(id), IdTypeMismatchError);
+  EXPECT_THROW(store.remove(id), MissingIdError);
 }
 
 // Store::clear()
@@ -353,7 +346,7 @@ TEST_F(StoreTest, AbortsTransactionOnRemoveFailure) {
 
   bool success = store.transaction([&store]() {
     Id invalid;
-    store.remove<Simple>(invalid);
+    store.remove(invalid);
   });
 
   EXPECT_FALSE(success);
@@ -389,7 +382,7 @@ TEST_F(StoreTest, TransactionRollsBackRemovals) {
   Id id = store.create<Simple>();
 
   store.transaction([&store, id]() {
-    store.remove<Simple>(id);
+    store.remove(id);
     triggerStoreException(store);
   });
 
@@ -481,7 +474,7 @@ TEST_F(StoreChangeTrackingTest, TracksOnlyFirstPreUpdateValue) {
 
 TEST_F(StoreChangeTrackingTest, TracksRemovals) {
   Id id = store.create<Simple>();
-  store.remove<Simple>(id);
+  store.remove(id);
 
   EXPECT_THAT(store.changes().removed, ElementsAre(Pair(id, Simple{0})));
 }
@@ -490,7 +483,7 @@ TEST_F(StoreChangeTrackingTest, TracksTransactions) {
   store.transaction([this]() {
     Id id = store.create<Simple>();
     store.update<Simple>(id, [](Simple *s) { s->property = 42; });
-    store.remove<Simple>(id);
+    store.remove(id);
   });
 
   using Changes = Store<Simple>::Changes;
@@ -508,7 +501,7 @@ TEST_F(StoreChangeTrackingTest, TracksTransactions) {
 TEST_F(StoreChangeTrackingTest, ResetsChanges) {
   Id id = store.create<Simple>();
   store.update<Simple>(id, [](Simple *s) { s->property = 42; });
-  store.remove<Simple>(id);
+  store.remove(id);
 
   store.resetChanges();
 
