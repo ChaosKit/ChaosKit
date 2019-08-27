@@ -1,3 +1,6 @@
 [submodule "thirdparty/better_enums"]
 	path = thirdparty/better_enums
 	url = https://github.com/aantron/better-enums.git
+[submodule "thirdparty/randutils"]
+	path = thirdparty/randutils
+	url = https://gist.github.com/540829265469e673d045.git
