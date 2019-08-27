@@ -1,0 +1,3 @@
+[submodule "thirdparty/better_enums"]
+	path = thirdparty/better_enums
+	url = https://github.com/aantron/better-enums.git
