@@ -109,43 +109,6 @@ QModelIndex DocumentModel::index(int row, int column,
   }
 
   return QModelIndex();
-
-  //  // We treat the System as the root here, but don't display it.
-  //  // Top-level items are Blends. The last one is the FinalBlend.
-  //  if (!parent.isValid()) {
-  //    Id rootId = store_.systemId();
-  //    size_t blendCount = store_->countChildren<core::Blend>(rootId);
-  //
-  //    // Blends
-  //    if (row < blendCount) {
-  //      auto children = store_->children<core::Blend>(rootId);
-  //      return createIndex(row, column, fromId(children[row]));
-  //    }
-  //    // Final Blend
-  //    if (row == blendCount) {
-  //      // This works because there can be only one final blend.
-  //      Id finalBlendId = store_->lastId<core::FinalBlend>();
-  //      return createIndex(row, column, fromId(finalBlendId));
-  //    }
-  //
-  //    return QModelIndex();
-  //  }
-
-  //  // Parent index is valid, that means the parent must be a Blend or a
-  //  // FinalBlend.
-  //  Id parentId = toId(parent.internalId());
-  //  if (!store_->matchesType<core::Blend>(parentId) &&
-  //      !store_->matchesType<core::FinalBlend>(parentId)) {
-  //    return QModelIndex();
-  //  }
-  //
-  //  // Formulas
-  //  auto formulas = store_->children<core::Formula>(parentId);
-  //  if (row < formulas.size()) {
-  //    return createIndex(row, column, fromId(formulas[row]));
-  //  }
-  //
-  //  return QModelIndex();
 }
 
 QModelIndex DocumentModel::parent(const QModelIndex& child) const {
@@ -211,14 +174,6 @@ int DocumentModel::rowCount(const QModelIndex& parent) const {
   }
   Id parentId = toId(parent.internalId());
   return store_.countAllChildren(parentId);
-  //  if (!parent.isValid()) {
-  //    // Extra one is for the final blend, of which there is always one.
-  //    return static_cast<int>(store_->countChildren<core::Blend>(systemId)) +
-  //    1;
-  //  }
-  //
-  //  Id parentId = toId(parent.internalId());
-  //  return store_->countChildren<core::Formula>(parentId);
 }
 
 int DocumentModel::columnCount(const QModelIndex& parent) const { return 1; }
