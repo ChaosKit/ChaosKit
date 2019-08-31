@@ -30,6 +30,8 @@ struct Remover<HStore> {
   static void remove(HStore&, Id) {}
 };
 
+static const std::vector<Id> EMPTY_ID_VECTOR{};
+
 }  // namespace detail
 
 /** Store that manages a predefined hierarchy of types. */
@@ -196,25 +198,25 @@ class HierarchicalStore : public Store<Ts...> {
   }
 
   template <typename C>
-  [[nodiscard]] const std::vector<Id>* children(Id parentId) const {
+  [[nodiscard]] const std::vector<Id>& children(Id parentId) const {
     if constexpr (isChild<C>()) {
       auto it = childrenByType_.find(parentId);
       if (it == childrenByType_.end()) {
-        return nullptr;
+        return detail::EMPTY_ID_VECTOR;
       }
 
-      return &(it->second.at(typeIndex<C>()));
+      return it->second.at(typeIndex<C>());
     } else {
-      return nullptr;
+      return detail::EMPTY_ID_VECTOR;
     }
   }
 
-  [[nodiscard]] const std::vector<Id>* allChildren(Id parentId) const {
+  [[nodiscard]] const std::vector<Id>& allChildren(Id parentId) const {
     auto it = children_.find(parentId);
     if (it == children_.end()) {
-      return nullptr;
+      return detail::EMPTY_ID_VECTOR;
     }
-    return &it->second;
+    return it->second;
   }
 
   [[nodiscard]] const Id* parent(Id childId) const {

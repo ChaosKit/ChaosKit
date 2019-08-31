@@ -88,24 +88,24 @@ QModelIndex DocumentModel::index(int row, int column,
   // be displayed in that order.
   if (Store::matchesType<core::System>(parentId)) {
     size_t offset = 0;
-    auto* blends = store_.children<core::Blend>(parentId);
-    if (blends) {
-      offset = blends->size();
-      if (row < blends->size()) {
-        return createIndex(row, column, fromId((*blends)[row]));
-      }
+    const auto& blends = store_.children<core::Blend>(parentId);
+    offset = blends.size();
+    if (row < blends.size()) {
+      return createIndex(row, column, fromId(blends[row]));
     }
 
-    auto* finalBlends = store_.children<core::FinalBlend>(parentId);
-    if (finalBlends && (row < finalBlends->size() + offset)) {
-      return createIndex(row, column, fromId((*finalBlends)[row - offset]));
+    const auto& finalBlends = store_.children<core::FinalBlend>(parentId);
+    if (row < finalBlends.size() + offset) {
+      return createIndex(row, column, fromId(finalBlends[row - offset]));
     }
+
+    return QModelIndex();
   }
 
   // Generic tree traversal for children.
-  auto* children = store_.allChildren(parentId);
-  if (children && row < children->size()) {
-    return createIndex(row, column, fromId((*children)[row]));
+  const auto& children = store_.allChildren(parentId);
+  if (row < children.size()) {
+    return createIndex(row, column, fromId(children[row]));
   }
 
   return QModelIndex();
@@ -133,10 +133,9 @@ QModelIndex DocumentModel::parent(const QModelIndex& child) const {
   // Special case for Blends and the Final Blend because of their forced
   // ordering.
   if (Store::matchesType<core::Blend>(*parentId)) {
-    auto* blends = store_.children<core::Blend>(*grandparentId);
-    auto it = std::find(blends->begin(), blends->end(), *parentId);
-    return createIndex(std::distance(blends->begin(), it), 0,
-                       fromId(*parentId));
+    const auto& blends = store_.children<core::Blend>(*grandparentId);
+    auto it = std::find(blends.begin(), blends.end(), *parentId);
+    return createIndex(std::distance(blends.begin(), it), 0, fromId(*parentId));
   }
   if (Store::matchesType<core::FinalBlend>(*parentId)) {
     size_t blendCount = store_.countChildren<core::Blend>(*grandparentId);
@@ -144,27 +143,9 @@ QModelIndex DocumentModel::parent(const QModelIndex& child) const {
   }
 
   // Generic case for other parents.
-  auto* parents = store_.allChildren(*grandparentId);
-  auto it = std::find(parents->begin(), parents->end(), *parentId);
-  return createIndex(std::distance(parents->begin(), it), 0, fromId(*parentId));
-
-  //  // Only formulas can have parents.
-  //  if (!store_->matchesType<core::Formula>(childId)) {
-  //    return QModelIndex();
-  //  }
-  //
-  //  Id systemId = store_.systemId();
-  //  size_t blendCount = store_->countChildren<core::Blend>(systemId);
-  //
-  //  Id parentId = *store_->parent(childId);
-  //  if (store_->matchesType<core::FinalBlend>(parentId)) {
-  //    return createIndex(blendCount, 0, fromId(parentId));
-  //  }
-  //
-  //  auto children = store_->children<core::Blend>(systemId);
-  //  auto it = std::find(children.begin(), children.end(), parentId);
-  //  return createIndex(std::distance(children.begin(), it), 0,
-  //  fromId(parentId));
+  const auto& parents = store_.allChildren(*grandparentId);
+  auto it = std::find(parents.begin(), parents.end(), *parentId);
+  return createIndex(std::distance(parents.begin(), it), 0, fromId(*parentId));
 }
 
 int DocumentModel::rowCount(const QModelIndex& parent) const {
@@ -342,9 +323,9 @@ bool DocumentModel::removeRows(int row, int count, const QModelIndex& parent) {
       return false;
     }
 
-    children = store_.children<core::Blend>(parentId);
+    children = &store_.children<core::Blend>(parentId);
   } else {
-    children = store_.allChildren(parentId);
+    children = &store_.allChildren(parentId);
   }
 
   std::vector<Id> idsToRemove;
