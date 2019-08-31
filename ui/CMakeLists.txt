@@ -2,6 +2,7 @@ find_package(Qt5 REQUIRED
         COMPONENTS
         Core Gui Qml Quick QuickControls2
         OPTIONAL_COMPONENTS Widgets)
+find_package(KF5ItemModels)
 
 add_subdirectory(models)
 
@@ -57,6 +58,7 @@ target_link_libraries(ModelTest PRIVATE
         core
         ui_state
         Qt5::Core Qt5::Gui Qt5::Widgets
+        KF5::ItemModels
         )
 
 add_executable(TestWindow WIN32
