@@ -52,15 +52,15 @@ class DocumentModel : public QAbstractItemModel {
 
   void addFormula(library::FormulaType type, const QModelIndex& blendIndex);
 
+  [[nodiscard]] QModelIndex documentIndex() const;
+  [[nodiscard]] QModelIndex systemIndex() const;
+
  public slots:
   void addBlend();
 
  private:
   [[nodiscard]] state::Id documentId() const;
   [[nodiscard]] state::Id systemId() const;
-
-  [[nodiscard]] QModelIndex documentIndex() const;
-  [[nodiscard]] QModelIndex systemIndex() const;
 
   void fixInvariants();
 };

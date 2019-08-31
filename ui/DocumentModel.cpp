@@ -357,50 +357,61 @@ bool DocumentModel::setData(const QModelIndex& index, const QVariant& value,
 }
 
 bool DocumentModel::removeRows(int row, int count, const QModelIndex& parent) {
-  bool success = false;
-
-  beginRemoveRows(parent, row, row + count);
-  if (parent.isValid()) {
-    Id parentId = toId(parent.internalId());
-    std::vector<Id> idsToRemove;
-
-    {
-      const std::vector<Id>* children;
-
-      // Special case for Blends because of the ordering
-      if (Store::matchesType<core::System>(parentId)) {
-        children = store_.children<core::Blend>(parentId);
-        if (row + count > store_.countChildren<core::Blend>(parentId)) {
-          idsToRemove.push_back(store_.lastId<core::FinalBlend>());
-        }
-      } else {
-        children = store_.allChildren(parentId);
-      }
-
-      if (children) {
-        auto front = children->begin() + row;
-        auto back = front + count;
-        if (front != children->end()) {
-          std::copy(front, back, std::back_inserter(idsToRemove));
-        }
-      }
-    }
-
-    if (idsToRemove.size() == count) {
-      for (const Id& id : idsToRemove) {
-        store_.remove(id);
-      }
-      success = true;
-    }
-  } else if (row == 0 && count == 1) {
-    store_.remove(documentId());
-    success = true;
+  if (count < 1) {
+    return false;
   }
 
-  fixInvariants();
+  if (!parent.isValid()) {
+    // Trying to remove the Document, remove the System instead.
+    return removeRows(0, 1, documentIndex());
+  }
+
+  Id parentId = toId(parent.internalId());
+  if (Store::matchesType<core::Document>(parentId)) {
+    // Trying to remove the System, remove all Blends.
+    auto system = systemIndex();
+    return removeRows(0, rowCount(system), system);
+  }
+
+  const std::vector<Id>* children;
+  if (Store::matchesType<core::System>(parentId)) {
+    // Trying to remove Blends
+
+    if (row + count > store_.countChildren<core::Blend>(parentId)) {
+      // Trying to remove the Final Blend, split the range to delete Blends and
+      // Final Blend's Formulas separately.
+      auto finalBlend = index(rowCount(parent) - 1, 0, parent);
+
+      removeRows(0, rowCount(finalBlend), finalBlend);
+      removeRows(row, count - 1, parent);
+      return false;
+    }
+
+    children = store_.children<core::Blend>(parentId);
+  } else {
+    children = store_.allChildren(parentId);
+  }
+
+  std::vector<Id> idsToRemove;
+  if (children) {
+    auto front = children->begin() + row;
+    auto back = front + count;
+    if (front != children->end()) {
+      std::copy(front, back, std::back_inserter(idsToRemove));
+    }
+  }
+
+  if (idsToRemove.size() != count) {
+    return false;
+  }
+
+  beginRemoveRows(parent, row, row + count);
+  for (auto id : idsToRemove) {
+    store_.remove(id);
+  }
   endRemoveRows();
 
-  return success;
+  return true;
 }
 
 //////////////////////////////////////////////////////////////// Private methods
