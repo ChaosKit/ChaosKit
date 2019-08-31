@@ -2,5 +2,10 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/thirdparty/better_enums" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/thirdparty/googletest" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/thirdparty/randutils" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/thirdparty/variant" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/thirdparty/variant/.mason" vcs="Git" />
   </component>
 </project>
