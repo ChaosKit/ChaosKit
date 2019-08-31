@@ -1,9 +1,7 @@
 #include "TestWindow.h"
 #include <library/FormulaType.h>
 #include <QTimer>
-#include "models/Blend.h"
-#include "models/Formula.h"
-#include "models/System.h"
+#include "DocumentModel.h"
 
 using chaoskit::core::HistogramBuffer;
 using chaoskit::library::FormulaType;
@@ -14,15 +12,22 @@ TestWindow::TestWindow() {
   setTitle(QStringLiteral("ChaosKit (Test Window)"));
   setBaseSize(QSize(512, 512));
 
-  auto *system = new System(this);
-  auto *formula = system->addBlend()->addFormula(FormulaType::DeJong);
-  formula->setParams({9.379666578024626e-01f, 1.938709271140397e+00f,
-                      -1.580897020176053e-01f, -1.430070123635232e+00f});
-  system->finalBlend()->setPost(QTransform::fromScale(.5, 1).translate(.5, .5));
+  auto *model = new DocumentModel(this);
+  QModelIndex blendIndex = model->addBlend();
+  QModelIndex formulaIndex = model->addFormula(FormulaType::DeJong, blendIndex);
+  model->setData(formulaIndex,
+                 QVariant::fromValue(std::vector<float>{
+                     9.379666578024626e-01f, 1.938709271140397e+00f,
+                     -1.580897020176053e-01f, -1.430070123635232e+00f}),
+                 DocumentModel::ParamsRole);
+  model->setData(
+      model->finalBlendIndex(),
+      QVariant::fromValue(QTransform::fromScale(.5, 1).translate(.5, .5)),
+      DocumentModel::PostTransformRole);
 
   histogramGenerator_ = new HistogramGenerator(this);
   histogramGenerator_->setSize(512, 512);
-  histogramGenerator_->setSystem(system);
+  histogramGenerator_->setSystem(model->document()->system);
   histogramGenerator_->setTtl(20);
   toneMapper_ = new GLToneMapper(this);
 

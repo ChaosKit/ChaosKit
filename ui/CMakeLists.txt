@@ -70,5 +70,6 @@ target_link_libraries(TestWindow PRIVATE
         core
         library
         ui_common
+        ui_state
         Qt5::Core Qt5::Gui Qt5::Widgets
         )
