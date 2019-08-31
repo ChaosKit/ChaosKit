@@ -46,6 +46,11 @@ void HistogramGenerator::setSystem(const System *system) {
                             [=] { blenderTask_->setSystem(system); });
 }
 
+void HistogramGenerator::setSystem(const core::System *system) {
+  QMetaObject::invokeMethod(blenderTask_,
+                            [=] { blenderTask_->setSystem(system); });
+}
+
 void HistogramGenerator::setSize(quint32 width, quint32 height) {
   QMetaObject::invokeMethod(
       blenderTask_, [=] { gathererTask_->setSize(QSize(width, height)); });

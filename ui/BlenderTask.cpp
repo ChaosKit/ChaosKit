@@ -1,10 +1,12 @@
 #include "BlenderTask.h"
 #include <QTimer>
+#include "core/toSource.h"
 #include "models/toSource.h"
 
 using chaoskit::core::Particle;
 using chaoskit::core::Point;
 using chaoskit::core::SimpleInterpreter;
+using chaoskit::core::toSource;
 using chaoskit::ui::toSource;
 
 namespace chaoskit::ui {
@@ -22,6 +24,12 @@ float distance(const Point &a, const Point &b) {
 void BlenderTask::setSystem(const System *system) {
   interpreter_ = std::make_unique<SimpleInterpreter>(toSource(system),
                                                      system->params(), rng_);
+  resetParticle();
+}
+
+void BlenderTask::setSystem(const core::System *system) {
+  interpreter_ = std::make_unique<SimpleInterpreter>(
+      toSource(*system), core::Params::fromSystem(*system), rng_);
   resetParticle();
 }
 

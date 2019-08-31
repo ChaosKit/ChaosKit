@@ -17,6 +17,7 @@ class BlenderTask : public QObject {
 
  public slots:
   void setSystem(const chaoskit::ui::System *system);
+  void setSystem(const chaoskit::core::System *system);
   void start();
   void stop();
   void setTtl(int32_t ttl);
