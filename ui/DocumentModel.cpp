@@ -1,4 +1,5 @@
 #include "DocumentModel.h"
+#include <QtGui/QTransform>
 #include "state/Id.h"
 
 using chaoskit::state::Id;
@@ -22,20 +23,51 @@ bool DocumentModel::isBlend(const QModelIndex& index) const {
          matchesType<core::FinalBlend>(index);
 }
 
+QModelIndex DocumentModel::blendAt(int i) const {
+  return index(i, 0, systemIndex());
+}
+
+QModelIndex DocumentModel::formulaAt(int i,
+                                     const QModelIndex& blendIndex) const {
+  if (!blendIndex.isValid() || !isBlend(blendIndex)) {
+    return QModelIndex();
+  }
+
+  return index(i, 0, blendIndex);
+}
+
+QModelIndex DocumentModel::documentIndex() const {
+  return createIndex(0, 0, fromId(documentId()));
+}
+
+QModelIndex DocumentModel::systemIndex() const {
+  return createIndex(0, 0, fromId(systemId()));
+}
+
+QModelIndex DocumentModel::finalBlendIndex() const {
+  auto system = systemIndex();
+  return index(rowCount(system) - 1, 0, system);
+}
+
+const core::Document* DocumentModel::document() const {
+  return store_.find<core::Document>(documentId());
+}
+
 ///////////////////////////////////////////////////////////// Custom API — Slots
 
-void DocumentModel::addBlend() {
+QModelIndex DocumentModel::addBlend() {
   size_t newRowNumber = store_.countChildren<core::Blend>(systemId());
   beginInsertRows(systemIndex(), newRowNumber, newRowNumber);
   store_.associateNewChildWith<core::System, core::Blend>(
       systemId(), [](core::Blend* blend) { blend->name = "Unnamed blend"; });
   endInsertRows();
+  return blendAt(newRowNumber);
 }
 
-void DocumentModel::addFormula(library::FormulaType type,
-                               const QModelIndex& blendIndex) {
+QModelIndex DocumentModel::addFormula(library::FormulaType type,
+                                      const QModelIndex& blendIndex) {
   if (!blendIndex.isValid() || !isBlend(blendIndex)) {
-    return;
+    return QModelIndex();
   }
 
   Id blendId = toId(blendIndex.internalId());
@@ -54,6 +86,7 @@ void DocumentModel::addFormula(library::FormulaType type,
   }
 
   endInsertRows();
+  return index(newRowNumber, 0, blendIndex);
 }
 
 /////////////////////// QAbstractItemModel method overrides for read-only access
@@ -173,6 +206,20 @@ bool DocumentModel::hasChildren(const QModelIndex& parent) const {
 
 namespace {
 
+QTransform toQtTransform(const core::Transform& transform) {
+  return QTransform(transform.values[0], transform.values[3],
+                    transform.values[1], transform.values[4],
+                    transform.values[2], transform.values[5]);
+}
+
+core::Transform fromQtTransform(const QTransform& transform) {
+  return core::Transform(
+      {static_cast<float>(transform.m11()), static_cast<float>(transform.m21()),
+       static_cast<float>(transform.m31()), static_cast<float>(transform.m12()),
+       static_cast<float>(transform.m22()),
+       static_cast<float>(transform.m32())});
+}
+
 QVariant documentData(const core::Document* blend, int role) {
   if (!blend) return QVariant();
 
@@ -193,6 +240,16 @@ QVariant systemData(const core::System* blend, int role) {
       return QVariant();
   }
 }
+QVariant commonBlendData(const core::BlendBase* blend, int role) {
+  switch (role) {
+    case DocumentModel::PreTransformRole:
+      return QVariant::fromValue(toQtTransform(blend->pre));
+    case DocumentModel::PostTransformRole:
+      return QVariant::fromValue(toQtTransform(blend->post));
+    default:
+      return QVariant();
+  }
+}
 QVariant blendData(const core::Blend* blend, int role) {
   if (!blend) return QVariant();
 
@@ -201,7 +258,7 @@ QVariant blendData(const core::Blend* blend, int role) {
     case Qt::EditRole:
       return QString::fromStdString(blend->name);
     default:
-      return QVariant();
+      return commonBlendData(blend, role);
   }
 }
 QVariant finalBlendData(const core::FinalBlend* blend, int role) {
@@ -211,23 +268,55 @@ QVariant finalBlendData(const core::FinalBlend* blend, int role) {
     return QStringLiteral("Final Blend");
   }
 
-  return QVariant();
+  return commonBlendData(blend, role);
 }
 QVariant formulaData(const core::Formula* formula, int role) {
   if (!formula) return QVariant();
 
-  if (role == Qt::DisplayRole) {
-    return QString(formula->type._to_string());
+  switch (role) {
+    case Qt::DisplayRole:
+      return QString(formula->type._to_string());
+    case DocumentModel::ParamsRole:
+      return QVariant::fromValue(formula->params);
   }
 
   return QVariant();
 }
 
+bool setCommonBlendData(core::BlendBase* blend, const QVariant& value,
+                        int role) {
+  switch (role) {
+    case DocumentModel::PreTransformRole:
+      blend->pre = fromQtTransform(value.value<QTransform>());
+      return true;
+    case DocumentModel::PostTransformRole:
+      blend->post = fromQtTransform(value.value<QTransform>());
+      return true;
+    default:
+      return false;
+  }
+}
 bool setBlendData(core::Blend* blend, const QVariant& value, int role) {
   if (!blend) return false;
 
   if (role == Qt::EditRole) {
     blend->name = value.toString().toStdString();
+    return true;
+  }
+
+  return setCommonBlendData(blend, value, role);
+}
+bool setFinalBlendData(core::FinalBlend* blend, const QVariant& value,
+                       int role) {
+  if (!blend) return false;
+
+  return setCommonBlendData(blend, value, role);
+}
+bool setFormulaData(core::Formula* formula, const QVariant& value, int role) {
+  if (!formula) return false;
+
+  if (role == DocumentModel::ParamsRole) {
+    formula->params = value.value<std::vector<float>>();
     return true;
   }
 
@@ -283,6 +372,16 @@ bool DocumentModel::setData(const QModelIndex& index, const QVariant& value,
     updated =
         store_.update<core::Blend>(id, [&value, role](core::Blend* blend) {
           return setBlendData(blend, value, role);
+        });
+  } else if (Store::matchesType<core::FinalBlend>(id)) {
+    updated = store_.update<core::FinalBlend>(
+        id, [&value, role](core::FinalBlend* blend) {
+          return setFinalBlendData(blend, value, role);
+        });
+  } else if (Store::matchesType<core::Formula>(id)) {
+    updated = store_.update<core::Formula>(
+        id, [&value, role](core::Formula* formula) {
+          return setFormulaData(formula, value, role);
         });
   }
 
@@ -359,14 +458,6 @@ state::Id DocumentModel::documentId() const {
 state::Id DocumentModel::systemId() const {
   return store_.lastId<core::System>();
 };
-
-QModelIndex DocumentModel::documentIndex() const {
-  return createIndex(0, 0, fromId(documentId()));
-}
-
-QModelIndex DocumentModel::systemIndex() const {
-  return createIndex(0, 0, fromId(systemId()));
-}
 
 void DocumentModel::fixInvariants() {
   Id documentId = (store_.count<core::Document>() < 1)

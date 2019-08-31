@@ -20,6 +20,12 @@ class DocumentModel : public QAbstractItemModel {
   Store store_;
 
  public:
+  enum Roles {
+    ParamsRole = Qt::UserRole + 1,
+    PreTransformRole,
+    PostTransformRole,
+  };
+
   explicit DocumentModel(QObject* parent = nullptr);
 
   // QAbstractItemModel method overrides for read access
@@ -49,14 +55,21 @@ class DocumentModel : public QAbstractItemModel {
     return Store::matchesType<T>(state::Id(index.internalId()));
   }
   [[nodiscard]] bool isBlend(const QModelIndex& index) const;
+  [[nodiscard]] QModelIndex blendAt(int i) const;
+  [[nodiscard]] QModelIndex formulaAt(int i,
+                                      const QModelIndex& blendIndex) const;
 
-  void addFormula(library::FormulaType type, const QModelIndex& blendIndex);
+  QModelIndex addFormula(library::FormulaType type,
+                         const QModelIndex& blendIndex);
 
   [[nodiscard]] QModelIndex documentIndex() const;
   [[nodiscard]] QModelIndex systemIndex() const;
+  [[nodiscard]] QModelIndex finalBlendIndex() const;
+
+  [[nodiscard]] const core::Document* document() const;
 
  public slots:
-  void addBlend();
+  QModelIndex addBlend();
 
  private:
   [[nodiscard]] state::Id documentId() const;
