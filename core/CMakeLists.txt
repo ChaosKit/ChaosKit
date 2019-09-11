@@ -2,6 +2,7 @@ add_subdirectory(structures)
 add_subdirectory(models)
 
 add_library(core
+        errors.cpp errors.h
         HistogramBuffer.h HistogramBuffer.cpp
         HistogramColor.h
         Params.h
@@ -14,7 +15,8 @@ add_library(core
         ThreadLocalRng.h ThreadLocalRng.cpp
         random.h
         toSource.h toSource.cpp
-        util.h util.cpp transforms.cpp transforms.h)
+        transforms.cpp transforms.h
+        util.h util.cpp)
 target_link_libraries(core
         PUBLIC ast stdx randutils core_models
         INTERFACE core_structures)

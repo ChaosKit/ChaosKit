@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "ThreadLocalRng.h"
+#include "errors.h"
 
 namespace chaoskit::core {
 
@@ -67,7 +68,11 @@ class BlendInterpreter {
   }
 
   float operator()(const ast::Parameter &param) const {
-    return params_.at(index_).at(param.index());
+    try {
+      return params_.at(index_).at(param.index());
+    } catch (std::out_of_range &e) {
+      throw MissingParameterError(index_, param.index());
+    }
   }
 
   float operator()(const ast::UnaryFunction &function) const {

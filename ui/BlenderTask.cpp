@@ -1,8 +1,11 @@
 #include "BlenderTask.h"
+#include <QDebug>
 #include <QTimer>
+#include "core/errors.h"
 #include "core/toSource.h"
 #include "models/toSource.h"
 
+using chaoskit::core::MissingParameterError;
 using chaoskit::core::Particle;
 using chaoskit::core::Point;
 using chaoskit::core::SimpleInterpreter;
@@ -25,12 +28,14 @@ void BlenderTask::setSystem(const System *system) {
   interpreter_ = std::make_unique<SimpleInterpreter>(toSource(system),
                                                      system->params(), rng_);
   resetParticle();
+  start();
 }
 
 void BlenderTask::setSystem(const core::System *system) {
   interpreter_ = std::make_unique<SimpleInterpreter>(
       toSource(*system), core::Params::fromSystem(*system), rng_);
   resetParticle();
+  start();
 }
 
 void BlenderTask::start() {
@@ -57,22 +62,28 @@ void BlenderTask::calculate() {
     return;
   }
 
-  auto [next_state, output] = (*interpreter_)(particle_.point);
-  // TODO: calculate color in AST
-  float unused;
-  particle_.color = modf(distance(particle_.point, next_state) * .2f, &unused);
+  try {
+    auto [next_state, output] = (*interpreter_)(particle_.point);
+    // TODO: calculate color in AST
+    float unused;
+    particle_.color =
+        modf(distance(particle_.point, next_state) * .2f, &unused);
 
-  particle_.point = next_state;
-  emit stepCompleted(output, particle_.color);
+    particle_.point = next_state;
+    emit stepCompleted(output, particle_.color);
 
-  if (particle_.ttl == 0) {
-    randomizeParticle();
-    particle_.ttl = ttl_;
-  } else if (particle_.ttl != Particle::IMMORTAL) {
-    --particle_.ttl;
+    if (particle_.ttl == 0) {
+      randomizeParticle();
+      particle_.ttl = ttl_;
+    } else if (particle_.ttl != Particle::IMMORTAL) {
+      --particle_.ttl;
+    }
+
+    QTimer::singleShot(0, this, &BlenderTask::calculate);
+  } catch (MissingParameterError &e) {
+    qCritical() << "In BlenderTask::calculate():" << e.what();
+    stop();
   }
-
-  QTimer::singleShot(0, this, &BlenderTask::calculate);
 }
 
 void BlenderTask::setTtl(int32_t ttl) {
