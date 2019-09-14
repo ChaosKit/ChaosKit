@@ -5,7 +5,6 @@
 #include <QMainWindow>
 #include <QTreeView>
 #include "DocumentModel.h"
-#include "SubtreeModel.h"
 
 namespace chaoskit::ui {
 

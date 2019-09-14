@@ -6,23 +6,21 @@
 #include "BlenderTask.h"
 #include "GathererTask.h"
 #include "HistogramBuffer.h"
-#include "models/System.h"
 
 namespace chaoskit::ui {
 
 class HistogramGenerator : public QObject {
   Q_OBJECT
  public:
-  HistogramGenerator(QObject *parent = nullptr);
-  ~HistogramGenerator();
+  explicit HistogramGenerator(QObject *parent = nullptr);
+  ~HistogramGenerator() override;
 
   void withHistogram(
       const std::function<void(const core::HistogramBuffer &)> &action);
 
-  bool running() const { return running_; }
+  [[nodiscard]] bool running() const { return running_; }
 
  public slots:
-  void setSystem(const chaoskit::ui::System *system);
   void setSystem(const chaoskit::core::System *system);
   void setSize(quint32 width, quint32 height);
   void setTtl(int32_t ttl);

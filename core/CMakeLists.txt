@@ -1,5 +1,4 @@
 add_subdirectory(structures)
-add_subdirectory(models)
 
 add_library(core
         errors.cpp errors.h
@@ -18,7 +17,7 @@ add_library(core
         transforms.cpp transforms.h
         util.h util.cpp)
 target_link_libraries(core
-        PUBLIC ast stdx randutils core_models
+        PUBLIC ast stdx randutils
         INTERFACE core_structures)
 
 add_executable(core_test SimpleInterpreterTest.cpp)

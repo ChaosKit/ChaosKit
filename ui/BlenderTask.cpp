@@ -3,14 +3,12 @@
 #include <QTimer>
 #include "core/errors.h"
 #include "core/toSource.h"
-#include "models/toSource.h"
 
 using chaoskit::core::MissingParameterError;
 using chaoskit::core::Particle;
 using chaoskit::core::Point;
 using chaoskit::core::SimpleInterpreter;
 using chaoskit::core::toSource;
-using chaoskit::ui::toSource;
 
 namespace chaoskit::ui {
 
@@ -23,13 +21,6 @@ float distance(const Point &a, const Point &b) {
 }
 
 }  // namespace
-
-void BlenderTask::setSystem(const System *system) {
-  interpreter_ = std::make_unique<SimpleInterpreter>(toSource(system),
-                                                     system->params(), rng_);
-  resetParticle();
-  start();
-}
 
 void BlenderTask::setSystem(const core::System *system) {
   interpreter_ = std::make_unique<SimpleInterpreter>(

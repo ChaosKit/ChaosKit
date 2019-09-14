@@ -5,12 +5,12 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QSurfaceFormat>
+#include <QtGui/QTransform>
 #include "DocumentModel.h"
 #include "HistogramBuffer.h"
 #include "ModelEntry.h"
 #include "Point.h"
 #include "SystemView.h"
-#include "models/System.h"
 
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
@@ -18,7 +18,6 @@ using chaoskit::library::FormulaType;
 using chaoskit::ui::DocumentEntryType;
 using chaoskit::ui::DocumentModel;
 using chaoskit::ui::ModelEntry;
-using chaoskit::ui::System;
 using chaoskit::ui::SystemView;
 
 QStringList createFormulaList() {

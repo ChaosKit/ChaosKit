@@ -4,8 +4,6 @@ find_package(Qt5 REQUIRED
         OPTIONAL_COMPONENTS Widgets)
 find_package(KF5ItemModels)
 
-add_subdirectory(models)
-
 add_library(ui_common
         BlenderTask.cpp BlenderTask.h
         GathererTask.cpp GathererTask.h
@@ -18,7 +16,6 @@ add_library(ui_common
 set_target_properties(ui_common PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_common PUBLIC
         core
-        ui_models
         Qt5::Core Qt5::Gui
         )
 
@@ -38,14 +35,12 @@ add_executable(ChaosKit WIN32
         main.cpp
         ui.qrc
         SystemView.h SystemView.cpp
-        SystemModel.cpp SystemModel.h
-        SubtreeModel.cpp SubtreeModel.h)
+        )
 set_target_properties(ChaosKit PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON)
 target_link_libraries(ChaosKit PRIVATE
         core
         library
         ui_common
-        ui_models
         ui_state
         Qt5::Core Qt5::Gui Qt5::Qml Qt5::Quick Qt5::QuickControls2
         KF5::ItemModels

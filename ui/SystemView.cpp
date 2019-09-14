@@ -82,27 +82,6 @@ void SystemView::setRunning(bool running) {
   }
 }
 
-void SystemView::setSystem(System *system) {
-  if (system == system_) {
-    return;
-  }
-
-  if (system_ != nullptr) {
-    system_->disconnect(this);
-  }
-
-  system_ = system;
-  updateSystem();
-  emit systemChanged();
-
-  connect(system, &System::sourceChanged, this, &SystemView::updateSystem);
-  connect(system, &System::paramsChanged, this, &SystemView::updateSystem);
-  connect(system, &System::finalBlendSourceChanged, this,
-          &SystemView::updateSystem);
-  connect(system, &System::finalBlendParamsChanged, this,
-          &SystemView::updateSystem);
-}
-
 void SystemView::setModel(DocumentModel *documentModel) {
   if (documentModel == model_) {
     return;
@@ -120,12 +99,7 @@ void SystemView::setModel(DocumentModel *documentModel) {
 }
 
 void SystemView::updateSystem() {
-  // TODO: remove migration code
-  if (model_) {
-    generator_->setSystem(model_->system());
-  } else {
-    generator_->setSystem(system_);
-  }
+  generator_->setSystem(model_->system());
   generator_->clear();
   update();
 }
