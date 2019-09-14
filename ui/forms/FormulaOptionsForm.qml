@@ -31,4 +31,14 @@ GridLayout {
 
     onAccepted: formula.weight = parseFloat(text)
   }
+
+  Button {
+    Layout.columnSpan: 3
+    Layout.fillWidth: true
+
+    text: "Randomize Params"
+    onClicked: {
+      documentModel.randomizeParams(selectionModel.currentIndex);
+    }
+  }
 }

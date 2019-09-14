@@ -104,6 +104,7 @@ class DocumentModel : public QAbstractItemModel {
 
  public slots:
   QModelIndex addBlend();
+  void randomizeParams(const QModelIndex& index);
 
  signals:
   void structureChanged();

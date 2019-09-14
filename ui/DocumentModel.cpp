@@ -145,6 +145,22 @@ QModelIndex DocumentModel::addFormula(const QString& type,
   return addFormula(*optionalType, blendIndex);
 }
 
+void DocumentModel::randomizeParams(const QModelIndex& index) {
+  if (!index.isValid()) {
+    return;
+  }
+
+  // Get the FormulaType
+  Id id = toId(index.internalId());
+  if (!Store::matchesType<core::Formula>(id)) {
+    return;
+  }
+  library::FormulaType formulaType = store_.find<core::Formula>(id)->type;
+
+  setData(index, QVariant::fromValue(generateFormulaParams(formulaType)),
+          DocumentModel::ParamsRole);
+}
+
 /////////////////////// QAbstractItemModel method overrides for read-only access
 
 QHash<int, QByteArray> DocumentModel::roleNames() const {
