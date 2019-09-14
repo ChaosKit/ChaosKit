@@ -1,12 +1,14 @@
-#include "SystemElement.h"
+#include "ModelEntry.h"
 #include <QMetaProperty>
-#include "SystemModel.h"
 
 namespace chaoskit::ui {
 
-SystemElement::SystemElement(SystemModel *model, const QModelIndex &index)
-    : QQmlPropertyMap(this, model), model_(model), index_(index) {
-  auto roleNames = model->roleNames();
+ModelEntry::ModelEntry(QAbstractItemModel *model, const QModelIndex &index)
+    : QQmlPropertyMap(this, model),
+      model_(model),
+      index_(index),
+      element_(nullptr) {
+  QHash<int, QByteArray> roleNames = model->roleNames();
   for (auto it = roleNames.cbegin(); it != roleNames.cend(); ++it) {
     QString name = QString::fromUtf8(*it);
     insert(name, model->data(index, it.key()));
@@ -14,10 +16,10 @@ SystemElement::SystemElement(SystemModel *model, const QModelIndex &index)
   }
 
   connect(this, &QQmlPropertyMap::valueChanged, this,
-          &SystemElement::handleValueChanged);
+          &ModelEntry::handleValueChanged);
 }
 
-void SystemElement::proxyElement(QObject *element) {
+void ModelEntry::proxyElement(QObject *element) {
   element_ = element;
   auto *metaObject = element->metaObject();
   for (int i = metaObject->propertyOffset(); i < metaObject->propertyCount();
@@ -30,8 +32,7 @@ void SystemElement::proxyElement(QObject *element) {
   }
 }
 
-void SystemElement::handleValueChanged(const QString &key,
-                                       const QVariant &value) {
+void ModelEntry::handleValueChanged(const QString &key, const QVariant &value) {
   if (reverseRoleNames_.contains(key)) {
     model_->setData(index_, value, reverseRoleNames_.value(key));
   } else {

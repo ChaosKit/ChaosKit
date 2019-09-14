@@ -1,5 +1,9 @@
 #include "DocumentModel.h"
+#include <QRandomGenerator>
 #include <QtGui/QTransform>
+#include <sstream>
+#include "core/toSource.h"
+#include "library/util.h"
 #include "state/Id.h"
 
 using chaoskit::state::Id;
@@ -10,10 +14,27 @@ namespace {
 quintptr fromId(Id id) { return static_cast<uint64_t>(id); }
 
 Id toId(quintptr ptr) { return Id(static_cast<uint64_t>(ptr)); }
+
+std::vector<float> generateFormulaParams(library::FormulaType type) {
+  std::vector<float> params(library::paramCount(type));
+  auto* rng = QRandomGenerator::global();
+  for (float& param : params) {
+    param = static_cast<float>(rng->bounded(4.0) - 2.0);
+  }
+  return params;
+}
+
 }  // namespace
 
 DocumentModel::DocumentModel(QObject* parent) : QAbstractItemModel(parent) {
   fixInvariants();
+
+  connect(this, &QAbstractItemModel::dataChanged, this,
+          &DocumentModel::handleDataChanges);
+  connect(this, &QAbstractItemModel::rowsInserted, this,
+          &DocumentModel::handleRowInsertion);
+  connect(this, &QAbstractItemModel::rowsRemoved, this,
+          &DocumentModel::handleRowRemoval);
 }
 
 ///////////////////////////////////////////////////////////////////// Custom API
@@ -21,6 +42,10 @@ DocumentModel::DocumentModel(QObject* parent) : QAbstractItemModel(parent) {
 bool DocumentModel::isBlend(const QModelIndex& index) const {
   return matchesType<core::Blend>(index) ||
          matchesType<core::FinalBlend>(index);
+}
+
+bool DocumentModel::isFinalBlend(const QModelIndex& index) const {
+  return matchesType<core::FinalBlend>(index);
 }
 
 QModelIndex DocumentModel::blendAt(int i) const {
@@ -49,8 +74,27 @@ QModelIndex DocumentModel::finalBlendIndex() const {
   return index(rowCount(system) - 1, 0, system);
 }
 
+bool DocumentModel::removeRowAtIndex(const QModelIndex& index) {
+  return removeRow(index.row(), index.parent());
+}
+
 const core::Document* DocumentModel::document() const {
   return store_.find<core::Document>(documentId());
+}
+
+const core::System* DocumentModel::system() const {
+  return store_.find<core::System>(systemId());
+}
+
+ModelEntry* DocumentModel::entryAtIndex(const QModelIndex& index) {
+  return new ModelEntry(this, index);
+}
+
+QString DocumentModel::debugSource() const {
+  ast::System ast = core::toSource(*system());
+  std::stringstream ss;
+  ss << ast;
+  return QString::fromStdString(ss.str());
 }
 
 ///////////////////////////////////////////////////////////// Custom API — Slots
@@ -75,8 +119,10 @@ QModelIndex DocumentModel::addFormula(library::FormulaType type,
 
   beginInsertRows(blendIndex, newRowNumber, newRowNumber);
 
-  Id formulaId = store_.create<core::Formula>(
-      [type](core::Formula* formula) { formula->setType(type); });
+  Id formulaId = store_.create<core::Formula>([type](core::Formula* formula) {
+    formula->setType(type);
+    formula->params = generateFormulaParams(type);
+  });
 
   if (Store::matchesType<core::FinalBlend>(blendId)) {
     store_.associateChildWith<core::FinalBlend, core::Formula>(blendId,
@@ -89,7 +135,27 @@ QModelIndex DocumentModel::addFormula(library::FormulaType type,
   return index(newRowNumber, 0, blendIndex);
 }
 
+QModelIndex DocumentModel::addFormula(const QString& type,
+                                      const QModelIndex& blendIndex) {
+  auto optionalType = library::FormulaType::_from_string_nothrow(type.toUtf8());
+  if (!optionalType) {
+    return QModelIndex();
+  }
+
+  return addFormula(*optionalType, blendIndex);
+}
+
 /////////////////////// QAbstractItemModel method overrides for read-only access
+
+QHash<int, QByteArray> DocumentModel::roleNames() const {
+  QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+  names[ParamsRole] = "params";
+  names[PreTransformRole] = "pre";
+  names[PostTransformRole] = "post";
+  names[WeightRole] = "weight";
+  names[TypeRole] = "type";
+  return names;
+}
 
 Qt::ItemFlags DocumentModel::flags(const QModelIndex& index) const {
   if (!index.isValid()) {
@@ -220,22 +286,26 @@ core::Transform fromQtTransform(const QTransform& transform) {
        static_cast<float>(transform.m32())});
 }
 
-QVariant documentData(const core::Document* blend, int role) {
-  if (!blend) return QVariant();
+QVariant documentData(const core::Document* document, int role) {
+  if (!document) return QVariant();
 
   switch (role) {
     case Qt::DisplayRole:
       return QStringLiteral("Document");
+    case DocumentModel::TypeRole:
+      return DocumentEntryType::Document;
     default:
       return QVariant();
   }
 }
-QVariant systemData(const core::System* blend, int role) {
-  if (!blend) return QVariant();
+QVariant systemData(const core::System* system, int role) {
+  if (!system) return QVariant();
 
   switch (role) {
     case Qt::DisplayRole:
       return QStringLiteral("System");
+    case DocumentModel::TypeRole:
+      return DocumentEntryType::System;
     default:
       return QVariant();
   }
@@ -257,6 +327,10 @@ QVariant blendData(const core::Blend* blend, int role) {
     case Qt::DisplayRole:
     case Qt::EditRole:
       return QString::fromStdString(blend->name);
+    case DocumentModel::TypeRole:
+      return DocumentEntryType::Blend;
+    case DocumentModel::WeightRole:
+      return blend->weight;
     default:
       return commonBlendData(blend, role);
   }
@@ -264,11 +338,14 @@ QVariant blendData(const core::Blend* blend, int role) {
 QVariant finalBlendData(const core::FinalBlend* blend, int role) {
   if (!blend) return QVariant();
 
-  if (role == Qt::DisplayRole) {
-    return QStringLiteral("Final Blend");
+  switch (role) {
+    case Qt::DisplayRole:
+      return QStringLiteral("Final Blend");
+    case DocumentModel::TypeRole:
+      return DocumentEntryType::FinalBlend;
+    default:
+      return commonBlendData(blend, role);
   }
-
-  return commonBlendData(blend, role);
 }
 QVariant formulaData(const core::Formula* formula, int role) {
   if (!formula) return QVariant();
@@ -276,51 +353,67 @@ QVariant formulaData(const core::Formula* formula, int role) {
   switch (role) {
     case Qt::DisplayRole:
       return QString(formula->type._to_string());
+    case DocumentModel::TypeRole:
+      return DocumentEntryType::Formula;
     case DocumentModel::ParamsRole:
       return QVariant::fromValue(formula->params);
+    case DocumentModel::WeightRole:
+      return formula->weight.x;
+    default:
+      return QVariant();
   }
-
-  return QVariant();
 }
 
-bool setCommonBlendData(core::BlendBase* blend, const QVariant& value,
-                        int role) {
+QVector<int> setCommonBlendData(core::BlendBase* blend, const QVariant& value,
+                                int role) {
   switch (role) {
     case DocumentModel::PreTransformRole:
       blend->pre = fromQtTransform(value.value<QTransform>());
-      return true;
+      return {role};
     case DocumentModel::PostTransformRole:
       blend->post = fromQtTransform(value.value<QTransform>());
-      return true;
+      return {role};
     default:
-      return false;
+      return {};
   }
 }
-bool setBlendData(core::Blend* blend, const QVariant& value, int role) {
-  if (!blend) return false;
+QVector<int> setBlendData(core::Blend* blend, const QVariant& value, int role) {
+  if (!blend) return {};
 
-  if (role == Qt::EditRole) {
-    blend->name = value.toString().toStdString();
-    return true;
+  switch (role) {
+    case Qt::EditRole:
+      blend->name = value.toString().toStdString();
+      return {Qt::DisplayRole, Qt::EditRole};
+    case DocumentModel::WeightRole:
+      blend->weight = value.toFloat();
+      return {role};
+    default:
+      return setCommonBlendData(blend, value, role);
   }
+}
+QVector<int> setFinalBlendData(core::FinalBlend* blend, const QVariant& value,
+                               int role) {
+  if (!blend) return {};
 
   return setCommonBlendData(blend, value, role);
 }
-bool setFinalBlendData(core::FinalBlend* blend, const QVariant& value,
-                       int role) {
-  if (!blend) return false;
+QVector<int> setFormulaData(core::Formula* formula, const QVariant& value,
+                            int role) {
+  if (!formula) return {};
 
-  return setCommonBlendData(blend, value, role);
-}
-bool setFormulaData(core::Formula* formula, const QVariant& value, int role) {
-  if (!formula) return false;
-
-  if (role == DocumentModel::ParamsRole) {
-    formula->params = value.value<std::vector<float>>();
-    return true;
+  switch (role) {
+    case DocumentModel::ParamsRole:
+      formula->params = value.value<std::vector<float>>();
+      return {role};
+    case DocumentModel::WeightRole: {
+      float val = value.toFloat();
+      formula->weight.x = val;
+      formula->weight.y = val;
+      return {role};
+    }
+    default:
+      return {};
   }
-
-  return false;
 }
 
 }  // namespace
@@ -367,28 +460,28 @@ bool DocumentModel::setData(const QModelIndex& index, const QVariant& value,
   }
 
   Id id = toId(index.internalId());
-  bool updated = false;
+  QVector<int> updatedRoles;
   if (Store::matchesType<core::Blend>(id)) {
-    updated =
+    updatedRoles =
         store_.update<core::Blend>(id, [&value, role](core::Blend* blend) {
           return setBlendData(blend, value, role);
         });
   } else if (Store::matchesType<core::FinalBlend>(id)) {
-    updated = store_.update<core::FinalBlend>(
+    updatedRoles = store_.update<core::FinalBlend>(
         id, [&value, role](core::FinalBlend* blend) {
           return setFinalBlendData(blend, value, role);
         });
   } else if (Store::matchesType<core::Formula>(id)) {
-    updated = store_.update<core::Formula>(
+    updatedRoles = store_.update<core::Formula>(
         id, [&value, role](core::Formula* formula) {
           return setFormulaData(formula, value, role);
         });
   }
 
-  if (updated) {
-    emit dataChanged(index, index, {role});
+  if (!updatedRoles.isEmpty()) {
+    emit dataChanged(index, index, updatedRoles);
   }
-  return updated;
+  return !updatedRoles.isEmpty();
 }
 
 bool DocumentModel::removeRows(int row, int count, const QModelIndex& parent) {
@@ -440,7 +533,7 @@ bool DocumentModel::removeRows(int row, int count, const QModelIndex& parent) {
     return false;
   }
 
-  beginRemoveRows(parent, row, row + count);
+  beginRemoveRows(parent, row, row + count - 1);
   for (auto id : idsToRemove) {
     store_.remove(id);
   }
@@ -460,17 +553,54 @@ state::Id DocumentModel::systemId() const {
 };
 
 void DocumentModel::fixInvariants() {
-  Id documentId = (store_.count<core::Document>() < 1)
-                      ? store_.create<core::Document>()
-                      : store_.lastId<core::Document>();
-  Id systemId =
-      (store_.countChildren<core::System>(documentId) < 1)
-          ? store_.associateNewChildWith<core::Document, core::System>(
-                documentId)
-          : store_.lastId<core::System>();
+  bool shouldNotify = false;
+
+  Id documentId;
+  if (store_.count<core::Document>() < 1) {
+    documentId = store_.create<core::Document>();
+    shouldNotify = true;
+  } else {
+    documentId = store_.lastId<core::Document>();
+  }
+
+  Id systemId;
+  if (store_.countChildren<core::System>(documentId) < 1) {
+    systemId =
+        store_.associateNewChildWith<core::Document, core::System>(documentId);
+    shouldNotify = true;
+  } else {
+    systemId = store_.lastId<core::System>();
+  }
 
   if (store_.countChildren<core::FinalBlend>(systemId) < 1) {
     store_.associateNewChildWith<core::System, core::FinalBlend>(systemId);
+    shouldNotify = true;
+  }
+
+  if (shouldNotify) {
+    emit invariantsFixed();
+  }
+}
+
+void DocumentModel::handleDataChanges(const QModelIndex& topLeft,
+                                      const QModelIndex& bottomRight,
+                                      const QVector<int>& roles) {
+  if (topLeft != documentIndex() && !roles.contains(Qt::DisplayRole)) {
+    emit structureChanged();
+  }
+}
+
+void DocumentModel::handleRowInsertion(const QModelIndex& parent, int first,
+                                       int last) {
+  if (parent.isValid() && parent != documentIndex()) {
+    emit structureChanged();
+  }
+}
+
+void DocumentModel::handleRowRemoval(const QModelIndex& parent, int first,
+                                     int last) {
+  if (parent.isValid() && parent != documentIndex()) {
+    emit structureChanged();
   }
 }
 

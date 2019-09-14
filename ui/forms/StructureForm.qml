@@ -1,23 +1,24 @@
 import QtQuick 2.12
 import QtQuick.Layouts 1.12
+import QtQml.Models 2.12
 import "../controls"
 import "../resources"
 
 ColumnLayout {
-  id: root
   spacing: 0
 
-  property alias model: toolOptions.rootModel
-  property alias selectionModel: toolOptions.selectionModel
-
-  Repeater {
-    id: repeater
-    model: root.model
+  DelegateModel {
+    id: delegateModel
+    model: documentModel
+    rootIndex: documentModel.systemIndex
     delegate: BlendListItem {
       Layout.fillWidth: true
-      rootModel: root.model
-      selectionModel: root.selectionModel
+      parentModel: delegateModel
     }
+  }
+
+  Repeater {
+    model: delegateModel
   }
 
   MouseArea {
@@ -33,7 +34,7 @@ ColumnLayout {
 
     SymbolButton {
       symbol: Icons.faPlus
-      onClicked: model.addBlend()
+      onClicked: documentModel.addBlend()
     }
 
     Item {
@@ -42,9 +43,9 @@ ColumnLayout {
 
     SymbolButton {
       enabled: selectionModel.currentIndex.valid &&
-          !model.isFinalBlend(selectionModel.currentIndex)
+          !documentModel.isFinalBlend(selectionModel.currentIndex)
       symbol: Icons.faTrashAlt
-      onClicked: model.removeRowAtIndex(selectionModel.currentIndex)
+      onClicked: documentModel.removeRowAtIndex(selectionModel.currentIndex)
     }
   }
 

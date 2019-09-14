@@ -1,3 +1,4 @@
+import QtQml 2.12
 import QtQml.Models 2.12
 import QtQuick 2.12
 import QtQuick.Controls 2.12
@@ -13,22 +14,15 @@ ApplicationWindow {
   height: 768
   visible: true
 
-  SystemModel {
-    id: systemModel
-  }
-
-  ItemSelectionModel {
-    id: selectionModel
-    model: systemModel
-
+  Connections {
+    target: selectionModel
     onCurrentChanged: {
-      editor.selectedElement = systemModel.modelAtIndex(current);
+      editor.selectedElement = documentModel.entryAtIndex(current);
     }
   }
 
   Editor {
     id: editor
-    system: systemModel.system
     refreshInterval: 100
     gamma: renderingForm.gamma
     exposure: renderingForm.exposure
@@ -68,7 +62,7 @@ ApplicationWindow {
       active: false
       sourceComponent: AstInspector {
         anchors.centerIn: Overlay.overlay
-        source: systemModel.source
+        source: documentModel.debugSource
 
         onClosed: astInspectorLoader.active = false
       }
@@ -117,8 +111,6 @@ ApplicationWindow {
 
       StructureForm {
         id: structureForm
-        model: systemModel
-        selectionModel: selectionModel
       }
       RenderingForm {
         id: renderingForm

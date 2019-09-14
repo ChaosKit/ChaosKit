@@ -11,52 +11,24 @@ GridLayout {
   rowSpacing: 0
 
   Label {
-    Layout.columnSpan: 3
-    text: "Weights"
-    font.bold: true
-  }
-
-  Label {
-    text: "X"
+    text: "Weight"
   }
   Slider {
     Layout.fillWidth: true
     from: 0
     to: 2
     stepSize: 0.01
-    value: formula.weightX
+    value: formula.weight
 
-    onMoved: formula.weightX = value
+    onMoved: formula.weight = value
   }
   TextField {
-    text: formula.weightX.toFixed(2)
+    text: formula.weight.toFixed(2)
     validator: DoubleValidator {
       decimals: 2
       locale: "C"
     }
 
-    onAccepted: formula.weightX = parseFloat(text)
-  }
-
-  Label {
-    text: "Y"
-  }
-  Slider {
-    Layout.fillWidth: true
-    from: 0
-    to: 2
-    stepSize: 0.01
-    value: formula.weightY
-
-    onMoved: formula.weightY = value
-  }
-  TextField {
-    text: formula.weightY.toFixed(2)
-    validator: DoubleValidator {
-      decimals: 2
-      locale: "C"
-    }
-    width: 30
-    onAccepted: formula.weightY = parseFloat(text)
+    onAccepted: formula.weight = parseFloat(text)
   }
 }

@@ -10,11 +10,10 @@ ColumnLayout {
   id: itemRoot
   spacing: 0
 
+  property var parentModel
   property bool itemEnabled: true  // TODO: use the model
   property bool open: false
-  property var rootModel: null
-  property var selectionModel: null
-  readonly property var selectionIndex: rootModel.modelIndexForSelection(index)
+  readonly property var parentIndex: parentModel.modelIndex(index)
 
   MouseArea {
     Layout.fillWidth: true
@@ -23,14 +22,14 @@ ColumnLayout {
 
     onClicked: {
       selectionModel.setCurrentIndex(
-          selectionIndex, ItemSelectionModel.ClearAndSelect);
+          parentIndex, ItemSelectionModel.ClearAndSelect);
     }
 
     Rectangle {
       id: background
       anchors.fill: parent
       color: Material.foreground
-      opacity: selectionModel.currentIndex == selectionIndex ? 0.25 :
+      opacity: selectionModel.currentIndex == parentIndex ? 0.25 :
         (parent.containsMouse ? 0.1 : 0.0)
     }
 
@@ -62,14 +61,25 @@ ColumnLayout {
         Layout.preferredWidth: 100
         Layout.fillHeight: true
 
-        value: weight
-        visible: !isFinalBlend
+        value: weight || 0
+        visible: !documentModel.isFinalBlend(parentIndex)
         onMoved: model.weight = value
       }
     }
   }
 
   // Formulas
+
+  DelegateModel {
+    id: formulaDelegateModel
+    model: documentModel
+    rootIndex: parentIndex
+    delegate: FormulaListItem {
+      anchors.left: parent.left
+      anchors.right: parent.right
+      parentModel: formulaDelegateModel
+    }
+  }
 
   Rectangle {
     Layout.fillWidth: true
@@ -84,21 +94,13 @@ ColumnLayout {
       anchors.fill: parent
 
       Repeater {
-        id: formulaRepeater
-        model: rootModel.childModel(index)
-        delegate: FormulaListItem {
-          anchors.left: parent.left
-          anchors.right: parent.right
-          rootModel: itemRoot.rootModel
-          blendModel: formulaRepeater.model
-          selectionModel: itemRoot.selectionModel
-        }
+        model: formulaDelegateModel
       }
 
       AddFormulaForm {
         anchors.left: parent.left
         anchors.right: parent.right
-        rootModel: itemRoot.rootModel
+        blendIndex: parentIndex
       }
     }
   }

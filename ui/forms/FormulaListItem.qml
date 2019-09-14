@@ -11,22 +11,20 @@ MouseArea {
   implicitHeight: contents.implicitHeight
   hoverEnabled: true
 
+  property var parentModel
   property bool itemEnabled: true  // TODO: use the model
-  property var rootModel: null
-  property var blendModel: null
-  property var selectionModel: null
-  readonly property var selectionIndex: blendModel.modelIndexForSelection(index)
+  readonly property var parentIndex: parentModel.modelIndex(index)
 
   onClicked: {
     selectionModel.setCurrentIndex(
-        selectionIndex, ItemSelectionModel.ClearAndSelect);
+        parentIndex, ItemSelectionModel.ClearAndSelect);
   }
 
   Rectangle {
     id: background
     anchors.fill: parent
     color: Material.foreground
-    opacity: selectionModel.currentIndex == selectionIndex ? 0.25 :
+    opacity: selectionModel.currentIndex == parentIndex ? 0.25 :
         (parent.containsMouse ? 0.1 : 0.0)
   }
 

@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QTransform>
 #include <sstream>
-#include "SystemElement.h"
+#include "ModelEntry.h"
 #include "models/toSource.h"
 
 using chaoskit::library::FormulaType;
@@ -373,10 +373,15 @@ QVector<int> SystemModel::setFormulaData(Formula *blend, int role,
   return {};
 }
 
-SubtreeModel *SystemModel::childModel(int index) {
-  auto *model = new SubtreeModel();
+KSelectionProxyModel *SystemModel::childModel(int index) {
+  auto *selectionModel = new QItemSelectionModel(this);
+  selectionModel->select(this->index(index, 0, QModelIndex()),
+                         QItemSelectionModel::ClearAndSelect);
+
+  auto *model = new KSelectionProxyModel(selectionModel, this);
   model->setSourceModel(this);
-  model->setRootIndex(this->index(index, 0, QModelIndex()));
+  model->setFilterBehavior(KSelectionProxyModel::SubTreesWithoutRoots);
+
   return model;
 }
 
@@ -408,13 +413,13 @@ QModelIndex SystemModel::modelIndexForSelection(int index) {
   return this->index(index, 0, QModelIndex());
 }
 
-SystemElement *SystemModel::modelAtIndex(const QModelIndex &index) {
+ModelEntry *SystemModel::modelAtIndex(const QModelIndex &index) {
   if (!index.isValid()) {
     // TODO: do we even have to manipulate the system?
     return nullptr;
   }
 
-  auto *systemElement = new SystemElement(this, index);
+  auto *systemElement = new ModelEntry(this, index);
 
   auto id = index.internalId();
   auto *blend = getBlendForId(id);

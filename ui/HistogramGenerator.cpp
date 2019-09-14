@@ -10,6 +10,7 @@ namespace chaoskit::ui {
 
 HistogramGenerator::HistogramGenerator(QObject *parent) : QObject(parent) {
   thread_ = new QThread();
+  thread_->setObjectName("HistogramGenerator");
 
   blenderTask_ = new BlenderTask(std::make_shared<ThreadLocalRng>());
   blenderTask_->moveToThread(thread_);
@@ -42,13 +43,13 @@ void HistogramGenerator::withHistogram(
 }
 
 void HistogramGenerator::setSystem(const System *system) {
-  QMetaObject::invokeMethod(blenderTask_,
-                            [=] { blenderTask_->setSystem(system); });
+  QMetaObject::invokeMethod(
+      blenderTask_, [this, system] { blenderTask_->setSystem(system); });
 }
 
 void HistogramGenerator::setSystem(const core::System *system) {
-  QMetaObject::invokeMethod(blenderTask_,
-                            [=] { blenderTask_->setSystem(system); });
+  QMetaObject::invokeMethod(
+      blenderTask_, [this, system] { blenderTask_->setSystem(system); });
 }
 
 void HistogramGenerator::setSize(quint32 width, quint32 height) {

@@ -2,6 +2,7 @@
 #define CHAOSKIT_UI_DOCUMENTMODEL_H
 
 #include <QAbstractItemModel>
+#include "ModelEntry.h"
 #include "core/structures/Blend.h"
 #include "core/structures/Document.h"
 #include "core/structures/Formula.h"
@@ -11,8 +12,27 @@
 
 namespace chaoskit::ui {
 
+class DocumentEntryType {
+  Q_GADGET
+ public:
+  DocumentEntryType() = delete;
+
+  enum Type {
+    Blend,
+    Document,
+    FinalBlend,
+    Formula,
+    System,
+  };
+  Q_ENUM(Type)
+};
+
 class DocumentModel : public QAbstractItemModel {
   Q_OBJECT
+  Q_PROPERTY(QString debugSource READ debugSource NOTIFY structureChanged)
+  Q_PROPERTY(
+      QModelIndex documentIndex READ documentIndex NOTIFY invariantsFixed)
+  Q_PROPERTY(QModelIndex systemIndex READ systemIndex NOTIFY invariantsFixed)
 
   using Store =
       state::HierarchicalStore<core::Blend, core::Document, core::FinalBlend,
@@ -24,6 +44,8 @@ class DocumentModel : public QAbstractItemModel {
     ParamsRole = Qt::UserRole + 1,
     PreTransformRole,
     PostTransformRole,
+    WeightRole,
+    TypeRole,
   };
 
   explicit DocumentModel(QObject* parent = nullptr);
@@ -39,6 +61,7 @@ class DocumentModel : public QAbstractItemModel {
   [[nodiscard]] QModelIndex index(int row, int column,
                                   const QModelIndex& parent) const override;
   [[nodiscard]] QModelIndex parent(const QModelIndex& child) const override;
+  [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
   [[nodiscard]] int rowCount(const QModelIndex& parent) const override;
 
   // QAbstractItemModel method overrides for write access
@@ -55,27 +78,48 @@ class DocumentModel : public QAbstractItemModel {
     return Store::matchesType<T>(state::Id(index.internalId()));
   }
   [[nodiscard]] bool isBlend(const QModelIndex& index) const;
+  [[nodiscard]] Q_INVOKABLE bool isFinalBlend(const QModelIndex& index) const;
   [[nodiscard]] QModelIndex blendAt(int i) const;
   [[nodiscard]] QModelIndex formulaAt(int i,
                                       const QModelIndex& blendIndex) const;
 
   QModelIndex addFormula(library::FormulaType type,
                          const QModelIndex& blendIndex);
+  Q_INVOKABLE QModelIndex addFormula(const QString& type,
+                                     const QModelIndex& blendIndex);
+
+  Q_INVOKABLE bool removeRowAtIndex(const QModelIndex& index);
 
   [[nodiscard]] QModelIndex documentIndex() const;
   [[nodiscard]] QModelIndex systemIndex() const;
   [[nodiscard]] QModelIndex finalBlendIndex() const;
 
   [[nodiscard]] const core::Document* document() const;
+  [[nodiscard]] const core::System* system() const;
+
+  [[nodiscard]] Q_INVOKABLE ModelEntry* entryAtIndex(const QModelIndex& index);
+
+  [[nodiscard]] QString debugSource() const;
 
  public slots:
   QModelIndex addBlend();
+
+ signals:
+  void structureChanged();
+  void invariantsFixed();
 
  private:
   [[nodiscard]] state::Id documentId() const;
   [[nodiscard]] state::Id systemId() const;
 
   void fixInvariants();
+
+ private slots:
+  void handleDataChanges(const QModelIndex& topLeft,
+                         const QModelIndex& bottomRight,
+                         const QVector<int>& roles);
+  void handleRowInsertion(const QModelIndex& parent, int first, int last);
+  void handleRowRemoval(const QModelIndex& parent, int first, int last);
 };
 
 }  // namespace chaoskit::ui

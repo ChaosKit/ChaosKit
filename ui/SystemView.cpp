@@ -103,8 +103,29 @@ void SystemView::setSystem(System *system) {
           &SystemView::updateSystem);
 }
 
+void SystemView::setModel(DocumentModel *documentModel) {
+  if (documentModel == model_) {
+    return;
+  }
+  if (model_ != nullptr) {
+    model_->disconnect(this);
+  }
+
+  model_ = documentModel;
+  updateSystem();
+  emit modelChanged();
+
+  connect(documentModel, &DocumentModel::structureChanged, this,
+          &SystemView::updateSystem);
+}
+
 void SystemView::updateSystem() {
-  generator_->setSystem(system_);
+  // TODO: remove migration code
+  if (model_) {
+    generator_->setSystem(model_->system());
+  } else {
+    generator_->setSystem(system_);
+  }
   generator_->clear();
   update();
 }

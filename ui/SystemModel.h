@@ -1,9 +1,10 @@
 #ifndef CHAOSKIT_UI_SYSTEMMODEL_H
 #define CHAOSKIT_UI_SYSTEMMODEL_H
 
+#include <KSelectionProxyModel>
 #include <QAbstractItemModel>
+#include "ModelEntry.h"
 #include "SubtreeModel.h"
-#include "SystemElement.h"
 #include "models/Blend.h"
 #include "models/Formula.h"
 #include "models/System.h"
@@ -40,13 +41,13 @@ class SystemModel : public QAbstractItemModel {
   bool insertRows(int row, int count, const QModelIndex &parent) override;
   bool removeRows(int row, int count, const QModelIndex &parent) override;
 
-  Q_INVOKABLE SubtreeModel *childModel(int index);
+  Q_INVOKABLE KSelectionProxyModel *childModel(int index);
   Q_INVOKABLE QModelIndex modelIndexForSelection(int index);
   Q_INVOKABLE void addBlend();
   Q_INVOKABLE void addFormula(int blendIndex, const QString &type);
   Q_INVOKABLE void removeRowAtIndex(const QModelIndex &index);
   Q_INVOKABLE bool isFinalBlend(const QModelIndex &index);
-  Q_INVOKABLE SystemElement *modelAtIndex(const QModelIndex &index);
+  Q_INVOKABLE ModelEntry *modelAtIndex(const QModelIndex &index);
 
   System *system() const { return system_; }
   QString source() const;

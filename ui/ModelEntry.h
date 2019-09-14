@@ -1,20 +1,21 @@
-#ifndef CHAOSKIT_UI_SYSTEMELEMENT_H
-#define CHAOSKIT_UI_SYSTEMELEMENT_H
+#ifndef CHAOSKIT_UI_MODELENTRY_H
+#define CHAOSKIT_UI_MODELENTRY_H
 
+#include <QAbstractItemModel>
+#include <QHash>
 #include <QPersistentModelIndex>
 #include <QQmlPropertyMap>
 
 namespace chaoskit::ui {
 
-class SystemModel;
-
-class SystemElement : public QQmlPropertyMap {
+class ModelEntry : public QQmlPropertyMap {
+  Q_OBJECT
  public:
-  SystemElement(SystemModel *model, const QModelIndex &index);
+  ModelEntry(QAbstractItemModel *model, const QModelIndex &index);
   void proxyElement(QObject *element);
 
  private:
-  SystemModel *model_;
+  QAbstractItemModel *model_;
   QPersistentModelIndex index_;
   QHash<QString, int> reverseRoleNames_;
   QObject *element_;
@@ -25,4 +26,4 @@ class SystemElement : public QQmlPropertyMap {
 
 }  // namespace chaoskit::ui
 
-#endif  // CHAOSKIT_UI_SYSTEMELEMENT_H
+#endif  // CHAOSKIT_UI_MODELENTRY_H

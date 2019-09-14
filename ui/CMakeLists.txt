@@ -24,13 +24,14 @@ target_link_libraries(ui_common PUBLIC
 
 add_library(ui_state
         DocumentModel.cpp DocumentModel.h
+        ModelEntry.cpp ModelEntry.h
         )
 set_target_properties(ui_state PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_state PUBLIC
         core
         library
         state
-        Qt5::Core
+        Qt5::Core Qt5::Qml
         )
 
 add_executable(ChaosKit WIN32
@@ -38,15 +39,16 @@ add_executable(ChaosKit WIN32
         ui.qrc
         SystemView.h SystemView.cpp
         SystemModel.cpp SystemModel.h
-        SubtreeModel.cpp SubtreeModel.h
-        SystemElement.cpp SystemElement.h)
+        SubtreeModel.cpp SubtreeModel.h)
 set_target_properties(ChaosKit PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON)
 target_link_libraries(ChaosKit PRIVATE
         core
         library
         ui_common
         ui_models
+        ui_state
         Qt5::Core Qt5::Gui Qt5::Qml Qt5::Quick Qt5::QuickControls2
+        KF5::ItemModels
         )
 
 add_executable(ModelTest WIN32

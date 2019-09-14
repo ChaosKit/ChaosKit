@@ -7,11 +7,11 @@ import "../resources"
 RowLayout {
   spacing: 0
 
-  property var rootModel: null
+  property var blendIndex: null
 
   SymbolButton {
     symbol: Icons.faPlus
-    onClicked: rootModel.addFormula(index, formulaTypePicker.currentText)
+    onClicked: documentModel.addFormula(formulaTypePicker.currentText, blendIndex)
   }
 
   ComboBox {

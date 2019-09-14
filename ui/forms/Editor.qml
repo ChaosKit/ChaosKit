@@ -7,7 +7,6 @@ Item {
   property bool autoRefresh: true
   property int refreshInterval: 100
   property alias running: systemView.running
-  property alias system: systemView.system
   property alias gamma: systemView.gamma
   property alias exposure: systemView.exposure
   property alias vibrancy: systemView.vibrancy
@@ -16,7 +15,7 @@ Item {
 
   SystemView {
     id: systemView
-    objectName: "systemview"
+    model: documentModel
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenter: parent.verticalCenter
 
@@ -30,6 +29,8 @@ Item {
     interval: parent.refreshInterval
     running: parent.autoRefresh && systemView.running
     repeat: true
-    onTriggered: systemView.update();
+    onTriggered: {
+      systemView.update();
+    }
   }
 }
