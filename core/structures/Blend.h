@@ -13,6 +13,7 @@ struct BlendBase {
   std::vector<Formula*> formulas;
   Transform pre;
   Transform post;
+  bool enabled = true;
 };
 
 struct Blend : public BlendBase {

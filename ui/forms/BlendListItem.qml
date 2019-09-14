@@ -3,6 +3,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.4
 import QtQuick.Controls.Material 2.12
 import QtQuick.Layouts 1.11
+import app.chaoskit 1.0
 import "../controls"
 import "../resources"
 
@@ -11,7 +12,6 @@ ColumnLayout {
   spacing: 0
 
   property var parentModel
-  property bool itemEnabled: true  // TODO: use the model
   property bool open: false
   readonly property var parentIndex: parentModel.modelIndex(index)
 
@@ -39,8 +39,8 @@ ColumnLayout {
       anchors.right: parent.right
 
       SymbolButton {
-        symbol: itemRoot.itemEnabled ? Icons.faEye : Icons.faEyeSlash
-        onClicked: itemRoot.itemEnabled = !itemRoot.itemEnabled
+        symbol: model.enabled ? Icons.faEye : Icons.faEyeSlash
+        onClicked: model.enabled = !model.enabled
       }
 
       SymbolButton {
@@ -62,7 +62,7 @@ ColumnLayout {
         Layout.fillHeight: true
 
         value: weight || 0
-        visible: !documentModel.isFinalBlend(parentIndex)
+        visible: type !== DocumentEntryType.FinalBlend
         onMoved: model.weight = value
       }
     }

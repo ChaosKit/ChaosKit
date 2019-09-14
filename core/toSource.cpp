@@ -27,22 +27,31 @@ ast::Transform toSource(const Transform &transform) {
 }
 
 ast::System toSource(const System &system) {
+  std::vector<core::Blend *> enabledBlends;
+  std::copy_if(system.blends.begin(), system.blends.end(),
+               std::back_inserter(enabledBlends),
+               [](const Blend *blend) { return blend->enabled; });
+
   // Generate a monotonically increasing vector of limits
-  std::vector<float> limits(system.blends.size());
-  std::transform(system.blends.begin(), system.blends.end(), limits.begin(),
+  std::vector<float> limits(enabledBlends.size());
+  std::transform(enabledBlends.begin(), enabledBlends.end(), limits.begin(),
                  [](const Blend *blend) { return blend->weight; });
   std::partial_sum(limits.begin(), limits.end(), limits.begin());
 
   // Combine blends and limits into LimitedBlends
   std::vector<ast::LimitedBlend> limitedBlends;
-  limitedBlends.reserve(system.blends.size());
-  std::transform(system.blends.begin(), system.blends.end(), limits.begin(),
+  limitedBlends.reserve(enabledBlends.size());
+  std::transform(enabledBlends.begin(), enabledBlends.end(), limits.begin(),
                  std::back_inserter(limitedBlends),
                  [](const Blend *blend, float limit) {
                    return ast::LimitedBlend{toSource(*blend), limit};
                  });
 
-  return ast::System{std::move(limitedBlends), toSource(*system.finalBlend)};
+  if (system.finalBlend->enabled) {
+    return ast::System{std::move(limitedBlends), toSource(*system.finalBlend)};
+  } else {
+    return ast::System{std::move(limitedBlends)};
+  }
 }
 
 }  // namespace chaoskit::core

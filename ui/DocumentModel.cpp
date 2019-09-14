@@ -154,6 +154,7 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   names[PostTransformRole] = "post";
   names[WeightRole] = "weight";
   names[TypeRole] = "type";
+  names[EnabledRole] = "enabled";
   return names;
 }
 
@@ -316,6 +317,8 @@ QVariant commonBlendData(const core::BlendBase* blend, int role) {
       return QVariant::fromValue(toQtTransform(blend->pre));
     case DocumentModel::PostTransformRole:
       return QVariant::fromValue(toQtTransform(blend->post));
+    case DocumentModel::EnabledRole:
+      return blend->enabled;
     default:
       return QVariant();
   }
@@ -372,6 +375,9 @@ QVector<int> setCommonBlendData(core::BlendBase* blend, const QVariant& value,
       return {role};
     case DocumentModel::PostTransformRole:
       blend->post = fromQtTransform(value.value<QTransform>());
+      return {role};
+    case DocumentModel::EnabledRole:
+      blend->enabled = value.toBool();
       return {role};
     default:
       return {};

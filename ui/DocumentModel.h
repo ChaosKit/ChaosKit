@@ -46,6 +46,7 @@ class DocumentModel : public QAbstractItemModel {
     PostTransformRole,
     WeightRole,
     TypeRole,
+    EnabledRole,
   };
 
   explicit DocumentModel(QObject* parent = nullptr);
