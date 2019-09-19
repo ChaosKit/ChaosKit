@@ -16,17 +16,20 @@ class Params {
   static Params fromSystem(const System &system) {
     Params result;
 
-    for (size_t i = 0; i < system.blends.size(); ++i) {
-      const auto &blend = system.blends[i];
+    size_t blendIndex = 0;
+    for (const auto &blend : system.blends) {
+      if (!blend->enabled) continue;
+
       for (size_t j = 0; j < blend->formulas.size(); ++j) {
         const auto &formula = blend->formulas[j];
         if (!formula->params.empty()) {
-          result[SystemIndex{i, j}] = formula->params;
+          result[SystemIndex{blendIndex, j}] = formula->params;
         }
       }
+      blendIndex++;
     }
 
-    if (!system.finalBlend) {
+    if (!system.finalBlend || !system.finalBlend->enabled) {
       return result;
     }
 
