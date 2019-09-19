@@ -13,8 +13,8 @@ TestWindow::TestWindow() {
   setBaseSize(QSize(512, 512));
 
   auto *model = new DocumentModel(this);
-  QModelIndex blendIndex = model->addBlend();
-  QModelIndex formulaIndex = model->addFormula(FormulaType::DeJong, blendIndex);
+  QModelIndex blendIndex = model->addBlend(FormulaType::DeJong);
+  QModelIndex formulaIndex = model->formulaAt(0, blendIndex);
   model->setData(formulaIndex,
                  QVariant::fromValue(std::vector<float>{
                      9.379666578024626e-01f, 1.938709271140397e+00f,

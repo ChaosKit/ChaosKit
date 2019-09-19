@@ -7,6 +7,7 @@
 #include <QSurfaceFormat>
 #include <QtGui/QTransform>
 #include "DocumentModel.h"
+#include "FormulaPreviewProvider.h"
 #include "HistogramBuffer.h"
 #include "ModelEntry.h"
 #include "Point.h"
@@ -17,6 +18,7 @@ using chaoskit::core::Point;
 using chaoskit::library::FormulaType;
 using chaoskit::ui::DocumentEntryType;
 using chaoskit::ui::DocumentModel;
+using chaoskit::ui::FormulaPreviewProvider;
 using chaoskit::ui::ModelEntry;
 using chaoskit::ui::SystemView;
 
@@ -57,9 +59,8 @@ int main(int argc, char* argv[]) {
   // Set up models
 
   auto* documentModel = new DocumentModel();
-  QModelIndex blendIndex = documentModel->addBlend();
-  QModelIndex formulaIndex =
-      documentModel->addFormula(FormulaType::DeJong, blendIndex);
+  QModelIndex blendIndex = documentModel->addBlend(FormulaType::DeJong);
+  QModelIndex formulaIndex = documentModel->formulaAt(0, blendIndex);
   documentModel->setData(formulaIndex,
                          QVariant::fromValue(std::vector<float>{
                              9.379666578024626e-01f, 1.938709271140397e+00f,
@@ -78,6 +79,8 @@ int main(int argc, char* argv[]) {
       QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
   QQmlApplicationEngine engine;
+  engine.addImageProvider(QStringLiteral("formula"),
+                          new FormulaPreviewProvider);
   engine.rootContext()->setContextProperties({
       {QStringLiteral("formulaList"), QVariant::fromValue(createFormulaList())},
       {QStringLiteral("monospaceFont"), QVariant::fromValue(monospaceFont)},

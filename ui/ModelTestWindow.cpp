@@ -39,8 +39,8 @@ ModelTestWindow::ModelTestWindow() : QMainWindow(nullptr) {
         addFormulaAction->setEnabled(
             model_->isBlend(displayModel_->mapToSource(current)));
       });
-  connect(addBlendAction, &QAction::triggered, model_,
-          &DocumentModel::addBlend);
+  connect(addBlendAction, &QAction::triggered,
+          [this]() { model_->addBlend(library::FormulaType::DeJong); });
   connect(addFormulaAction, &QAction::triggered, this,
           &ModelTestWindow::addFormula);
   connect(removeAction, &QAction::triggered, [this]() {

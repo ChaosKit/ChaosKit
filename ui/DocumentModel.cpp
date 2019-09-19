@@ -99,13 +99,31 @@ QString DocumentModel::debugSource() const {
 
 ///////////////////////////////////////////////////////////// Custom API — Slots
 
-QModelIndex DocumentModel::addBlend() {
+QModelIndex DocumentModel::addBlend(chaoskit::library::FormulaType type) {
   size_t newRowNumber = store_.countChildren<core::Blend>(systemId());
   beginInsertRows(systemIndex(), newRowNumber, newRowNumber);
-  store_.associateNewChildWith<core::System, core::Blend>(
-      systemId(), [](core::Blend* blend) { blend->name = "Unnamed blend"; });
+
+  Id blendId = store_.associateNewChildWith<core::System, core::Blend>(
+      systemId(), [type](core::Blend* blend) {
+        blend->name = std::string(type._to_string());
+      });
+  store_.associateNewChildWith<core::Blend, core::Formula>(
+      blendId, [type](core::Formula* formula) {
+        formula->setType(type);
+        formula->params = generateFormulaParams(type);
+      });
+
   endInsertRows();
   return blendAt(newRowNumber);
+}
+
+QModelIndex DocumentModel::addBlend(const QString& type) {
+  auto optionalType = library::FormulaType::_from_string_nothrow(type.toUtf8());
+  if (!optionalType) {
+    return QModelIndex();
+  }
+
+  return addBlend(*optionalType);
 }
 
 QModelIndex DocumentModel::addFormula(library::FormulaType type,

@@ -10,8 +10,10 @@
         <file>forms/BlendOptionsForm.qml</file>
         <file>forms/DocumentOptionsForm.qml</file>
         <file>forms/Editor.qml</file>
+        <file>forms/FormulaCard.qml</file>
         <file>forms/FormulaListItem.qml</file>
         <file>forms/FormulaOptionsForm.qml</file>
+        <file>forms/FormulaPicker.qml</file>
         <file>forms/MainWindow.qml</file>
         <file>forms/RenderingForm.qml</file>
         <file>forms/StructureForm.qml</file>

@@ -89,6 +89,9 @@ class DocumentModel : public QAbstractItemModel {
   Q_INVOKABLE QModelIndex addFormula(const QString& type,
                                      const QModelIndex& blendIndex);
 
+  QModelIndex addBlend(library::FormulaType type);
+  Q_INVOKABLE QModelIndex addBlend(const QString& type);
+
   Q_INVOKABLE bool removeRowAtIndex(const QModelIndex& index);
 
   [[nodiscard]] QModelIndex documentIndex() const;
@@ -103,7 +106,6 @@ class DocumentModel : public QAbstractItemModel {
   [[nodiscard]] QString debugSource() const;
 
  public slots:
-  QModelIndex addBlend();
   void randomizeParams(const QModelIndex& index);
 
  signals:

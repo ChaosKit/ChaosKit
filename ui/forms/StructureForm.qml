@@ -1,5 +1,7 @@
 import QtQuick 2.12
+import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QtQuick.Window 2.2
 import QtQml.Models 2.12
 import "../controls"
 import "../resources"
@@ -34,7 +36,20 @@ ColumnLayout {
 
     SymbolButton {
       symbol: Icons.faPlus
-      onClicked: documentModel.addBlend()
+      onClicked: formulaPicker.open()
+
+      Popup {
+        id: formulaPicker
+        margins: 0
+        padding: 4
+
+        FormulaPicker {
+          onPicked: {
+            documentModel.addBlend(formulaType);
+            formulaPicker.close();
+          }
+        }
+      }
     }
 
     Item {

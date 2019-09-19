@@ -35,7 +35,7 @@ add_executable(ChaosKit WIN32
         main.cpp
         ui.qrc
         SystemView.h SystemView.cpp
-        )
+        FormulaPreviewProvider.cpp FormulaPreviewProvider.h)
 set_target_properties(ChaosKit PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON)
 target_link_libraries(ChaosKit PRIVATE
         core
