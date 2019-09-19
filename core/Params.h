@@ -26,6 +26,10 @@ class Params {
       }
     }
 
+    if (!system.finalBlend) {
+      return result;
+    }
+
     for (size_t j = 0; j < system.finalBlend->formulas.size(); ++j) {
       const auto &formula = system.finalBlend->formulas[j];
       if (!formula->params.empty()) {

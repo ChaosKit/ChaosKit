@@ -35,7 +35,7 @@ ast::System toSource(const System &system) {
     limitedBlends.emplace_back(toSource(*blend), currentLimit);
   }
 
-  if (system.finalBlend->enabled) {
+  if (system.finalBlend && system.finalBlend->enabled) {
     return ast::System{std::move(limitedBlends), toSource(*system.finalBlend)};
   } else {
     return ast::System{std::move(limitedBlends)};
