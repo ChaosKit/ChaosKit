@@ -23,6 +23,7 @@ namespace {
 constexpr int GRID_WIDTH = 16;
 constexpr int GRID_HEIGHT = 16;
 constexpr double GRID_EXPANSION_FACTOR = .2;
+constexpr int ITERATIONS = 3;
 
 /** Returns a vector of good-looking params for a formula. */
 std::vector<float> getParamsForFormula(library::FormulaType type) {
@@ -60,13 +61,15 @@ QVector<QPointF> generateGrid(library::FormulaType type, int width,
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       // Convert the point to be in [-1; 1]
-      core::Point origin((float)(x * 2) / (float)(width - 1) - 1.f,
-                         (float)(y * 2) / (float)(height - 1) - 1.f);
+      core::Point point((float)(x * 2) / (float)(width - 1) - 1.f,
+                        (float)(y * 2) / (float)(height - 1) - 1.f);
 
       int index = y * width + x;
-      core::Point output = interpreter(origin).output;
-      points[index].setX(output.x());
-      points[index].setY(output.y());
+      for (int i = 0; i < ITERATIONS; i++) {
+        point = interpreter(point).next_state;
+      }
+      points[index].setX(point.x());
+      points[index].setY(point.y());
     }
   }
 
