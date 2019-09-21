@@ -39,6 +39,7 @@ Pane {
 
     states: State {
       name: "hovered"
+      when: mouseArea.containsMouse
       PropertyChanges {
         target: overlay
         opacity: 0.04
@@ -46,12 +47,11 @@ Pane {
     }
 
     MouseArea {
+      id: mouseArea
       anchors.fill: parent
       cursorShape: Qt.PointingHandCursor
       hoverEnabled: true
 
-      onEntered: overlay.state = "hovered"
-      onExited: overlay.state = ""
       onClicked: root.clicked()
     }
   }
