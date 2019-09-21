@@ -1,7 +1,8 @@
 #include <library/FormulaType.h>
-#include <KSelectionProxyModel>
+#include <QDir>
 #include <QFontDatabase>
 #include <QGuiApplication>
+#include <QItemSelectionModel>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QSurfaceFormat>
@@ -53,7 +54,6 @@ int main(int argc, char* argv[]) {
       "app.chaoskit", 1, 0, "DocumentEntryType",
       QStringLiteral("Not creatable because it's an enum"));
   qmlRegisterInterface<ModelEntry>("ModelEntry");
-  qmlRegisterType<KSelectionProxyModel>();
   qmlRegisterType<SystemView>("app.chaoskit", 1, 0, "SystemView");
 
   // Set up models
@@ -87,7 +87,20 @@ int main(int argc, char* argv[]) {
       {QStringLiteral("documentModel"), QVariant::fromValue(documentModel)},
       {QStringLiteral("selectionModel"), QVariant::fromValue(selectionModel)},
   });
+
+#ifdef CHAOSKIT_DEBUG
+#define XSTR(s) STR(s)
+#define STR(s) #s
+  // Bypass QRC for a faster iteration cycle.
+  engine.rootContext()->setBaseUrl(
+      QUrl::fromLocalFile(QStringLiteral(XSTR(CHAOSKIT_SOURCE_DIR) "/ui/")));
+  engine.load(QUrl::fromLocalFile(
+      QStringLiteral(XSTR(CHAOSKIT_SOURCE_DIR) "/ui/forms/MainWindow.qml")));
+#undef XSTR
+#undef STR
+#else
   engine.load(QUrl(QStringLiteral("qrc:/forms/MainWindow.qml")));
+#endif
 
   return QGuiApplication::exec();
 }

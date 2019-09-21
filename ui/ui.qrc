@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>qtquickcontrols2.conf</file>
         <file>controls/SymbolButton.qml</file>
         <file>controls/Slider.qml</file>
         <file>controls/TransformControl.qml</file>
@@ -18,12 +17,5 @@
         <file>forms/RenderingForm.qml</file>
         <file>forms/StructureForm.qml</file>
         <file>forms/ToolOptionsForm.qml</file>
-        <file>resources/Constants.qml</file>
-        <file>resources/ElementType.qml</file>
-        <file>resources/Font Awesome 5 Free-Regular-400.otf</file>
-        <file>resources/Font Awesome 5 Free-Solid-900.otf</file>
-        <file>resources/Fonts.qml</file>
-        <file>resources/Icons.qml</file>
-        <file>resources/qmldir</file>
     </qresource>
 </RCC>

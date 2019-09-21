@@ -31,12 +31,25 @@ target_link_libraries(ui_state PUBLIC
         Qt5::Core Qt5::Qml
         )
 
-add_executable(ChaosKit WIN32
+set(ChaosKit_SOURCES
         main.cpp
-        ui.qrc
         SystemView.h SystemView.cpp
-        FormulaPreviewProvider.cpp FormulaPreviewProvider.h)
-set_target_properties(ChaosKit PROPERTIES AUTOMOC ON AUTOUIC ON AUTORCC ON)
+        FormulaPreviewProvider.cpp FormulaPreviewProvider.h
+        )
+qt5_add_resources(ChaosKit_SOURCES resources.qrc)
+
+# Only add the QML UI stuff for non-debug builds. Debug builds will load the
+# QML files from the filesystem, making the iteration cycle faster.
+if (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug"))
+    qt5_add_resources(ChaosKit_SOURCES ui.qrc)
+endif ()
+
+add_executable(ChaosKit WIN32 ${ChaosKit_SOURCES})
+set_target_properties(ChaosKit PROPERTIES
+        AUTOMOC ON
+        AUTOUIC ON
+        AUTORCC OFF
+        )
 target_link_libraries(ChaosKit PRIVATE
         core
         library
@@ -44,6 +57,10 @@ target_link_libraries(ChaosKit PRIVATE
         ui_state
         Qt5::Core Qt5::Gui Qt5::Qml Qt5::Quick Qt5::QuickControls2
         KF5::ItemModels
+        )
+target_compile_definitions(ChaosKit PRIVATE
+        $<$<CONFIG:Debug>:CHAOSKIT_DEBUG>
+        "CHAOSKIT_SOURCE_DIR=${ChaosKit_SOURCE_DIR}"
         )
 
 add_executable(ModelTest WIN32
