@@ -1,4 +1,1 @@
 singleton Constants 1.0 Constants.qml
-singleton ElementType 1.0 ElementType.qml
-singleton Fonts 1.0 Fonts.qml
-singleton Icons 1.0 Icons.qml

@@ -4,7 +4,6 @@ import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.11
 import QtQuick.Controls.Material 2.12
 import "../controls"
-import "../resources"
 
 MouseArea {
   id: itemRoot
@@ -33,8 +32,8 @@ MouseArea {
     anchors.fill: parent
     spacing: 0
 
-    SymbolButton {
-      symbol: itemRoot.itemEnabled ? Icons.faEye : Icons.faEyeSlash
+    IconButton {
+      iconName: model.enabled ? "eye" : "eye-slash"
       onClicked: itemRoot.itemEnabled = !itemRoot.itemEnabled
     }
 

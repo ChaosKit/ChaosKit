@@ -5,7 +5,6 @@ import QtQuick.Controls.Material 2.12
 import QtQuick.Layouts 1.11
 import app.chaoskit 1.0
 import "../controls"
-import "../resources"
 
 ColumnLayout {
   id: itemRoot
@@ -24,7 +23,7 @@ ColumnLayout {
       }
       PropertyChanges {
         target: openToggle
-        symbol: Icons.faCaretDown
+        iconName: "caret-down"
       }
     }
   ]
@@ -62,14 +61,14 @@ ColumnLayout {
       anchors.left: parent.left
       anchors.right: parent.right
 
-      SymbolButton {
-        symbol: model.enabled ? Icons.faEye : Icons.faEyeSlash
+      IconButton {
+        iconName: model.enabled ? "eye" : "eye-slash"
         onClicked: model.enabled = !model.enabled
       }
 
-      SymbolButton {
+      IconButton {
         id: openToggle
-        symbol: Icons.faCaretRight
+        iconName: "caret-right"
         visible: formulaDelegateModel.count > 1
         onClicked: {
           itemRoot.state = (itemRoot.state === "open") ? "" : "open";

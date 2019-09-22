@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Window 2.12
 import "../controls"
-import "../resources"
 
 Popup {
   id: popup
@@ -21,11 +20,11 @@ Popup {
     font.bold: true
   }
 
-  SymbolButton {
+  IconButton {
+    iconName: "times"
     y: -8
     anchors.right: parent.right
     anchors.rightMargin: -8
-    symbol: Icons.faTimes
     onClicked: popup.close()
   }
 

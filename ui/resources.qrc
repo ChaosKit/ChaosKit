@@ -1,12 +1,19 @@
 <RCC>
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
+
+        <file>icons/caret-down.svg</file>
+        <file>icons/caret-right.svg</file>
+        <file>icons/chevron-left.svg</file>
+        <file>icons/chevron-right.svg</file>
+        <file>icons/eye.svg</file>
+        <file>icons/eye-slash.svg</file>
+        <file>icons/low-vision.svg</file>
+        <file>icons/plus.svg</file>
+        <file>icons/times.svg</file>
+        <file>icons/trash-alt.svg</file>
+
         <file>resources/Constants.qml</file>
-        <file>resources/ElementType.qml</file>
-        <file>resources/Font Awesome 5 Free-Regular-400.otf</file>
-        <file>resources/Font Awesome 5 Free-Solid-900.otf</file>
-        <file>resources/Fonts.qml</file>
-        <file>resources/Icons.qml</file>
         <file>resources/qmldir</file>
     </qresource>
 </RCC>

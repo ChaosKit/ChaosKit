@@ -5,7 +5,6 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import app.chaoskit 1.0
 import "../controls"
-import "../resources"
 
 ApplicationWindow {
   id: root
@@ -38,13 +37,13 @@ ApplicationWindow {
     }
   }
 
-  SymbolButton {
+  IconButton {
     id: showButton
     anchors.top: parent.top
     anchors.right: parent.right
     anchors.topMargin: 5
     anchors.rightMargin: 4
-    symbol: Icons.faChevronLeft
+    iconName: "chevron-left"
     onClicked: drawer.open()
   }
 
@@ -78,13 +77,13 @@ ApplicationWindow {
     modal: false
     visible: true
 
-    SymbolButton {
+    IconButton {
       id: hideButton
       anchors.top: parent.top
       anchors.left: parent.left
       anchors.topMargin: 5
       anchors.leftMargin: 4
-      symbol: Icons.faChevronRight
+      iconName: "chevron-right"
       onClicked: drawer.close()
     }
 

@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.12
 import QtQuick.Window 2.2
 import QtQml.Models 2.12
 import "../controls"
-import "../resources"
 
 ColumnLayout {
   spacing: 0
@@ -34,8 +33,8 @@ ColumnLayout {
     Layout.fillWidth: true
     spacing: 0
 
-    SymbolButton {
-      symbol: Icons.faPlus
+    IconButton {
+      iconName: "plus"
       onClicked: formulaPicker.open()
 
       Popup {
@@ -56,10 +55,10 @@ ColumnLayout {
       Layout.fillWidth: true
     }
 
-    SymbolButton {
+    IconButton {
+      iconName: "trash-alt"
       enabled: selectionModel.currentIndex.valid &&
           !documentModel.isFinalBlend(selectionModel.currentIndex)
-      symbol: Icons.faTrashAlt
       onClicked: documentModel.removeRowAtIndex(selectionModel.currentIndex)
     }
   }
