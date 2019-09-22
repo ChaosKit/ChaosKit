@@ -90,7 +90,8 @@ ColumnLayout {
         Layout.fillHeight: true
 
         value: weight || 0
-        visible: type !== DocumentEntryType.FinalBlend
+        visible:
+            (type !== DocumentEntryType.FinalBlend) && (parentModel.count > 2)
         onMoved: model.weight = value
       }
     }
