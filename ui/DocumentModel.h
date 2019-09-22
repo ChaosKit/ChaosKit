@@ -63,7 +63,8 @@ class DocumentModel : public QAbstractItemModel {
                                   const QModelIndex& parent) const override;
   [[nodiscard]] QModelIndex parent(const QModelIndex& child) const override;
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
-  [[nodiscard]] int rowCount(const QModelIndex& parent) const override;
+  [[nodiscard]] Q_INVOKABLE int rowCount(
+      const QModelIndex& parent) const override;
 
   // QAbstractItemModel method overrides for write access
   bool setData(const QModelIndex& index, const QVariant& value,

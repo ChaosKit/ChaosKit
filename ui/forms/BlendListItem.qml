@@ -12,8 +12,32 @@ ColumnLayout {
   spacing: 0
 
   property var parentModel
-  property bool open: false
   readonly property var parentIndex: parentModel.modelIndex(index)
+
+  states: [
+    State {
+      name: "open"
+
+      PropertyChanges {
+        target: formulaList
+        visible: true
+      }
+      PropertyChanges {
+        target: openToggle
+        symbol: Icons.faCaretDown
+      }
+    }
+  ]
+
+  // Close formulas if they should not be visible.
+  Connections {
+    target: documentModel
+    onRowsRemoved: {
+      if (parent === parentIndex && documentModel.rowCount(parent) <= 1) {
+        itemRoot.state = "";
+      }
+    }
+  }
 
   MouseArea {
     Layout.fillWidth: true
@@ -44,8 +68,12 @@ ColumnLayout {
       }
 
       SymbolButton {
-        symbol: itemRoot.open ? Icons.faCaretDown : Icons.faCaretRight
-        onClicked: itemRoot.open = !itemRoot.open
+        id: openToggle
+        symbol: Icons.faCaretRight
+        visible: formulaDelegateModel.count > 1
+        onClicked: {
+          itemRoot.state = (itemRoot.state === "open") ? "" : "open";
+        }
       }
 
       Label {
@@ -82,11 +110,12 @@ ColumnLayout {
   }
 
   Rectangle {
-    Layout.fillWidth: true
-    Layout.preferredHeight: formulaColumn.implicitHeight
+    id: formulaList
 
     color: Qt.rgba(0, 0, 0, 0.1)
-    visible: itemRoot.open
+    implicitHeight: formulaColumn.implicitHeight
+    visible: false
+    Layout.fillWidth: true
 
     Column {
       id: formulaColumn
@@ -95,12 +124,6 @@ ColumnLayout {
 
       Repeater {
         model: formulaDelegateModel
-      }
-
-      AddFormulaForm {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        blendIndex: parentIndex
       }
     }
   }
