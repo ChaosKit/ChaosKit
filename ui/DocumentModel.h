@@ -118,6 +118,7 @@ class DocumentModel : public QAbstractItemModel {
   [[nodiscard]] state::Id systemId() const;
 
   void fixInvariants();
+  void maybeUpdateBlendDisplayName(const QModelIndex& blend);
 
  private slots:
   void handleDataChanges(const QModelIndex& topLeft,

@@ -103,10 +103,8 @@ QModelIndex DocumentModel::addBlend(chaoskit::library::FormulaType type) {
   size_t newRowNumber = store_.countChildren<core::Blend>(systemId());
   beginInsertRows(systemIndex(), newRowNumber, newRowNumber);
 
-  Id blendId = store_.associateNewChildWith<core::System, core::Blend>(
-      systemId(), [type](core::Blend* blend) {
-        blend->name = std::string(type._to_string());
-      });
+  Id blendId =
+      store_.associateNewChildWith<core::System, core::Blend>(systemId());
   store_.associateNewChildWith<core::Blend, core::Formula>(
       blendId, [type](core::Formula* formula) {
         formula->setType(type);
@@ -321,6 +319,18 @@ core::Transform fromQtTransform(const QTransform& transform) {
        static_cast<float>(transform.m32())});
 }
 
+QString displayName(const core::Blend* blend) {
+  if (!blend->name.empty()) {
+    return QString::fromStdString(blend->name);
+  }
+
+  QStringList formulaTypes;
+  for (const auto* formula : blend->formulas) {
+    formulaTypes.push_back(QString::fromUtf8(formula->type._to_string()));
+  }
+  return formulaTypes.join(QStringLiteral(" + "));
+}
+
 QVariant documentData(const core::Document* document, int role) {
   if (!document) return QVariant();
 
@@ -362,6 +372,7 @@ QVariant blendData(const core::Blend* blend, int role) {
 
   switch (role) {
     case Qt::DisplayRole:
+      return displayName(blend);
     case Qt::EditRole:
       return QString::fromStdString(blend->name);
     case DocumentModel::TypeRole:
@@ -622,6 +633,13 @@ void DocumentModel::fixInvariants() {
   }
 }
 
+void DocumentModel::maybeUpdateBlendDisplayName(const QModelIndex& blend) {
+  if (matchesType<core::Blend>(blend) &&
+      data(blend, Qt::EditRole).toString().isEmpty()) {
+    emit dataChanged(blend, blend, {Qt::DisplayRole});
+  }
+}
+
 void DocumentModel::handleDataChanges(const QModelIndex& topLeft,
                                       const QModelIndex& bottomRight,
                                       const QVector<int>& roles) {
@@ -634,6 +652,8 @@ void DocumentModel::handleRowInsertion(const QModelIndex& parent, int first,
                                        int last) {
   if (parent.isValid() && parent != documentIndex()) {
     emit structureChanged();
+
+    maybeUpdateBlendDisplayName(parent);
   }
 }
 
@@ -641,6 +661,8 @@ void DocumentModel::handleRowRemoval(const QModelIndex& parent, int first,
                                      int last) {
   if (parent.isValid() && parent != documentIndex()) {
     emit structureChanged();
+
+    maybeUpdateBlendDisplayName(parent);
   }
 }
 

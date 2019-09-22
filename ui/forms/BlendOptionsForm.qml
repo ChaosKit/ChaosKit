@@ -16,7 +16,7 @@ GridLayout {
     visible: blend.type === DocumentEntryType.Blend
   }
   TextField {
-    placeholderText: "(unnamed)"
+    placeholderText: blend.display
     text: blend.edit || ""
     visible: blend.type === DocumentEntryType.Blend
 
