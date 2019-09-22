@@ -38,7 +38,7 @@ GridLayout {
 
     text: "Randomize Params"
     onClicked: {
-      documentModel.randomizeParams(selectionModel.currentIndex);
+      documentModel.randomizeParams(formula.modelIndex);
     }
   }
 }

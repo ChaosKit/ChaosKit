@@ -11,6 +11,15 @@ GridLayout {
   columnSpacing: 4
   rowSpacing: 0
 
+  Component.onCompleted: {
+    const formulaIndex = blend.singleFormulaIndex;
+    if (!formulaIndex) return;
+
+    formulaFormLoader.setSource('FormulaOptionsForm.qml', {
+      formula: documentModel.entryAtIndex(formulaIndex)
+    });
+  }
+
   Label {
     text: "Name"
     visible: blend.type === DocumentEntryType.Blend
@@ -21,5 +30,11 @@ GridLayout {
     visible: blend.type === DocumentEntryType.Blend
 
     onTextEdited: blend.edit = text
+  }
+
+  Loader {
+    id: formulaFormLoader
+    Layout.columnSpan: 2
+    Layout.fillWidth: true
   }
 }

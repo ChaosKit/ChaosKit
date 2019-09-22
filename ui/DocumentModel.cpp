@@ -187,6 +187,8 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   names[WeightRole] = "weight";
   names[TypeRole] = "type";
   names[EnabledRole] = "enabled";
+  names[SingleFormulaIndexRole] = "singleFormulaIndex";
+  names[ModelIndexRole] = "modelIndex";
   return names;
 }
 
@@ -474,6 +476,10 @@ QVariant DocumentModel::data(const QModelIndex& index, int role) const {
     return QVariant();
   }
 
+  if (role == DocumentModel::ModelIndexRole) {
+    return index;
+  }
+
   Id id = toId(index.internalId());
   if (Store::matchesType<core::Document>(id)) {
     return documentData(store_.find<core::Document>(id), role);
@@ -482,6 +488,11 @@ QVariant DocumentModel::data(const QModelIndex& index, int role) const {
     return systemData(store_.find<core::System>(id), role);
   }
   if (Store::matchesType<core::Blend>(id)) {
+    if (role == DocumentModel::SingleFormulaIndexRole &&
+        store_.countAllChildren(id) <= 1) {
+      return formulaAt(0, index);
+    }
+
     return blendData(store_.find<core::Blend>(id), role);
   }
   if (Store::matchesType<core::FinalBlend>(id)) {
@@ -638,6 +649,16 @@ void DocumentModel::maybeUpdateBlendDisplayName(const QModelIndex& blend) {
       data(blend, Qt::EditRole).toString().isEmpty()) {
     emit dataChanged(blend, blend, {Qt::DisplayRole});
   }
+}
+
+QModelIndex DocumentModel::getFormulaIndex(const QModelIndex& blendOrFormula) {
+  if (matchesType<core::Formula>(blendOrFormula)) {
+    return blendOrFormula;
+  }
+  if (matchesType<core::Blend>(blendOrFormula)) {
+    return formulaAt(0, blendOrFormula);
+  }
+  return QModelIndex();
 }
 
 void DocumentModel::handleDataChanges(const QModelIndex& topLeft,

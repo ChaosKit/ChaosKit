@@ -47,6 +47,8 @@ class DocumentModel : public QAbstractItemModel {
     WeightRole,
     TypeRole,
     EnabledRole,
+    SingleFormulaIndexRole,
+    ModelIndexRole,
   };
 
   explicit DocumentModel(QObject* parent = nullptr);
@@ -119,6 +121,7 @@ class DocumentModel : public QAbstractItemModel {
 
   void fixInvariants();
   void maybeUpdateBlendDisplayName(const QModelIndex& blend);
+  QModelIndex getFormulaIndex(const QModelIndex& blendOrFormula);
 
  private slots:
   void handleDataChanges(const QModelIndex& topLeft,
