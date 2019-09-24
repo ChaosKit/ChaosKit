@@ -1,4 +1,5 @@
 #include "DocumentModel.h"
+#include <QDebug>
 #include <QRandomGenerator>
 #include <QtGui/QTransform>
 #include <sstream>
@@ -35,6 +36,8 @@ DocumentModel::DocumentModel(QObject* parent) : QAbstractItemModel(parent) {
           &DocumentModel::handleRowInsertion);
   connect(this, &QAbstractItemModel::rowsRemoved, this,
           &DocumentModel::handleRowRemoval);
+  connect(this, &QAbstractItemModel::rowsMoved, this,
+          &DocumentModel::handleRowMove);
 }
 
 ///////////////////////////////////////////////////////////////////// Custom API
@@ -175,6 +178,42 @@ void DocumentModel::randomizeParams(const QModelIndex& index) {
 
   setData(index, QVariant::fromValue(generateFormulaParams(formulaType)),
           DocumentModel::ParamsRole);
+}
+
+void DocumentModel::absorbBlend(const QModelIndex& source,
+                                const QModelIndex& destination) {
+  if (!source.isValid() || !destination.isValid() ||
+      !matchesType<core::Blend>(source) || !isBlend(destination)) {
+    return;
+  }
+
+  Id sourceId = toId(source.internalId());
+  Id destinationId = toId(destination.internalId());
+
+  // Get formulas to move to destination
+  std::vector<Id> sourceFormulas = store_.allChildren(sourceId);
+
+  // Move the formulas to the destination blend
+  if (!beginMoveRows(source, 0, (int)(sourceFormulas.size()) - 1, destination,
+                     rowCount(destination))) {
+    return;
+  }
+  for (const auto& formulaId : sourceFormulas) {
+    store_.dissociateChildFrom<core::Blend, core::Formula>(sourceId, formulaId);
+    if (Store::matchesType<core::Blend>(destinationId)) {
+      store_.associateChildWith<core::Blend, core::Formula>(destinationId,
+                                                            formulaId);
+    } else {
+      store_.associateChildWith<core::FinalBlend, core::Formula>(destinationId,
+                                                                 formulaId);
+    }
+  }
+  endMoveRows();
+
+  // Remove the source blend, as it's now empty
+  beginRemoveRows(source.parent(), source.row(), source.row());
+  store_.remove(sourceId);
+  endRemoveRows();
 }
 
 /////////////////////// QAbstractItemModel method overrides for read-only access
@@ -685,6 +724,19 @@ void DocumentModel::handleRowRemoval(const QModelIndex& parent, int first,
 
     maybeUpdateBlendDisplayName(parent);
   }
+}
+
+void DocumentModel::handleRowMove(const QModelIndex& parent, int first,
+                                  int last, const QModelIndex& destination,
+                                  int row) {
+  if (!parent.isValid() || parent == documentIndex() ||
+      !destination.isValid() || destination == documentIndex()) {
+    return;
+  }
+
+  emit structureChanged();
+  maybeUpdateBlendDisplayName(parent);
+  maybeUpdateBlendDisplayName(destination);
 }
 
 }  // namespace chaoskit::ui

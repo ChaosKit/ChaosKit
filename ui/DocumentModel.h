@@ -97,6 +97,9 @@ class DocumentModel : public QAbstractItemModel {
 
   Q_INVOKABLE bool removeRowAtIndex(const QModelIndex& index);
 
+  Q_INVOKABLE void absorbBlend(const QModelIndex& source,
+                               const QModelIndex& destination);
+
   [[nodiscard]] QModelIndex documentIndex() const;
   [[nodiscard]] QModelIndex systemIndex() const;
   [[nodiscard]] QModelIndex finalBlendIndex() const;
@@ -129,6 +132,8 @@ class DocumentModel : public QAbstractItemModel {
                          const QVector<int>& roles);
   void handleRowInsertion(const QModelIndex& parent, int first, int last);
   void handleRowRemoval(const QModelIndex& parent, int first, int last);
+  void handleRowMove(const QModelIndex& parent, int first, int last,
+                     const QModelIndex& destination, int row);
 };
 
 }  // namespace chaoskit::ui

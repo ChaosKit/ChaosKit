@@ -1,51 +1,82 @@
 import QtQml.Models 2.12
 import QtQuick 2.12
+import QtQuick.Controls.Material 2.12
 import QtQuick.Layouts 1.11
 import "../controls"
 
-ColumnLayout {
-  id: itemRoot
-  spacing: 0
+DropArea {
+  id: root
 
   property var parentModel
   readonly property var parentIndex: parentModel.modelIndex(index)
+  property bool acceptsDrag: containsDrag && drag.source !== root
 
-  BlendRow {
-    id: row
-    modelIndex: parentIndex
-    toggleVisible: formulaDelegateModel.count > 1
-    Layout.fillWidth: true
+  implicitHeight: contents.implicitHeight
+  Drag.active: row.drag.active
+
+  onDropped: {
+    if (root.acceptsDrag) {
+      documentModel.absorbBlend(drop.source.parentIndex, root.parentIndex);
+    }
   }
 
-  // Formulas
+  ColumnLayout {
+    anchors.left: parent.left
+    anchors.right: parent.right
+    id: contents
+    spacing: 0
 
-  DelegateModel {
-    id: formulaDelegateModel
-    model: documentModel
-    rootIndex: parentIndex
-    delegate: FormulaListItem {
-      anchors.left: parent.left
-      anchors.right: parent.right
-      parentModel: formulaDelegateModel
+    BlendRow {
+      id: row
+      drag.target: root
+      drag.axis: Drag.YAxis
+      modelIndex: parentIndex
+      toggleVisible: formulaDelegateModel.count > 1
+      Layout.fillWidth: true
+
+      onDragEnded: {
+        root.Drag.drop();
+      }
+    }
+
+    // Formulas
+
+    DelegateModel {
+      id: formulaDelegateModel
+      model: documentModel
+      rootIndex: parentIndex
+      delegate: FormulaListItem {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        parentModel: formulaDelegateModel
+      }
+    }
+
+    Rectangle {
+      id: formulaList
+
+      color: Qt.rgba(0, 0, 0, 0.1)
+      implicitHeight: formulaColumn.implicitHeight
+      visible: row.isOpen
+      Layout.fillWidth: true
+
+      Column {
+        id: formulaColumn
+        spacing: 0
+        anchors.fill: parent
+
+        Repeater {
+          model: formulaDelegateModel
+        }
+      }
     }
   }
 
   Rectangle {
-    id: formulaList
-
-    color: Qt.rgba(0, 0, 0, 0.1)
-    implicitHeight: formulaColumn.implicitHeight
-    visible: row.isOpen
-    Layout.fillWidth: true
-
-    Column {
-      id: formulaColumn
-      spacing: 0
-      anchors.fill: parent
-
-      Repeater {
-        model: formulaDelegateModel
-      }
-    }
+    anchors.fill: parent
+    border.width: 1
+    border.color: Material.foreground
+    color: "transparent"
+    visible: acceptsDrag
   }
 }

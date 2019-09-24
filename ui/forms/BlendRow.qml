@@ -10,7 +10,10 @@ Item {
 
   property var modelIndex
   property bool toggleVisible
+  property alias drag: mouseArea.drag
   property bool isOpen: false
+
+  signal dragEnded()
 
   implicitHeight: contents.implicitHeight
 
@@ -30,6 +33,11 @@ Item {
     onClicked: {
       selectionModel.setCurrentIndex(
           modelIndex, ItemSelectionModel.ClearAndSelect);
+    }
+    onReleased: {
+      if (mouseArea.drag.active) {
+        root.dragEnded();
+      }
     }
   }
 
