@@ -6,6 +6,7 @@
         <file>forms/AstInspector.qml</file>
         <file>forms/BlendListItem.qml</file>
         <file>forms/BlendOptionsForm.qml</file>
+        <file>forms/BlendRow.qml</file>
         <file>forms/DocumentOptionsForm.qml</file>
         <file>forms/Editor.qml</file>
         <file>forms/FormulaCard.qml</file>
