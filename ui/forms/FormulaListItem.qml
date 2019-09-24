@@ -33,7 +33,7 @@ MouseArea {
     spacing: 0
 
     IconButton {
-      iconName: model.enabled ? "eye" : "eye-slash"
+      iconName: itemEnabled ? "eye" : "eye-slash"
       onClicked: itemRoot.itemEnabled = !itemRoot.itemEnabled
     }
 
