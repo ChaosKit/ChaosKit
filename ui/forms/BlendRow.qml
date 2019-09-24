@@ -3,6 +3,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.4
 import QtQuick.Controls.Material 2.12
 import QtQuick.Layouts 1.11
+import app.chaoskit 1.0
 import "../controls"
 
 Item {
@@ -74,7 +75,9 @@ Item {
   Connections {
     target: documentModel
     onRowsRemoved: {
-      if (parent === modelIndex && documentModel.rowCount(parent) <= 1) {
+      const minFormulaCount = (type === DocumentEntryType.Blend) ? 1 : 0;
+      if (parent === modelIndex
+          && documentModel.rowCount(parent) <= minFormulaCount) {
         row.isOpen = false;
       }
     }
