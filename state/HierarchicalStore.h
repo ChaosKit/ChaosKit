@@ -104,6 +104,23 @@ class HierarchicalStore : public Store<Ts...> {
     return childId;
   }
 
+  template <typename P, typename C>
+  void dissociateChildFrom(Id parentId, Id childId) {
+    static_assert(Store<Ts...>::template containsType<P>());
+    static_assert(Store<Ts...>::template containsType<C>());
+    if (!this->template matchesType<P>(parentId)) {
+      throw IdTypeMismatchError("in HierarchicalStore::dissociateChildFrom()");
+    }
+    if (!this->template matchesType<C>(childId)) {
+      throw IdTypeMismatchError("in HierarchicalStore::dissociateChildFrom()");
+    }
+
+    C* child = const_cast<C*>(this->template find<C>(childId));
+    this->template update<P>(
+        parentId, [child](P* parent) { dissociateChild(*parent, child); });
+    cut(parentId, childId, typeIndex<C>());
+  }
+
   template <typename T>
   void removeWithType(Id id) {
     static_assert(Store<Ts...>::template containsType<T>());

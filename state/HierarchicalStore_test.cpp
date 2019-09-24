@@ -16,6 +16,7 @@ using testing::ElementsAre;
 using testing::Eq;
 using testing::Field;
 using testing::IsNull;
+using testing::NotNull;
 using testing::Pointee;
 
 // The hierarchy represented in these tests looks as follows:
@@ -173,6 +174,30 @@ TEST_F(HierarchicalStoreTest,
 
   EXPECT_THROW((store.associateNewChildWith<HasOne, One>(notParentId)),
                IdTypeMismatchError);
+}
+
+// HierarchicalStore::dissociateChildFrom()
+
+TEST_F(HierarchicalStoreTest, DissociatesChildFromParent) {
+  HierarchicalStore<HasOne, One> store;
+  Id parentId = store.create<HasOne>();
+  Id childId = store.associateNewChildWith<HasOne, One>(parentId);
+
+  store.dissociateChildFrom<HasOne, One>(parentId, childId);
+
+  const auto* parent = store.find<HasOne>(parentId);
+  EXPECT_THAT(parent->one, IsNull());
+}
+
+TEST_F(HierarchicalStoreTest, DissociatingDoesNotRemoveElements) {
+  HierarchicalStore<HasOne, One> store;
+  Id parentId = store.create<HasOne>();
+  Id childId = store.associateNewChildWith<HasOne, One>(parentId);
+
+  store.dissociateChildFrom<HasOne, One>(parentId, childId);
+
+  const auto* child = store.find<One>(childId);
+  EXPECT_THAT(child, NotNull());
 }
 
 // HierarchicalStore::remove()
