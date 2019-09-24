@@ -2,6 +2,7 @@ import QtQml.Models 2.12
 import QtQuick 2.12
 import QtQuick.Controls.Material 2.12
 import QtQuick.Layouts 1.11
+import app.chaoskit 1.0
 import "../controls"
 
 DropArea {
@@ -31,7 +32,8 @@ DropArea {
       drag.target: root
       drag.axis: Drag.YAxis
       modelIndex: parentIndex
-      toggleVisible: formulaDelegateModel.count > 1
+      toggleVisible:
+        formulaDelegateModel.count > (type === DocumentEntryType.Blend ? 1 : 0)
       Layout.fillWidth: true
 
       onDragEnded: {
