@@ -34,6 +34,27 @@ QStringList createFormulaList() {
   return result;
 }
 
+// Bypass QRC for a faster iteration cycle.
+#ifdef CHAOSKIT_DEBUG
+#define XSTR(s) STR(s)
+#define STR(s) #s
+QString createPath(const QString& path) {
+  return QStringLiteral(XSTR(CHAOSKIT_SOURCE_DIR) "/ui/").append(path);
+}
+QUrl createUrl(const QString& path) {
+  return QUrl::fromLocalFile(createPath(path));
+}
+#undef XSTR
+#undef STR
+#else
+QString createPath(const QString& path) {
+  return QStringLiteral(":/").append(path);
+}
+QUrl createUrl(const QString& path) {
+  return QUrl(QStringLiteral("qrc:/").append(path));
+}
+#endif
+
 int main(int argc, char* argv[]) {
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication app(argc, argv);
@@ -73,11 +94,15 @@ int main(int argc, char* argv[]) {
 
   auto* selectionModel = new QItemSelectionModel(documentModel);
 
-  // Set up QML and pass data to the context
-
+  // Set up fonts
+  QFontDatabase::addApplicationFont(createPath("fonts/Inter-Regular.otf"));
+  QFontDatabase::addApplicationFont(createPath("fonts/Inter-Medium.otf"));
+  QFontDatabase::addApplicationFont(createPath("fonts/Inter-SemiBold.otf"));
+  QFontDatabase::addApplicationFont(createPath("fonts/Inter-Bold.otf"));
   const QFont monospaceFont =
       QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
+  // Set up QML and pass data to the context
   QQmlApplicationEngine engine;
   engine.addImageProvider(QStringLiteral("formula"),
                           new FormulaPreviewProvider);
@@ -89,18 +114,9 @@ int main(int argc, char* argv[]) {
   });
 
 #ifdef CHAOSKIT_DEBUG
-#define XSTR(s) STR(s)
-#define STR(s) #s
-  // Bypass QRC for a faster iteration cycle.
-  engine.rootContext()->setBaseUrl(
-      QUrl::fromLocalFile(QStringLiteral(XSTR(CHAOSKIT_SOURCE_DIR) "/ui/")));
-  engine.load(QUrl::fromLocalFile(
-      QStringLiteral(XSTR(CHAOSKIT_SOURCE_DIR) "/ui/forms/MainWindow.qml")));
-#undef XSTR
-#undef STR
-#else
-  engine.load(QUrl(QStringLiteral("qrc:/forms/MainWindow.qml")));
+  engine.rootContext()->setBaseUrl(createUrl(""));
 #endif
+  engine.load(createUrl("forms/MainWindow.qml"));
 
   return QGuiApplication::exec();
 }

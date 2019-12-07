@@ -2,6 +2,11 @@
     <qresource prefix="/">
         <file>qtquickcontrols2.conf</file>
 
+        <file>fonts/Inter-Bold.otf</file>
+        <file>fonts/Inter-Medium.otf</file>
+        <file>fonts/Inter-Regular.otf</file>
+        <file>fonts/Inter-SemiBold.otf</file>
+
         <file>icons/caret-down.svg</file>
         <file>icons/caret-right.svg</file>
         <file>icons/chevron-left.svg</file>
