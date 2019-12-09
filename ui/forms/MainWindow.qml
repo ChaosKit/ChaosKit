@@ -9,6 +9,7 @@ import "../controls"
 ApplicationWindow {
   id: root
   title: "ChaosKit"
+  font.family: "Inter"
   width: 1024
   height: 768
   visible: true
@@ -23,9 +24,9 @@ ApplicationWindow {
   Editor {
     id: editor
     refreshInterval: 100
-    gamma: renderingForm.gamma
-    exposure: renderingForm.exposure
-    vibrancy: renderingForm.vibrancy
+    gamma: 2.2 //renderingForm.gamma
+    exposure: 0.0 //renderingForm.exposure
+    vibrancy: 0.0 //renderingForm.vibrancy
 
     anchors.fill: parent
     transform: Translate {
@@ -87,32 +88,14 @@ ApplicationWindow {
       onClicked: drawer.close()
     }
 
-    TabBar {
-      id: editorTabs
+    ColumnLayout {
       anchors.top: parent.top
-      anchors.left: hideButton.right
+      anchors.left: parent.left
       anchors.right: parent.right
-      anchors.leftMargin: 4
+      anchors.topMargin: 40
 
-      TabButton {
-        text: qsTr("Structure")
-      }
-      TabButton {
-        text: qsTr("Rendering")
-      }
-    }
-
-    StackLayout {
-      currentIndex: editorTabs.currentIndex
-      anchors.top: editorTabs.bottom
-      anchors.bottom: parent.bottom
-      width: parent.width
-
-      StructureForm {
-        id: structureForm
-      }
-      RenderingForm {
-        id: renderingForm
+      Label {
+        text: 'TBD'
       }
     }
   }
