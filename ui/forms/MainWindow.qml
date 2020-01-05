@@ -2,12 +2,16 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 
 ApplicationWindow {
-  height: 600
-  width: 800
+  height: 768
+  title: "ChaosKit"
   visible: true
+  width: 1024
 
-  Button {
+  SystemPreview {
     anchors.centerIn: parent
-    text: 'Hello :)'
+
+    Component.onCompleted: {
+      running = true;
+    }
   }
 }

@@ -5,6 +5,7 @@
         <file>ChaosKit/qmldir</file>
         <file>ChaosKit/Theme.qml</file>
         <file>controls/IconButton.qml</file>
+        <file>forms/SystemPreview.qml</file>
         <file>forms/MainWindow.qml</file>
         <file>qtquickcontrols2.conf</file>
     </qresource>
