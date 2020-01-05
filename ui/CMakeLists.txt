@@ -59,7 +59,7 @@ set(ChaosKit_SOURCES
 
 # As an exception to the not-always-static resources defined above, custom
 # fonts are always embedded in the binary.
-qt5_add_big_resources(ChaosKit_SOURCES static.qrc)
+qt5_add_resources(ChaosKit_SOURCES static.qrc)
 
 add_executable(ChaosKit WIN32 ${ChaosKit_SOURCES})
 set_target_properties(ChaosKit PROPERTIES
