@@ -2,9 +2,11 @@
 <RCC version="1.0">
     <qresource>
         <file>ChaosKit/ApplicationWindow.qml</file>
+        <file>ChaosKit/Fab.qml</file>
+        <file>ChaosKit/IconButton.qml</file>
         <file>ChaosKit/qmldir</file>
         <file>ChaosKit/Theme.qml</file>
-        <file>controls/IconButton.qml</file>
+        <file>ChaosKit/ToolTip.qml</file>
         <file>forms/SystemPreview.qml</file>
         <file>forms/MainWindow.qml</file>
         <file>qtquickcontrols2.conf</file>

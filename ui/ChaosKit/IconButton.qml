@@ -1,10 +1,10 @@
-import QtQuick 2.0
+import QtQuick 2.12
 import QtQuick.Controls 2.12
 
 RoundButton {
   property string iconName
-  property int size: 16
-  property int innerOffset: 4
+  property int size: Theme.units(4)
+  property int innerOffset: Theme.units(1)
 
   icon.source: `qrc:/icons/${iconName}.svg`
   icon.width: size

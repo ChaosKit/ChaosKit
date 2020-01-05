@@ -4,12 +4,22 @@ import QtQuick 2.12
 QtObject {
   // Dimensions
 
+  readonly property int borderRadius: 2
   readonly property int unit: 4
   function units(count) {
     return unit * count;
   }
 
   // Fonts
+
+  readonly property int captionFontSize: 10
+  function letterSpacing(fontSize) {
+    // Based on Inter Dynamic Metrics: https://rsms.me/inter/dynmetrics/
+    const a = -0.0223;
+    const b = 0.185;
+    const c = -0.1745;
+    return (a + b * Math.exp(c * fontSize)) * fontSize;
+  }
 
   readonly property string fontFamily: "Inter"
   // monospaceFont needs to be exposed to the context from the C++ side.
@@ -19,6 +29,15 @@ QtObject {
 
   function alpha(color, alpha) {
     return Qt.rgba(color.r, color.g, color.b, alpha);
+  }
+  function blend(a, b, ratio) {
+    const complement = 1 - ratio;
+    return Qt.rgba(
+      a.r * complement + b.r * ratio,
+      a.g * complement + b.g * ratio,
+      a.b * complement + b.b * ratio,
+      a.a * complement + b.a * ratio
+    );
   }
 
   readonly property color primary900: "#F8791C"
@@ -49,7 +68,11 @@ QtObject {
   readonly property color primaryColor: primary200
   readonly property color primaryVariantColor: primary900
   readonly property color secondaryColor: secondary200
-  readonly property color borderColor: alpha("white", 0.12)
+  readonly property color borderColor: Qt.rgba(1, 1, 1, 0.12)
+  readonly property color disabledColor: Qt.rgba(1, 1, 1, 0.12)
+
+  readonly property color black: "black"
+  readonly property color white: "white"
 
   readonly property color onPrimary: "black"
   readonly property color onSurface: "white"
