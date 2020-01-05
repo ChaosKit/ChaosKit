@@ -1,5 +1,5 @@
-#include <library/FormulaType.h>
 #include <QDir>
+#include <QDirIterator>
 #include <QFontDatabase>
 #include <QGuiApplication>
 #include <QItemSelectionModel>
@@ -10,9 +10,12 @@
 #include "DocumentModel.h"
 #include "FormulaPreviewProvider.h"
 #include "HistogramBuffer.h"
+#include "HotReloader.h"
 #include "ModelEntry.h"
 #include "Point.h"
 #include "SystemView.h"
+#include "library/FormulaType.h"
+#include "resources.h"
 
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
@@ -20,8 +23,10 @@ using chaoskit::library::FormulaType;
 using chaoskit::ui::DocumentEntryType;
 using chaoskit::ui::DocumentModel;
 using chaoskit::ui::FormulaPreviewProvider;
+using chaoskit::ui::HotReloader;
 using chaoskit::ui::ModelEntry;
 using chaoskit::ui::SystemView;
+namespace resources = chaoskit::resources;
 
 QStringList createFormulaList() {
   QStringList result;
@@ -34,28 +39,9 @@ QStringList createFormulaList() {
   return result;
 }
 
-// Bypass QRC for a faster iteration cycle.
-#ifdef CHAOSKIT_DEBUG
-#define XSTR(s) STR(s)
-#define STR(s) #s
-QString createPath(const QString& path) {
-  return QStringLiteral(XSTR(CHAOSKIT_SOURCE_DIR) "/ui/").append(path);
-}
-QUrl createUrl(const QString& path) {
-  return QUrl::fromLocalFile(createPath(path));
-}
-#undef XSTR
-#undef STR
-#else
-QString createPath(const QString& path) {
-  return QStringLiteral(":/").append(path);
-}
-QUrl createUrl(const QString& path) {
-  return QUrl(QStringLiteral("qrc:/").append(path));
-}
-#endif
-
 int main(int argc, char* argv[]) {
+  resources::initialize();
+
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication app(argc, argv);
 
@@ -66,16 +52,15 @@ int main(int argc, char* argv[]) {
   QSurfaceFormat::setDefaultFormat(format);
 
   // Register types
-
   qRegisterMetaType<HistogramBuffer>();
   qRegisterMetaType<Point>();
 
   qmlRegisterType<DocumentModel>();
   qmlRegisterUncreatableType<DocumentEntryType>(
-      "app.chaoskit", 1, 0, "DocumentEntryType",
+      "ChaosKit", 1, 0, "DocumentEntryType",
       QStringLiteral("Not creatable because it's an enum"));
   qmlRegisterInterface<ModelEntry>("ModelEntry");
-  qmlRegisterType<SystemView>("app.chaoskit", 1, 0, "SystemView");
+  qmlRegisterType<SystemView>("ChaosKit", 1, 0, "SystemView");
 
   // Set up models
 
@@ -95,15 +80,19 @@ int main(int argc, char* argv[]) {
   auto* selectionModel = new QItemSelectionModel(documentModel);
 
   // Set up fonts
-  QFontDatabase::addApplicationFont(createPath("fonts/Inter-Regular.otf"));
-  QFontDatabase::addApplicationFont(createPath("fonts/Inter-Medium.otf"));
-  QFontDatabase::addApplicationFont(createPath("fonts/Inter-SemiBold.otf"));
-  QFontDatabase::addApplicationFont(createPath("fonts/Inter-Bold.otf"));
+  {
+    QDirIterator it(":/fonts", {"*.otf", "*.ttf"}, QDir::Files,
+                    QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+      QFontDatabase::addApplicationFont(it.next());
+    }
+  }
   const QFont monospaceFont =
       QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
   // Set up QML and pass data to the context
   QQmlApplicationEngine engine;
+  engine.addImportPath(resources::importPath());
   engine.addImageProvider(QStringLiteral("formula"),
                           new FormulaPreviewProvider);
   engine.rootContext()->setContextProperties({
@@ -113,10 +102,15 @@ int main(int argc, char* argv[]) {
       {QStringLiteral("selectionModel"), QVariant::fromValue(selectionModel)},
   });
 
-#ifdef CHAOSKIT_DEBUG
-  engine.rootContext()->setBaseUrl(createUrl(""));
-#endif
-  engine.load(createUrl("forms/MainWindow.qml"));
+  engine.load(resources::createUrl("forms/MainWindow.qml"));
+
+  // Hot reload
+  if (!resources::areStatic()) {
+    auto* hotReloader = new HotReloader(&engine, &app);
+    hotReloader->addWatchDirectory(resources::importPath());
+    hotReloader->setReloadPath(resources::createPath("forms/MainWindow.qml"));
+    qInfo() << "Hot Reloader enabled";
+  }
 
   return QGuiApplication::exec();
 }

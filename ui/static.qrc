@@ -1,0 +1,19 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file>fonts/Inter-Bold.otf</file>
+        <file>fonts/Inter-Medium.otf</file>
+        <file>fonts/Inter-Regular.otf</file>
+        <file>fonts/Inter-SemiBold.otf</file>
+        <file>icons/caret-down.svg</file>
+        <file>icons/caret-right.svg</file>
+        <file>icons/chevron-left.svg</file>
+        <file>icons/chevron-right.svg</file>
+        <file>icons/eye-slash.svg</file>
+        <file>icons/eye.svg</file>
+        <file>icons/low-vision.svg</file>
+        <file>icons/plus.svg</file>
+        <file>icons/times.svg</file>
+        <file>icons/trash-alt.svg</file>
+    </qresource>
+</RCC>
