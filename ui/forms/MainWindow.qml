@@ -24,5 +24,9 @@ ApplicationWindow {
     iconName: "random"
     ToolTip.text: "Randomize the image"
     ToolTip.visible: hovered
+
+    onClicked: {
+      documentModel.randomizeSystem();
+    }
   }
 }

@@ -23,6 +23,7 @@ target_link_libraries(ui_core PUBLIC
 add_library(ui_state
         DocumentModel.cpp DocumentModel.h
         ModelEntry.cpp ModelEntry.h
+        RandomizationSettings.cpp RandomizationSettings.h
         )
 set_target_properties(ui_state PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_state PUBLIC

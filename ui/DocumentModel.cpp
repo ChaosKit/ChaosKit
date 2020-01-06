@@ -38,6 +38,10 @@ DocumentModel::DocumentModel(QObject* parent) : QAbstractItemModel(parent) {
           &DocumentModel::handleRowRemoval);
   connect(this, &QAbstractItemModel::rowsMoved, this,
           &DocumentModel::handleRowMove);
+  connect(this, &QAbstractItemModel::modelReset, this,
+          &DocumentModel::structureChanged);
+  connect(this, &QAbstractItemModel::modelReset, this,
+          &DocumentModel::systemReset);
 }
 
 ///////////////////////////////////////////////////////////////////// Custom API
@@ -178,6 +182,66 @@ void DocumentModel::randomizeParams(const QModelIndex& index) {
 
   setData(index, QVariant::fromValue(generateFormulaParams(formulaType)),
           DocumentModel::ParamsRole);
+}
+
+void DocumentModel::randomizeSystem() {
+  auto settings = RandomizationSettings::Builder()
+                      .setMaxBlends(2)
+                      .setMaxFormulasInBlend(2)
+                      .setAllowedFormulaTypes({library::FormulaType::DeJong})
+                      .build();
+
+  randomizeSystem(settings);
+}
+
+void DocumentModel::randomizeSystem(const RandomizationSettings& settings) {
+  beginResetModel();
+
+  // Remove the System and then recreate a blank one
+  store_.remove(systemId());
+  fixInvariants();
+
+  auto* rng = QRandomGenerator::global();
+
+  // Generate blends
+  int numBlends = rng->bounded(settings.minBlends(), settings.maxBlends() + 1);
+  for (int i = 0; i < numBlends; ++i) {
+    // TODO: random weights
+    Id blendId =
+        store_.associateNewChildWith<core::System, core::Blend>(systemId());
+    int numFormulas = rng->bounded(settings.minFormulasInBlend(),
+                                   settings.maxFormulasInBlend() + 1);
+    for (int j = 0; j < numFormulas; ++j) {
+      // Generate formulas for blend
+      int typeIndex = rng->bounded(settings.allowedFormulaTypes().size());
+      auto formulaType = settings.allowedFormulaTypes()[typeIndex];
+
+      store_.associateNewChildWith<core::Blend, core::Formula>(
+          blendId, [formulaType](core::Formula* formula) {
+            formula->setType(formulaType);
+            formula->params = generateFormulaParams(formulaType);
+            // TODO: random weights
+          });
+    }
+  }
+
+  // Randomize final blend
+  int numFormulas = rng->bounded(settings.minFormulasInFinalBlend(),
+                                 settings.maxFormulasInFinalBlend() + 1);
+  for (int j = 0; j < numFormulas; ++j) {
+    // Generate formulas for final blend
+    int typeIndex = rng->bounded(settings.allowedFormulaTypes().size());
+    auto formulaType = settings.allowedFormulaTypes()[typeIndex];
+
+    store_.associateNewChildWith<core::FinalBlend, core::Formula>(
+        store_.lastId<core::FinalBlend>(),
+        [formulaType](core::Formula* formula) {
+          formula->setType(formulaType);
+          formula->params = generateFormulaParams(formulaType);
+        });
+  }
+
+  endResetModel();
 }
 
 void DocumentModel::absorbBlend(const QModelIndex& source,
@@ -653,13 +717,13 @@ state::Id DocumentModel::systemId() const {
   return store_.lastId<core::System>();
 };
 
-void DocumentModel::fixInvariants() {
-  bool shouldNotify = false;
+bool DocumentModel::fixInvariants() {
+  bool performedChanges = false;
 
   Id documentId;
   if (store_.count<core::Document>() < 1) {
     documentId = store_.create<core::Document>();
-    shouldNotify = true;
+    performedChanges = true;
   } else {
     documentId = store_.lastId<core::Document>();
   }
@@ -668,19 +732,17 @@ void DocumentModel::fixInvariants() {
   if (store_.countChildren<core::System>(documentId) < 1) {
     systemId =
         store_.associateNewChildWith<core::Document, core::System>(documentId);
-    shouldNotify = true;
+    performedChanges = true;
   } else {
     systemId = store_.lastId<core::System>();
   }
 
   if (store_.countChildren<core::FinalBlend>(systemId) < 1) {
     store_.associateNewChildWith<core::System, core::FinalBlend>(systemId);
-    shouldNotify = true;
+    performedChanges = true;
   }
 
-  if (shouldNotify) {
-    emit invariantsFixed();
-  }
+  return performedChanges;
 }
 
 void DocumentModel::maybeUpdateBlendDisplayName(const QModelIndex& blend) {
@@ -725,7 +787,6 @@ void DocumentModel::handleRowRemoval(const QModelIndex& parent, int first,
     maybeUpdateBlendDisplayName(parent);
   }
 }
-
 void DocumentModel::handleRowMove(const QModelIndex& parent, int first,
                                   int last, const QModelIndex& destination,
                                   int row) {

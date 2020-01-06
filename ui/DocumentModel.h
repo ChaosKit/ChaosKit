@@ -3,6 +3,7 @@
 
 #include <QAbstractItemModel>
 #include "ModelEntry.h"
+#include "RandomizationSettings.h"
 #include "core/structures/Blend.h"
 #include "core/structures/Document.h"
 #include "core/structures/Formula.h"
@@ -30,9 +31,8 @@ class DocumentEntryType {
 class DocumentModel : public QAbstractItemModel {
   Q_OBJECT
   Q_PROPERTY(QString debugSource READ debugSource NOTIFY structureChanged)
-  Q_PROPERTY(
-      QModelIndex documentIndex READ documentIndex NOTIFY invariantsFixed)
-  Q_PROPERTY(QModelIndex systemIndex READ systemIndex NOTIFY invariantsFixed)
+  Q_PROPERTY(QModelIndex documentIndex READ documentIndex NOTIFY systemReset)
+  Q_PROPERTY(QModelIndex systemIndex READ systemIndex NOTIFY systemReset)
 
   using Store =
       state::HierarchicalStore<core::Blend, core::Document, core::FinalBlend,
@@ -113,16 +113,18 @@ class DocumentModel : public QAbstractItemModel {
 
  public slots:
   void randomizeParams(const QModelIndex& index);
+  void randomizeSystem();
+  void randomizeSystem(const RandomizationSettings& settings);
 
  signals:
   void structureChanged();
-  void invariantsFixed();
+  void systemReset();
 
  private:
   [[nodiscard]] state::Id documentId() const;
   [[nodiscard]] state::Id systemId() const;
 
-  void fixInvariants();
+  bool fixInvariants();
   void maybeUpdateBlendDisplayName(const QModelIndex& blend);
   QModelIndex getFormulaIndex(const QModelIndex& blendOrFormula);
 
