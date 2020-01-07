@@ -206,21 +206,25 @@ void DocumentModel::randomizeSystem(const RandomizationSettings& settings) {
   // Generate blends
   int numBlends = rng->bounded(settings.minBlends(), settings.maxBlends() + 1);
   for (int i = 0; i < numBlends; ++i) {
-    // TODO: random weights
-    Id blendId =
-        store_.associateNewChildWith<core::System, core::Blend>(systemId());
+    double blendWeight = rng->generateDouble();
+    Id blendId = store_.associateNewChildWith<core::System, core::Blend>(
+        systemId(), [blendWeight](core::Blend* blend) {
+          blend->weight = (float)blendWeight;
+        });
     int numFormulas = rng->bounded(settings.minFormulasInBlend(),
                                    settings.maxFormulasInBlend() + 1);
     for (int j = 0; j < numFormulas; ++j) {
       // Generate formulas for blend
       int typeIndex = rng->bounded(settings.allowedFormulaTypes().size());
       auto formulaType = settings.allowedFormulaTypes()[typeIndex];
+      double formulaWeight = rng->generateDouble();
 
       store_.associateNewChildWith<core::Blend, core::Formula>(
-          blendId, [formulaType](core::Formula* formula) {
+          blendId, [formulaType, formulaWeight](core::Formula* formula) {
             formula->setType(formulaType);
             formula->params = generateFormulaParams(formulaType);
-            // TODO: random weights
+            formula->weight.x = (float)formulaWeight;
+            formula->weight.y = (float)formulaWeight;
           });
     }
   }
