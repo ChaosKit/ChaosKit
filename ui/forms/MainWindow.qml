@@ -16,6 +16,32 @@ ApplicationWindow {
     }
   }
 
+  Button {
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.leftMargin: Theme.units(2)
+    anchors.bottomMargin: Theme.units(2)
+    text: "AST Inspector"
+
+    onClicked: {
+      astInspectorLoader.active = true;
+    }
+
+    Loader {
+      id: astInspectorLoader
+      active: false
+      sourceComponent: AstInspector {
+        anchors.centerIn: Overlay.overlay
+        source: documentModel.debugSource
+
+        onClosed: {
+          astInspectorLoader.active = false;
+        }
+      }
+    }
+  }
+
+
   Fab {
     anchors.right: parent.right
     anchors.bottom: parent.bottom
