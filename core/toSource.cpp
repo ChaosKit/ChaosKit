@@ -6,13 +6,22 @@
 namespace chaoskit::core {
 
 ast::Blend toSource(const BlendBase &blend) {
-  std::vector<ast::WeightedFormula> weighted_formulas;
-  weighted_formulas.reserve(blend.formulas.size());
+  std::vector<ast::WeightedFormula> weightedFormulas;
+  weightedFormulas.reserve(blend.formulas.size());
+
+  // Weights have to be normalized to sum to 1.0
+  float xSum = 0.f;
+  float ySum = 0.f;
   for (const auto &formula : blend.formulas) {
-    weighted_formulas.push_back(toSource(*formula));
+    xSum += formula->weight.x;
+    ySum += formula->weight.y;
+  }
+  for (const auto &formula : blend.formulas) {
+    weightedFormulas.emplace_back(formula->source, formula->weight.x / xSum,
+                                  formula->weight.y / ySum);
   }
 
-  return ast::Blend{std::move(weighted_formulas), toSource(blend.pre),
+  return ast::Blend{std::move(weightedFormulas), toSource(blend.pre),
                     toSource(blend.post)};
 }
 
