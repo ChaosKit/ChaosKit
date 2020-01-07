@@ -25,6 +25,28 @@ std::vector<float> generateFormulaParams(library::FormulaType type) {
   return params;
 }
 
+QVector<float> generateUniformWeights(int count) {
+  if (count <= 0) {
+    return QVector<float>();
+  }
+
+  QVector<float> cuts(count - 1);
+  auto* rng = QRandomGenerator::global();
+  for (float& cut : cuts) {
+    cut = (float)rng->generateDouble();
+  }
+  std::sort(cuts.begin(), cuts.end());
+
+  QVector<float> weights(count);
+  for (int i = 0; i < count; ++i) {
+    float prev = (i == 0) ? 0.f : cuts[i - 1];
+    float next = (i == cuts.size()) ? 1.f : cuts[i];
+
+    weights[i] = next - prev;
+  }
+  return weights;
+}
+
 }  // namespace
 
 DocumentModel::DocumentModel(QObject* parent) : QAbstractItemModel(parent) {
@@ -203,28 +225,31 @@ void DocumentModel::randomizeSystem(const RandomizationSettings& settings) {
 
   auto* rng = QRandomGenerator::global();
 
-  // Generate blends
   int numBlends = rng->bounded(settings.minBlends(), settings.maxBlends() + 1);
+  QVector<float> blendWeights = generateUniformWeights(numBlends);
+
+  // Generate blends
   for (int i = 0; i < numBlends; ++i) {
-    double blendWeight = rng->generateDouble();
+    float blendWeight = blendWeights[i];
     Id blendId = store_.associateNewChildWith<core::System, core::Blend>(
-        systemId(), [blendWeight](core::Blend* blend) {
-          blend->weight = (float)blendWeight;
-        });
+        systemId(),
+        [blendWeight](core::Blend* blend) { blend->weight = blendWeight; });
     int numFormulas = rng->bounded(settings.minFormulasInBlend(),
                                    settings.maxFormulasInBlend() + 1);
+    QVector<float> formulaWeights = generateUniformWeights(numFormulas);
+
     for (int j = 0; j < numFormulas; ++j) {
       // Generate formulas for blend
       int typeIndex = rng->bounded(settings.allowedFormulaTypes().size());
       auto formulaType = settings.allowedFormulaTypes()[typeIndex];
-      double formulaWeight = rng->generateDouble();
+      float formulaWeight = formulaWeights[j];
 
       store_.associateNewChildWith<core::Blend, core::Formula>(
           blendId, [formulaType, formulaWeight](core::Formula* formula) {
             formula->setType(formulaType);
             formula->params = generateFormulaParams(formulaType);
-            formula->weight.x = (float)formulaWeight;
-            formula->weight.y = (float)formulaWeight;
+            formula->weight.x = formulaWeight;
+            formula->weight.y = formulaWeight;
           });
     }
   }
