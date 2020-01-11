@@ -1,4 +1,4 @@
-#include "HotReloader.h"
+#include "EngineManager.h"
 #include <QDir>
 #include <QLoggingCategory>
 #include <QQuickWindow>
@@ -7,7 +7,7 @@
 
 namespace chaoskit::ui {
 
-Q_LOGGING_CATEGORY(hotreloader, "hotreloader");
+Q_LOGGING_CATEGORY(engineManager, "EngineManager");
 
 namespace {
 
@@ -42,8 +42,27 @@ QStringList getPathsToWatch(const QString& directory) {
 
 }  // namespace
 
-HotReloader::HotReloader(QQmlApplicationEngine* engine, QObject* parent)
-    : QObject(parent), engine_(engine), watcher_(nullptr), reloadPath_() {
+EngineManager::EngineManager(QObject* parent)
+    : QObject(parent), engine_(nullptr), watcher_(nullptr), loadUrl_() {}
+
+void EngineManager::createEngine() {
+  emit engineAboutToBeCreated();
+  engine_ = new QQmlApplicationEngine(this);
+  emit engineCreated(engine_);
+}
+
+void EngineManager::setLoadUrl(const QUrl& url) { loadUrl_ = url; }
+
+void EngineManager::load() {
+  Q_ASSERT(!loadUrl_.isEmpty());
+  if (engine_ == nullptr) {
+    createEngine();
+  }
+
+  engine_->load(loadUrl_);
+}
+
+void EngineManager::enableHotReload() {
   watcher_ = new QFileSystemWatcher(this);
 
   // FIXME: On macOS editing a file triggers a directory update as well.
@@ -51,30 +70,21 @@ HotReloader::HotReloader(QQmlApplicationEngine* engine, QObject* parent)
   //  connect(watcher_, &QFileSystemWatcher::directoryChanged, this,
   //          &HotReloader::reload);
   connect(watcher_, &QFileSystemWatcher::fileChanged, this,
-          &HotReloader::reload);
+          &EngineManager::reload);
 }
 
-void HotReloader::addWatchDirectory(const QString& directory) {
+void EngineManager::addWatchDirectory(const QString& directory) {
+  Q_ASSERT(watcher_ != nullptr);
   watcher_->addPaths(getPathsToWatch(directory));
 }
 
-void HotReloader::setReloadPath(const QString& path) { reloadPath_ = path; }
+void EngineManager::reload(const QString& changedPath) {
+  qDebug(engineManager) << "Reloading due to path change:" << changedPath;
 
-void HotReloader::reload(const QString& changedPath) {
-  if (reloadPath_.isEmpty()) {
-    qWarning(hotreloader) << "NOT RELOADING because reloadPath is not set";
-    return;
-  }
-
-  qDebug(hotreloader) << "Reloading due to path change:" << changedPath;
-
-  auto* window = qobject_cast<QQuickWindow*>(engine_->rootObjects().first());
-
-  engine_->clearComponentCache();
-  engine_->load(reloadPath_);
-
-  window->close();
-  delete window;
+  delete engine_;
+  qmlClearTypeRegistrations();
+  createEngine();
+  load();
 }
 
 }  // namespace chaoskit::ui
