@@ -12,6 +12,7 @@ QtObject {
 
   // Fonts
 
+  readonly property int buttonFontSize: 12
   readonly property int captionFontSize: 10
   function letterSpacing(fontSize) {
     // Based on Inter Dynamic Metrics: https://rsms.me/inter/dynmetrics/

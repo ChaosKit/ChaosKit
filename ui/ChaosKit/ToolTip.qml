@@ -14,10 +14,8 @@ T.ToolTip {
                            contentHeight + topPadding + bottomPadding)
 
   margins: 0
-  topPadding: (Theme.units(5) - Theme.captionFontSize) / 2
-  bottomPadding: (Theme.units(5) - Theme.captionFontSize) / 2
-  leftPadding: Theme.units(2)
-  rightPadding: Theme.units(2)
+  horizontalPadding: Theme.units(2)
+  verticalPadding: (Theme.units(5) - Theme.captionFontSize) / 2
 
   closePolicy:
     T.Popup.CloseOnEscape | T.Popup.CloseOnPressOutsideParent |

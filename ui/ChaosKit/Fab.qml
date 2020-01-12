@@ -9,6 +9,7 @@ IconButton {
       enabled ?
         Theme.blend(
           Theme.primaryColor, Theme.white,
+          button.visualFocus ? 0.12 :
           button.down ? 0.1 :
           button.hovered ? 0.04 :
           0.0
