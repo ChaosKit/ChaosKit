@@ -12,6 +12,7 @@ QtObject {
 
   // Fonts
 
+  readonly property int headline6FontSize: 14
   readonly property int buttonFontSize: 12
   readonly property int captionFontSize: 10
   function letterSpacing(fontSize) {
@@ -71,6 +72,7 @@ QtObject {
   readonly property color secondaryColor: secondary200
   readonly property color borderColor: Qt.rgba(1, 1, 1, 0.12)
   readonly property color disabledColor: Qt.rgba(1, 1, 1, 0.12)
+  readonly property color surfaceOverlay: Qt.rgba(1, 1, 1, 0.12)
 
   readonly property color black: "black"
   readonly property color white: "white"
