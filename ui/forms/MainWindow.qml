@@ -19,9 +19,9 @@ ApplicationWindow {
   Button {
     anchors.bottom: parent.bottom
     anchors.left: parent.left
-    anchors.leftMargin: Theme.units(2)
-    anchors.bottomMargin: Theme.units(2)
+    anchors.margins: Theme.units(4)
     text: "AST Inspector"
+    outlined: true
 
     onClicked: {
       astInspectorLoader.active = true;

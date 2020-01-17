@@ -14,17 +14,17 @@ Popup {
 
   Label {
     id: title
-    x: 4
-    y: 4
     text: "AST Inspector"
-    font.bold: true
+    font.letterSpacing: Theme.letterSpacing(Theme.headline6FontSize)
+    font.pointSize: Theme.headline6FontSize
+    font.weight: Font.Medium
   }
 
   IconButton {
     iconName: "times"
-    y: -8
+    y: Theme.units(-1)
     anchors.right: parent.right
-    anchors.rightMargin: -8
+    anchors.rightMargin: Theme.units(-1)
     onClicked: popup.close()
   }
 
@@ -33,14 +33,12 @@ Popup {
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    anchors.margins: 4
-    contentWidth: sourceArea.contentWidth
-    contentHeight: sourceArea.contentHeight
+    anchors.topMargin: Theme.units(3)
 
     TextArea {
       id: sourceArea
       font.family: monospaceFont.family
-      font.pointSize: 12
+      font.pointSize: 11
       readOnly: true
     }
   }
