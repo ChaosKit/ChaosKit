@@ -47,6 +47,20 @@ QVector<float> generateUniformWeights(int count) {
   return weights;
 }
 
+QTransform toQtTransform(const core::Transform& transform) {
+  return QTransform(transform.values[0], transform.values[3],
+                    transform.values[1], transform.values[4],
+                    transform.values[2], transform.values[5]);
+}
+
+core::Transform fromQtTransform(const QTransform& transform) {
+  return core::Transform(
+      {static_cast<float>(transform.m11()), static_cast<float>(transform.m21()),
+       static_cast<float>(transform.m31()), static_cast<float>(transform.m12()),
+       static_cast<float>(transform.m22()),
+       static_cast<float>(transform.m32())});
+}
+
 }  // namespace
 
 DocumentModel::DocumentModel(QObject* parent) : QAbstractItemModel(parent) {
@@ -210,7 +224,8 @@ void DocumentModel::randomizeSystem() {
   auto settings = RandomizationSettings::Builder()
                       .setMaxBlends(2)
                       .setMaxFormulasInBlend(2)
-                      .setAllowedFormulaTypes({library::FormulaType::DeJong})
+                      .setAllowedFormulaTypes({library::FormulaType::DeJong,
+                                               library::FormulaType::Drain})
                       .build();
 
   randomizeSystem(settings);
@@ -269,6 +284,13 @@ void DocumentModel::randomizeSystem(const RandomizationSettings& settings) {
           formula->params = generateFormulaParams(formulaType);
         });
   }
+
+  // Temporary hack to make the randomized images more interesting
+  // TODO: remove this one we have bounds editing
+  store_.update<core::FinalBlend>(
+      store_.lastId<core::FinalBlend>(), [](core::FinalBlend* blend) {
+        blend->post = fromQtTransform(QTransform::fromScale(0.5, 0.5));
+      });
 
   endResetModel();
 }
@@ -438,20 +460,6 @@ bool DocumentModel::hasChildren(const QModelIndex& parent) const {
 /////////////////////////////////////////////////////// Read-only data functions
 
 namespace {
-
-QTransform toQtTransform(const core::Transform& transform) {
-  return QTransform(transform.values[0], transform.values[3],
-                    transform.values[1], transform.values[4],
-                    transform.values[2], transform.values[5]);
-}
-
-core::Transform fromQtTransform(const QTransform& transform) {
-  return core::Transform(
-      {static_cast<float>(transform.m11()), static_cast<float>(transform.m21()),
-       static_cast<float>(transform.m31()), static_cast<float>(transform.m12()),
-       static_cast<float>(transform.m22()),
-       static_cast<float>(transform.m32())});
-}
 
 QString displayName(const core::Blend* blend) {
   if (!blend->name.empty()) {
