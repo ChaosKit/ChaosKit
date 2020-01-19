@@ -2,9 +2,11 @@
 #include <QDirIterator>
 #include <QFontDatabase>
 #include <QGuiApplication>
+#include <QImageWriter>
 #include <QItemSelectionModel>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QRegularExpression>
 #include <QSurfaceFormat>
 #include <QtGui/QTransform>
 #include "DocumentModel.h"
@@ -14,6 +16,7 @@
 #include "ModelEntry.h"
 #include "Point.h"
 #include "SystemView.h"
+#include "Utilities.h"
 #include "library/FormulaType.h"
 #include "resources.h"
 
@@ -26,6 +29,7 @@ using chaoskit::ui::EngineManager;
 using chaoskit::ui::FormulaPreviewProvider;
 using chaoskit::ui::ModelEntry;
 using chaoskit::ui::SystemView;
+using chaoskit::ui::Utilities;
 namespace resources = chaoskit::resources;
 
 QStringList createFormulaList() {
@@ -36,6 +40,50 @@ QStringList createFormulaList() {
       result.append(formula);
     }
   }
+  return result;
+}
+
+QStringList createExportFormatList() {
+  static const QSet<QByteArray> excludedFormats{
+      QByteArrayLiteral("cur"), QByteArrayLiteral("icns"),
+      QByteArrayLiteral("ico"), QByteArrayLiteral("wbmp")};
+  static const QHash<QByteArray, QString> formatLabels{
+      {QByteArrayLiteral("bmp"), QStringLiteral("Windows Bitmap (*.bmp)")},
+      {QByteArrayLiteral("heic"),
+       QStringLiteral("High Efficiency Image Format (*.heic *.heif)")},
+      {QByteArrayLiteral("heif"),
+       QStringLiteral("High Efficiency Image Format (*.heic *.heif)")},
+      {QByteArrayLiteral("jp2"), QStringLiteral("JPEG 2000 (*.jp2)")},
+      {QByteArrayLiteral("jpeg"), QStringLiteral("JPEG (*.jpeg *.jpg)")},
+      {QByteArrayLiteral("jpg"), QStringLiteral("JPEG (*.jpeg *.jpg)")},
+      {QByteArrayLiteral("pbm"), QStringLiteral("Portable Bitmap (*.pbm)")},
+      {QByteArrayLiteral("pgm"), QStringLiteral("Portable Graymap (*.pgm)")},
+      {QByteArrayLiteral("png"), QStringLiteral("PNG (*.png)")},
+      {QByteArrayLiteral("ppm"), QStringLiteral("Portable Pixmap (*.ppm)")},
+      {QByteArrayLiteral("tif"), QStringLiteral("TIFF (*.tif *.tiff)")},
+      {QByteArrayLiteral("tiff"), QStringLiteral("TIFF (*.tif *.tiff)")},
+      {QByteArrayLiteral("webp"), QStringLiteral("WebP (*.webp)")},
+      {QByteArrayLiteral("xbm"), QStringLiteral("X Bitmap (*.xbm)")},
+      {QByteArrayLiteral("xpm"), QStringLiteral("X Pixmap (*.xpm)")},
+  };
+
+  QStringList result;
+  for (const QByteArray& format : QImageWriter::supportedImageFormats()) {
+    if (excludedFormats.contains(format)) {
+      continue;
+    }
+
+    if (formatLabels.contains(format)) {
+      result.append(formatLabels.value(format));
+    } else {
+      auto formatString = QString::fromLatin1(format);
+      result.append(QStringLiteral("%1 file (*.%2)")
+                        .arg(formatString.toUpper(), formatString));
+    }
+  }
+
+  result.removeDuplicates();
+  result.append(QStringLiteral("All files (*)"));
   return result;
 }
 
@@ -82,7 +130,6 @@ int main(int argc, char* argv[]) {
   }
 
   // Set up QML and pass data to the context
-
   auto* engineManager = new EngineManager(&app);
   engineManager->setLoadUrl(resources::createUrl("forms/MainWindow.qml"));
 
@@ -93,13 +140,28 @@ int main(int argc, char* argv[]) {
         QStringLiteral("Not creatable because it's an enum"));
     qmlRegisterInterface<ModelEntry>("ModelEntry");
     qmlRegisterType<SystemView>("ChaosKit", 1, 0, "SystemView");
+    qmlRegisterSingletonType<Utilities>(
+        "ChaosKit", 1, 0, "Utilities",
+        [](QQmlEngine*, QJSEngine*) -> QObject* { return new Utilities(); });
   });
 
-  auto onEngineCreated = [documentModel,
-                          selectionModel](QQmlApplicationEngine* engine) {
+  auto onEngineCreated = [documentModel, selectionModel,
+                          engineManager](QQmlApplicationEngine* engine) {
+    // This bit prevents segfaults when calling Qt.quit(). I think it's because
+    // the engineManager was being deleted in wrong order or from QML's thread.
+    QObject::connect(engine, &QQmlEngine::quit, engineManager,
+                     &QObject::deleteLater);
+
     engine->addImportPath(resources::importPath());
     engine->addImageProvider(QStringLiteral("formula"),
                              new FormulaPreviewProvider);
+
+    auto exportFormats = createExportFormatList();
+    QRegularExpression pngRx(".*\\.png.*");
+    int defaultExportFormat = exportFormats.indexOf(pngRx);
+    if (defaultExportFormat < 0) {
+      defaultExportFormat = exportFormats.size() - 1;
+    }
 
     const QFont monospaceFont =
         QFontDatabase::systemFont(QFontDatabase::FixedFont);
@@ -109,6 +171,8 @@ int main(int argc, char* argv[]) {
         {QStringLiteral("monospaceFont"), QVariant::fromValue(monospaceFont)},
         {QStringLiteral("documentModel"), QVariant::fromValue(documentModel)},
         {QStringLiteral("selectionModel"), QVariant::fromValue(selectionModel)},
+        {QStringLiteral("exportFormats"), QVariant::fromValue(exportFormats)},
+        {QStringLiteral("defaultExportFormat"), QVariant(defaultExportFormat)},
     });
   };
   QObject::connect(engineManager, &EngineManager::engineCreated,

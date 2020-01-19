@@ -1,3 +1,4 @@
+import Qt.labs.platform 1.1
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import ChaosKit 1.0
@@ -8,7 +9,44 @@ ApplicationWindow {
   visible: true
   width: 1024
 
+  function openSnackbar(text) {
+    snackbar.text = text;
+    snackbar.open();
+  }
+
+  FileDialog {
+    id: exportFileDialog
+    acceptLabel: 'Export'
+    defaultSuffix:
+      selectedNameFilter.extensions[0] === '*' ?
+      "png" :
+      selectedNameFilter.extensions[0]
+    fileMode: FileDialog.SaveFile
+    nameFilters: exportFormats
+    selectedNameFilter.index: defaultExportFormat
+
+    onAccepted: {
+      const fileName = Utilities.urlToLocalPath(file);
+      systemPreview.grabToImage(result => {
+        if (result.saveToFile(fileName)) {
+          openSnackbar("Image exported");
+          console.log("Exported image to", fileName);
+        } else {
+          openSnackbar("Failed to export image");
+          console.error("Could not export image to", fileName);
+        }
+      });
+    }
+  }
+
+  MainMenu {
+    onExportImage: {
+      exportFileDialog.open()
+    }
+  }
+
   SystemPreview {
+    id: systemPreview
     anchors.centerIn: parent
 
     Component.onCompleted: {
@@ -41,6 +79,9 @@ ApplicationWindow {
     }
   }
 
+  Snackbar {
+    id: snackbar
+  }
 
   Fab {
     anchors.right: parent.right

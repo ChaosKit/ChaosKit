@@ -56,7 +56,7 @@ set(ChaosKit_SOURCES
         EngineManager.cpp EngineManager.h
         SystemView.h SystemView.cpp
         FormulaPreviewProvider.cpp FormulaPreviewProvider.h
-        )
+        Utilities.cpp Utilities.h)
 
 # As an exception to the not-always-static resources defined above, custom
 # fonts are always embedded in the binary.
