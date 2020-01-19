@@ -4,30 +4,25 @@ import QtQuick.Controls.impl 2.12
 import QtQuick.Templates 2.12 as T
 import ChaosKit 1.0
 
-T.Button {
+T.TabButton {
   id: control
-
-  property bool outlined: false
-  flat: outlined
 
   implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                           implicitContentWidth + leftPadding + rightPadding)
   implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
                            implicitContentHeight + topPadding + bottomPadding)
 
-  font.capitalization: Font.AllUppercase
+  horizontalPadding: Theme.units(3)
+  verticalPadding: 0
+  spacing: 0
+
   font.pointSize: Theme.buttonFontSize
   font.letterSpacing: Theme.letterSpacing(Theme.buttonFontSize)
   font.weight: Font.DemiBold
 
-  padding: 0
-  leftPadding: (icon.name || icon.source.toString()) ? Theme.units(3) : Theme.units(4)
-  rightPadding: Theme.units(4)
-  spacing: Theme.units(2)
-
   icon.width: Theme.iconSize
   icon.height: Theme.iconSize
-  icon.color: control.flat ? Theme.primaryColor : Theme.onPrimaryHigh
+  icon.color: checked ? Theme.primaryColor : Theme.onSurfaceHigh
 
   contentItem: IconLabel {
       spacing: control.spacing
@@ -37,31 +32,22 @@ T.Button {
       icon: control.icon
       text: control.text
       font: control.font
-      color: control.flat ? Theme.primaryColor : Theme.onPrimaryHigh
+      color: checked ? Theme.primaryColor : Theme.onSurfaceHigh
   }
 
   function getColor() {
-    if (!enabled) return Theme.disabledColor;
     const value =
       control.visualFocus ? 0.12 :
       control.down ? 0.1 :
       control.hovered ? 0.04 :
       0.0;
 
-    if (control.flat) {
-      return Qt.rgba(255, 255, 255, value);
-    } else {
-      return Theme.blend(Theme.primaryColor, Theme.white, value);
-    }
+    return Qt.rgba(255, 255, 255, value);
   }
 
   background: Rectangle {
-      implicitWidth: Theme.units(16)
-      implicitHeight: Theme.units(8)
-      visible: !control.flat || control.outlined || control.hovered || control.down
-      radius: Theme.borderRadius
-      color: getColor()
-      border.color: Qt.rgba(255, 255, 255, 0.12)
-      border.width: control.outlined ? 1 : 0
+    implicitHeight: Theme.units(14)
+    visible: control.hovered || control.down
+    color: getColor()
   }
 }

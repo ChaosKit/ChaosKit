@@ -11,9 +11,10 @@
         <file>icons/chevron-right.svg</file>
         <file>icons/eye-slash.svg</file>
         <file>icons/eye.svg</file>
+        <file>icons/image.svg</file><!-- free regular 5.12 -->
         <file>icons/low-vision.svg</file>
         <file>icons/plus.svg</file>
-        <file>icons/random.svg</file><!-- pro 5.12 -->
+        <file>icons/random.svg</file><!-- pro regular 5.12 -->
         <file>icons/times.svg</file>
         <file>icons/trash-alt.svg</file>
     </qresource>

@@ -9,11 +9,15 @@
         <file>ChaosKit/Popup.qml</file>
         <file>ChaosKit/qmldir</file>
         <file>ChaosKit/RoundButton.qml</file>
+        <file>ChaosKit/Separator.qml</file>
         <file>ChaosKit/Snackbar.qml</file>
+        <file>ChaosKit/TabButton.qml</file>
         <file>ChaosKit/TextArea.qml</file>
         <file>ChaosKit/Theme.qml</file>
         <file>ChaosKit/ToolTip.qml</file>
         <file>forms/AstInspector.qml</file>
+        <file>forms/DocumentEditor.qml</file>
+        <file>forms/EditorTabs.qml</file>
         <file>forms/ExportImageDialog.qml</file>
         <file>forms/SystemPreview.qml</file>
         <file>forms/MainMenu.qml</file>

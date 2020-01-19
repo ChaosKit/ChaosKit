@@ -9,6 +9,10 @@ ApplicationWindow {
   visible: true
   width: 1024
 
+  Snackbar {
+    id: snackbar
+  }
+
   function openSnackbar(text) {
     snackbar.text = text;
     snackbar.open();
@@ -39,10 +43,20 @@ ApplicationWindow {
   SystemPreview {
     id: systemPreview
     anchors.centerIn: parent
+    transform: Translate {
+      x: documentEditor.opened ? -documentEditor.width * 0.33 : 0
+    }
 
     Component.onCompleted: {
       running = true;
     }
+  }
+
+  DocumentEditor {
+    id: documentEditor
+    anchors.top: parent.top
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
   }
 
   Button {
@@ -68,10 +82,6 @@ ApplicationWindow {
         }
       }
     }
-  }
-
-  Snackbar {
-    id: snackbar
   }
 
   Fab {

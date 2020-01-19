@@ -18,8 +18,8 @@ T.RoundButton {
   padding: 0
   spacing: 0
 
-  icon.width: Theme.units(4)
-  icon.height: Theme.units(4)
+  icon.width: Theme.iconSize
+  icon.height: Theme.iconSize
   icon.color: control.flat ? Theme.primaryColor : Theme.onPrimaryHigh
 
   contentItem: IconLabel {

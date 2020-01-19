@@ -9,6 +9,7 @@ QtObject {
   function units(count) {
     return unit * count;
   }
+  readonly property int iconSize: 16
 
   // Fonts
 
@@ -26,6 +27,10 @@ QtObject {
   readonly property string fontFamily: "Inter"
   // monospaceFont needs to be exposed to the context from the C++ side.
   readonly property string monospaceFontFamily: monospaceFont.family
+
+  // Easing curves
+
+  readonly property var standardCurve: [0.4, 0.0, 0.2, 1.0, 1.0, 1.0]
 
   // Colors
 

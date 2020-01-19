@@ -2,4 +2,5 @@ module ChaosKit
 singleton Theme 1.0 Theme.qml
 Fab 1.0 Fab.qml
 IconButton 1.0 IconButton.qml
+Separator 1.0 Separator.qml
 Snackbar 1.0 Snackbar.qml

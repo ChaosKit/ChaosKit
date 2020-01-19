@@ -3,7 +3,7 @@ import QtQuick.Controls 2.12
 
 RoundButton {
   property string iconName
-  property int size: Theme.units(4)
+  property int size: Theme.iconSize
   property int innerOffset: Theme.units(1)
 
   icon.source: `qrc:/icons/${iconName}.svg`
