@@ -14,17 +14,8 @@ ApplicationWindow {
     snackbar.open();
   }
 
-  FileDialog {
-    id: exportFileDialog
-    acceptLabel: 'Export'
-    defaultSuffix:
-      selectedNameFilter.extensions[0] === '*' ?
-      "png" :
-      selectedNameFilter.extensions[0]
-    fileMode: FileDialog.SaveFile
-    nameFilters: exportFormats
-    selectedNameFilter.index: defaultExportFormat
-
+  ExportImageDialog {
+    id: exportImageDialog
     onAccepted: {
       const fileName = Utilities.urlToLocalPath(file);
       systemPreview.grabToImage(result => {
@@ -41,7 +32,7 @@ ApplicationWindow {
 
   MainMenu {
     onExportImage: {
-      exportFileDialog.open()
+      exportImageDialog.open()
     }
   }
 
