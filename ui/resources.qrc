@@ -2,9 +2,15 @@
 <RCC version="1.0">
     <qresource>
         <file>ChaosKit/ApplicationWindow.qml</file>
+        <file>ChaosKit/Button.qml</file>
         <file>ChaosKit/Fab.qml</file>
         <file>ChaosKit/IconButton.qml</file>
+        <file>ChaosKit/Label.qml</file>
+        <file>ChaosKit/Popup.qml</file>
         <file>ChaosKit/qmldir</file>
+        <file>ChaosKit/RoundButton.qml</file>
+        <file>ChaosKit/Snackbar.qml</file>
+        <file>ChaosKit/TextArea.qml</file>
         <file>ChaosKit/Theme.qml</file>
         <file>ChaosKit/ToolTip.qml</file>
         <file>forms/AstInspector.qml</file>
