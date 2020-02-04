@@ -18,7 +18,7 @@ T.TabButton {
 
   font.pointSize: Theme.buttonFontSize
   font.letterSpacing: Theme.letterSpacing(Theme.buttonFontSize)
-  font.weight: Font.DemiBold
+  font.weight: Font.Medium
 
   icon.width: Theme.iconSize
   icon.height: Theme.iconSize

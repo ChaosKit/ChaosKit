@@ -47,6 +47,10 @@ ApplicationWindow {
       x: documentEditor.opened ? -documentEditor.width * 0.33 : 0
     }
 
+    gamma: documentModel.documentProxy.gamma
+    exposure: documentModel.documentProxy.exposure
+    vibrancy: documentModel.documentProxy.vibrancy
+
     Component.onCompleted: {
       running = true;
     }

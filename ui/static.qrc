@@ -15,7 +15,9 @@
         <file>icons/low-vision.svg</file>
         <file>icons/plus.svg</file>
         <file>icons/random.svg</file><!-- pro regular 5.12 -->
+        <file>icons/solar-system.svg</file><!-- pro regular 5.12 -->
         <file>icons/times.svg</file>
         <file>icons/trash-alt.svg</file>
+        <file>icons/undo.svg</file><!-- free solid 5.12 -->
     </qresource>
 </RCC>

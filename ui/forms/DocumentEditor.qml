@@ -15,8 +15,18 @@ RowLayout {
   Rectangle {
     Layout.fillHeight: true
     Layout.preferredWidth: 250
-    color: "#121212"
+    color: Theme.backgroundColor
     visible: tabs.currentIndex >= 0
+
+    StackLayout {
+      anchors.fill: parent
+      currentIndex: tabs.currentIndex
+
+      Rectangle {
+        color: 'red'
+      }
+      ImageEditor {}
+    }
   }
   Separator {
     direction: Separator.Direction.Vertical

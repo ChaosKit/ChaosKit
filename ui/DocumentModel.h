@@ -2,6 +2,7 @@
 #define CHAOSKIT_UI_DOCUMENTMODEL_H
 
 #include <QAbstractItemModel>
+#include "DocumentProxy.h"
 #include "ModelEntry.h"
 #include "RandomizationSettings.h"
 #include "core/structures/Blend.h"
@@ -33,6 +34,8 @@ class DocumentModel : public QAbstractItemModel {
   Q_PROPERTY(QString debugSource READ debugSource NOTIFY structureChanged)
   Q_PROPERTY(QModelIndex documentIndex READ documentIndex NOTIFY systemReset)
   Q_PROPERTY(QModelIndex systemIndex READ systemIndex NOTIFY systemReset)
+  Q_PROPERTY(
+      DocumentProxy* documentProxy READ documentProxy NOTIFY documentReset)
 
   using Store =
       state::HierarchicalStore<core::Blend, core::Document, core::FinalBlend,
@@ -41,14 +44,22 @@ class DocumentModel : public QAbstractItemModel {
 
  public:
   enum Roles {
-    ParamsRole = Qt::UserRole + 1,
+    // Common roles
+    TypeRole = Qt::UserRole + 1,
+    ModelIndexRole,
+    // Formula-specific roles
+    ParamsRole,
+    // Blend-specific roles
+    EnabledRole,
     PreTransformRole,
     PostTransformRole,
-    WeightRole,
-    TypeRole,
-    EnabledRole,
+    // Related to both formulas and blends
     SingleFormulaIndexRole,
-    ModelIndexRole,
+    WeightRole,
+    // Document-specific roles
+    ExposureRole,
+    GammaRole,
+    VibrancyRole,
   };
 
   explicit DocumentModel(QObject* parent = nullptr);
@@ -108,6 +119,7 @@ class DocumentModel : public QAbstractItemModel {
   [[nodiscard]] const core::System* system() const;
 
   [[nodiscard]] Q_INVOKABLE ModelEntry* entryAtIndex(const QModelIndex& index);
+  [[nodiscard]] DocumentProxy* documentProxy();
 
   [[nodiscard]] QString debugSource() const;
 
@@ -119,8 +131,11 @@ class DocumentModel : public QAbstractItemModel {
  signals:
   void structureChanged();
   void systemReset();
+  void documentReset();
 
  private:
+  DocumentProxy* documentProxy_;
+
   [[nodiscard]] state::Id documentId() const;
   [[nodiscard]] state::Id systemId() const;
 

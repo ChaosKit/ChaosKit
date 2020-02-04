@@ -4,11 +4,12 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import ChaosKit 1.0
 
-Item {
+Rectangle {
   id: root
 
   property int currentIndex: -1
 
+  color: Theme.backgroundColor
   implicitHeight: layout.implicitHeight
   implicitWidth: layout.implicitWidth
 
@@ -19,6 +20,10 @@ Item {
 
     ListModel {
       id: tabs
+      ListElement {
+        icon: 'solar-system'
+        text: 'System'
+      }
       ListElement {
         icon: 'image'
         text: 'Image'
@@ -61,7 +66,11 @@ Item {
     y: 0
 
     Component.onCompleted: {
-      const item = repeater.itemAt(0);
+      const dimensionIndex = Math.max(root.currentIndex, 0);
+      const item = repeater.itemAt(dimensionIndex);
+      if (root.currentIndex >= 0) {
+        indicator.y = item.y;
+      }
       indicator.height = item.implicitHeight;
     }
 

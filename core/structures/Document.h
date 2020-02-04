@@ -9,6 +9,10 @@ namespace chaoskit::core {
 
 struct Document {
   System* system;
+
+  float gamma = 2.2f;
+  float exposure = 0.0f;
+  float vibrancy = 0.0f;
 };
 
 }  // namespace chaoskit::core

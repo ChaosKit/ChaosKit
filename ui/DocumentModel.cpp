@@ -1,5 +1,6 @@
 #include "DocumentModel.h"
 #include <QDebug>
+#include <QLoggingCategory>
 #include <QRandomGenerator>
 #include <QtGui/QTransform>
 #include <sstream>
@@ -9,12 +10,22 @@
 
 using chaoskit::state::Id;
 
+QDebug operator<<(QDebug debug, Id id) {
+  QDebugStateSaver saver(debug);
+  debug.nospace().noquote() << hex << "(" << id.type << ":" << id.id << ")";
+  return debug;
+}
+
 namespace chaoskit::ui {
 
 namespace {
+
+Q_LOGGING_CATEGORY(logUpdate, "DocumentModel.update");
+
 quintptr fromId(Id id) { return static_cast<uint64_t>(id); }
 
 Id toId(quintptr ptr) { return Id(static_cast<uint64_t>(ptr)); }
+Id toId(const QModelIndex& index) { return toId(index.internalId()); }
 
 std::vector<float> generateFormulaParams(library::FormulaType type) {
   std::vector<float> params(library::paramCount(type));
@@ -63,7 +74,8 @@ core::Transform fromQtTransform(const QTransform& transform) {
 
 }  // namespace
 
-DocumentModel::DocumentModel(QObject* parent) : QAbstractItemModel(parent) {
+DocumentModel::DocumentModel(QObject* parent)
+    : QAbstractItemModel(parent), documentProxy_(new DocumentProxy(this)) {
   fixInvariants();
 
   connect(this, &QAbstractItemModel::dataChanged, this,
@@ -132,6 +144,8 @@ const core::System* DocumentModel::system() const {
 ModelEntry* DocumentModel::entryAtIndex(const QModelIndex& index) {
   return new ModelEntry(this, index);
 }
+
+DocumentProxy* DocumentModel::documentProxy() { return documentProxy_; }
 
 QString DocumentModel::debugSource() const {
   ast::System ast = core::toSource(*system());
@@ -335,14 +349,22 @@ void DocumentModel::absorbBlend(const QModelIndex& source,
 
 QHash<int, QByteArray> DocumentModel::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+  // Common roles
+  names[TypeRole] = "type";
+  names[ModelIndexRole] = "modelIndex";
+  // Formula-specific roles
   names[ParamsRole] = "params";
+  // Blend-specific roles
+  names[EnabledRole] = "enabled";
   names[PreTransformRole] = "pre";
   names[PostTransformRole] = "post";
-  names[WeightRole] = "weight";
-  names[TypeRole] = "type";
-  names[EnabledRole] = "enabled";
+  // Related to both formulas and blends
   names[SingleFormulaIndexRole] = "singleFormulaIndex";
-  names[ModelIndexRole] = "modelIndex";
+  names[WeightRole] = "weight";
+  // Document-specific roles
+  names[ExposureRole] = "exposure";
+  names[GammaRole] = "gamma";
+  names[VibrancyRole] = "vibrancy";
   return names;
 }
 
@@ -481,6 +503,12 @@ QVariant documentData(const core::Document* document, int role) {
       return QStringLiteral("Document");
     case DocumentModel::TypeRole:
       return DocumentEntryType::Document;
+    case DocumentModel::GammaRole:
+      return document->gamma;
+    case DocumentModel::ExposureRole:
+      return document->exposure;
+    case DocumentModel::VibrancyRole:
+      return document->vibrancy;
     default:
       return QVariant();
   }
@@ -608,6 +636,24 @@ QVector<int> setFormulaData(core::Formula* formula, const QVariant& value,
       return {};
   }
 }
+QVector<int> setDocumentData(core::Document* document, const QVariant& value,
+                             int role) {
+  if (!document) return {};
+
+  switch (role) {
+    case DocumentModel::GammaRole:
+      document->gamma = value.toFloat();
+      return {role};
+    case DocumentModel::ExposureRole:
+      document->exposure = value.toFloat();
+      return {role};
+    case DocumentModel::VibrancyRole:
+      document->vibrancy = value.toFloat();
+      return {role};
+    default:
+      return {};
+  }
+}
 
 }  // namespace
 
@@ -678,6 +724,27 @@ bool DocumentModel::setData(const QModelIndex& index, const QVariant& value,
         id, [&value, role](core::Formula* formula) {
           return setFormulaData(formula, value, role);
         });
+  } else if (Store::matchesType<core::Document>(id)) {
+    updatedRoles = store_.update<core::Document>(
+        id, [&value, role](core::Document* document) {
+          return setDocumentData(document, value, role);
+        });
+  }
+
+  // Logging setup
+  static auto allRoleNames = roleNames();
+  const auto& update = logUpdate();
+  if (updatedRoles.isEmpty()) {
+    qCWarning(update) << "failure" << toId(index)
+                      << QLatin1String(allRoleNames.value(role)) << value;
+  } else {
+    if (update.isDebugEnabled()) {
+      QVector<QLatin1String> roles;
+      for (int updatedRole : updatedRoles) {
+        roles.append(QLatin1String(allRoleNames.value(updatedRole)));
+      }
+      qDebug(update) << "success" << toId(index) << roles << value;
+    }
   }
 
   if (!updatedRoles.isEmpty()) {
@@ -815,7 +882,6 @@ void DocumentModel::handleRowInsertion(const QModelIndex& parent, int first,
     maybeUpdateBlendDisplayName(parent);
   }
 }
-
 void DocumentModel::handleRowRemoval(const QModelIndex& parent, int first,
                                      int last) {
   if (parent.isValid() && parent != documentIndex()) {

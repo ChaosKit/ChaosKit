@@ -10,6 +10,7 @@
 #include <QSurfaceFormat>
 #include <QtGui/QTransform>
 #include "DocumentModel.h"
+#include "DocumentProxy.h"
 #include "EngineManager.h"
 #include "FormulaPreviewProvider.h"
 #include "HistogramBuffer.h"
@@ -25,6 +26,7 @@ using chaoskit::core::Point;
 using chaoskit::library::FormulaType;
 using chaoskit::ui::DocumentEntryType;
 using chaoskit::ui::DocumentModel;
+using chaoskit::ui::DocumentProxy;
 using chaoskit::ui::EngineManager;
 using chaoskit::ui::FormulaPreviewProvider;
 using chaoskit::ui::ModelEntry;
@@ -135,6 +137,7 @@ int main(int argc, char* argv[]) {
 
   QObject::connect(engineManager, &EngineManager::engineAboutToBeCreated, [] {
     qmlRegisterType<DocumentModel>();
+    qmlRegisterType<DocumentProxy>();
     qmlRegisterUncreatableType<DocumentEntryType>(
         "ChaosKit", 1, 0, "DocumentEntryType",
         QStringLiteral("Not creatable because it's an enum"));
