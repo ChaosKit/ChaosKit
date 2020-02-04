@@ -32,6 +32,12 @@ QtObject {
 
   readonly property var standardCurve: [0.4, 0.0, 0.2, 1.0, 1.0, 1.0]
 
+  // Icons
+
+  function iconUrl(name) {
+    return `qrc:/icons/${name}.svg`
+  }
+
   // Colors
 
   function alpha(color, alpha) {

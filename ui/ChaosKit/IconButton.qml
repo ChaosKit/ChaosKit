@@ -6,7 +6,7 @@ RoundButton {
   property int size: Theme.iconSize
   property int innerOffset: Theme.units(1)
 
-  icon.source: `qrc:/icons/${iconName}.svg`
+  icon.source: Theme.iconUrl(iconName)
   icon.width: size
   icon.height: size
   bottomInset: 0
