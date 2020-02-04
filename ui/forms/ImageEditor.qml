@@ -9,7 +9,8 @@ GridLayout {
   columns: 3
 
   Label {
-    Layout.columnSpan: 3
+    Layout.columnSpan: 2
+    Layout.fillWidth: true
 
     color: Theme.onSurfaceMedium
     font.pointSize: 14
@@ -17,6 +18,17 @@ GridLayout {
     font.weight: Font.DemiBold
     padding: Theme.units(2)
     text: "Tone Mapping"
+  }
+  IconButton {
+    Layout.rightMargin: Theme.units(2)
+    iconName: 'undo'
+    size: 10
+
+    onClicked: {
+      gammaSlider.value = 2.2;
+      exposureSlider.value = 0.0;
+      vibrancySlider.value = 0.0;
+    }
   }
 
   // Gamma
