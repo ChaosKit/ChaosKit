@@ -175,14 +175,16 @@ using testing::ContainerEq;
 using testing::Eq;
 using testing::Not;
 
-TEST(AstTest, N) {
+class AstTest : public ::testing::Test {};
+
+TEST_F(AstTest, N) {
   Node result = helpers::n(2.f);
   Node expected = 2.f;
 
   ASSERT_THAT(result, EqualsTree(expected));
 }
 
-TEST(AstTest, Input) {
+TEST_F(AstTest, Input) {
   helpers::InputHelper input;
 
   Node result = input.x();
@@ -191,7 +193,7 @@ TEST(AstTest, Input) {
   ASSERT_THAT(result, EqualsTree(expected));
 }
 
-TEST(AstTest, InputXIsNotY) {
+TEST_F(AstTest, InputXIsNotY) {
   helpers::InputHelper input;
 
   Node x = input.x();
@@ -200,7 +202,7 @@ TEST(AstTest, InputXIsNotY) {
   ASSERT_THAT(x, Not(EqualsTree(y)));
 }
 
-TEST(AstTest, Parameter) {
+TEST_F(AstTest, Parameter) {
   helpers::ParameterHelper parameter;
 
   Node result = parameter[42];
@@ -209,7 +211,7 @@ TEST(AstTest, Parameter) {
   ASSERT_THAT(result, EqualsTree(expected));
 }
 
-TEST(AstTest, ParameterIndicesMatter) {
+TEST_F(AstTest, ParameterIndicesMatter) {
   helpers::ParameterHelper parameter;
 
   Node one = parameter[1];
@@ -218,7 +220,7 @@ TEST(AstTest, ParameterIndicesMatter) {
   ASSERT_THAT(one, Not(EqualsTree(two)));
 }
 
-TEST(AstTest, AllUnaryFunctionTypesHaveWorkingHelpers) {
+TEST_F(AstTest, AllUnaryFunctionTypesHaveWorkingHelpers) {
   std::unordered_map<UnaryFunction_Type::_enumerated,
                      std::function<UnaryFunction(const Expression&)>>
       helper_map{{UnaryFunction_Type::SIN, helpers::sin},
@@ -258,7 +260,7 @@ TEST(AstTest, AllUnaryFunctionTypesHaveWorkingHelpers) {
   }
 }
 
-TEST(AstTest, AllBinaryFunctionTypesHaveWorkingHelpers) {
+TEST_F(AstTest, AllBinaryFunctionTypesHaveWorkingHelpers) {
   std::unordered_map<
       BinaryFunction_Type::_enumerated,
       std::function<BinaryFunction(const Expression&, const Expression&)>>
@@ -301,7 +303,7 @@ TEST(AstTest, AllBinaryFunctionTypesHaveWorkingHelpers) {
   }
 }
 
-TEST(AstTest, UnaryMinusOverload) {
+TEST_F(AstTest, UnaryMinusOverload) {
   using namespace helpers;
 
   Node actual = -helpers::n(2.f);
@@ -310,7 +312,7 @@ TEST(AstTest, UnaryMinusOverload) {
   ASSERT_THAT(actual, EqualsTree(expected));
 }
 
-TEST(AstTest, BinaryMinusOverload) {
+TEST_F(AstTest, BinaryMinusOverload) {
   using namespace helpers;
 
   Node actual = n(2.f) - 3.f;
@@ -319,7 +321,7 @@ TEST(AstTest, BinaryMinusOverload) {
   ASSERT_THAT(actual, EqualsTree(expected));
 }
 
-TEST(AstTest, MakeSystemWithFormula) {
+TEST_F(AstTest, MakeSystemWithFormula) {
   using namespace helpers;
 
   Formula formula = Formula{1.f, 2.f};
