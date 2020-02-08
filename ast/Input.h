@@ -12,9 +12,9 @@ class Input {
  public:
   typedef Input_Type Type;
 
-  Input(Type type) : type_(type) {}
+  explicit Input(Type type) : type_(type) {}
 
-  Type type() const { return type_; }
+  [[nodiscard]] Type type() const { return type_; }
 
   bool operator==(const Input& other) const { return type_ == other.type_; }
 

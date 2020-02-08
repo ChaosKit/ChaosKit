@@ -5,8 +5,7 @@
 #include "Input.h"
 #include "Parameter.h"
 
-namespace chaoskit {
-namespace ast {
+namespace chaoskit::ast {
 
 class UnaryFunction;
 class BinaryFunction;
@@ -16,8 +15,7 @@ using Expression =
                           mapbox::util::recursive_wrapper<UnaryFunction>,
                           mapbox::util::recursive_wrapper<BinaryFunction>>;
 
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast
 
 #include "BinaryFunction.h"
 #include "UnaryFunction.h"

@@ -9,13 +9,15 @@ namespace chaoskit::ast {
 
 class System {
  public:
-  System(std::vector<LimitedBlend> blends = {})
+  explicit System(std::vector<LimitedBlend> blends = {})
       : blends_(std::move(blends)), final_blend_() {}
   System(std::vector<LimitedBlend> blends, Blend final_blend)
       : blends_(std::move(blends)), final_blend_(std::move(final_blend)) {}
 
-  const std::vector<LimitedBlend> &blends() const { return blends_; }
-  const Blend &final_blend() const { return final_blend_; }
+  [[nodiscard]] const std::vector<LimitedBlend> &blends() const {
+    return blends_;
+  }
+  [[nodiscard]] const Blend &final_blend() const { return final_blend_; }
 
   bool operator==(const System &other) const {
     return blends_ == other.blends_ && final_blend_ == other.final_blend_;

@@ -8,9 +8,9 @@ namespace chaoskit::ast {
 
 class Parameter {
  public:
-  Parameter(size_t index) : index_(index) {}
+  explicit Parameter(size_t index) : index_(index) {}
 
-  size_t index() const { return index_; }
+  [[nodiscard]] size_t index() const { return index_; }
 
   bool operator==(const Parameter& other) const {
     return index_ == other.index_;

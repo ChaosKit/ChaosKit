@@ -11,8 +11,8 @@ class LimitedBlend {
   LimitedBlend(Blend blend, float limit)
       : blend_(std::move(blend)), limit_(limit) {}
 
-  const Blend &blend() const { return blend_; }
-  float limit() const { return limit_; }
+  [[nodiscard]] const Blend &blend() const { return blend_; }
+  [[nodiscard]] float limit() const { return limit_; }
 
   bool operator==(const LimitedBlend &other) const {
     return blend_ == other.blend_ && limit_ == other.limit_;

@@ -3,6 +3,7 @@
 
 #include <enum.h>
 #include <ostream>
+#include <utility>
 #include "Expression.h"
 
 namespace chaoskit::ast {
@@ -15,12 +16,12 @@ class BinaryFunction {
  public:
   typedef BinaryFunction_Type Type;
 
-  BinaryFunction(Type type, const Expression& first, const Expression& second)
-      : type_(type), first_(first), second_(second) {}
+  BinaryFunction(Type type, Expression first, Expression second)
+      : type_(type), first_(std::move(first)), second_(std::move(second)) {}
 
-  Type type() const { return type_; }
-  const Expression& first() const { return first_; }
-  const Expression& second() const { return second_; }
+  [[nodiscard]] Type type() const { return type_; }
+  [[nodiscard]] const Expression& first() const { return first_; }
+  [[nodiscard]] const Expression& second() const { return second_; }
 
   bool operator==(const BinaryFunction& other) const {
     return type_ == other.type_ && first_ == other.first_ &&

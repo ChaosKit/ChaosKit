@@ -9,9 +9,7 @@
 #include "System.h"
 #include "UnaryFunction.h"
 
-namespace chaoskit {
-namespace ast {
-namespace helpers {
+namespace chaoskit::ast::helpers {
 
 inline Expression n(float value) { return Expression(value); }
 
@@ -146,8 +144,8 @@ inline BinaryFunction operator%(const Expression& first,
 }
 
 struct InputHelper {
-  Input x() const { return Input(Input_Type::X); }
-  Input y() const { return Input(Input_Type::Y); }
+  [[nodiscard]] Input x() const { return Input(Input_Type::X); }
+  [[nodiscard]] Input y() const { return Input(Input_Type::Y); }
 };
 
 struct ParameterHelper {
@@ -163,8 +161,6 @@ struct Helper {
   ParameterHelper params;
 };
 
-}  // namespace helpers
-}  // namespace ast
-}  // namespace chaoskit
+}  // namespace chaoskit::ast::helpers
 
 #endif  // CHAOSKIT_AST_HELPERS_H

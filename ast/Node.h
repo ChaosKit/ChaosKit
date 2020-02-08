@@ -31,6 +31,9 @@ using NodeAlias =
 
 struct Node : public NodeAlias {
   using NodeAlias::NodeAlias;
+  // This intentionally allows to implicitly convert from an Expression to a
+  // Node for convenience.
+  // NOLINTNEXTLINE(hicpp-explicit-conversions, google-explicit-constructor)
   Node(const Expression& expression);
 };
 

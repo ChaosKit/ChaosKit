@@ -3,6 +3,7 @@
 
 #include <enum.h>
 #include <ostream>
+#include <utility>
 #include "Expression.h"
 
 namespace chaoskit::ast {
@@ -14,11 +15,11 @@ class UnaryFunction {
  public:
   typedef UnaryFunction_Type Type;
 
-  UnaryFunction(Type type, const Expression& argument)
-      : type_(type), argument_(argument) {}
+  UnaryFunction(Type type, Expression argument)
+      : type_(type), argument_(std::move(argument)) {}
 
-  Type type() const { return type_; }
-  const Expression& argument() const { return argument_; }
+  [[nodiscard]] Type type() const { return type_; }
+  [[nodiscard]] const Expression& argument() const { return argument_; }
 
   bool operator==(const UnaryFunction& other) const {
     return type_ == other.type_ && argument_ == other.argument_;

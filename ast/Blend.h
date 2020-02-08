@@ -10,15 +10,17 @@ namespace chaoskit::ast {
 class Blend {
  public:
   Blend() : formulas_(), pre_(), post_() {}
-  Blend(std::vector<WeightedFormula> formulas)
+  explicit Blend(std::vector<WeightedFormula> formulas)
       : formulas_(std::move(formulas)), pre_(), post_() {}
   Blend(std::vector<WeightedFormula> formulas, const Transform &pre,
         const Transform &post)
       : formulas_(std::move(formulas)), pre_(pre), post_(post) {}
 
-  const std::vector<WeightedFormula> &formulas() const { return formulas_; }
-  const Transform &pre() const { return pre_; }
-  const Transform &post() const { return post_; }
+  [[nodiscard]] const std::vector<WeightedFormula> &formulas() const {
+    return formulas_;
+  }
+  [[nodiscard]] const Transform &pre() const { return pre_; }
+  [[nodiscard]] const Transform &post() const { return post_; }
 
   bool operator==(const Blend &other) const {
     return formulas_ == other.formulas_ && pre_ == other.pre_ &&
