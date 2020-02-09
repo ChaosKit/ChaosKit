@@ -202,6 +202,25 @@ TEST_F(AstTest, InputXIsNotY) {
   ASSERT_THAT(x, Not(EqualsTree(y)));
 }
 
+TEST_F(AstTest, Output) {
+  helpers::OutputHelper output;
+
+  Node result = output.y();
+  Node expected = Output(Output_Type::Y);
+
+  ASSERT_THAT(result, EqualsTree(expected));
+}
+
+TEST_F(AstTest, OutputIsNotInput) {
+  helpers::OutputHelper output;
+  helpers::InputHelper input;
+
+  Node outputX = output.x();
+  Node inputX = input.x();
+
+  ASSERT_THAT(outputX, Not(EqualsTree(inputX)));
+}
+
 TEST_F(AstTest, Parameter) {
   helpers::ParameterHelper parameter;
 

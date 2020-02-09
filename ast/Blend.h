@@ -40,7 +40,7 @@ class Blend {
  private:
   std::vector<WeightedFormula> formulas_;
   Transform pre_, post_;
-  Expression coloringMethod_ = 0.5f;
+  Expression coloringMethod_ = Input(Input_Type::COLOR);
 };
 
 std::ostream &operator<<(std::ostream &stream, const Blend &blend);

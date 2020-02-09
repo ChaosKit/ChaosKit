@@ -5,6 +5,7 @@
 #include "BinaryFunction.h"
 #include "Expression.h"
 #include "Input.h"
+#include "Output.h"
 #include "Parameter.h"
 #include "Transform.h"
 #include "UnaryFunction.h"
@@ -19,7 +20,7 @@ class System;
 
 namespace {
 using NodeAlias =
-    mapbox::util::variant<float, Input, Parameter, Transform,
+    mapbox::util::variant<float, Input, Output, Parameter, Transform,
                           mapbox::util::recursive_wrapper<UnaryFunction>,
                           mapbox::util::recursive_wrapper<BinaryFunction>,
                           mapbox::util::recursive_wrapper<Formula>,

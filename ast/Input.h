@@ -6,7 +6,7 @@
 
 namespace chaoskit::ast {
 
-BETTER_ENUM(Input_Type, char, X, Y)
+BETTER_ENUM(Input_Type, char, X, Y, COLOR)
 
 class Input {
  public:

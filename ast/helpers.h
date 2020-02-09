@@ -146,6 +146,12 @@ inline BinaryFunction operator%(const Expression& first,
 struct InputHelper {
   [[nodiscard]] Input x() const { return Input(Input_Type::X); }
   [[nodiscard]] Input y() const { return Input(Input_Type::Y); }
+  [[nodiscard]] Input color() const { return Input(Input_Type::COLOR); }
+};
+
+struct OutputHelper {
+  [[nodiscard]] Output x() const { return Output(Output_Type::X); }
+  [[nodiscard]] Output y() const { return Output(Output_Type::Y); }
 };
 
 struct ParameterHelper {
@@ -158,6 +164,7 @@ static System make_system(const Formula& f) {
 
 struct Helper {
   InputHelper input;
+  OutputHelper output;
   ParameterHelper params;
 };
 

@@ -6,6 +6,7 @@
 #include "Formula.h"
 #include "Input.h"
 #include "LimitedBlend.h"
+#include "Output.h"
 #include "Parameter.h"
 #include "System.h"
 #include "Transform.h"

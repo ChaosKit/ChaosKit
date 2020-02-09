@@ -5,6 +5,7 @@ add_library(ast
         Formula.cpp Formula.h
         Input.cpp Input.h
         LimitedBlend.cpp LimitedBlend.h
+        Output.cpp Output.h
         Node.cpp Node.h
         Parameter.cpp Parameter.h
         System.cpp System.h
