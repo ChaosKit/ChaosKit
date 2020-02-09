@@ -9,7 +9,7 @@
 namespace chaoskit::ast {
 
 BETTER_ENUM(UnaryFunction_Type, char, SIN, COS, TAN, MINUS, SQRT, ATAN, TRUNC,
-            EXP, FLOOR, CEIL, SIGNUM, ABS, NOT)
+            EXP, FLOOR, CEIL, SIGNUM, ABS, NOT, FRAC)
 
 class UnaryFunction {
  public:

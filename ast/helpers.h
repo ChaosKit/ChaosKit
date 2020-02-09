@@ -69,6 +69,10 @@ inline UnaryFunction operator!(const Expression& expression) {
   return UnaryFunction(UnaryFunction_Type::NOT, expression);
 }
 
+inline UnaryFunction frac(const Expression& expression) {
+  return UnaryFunction(UnaryFunction_Type::FRAC, expression);
+}
+
 inline BinaryFunction pow(const Expression& first, const Expression& second) {
   return BinaryFunction(BinaryFunction_Type::POWER, first, second);
 }

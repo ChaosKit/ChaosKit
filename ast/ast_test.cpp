@@ -254,7 +254,8 @@ TEST_F(AstTest, AllUnaryFunctionTypesHaveWorkingHelpers) {
                  {UnaryFunction_Type::FLOOR, helpers::floor},
                  {UnaryFunction_Type::SIGNUM, helpers::signum},
                  {UnaryFunction_Type::ABS, helpers::abs},
-                 {UnaryFunction_Type::NOT, helpers::operator!} };
+                 {UnaryFunction_Type::NOT, helpers::operator!},
+                  {UnaryFunction_Type::FRAC, helpers::frac}, };
 
   // Fill sets with type names as strings
   std::unordered_set<std::string> all_types;
@@ -283,20 +284,22 @@ TEST_F(AstTest, AllBinaryFunctionTypesHaveWorkingHelpers) {
   std::unordered_map<
       BinaryFunction_Type::_enumerated,
       std::function<BinaryFunction(const Expression&, const Expression&)>>
-      helper_map{{BinaryFunction_Type::ADD, (helpers::operator+)},
-                 {BinaryFunction_Type::SUBTRACT, helpers::subtract},
-                 {BinaryFunction_Type::MULTIPLY, (helpers::operator*)},
-                 {BinaryFunction_Type::DIVIDE, (helpers::operator/)},
-                 {BinaryFunction_Type::POWER, helpers::pow},
-                 {BinaryFunction_Type::MODULO, (helpers::operator%)},
-                 {BinaryFunction_Type::AND, (helpers::operator&&)},
-                 {BinaryFunction_Type::OR, (helpers::operator||)},
-                 {BinaryFunction_Type::LESS_THAN, helpers::lt},
-                 {BinaryFunction_Type::GREATER_THAN, helpers::gt},
-                 {BinaryFunction_Type::EQUALS, helpers::eq},
-                 {BinaryFunction_Type::LESS_THAN_OR_EQUAL, helpers::lte},
-                 {BinaryFunction_Type::GREATER_THAN_OR_EQUAL, helpers::gte},
-                 {BinaryFunction_Type::DISTANCE, helpers::distance}};
+      helper_map{
+          {BinaryFunction_Type::ADD, (helpers::operator+)},
+          {BinaryFunction_Type::SUBTRACT, helpers::subtract},
+          {BinaryFunction_Type::MULTIPLY, (helpers::operator*)},
+          {BinaryFunction_Type::DIVIDE, (helpers::operator/)},
+          {BinaryFunction_Type::POWER, helpers::pow},
+          {BinaryFunction_Type::MODULO, (helpers::operator%)},
+          {BinaryFunction_Type::AND, (helpers::operator&&)},
+          {BinaryFunction_Type::OR, (helpers::operator||)},
+          {BinaryFunction_Type::LESS_THAN, helpers::lt},
+          {BinaryFunction_Type::GREATER_THAN, helpers::gt},
+          {BinaryFunction_Type::EQUALS, helpers::eq},
+          {BinaryFunction_Type::LESS_THAN_OR_EQUAL, helpers::lte},
+          {BinaryFunction_Type::GREATER_THAN_OR_EQUAL, helpers::gte},
+          {BinaryFunction_Type::DISTANCE, helpers::distance},
+      };
 
   // Fill sets with type names as strings
   std::unordered_set<std::string> all_types;
