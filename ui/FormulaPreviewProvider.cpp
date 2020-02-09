@@ -50,6 +50,7 @@ core::SimpleInterpreter createInterpreter(library::FormulaType type) {
   system.blends.push_back(blend.get());
 
   return core::SimpleInterpreter(core::toSource(system),
+                                 core::Particle::IMMORTAL,
                                  core::Params::fromSystem(system));
 }
 
@@ -61,15 +62,17 @@ QVector<QPointF> generateGrid(library::FormulaType type, int width,
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       // Convert the point to be in [-1; 1]
-      core::Point point((float)(x * 2) / (float)(width - 1) - 1.f,
-                        (float)(y * 2) / (float)(height - 1) - 1.f);
+      core::Particle particle{{(float)(x * 2) / (float)(width - 1) - 1.f,
+                               (float)(y * 2) / (float)(height - 1) - 1.f},
+                              0.f,
+                              core::Particle::IMMORTAL};
 
       int index = y * width + x;
       for (int i = 0; i < ITERATIONS; i++) {
-        point = interpreter(point).next_state;
+        particle = interpreter(particle).next_state;
       }
-      points[index].setX(point.x());
-      points[index].setY(point.y());
+      points[index].setX(particle.x());
+      points[index].setY(particle.y());
     }
   }
 

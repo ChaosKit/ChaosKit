@@ -1,12 +1,12 @@
 #include "SimpleInterpreter.h"
 
-#include <ast/ast.h>
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <unordered_map>
 
 #include "ThreadLocalRng.h"
+#include "ast/ast.h"
 #include "errors.h"
 
 namespace chaoskit::core {
@@ -31,7 +31,10 @@ const std::unordered_map<char, std::function<float(float)>> UNARY_FUNCTIONS{
     {UnaryFn::SIGNUM, [](float f) { return std::signbit(f) ? -1 : 1; }},
     {UnaryFn::ABS, fabsf},
     {UnaryFn::NOT, std::logical_not<float>()},
-};
+    {UnaryFn::FRAC, [](float f) {
+       float unused;
+       return modff(f, &unused);
+     }}};
 
 const std::unordered_map<char, std::function<float(float, float)>>
     BINARY_FUNCTIONS{
@@ -53,8 +56,11 @@ const std::unordered_map<char, std::function<float(float, float)>>
 
 class BlendInterpreter {
  public:
-  BlendInterpreter(Point input, const Params &params, size_t blend_index)
-      : input_(input), params_(params), index_{blend_index, 0} {}
+  BlendInterpreter(Particle input, const Params &params, size_t blend_index)
+      : input_(input),
+        output_(input),
+        params_(params),
+        index_{blend_index, 0} {}
 
   float operator()(float number) const { return number; }
 
@@ -64,6 +70,17 @@ class BlendInterpreter {
         return input_.x();
       case ast::Input_Type::Y:
         return input_.y();
+      case ast::Input_Type::COLOR:
+        return input_.color;
+    }
+  }
+
+  float operator()(const ast::Output &output) const {
+    switch (output.type()) {
+      case ast::Output_Type::X:
+        return output_.x();
+      case ast::Output_Type::Y:
+        return output_.y();
     }
   }
 
@@ -86,62 +103,84 @@ class BlendInterpreter {
     return BINARY_FUNCTIONS.at(function.type()._to_integral())(first, second);
   }
 
-  Point operator()(const ast::Transform &transform) const {
+  Particle operator()(const ast::Transform &transform) const {
+    const auto &point = output_.point;
     const auto &params = transform.params();
-    return Point(params[0] * input_.x() + params[1] * input_.y() + params[2],
-                 params[3] * input_.x() + params[4] * input_.y() + params[5]);
+    return outputWithPoint(
+        Point(params[0] * point.x() + params[1] * point.y() + params[2],
+              params[3] * point.x() + params[4] * point.y() + params[5]));
   }
 
-  Point operator()(const ast::Formula &formula) const {
-    return Point(apply_visitor(*this, formula.x()),
-                 apply_visitor(*this, formula.y()));
+  Particle operator()(const ast::Formula &formula) const {
+    return outputWithPoint(Point(apply_visitor(*this, formula.x()),
+                                 apply_visitor(*this, formula.y())));
   }
 
-  Point operator()(const ast::WeightedFormula &formula) const {
-    Point point((*this)(formula.formula()));
-
-    return Point(point.x() * formula.weight_x(),
-                 point.y() * formula.weight_y());
+  Particle operator()(const ast::WeightedFormula &formula) const {
+    Particle particle((*this)(formula.formula()));
+    particle.point = Point(particle.x() * formula.weight_x(),
+                           particle.y() * formula.weight_y());
+    return particle;
   }
 
-  Point operator()(const ast::Blend &blend) {
-    input_ = (*this)(blend.pre());
+  Particle operator()(const ast::Blend &blend) {
+    output_ = (*this)(blend.pre());
 
     if (!blend.formulas().empty()) {
       Point point;
       for (const auto &formula : blend.formulas()) {
-        point += (*this)(formula);
+        point += (*this)(formula).point;
         index_.formula++;
       }
-      input_ = point;
+      output_.point = point;
     }
 
-    input_ = (*this)(blend.post());
-    return input_;
+    output_ = (*this)(blend.post());
+    output_.color = apply_visitor(*this, blend.coloringMethod());
+    return output_;
   }
 
  private:
-  Point input_;
+  Particle input_, output_;
   SystemIndex index_;
   const Params &params_;
+
+  [[nodiscard]] Particle outputWithPoint(Point point) const {
+    return {point, output_.color, output_.ttl};
+  }
 };
 
 }  // namespace
 
-SimpleInterpreter::SimpleInterpreter(ast::System system, Params params,
+SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, Params params,
                                      std::shared_ptr<Rng> rng)
     : system_(std::move(system)),
+      ttl_(ttl),
       params_(std::move(params)),
       rng_(std::move(rng)) {
   updateMaxLimit();
 }
 
-SimpleInterpreter::SimpleInterpreter(ast::System system, Params params)
-    : SimpleInterpreter(std::move(system), std::move(params),
+SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, Params params)
+    : SimpleInterpreter(std::move(system), ttl, std::move(params),
                         std::make_shared<ThreadLocalRng>()) {}
 
 void SimpleInterpreter::updateMaxLimit() {
   max_limit_ = system_.blends().empty() ? 0 : system_.blends().back().limit();
+}
+
+Particle SimpleInterpreter::randomizeParticle() {
+  Particle particle;
+  randomizeParticle(particle);
+  particle.ttl = (ttl_ == Particle::IMMORTAL) ? Particle::IMMORTAL
+                                              : rng_->randomInt(1, ttl_);
+  return particle;
+}
+
+void SimpleInterpreter::randomizeParticle(Particle &particle) {
+  particle.point =
+      Point(rng_->randomFloat(-1.f, 1.f), rng_->randomFloat(-1.f, 1.f));
+  particle.color = rng_->randomFloat(0.f, 1.f);
 }
 
 void SimpleInterpreter::setSystem(const ast::System &system) {
@@ -153,8 +192,15 @@ void SimpleInterpreter::setParams(Params params) {
   params_ = std::move(params);
 }
 
-SimpleInterpreter::Result SimpleInterpreter::operator()(Point input) {
-  Point next_state = input;
+void SimpleInterpreter::setTtl(int ttl) { ttl_ = ttl; }
+
+SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) {
+  Particle next_state = input;
+
+  if (next_state.ttl == 0) {
+    randomizeParticle(next_state);
+    next_state.ttl = ttl_;
+  }
 
   if (!system_.blends().empty()) {
     float limit = rng_->randomFloat(0.f, max_limit_);
@@ -169,9 +215,15 @@ SimpleInterpreter::Result SimpleInterpreter::operator()(Point input) {
     next_state =
         BlendInterpreter(input, params_, blend_index)(blend_iterator->blend());
   }
-  return {next_state,
-          BlendInterpreter(next_state, params_,
-                           SystemIndex::FINAL_BLEND)(system_.final_blend())};
+
+  if (next_state.ttl != Particle::IMMORTAL) {
+    --next_state.ttl;
+  }
+
+  Particle output = BlendInterpreter(
+      next_state, params_, SystemIndex::FINAL_BLEND)(system_.final_blend());
+
+  return {next_state, output};
 }
 
 }  // namespace chaoskit::core

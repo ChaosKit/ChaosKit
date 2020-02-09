@@ -3,7 +3,7 @@
 
 #include <ast/System.h>
 #include "Params.h"
-#include "Point.h"
+#include "Particle.h"
 #include "Rng.h"
 
 namespace chaoskit::core {
@@ -11,29 +11,34 @@ namespace chaoskit::core {
 class SimpleInterpreter {
  public:
   struct Result {
-    Point next_state;
-    Point output;
+    Particle next_state;
+    Particle output;
 
     bool operator==(const Result &other) const {
       return next_state == other.next_state && output == other.output;
     }
   };
 
-  SimpleInterpreter(ast::System system, Params params = Params{});
-  SimpleInterpreter(ast::System system, Params params,
+  explicit SimpleInterpreter(ast::System system, int ttl = Particle::IMMORTAL,
+                             Params params = Params{});
+  SimpleInterpreter(ast::System system, int ttl, Params params,
                     std::shared_ptr<Rng> rng);
 
   void setSystem(const ast::System &system);
   void setParams(Params params);
-  Result operator()(Point input);
+  void setTtl(int ttl);
+  Particle randomizeParticle();
+  Result operator()(Particle input);
 
  private:
   ast::System system_;
+  int ttl_;
   Params params_;
   float max_limit_;
   std::shared_ptr<Rng> rng_;
 
   void updateMaxLimit();
+  void randomizeParticle(Particle &particle);
 };
 
 }  // namespace chaoskit::core

@@ -24,9 +24,8 @@ float distance(const Point &a, const Point &b) {
 
 void BlenderTask::setSystem(const core::System *system) {
   interpreter_ = std::make_unique<SimpleInterpreter>(
-      toSource(*system), core::Params::fromSystem(*system), rng_);
-  resetParticle();
-  start();
+      toSource(*system), ttl_, core::Params::fromSystem(*system), rng_);
+  particle_ = interpreter_->randomizeParticle();
 }
 
 void BlenderTask::start() {
@@ -54,21 +53,9 @@ void BlenderTask::calculate() {
   }
 
   try {
-    auto [next_state, output] = (*interpreter_)(particle_.point);
-    // TODO: calculate color in AST
-    float unused;
-    particle_.color =
-        modf(distance(particle_.point, next_state) * .2f, &unused);
-
-    particle_.point = next_state;
-    emit stepCompleted(output, particle_.color);
-
-    if (particle_.ttl == 0) {
-      randomizeParticle();
-      particle_.ttl = ttl_;
-    } else if (particle_.ttl != Particle::IMMORTAL) {
-      --particle_.ttl;
-    }
+    auto [next_state, output] = (*interpreter_)(particle_);
+    particle_ = next_state;
+    emit stepCompleted(output.point, output.color);
 
     QTimer::singleShot(0, this, &BlenderTask::calculate);
   } catch (MissingParameterError &e) {
@@ -79,19 +66,10 @@ void BlenderTask::calculate() {
 
 void BlenderTask::setTtl(int32_t ttl) {
   ttl_ = ttl;
-  resetParticle();
-}
-
-void BlenderTask::randomizeParticle() {
-  particle_.point =
-      Point(rng_->randomFloat(-1.f, 1.f), rng_->randomFloat(-1.f, 1.f));
-  particle_.color = rng_->randomFloat(0.f, 1.f);
-}
-
-void BlenderTask::resetParticle() {
-  randomizeParticle();
-  particle_.ttl = (ttl_ == Particle::IMMORTAL) ? Particle::IMMORTAL
-                                               : rng_->randomInt(1, ttl_);
+  if (interpreter_) {
+    interpreter_->setTtl(ttl);
+    particle_ = interpreter_->randomizeParticle();
+  }
 }
 
 }  // namespace chaoskit::ui

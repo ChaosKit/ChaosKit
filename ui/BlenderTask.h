@@ -10,8 +10,8 @@ namespace chaoskit::ui {
 class BlenderTask : public QObject {
   Q_OBJECT
  public:
-  BlenderTask(std::shared_ptr<core::Rng> rng,
-              int32_t ttl = core::Particle::IMMORTAL)
+  explicit BlenderTask(std::shared_ptr<core::Rng> rng,
+                       int32_t ttl = core::Particle::IMMORTAL)
       : interpreter_(), particle_{}, ttl_(ttl), rng_(std::move(rng)) {}
 
  public slots:
@@ -34,9 +34,6 @@ class BlenderTask : public QObject {
   int32_t ttl_;
   bool running_ = false;
   std::shared_ptr<core::Rng> rng_;
-
-  void randomizeParticle();
-  void resetParticle();
 };
 
 }  // namespace chaoskit::ui
