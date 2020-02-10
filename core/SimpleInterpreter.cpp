@@ -212,8 +212,8 @@ SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) {
     auto blend_index = static_cast<size_t>(
         std::distance(system_.blends().begin(), blend_iterator));
 
-    next_state =
-        BlendInterpreter(input, params_, blend_index)(blend_iterator->blend());
+    next_state = BlendInterpreter(next_state, params_,
+                                  blend_index)(blend_iterator->blend());
   }
 
   if (next_state.ttl != Particle::IMMORTAL) {
