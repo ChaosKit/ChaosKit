@@ -10,6 +10,7 @@
         <file>ChaosKit/qmldir</file>
         <file>ChaosKit/RoundButton.qml</file>
         <file>ChaosKit/Separator.qml</file>
+        <file>ChaosKit/Slider.qml</file>
         <file>ChaosKit/Snackbar.qml</file>
         <file>ChaosKit/TabButton.qml</file>
         <file>ChaosKit/TextArea.qml</file>
@@ -20,9 +21,9 @@
         <file>forms/EditorTabs.qml</file>
         <file>forms/ExportImageDialog.qml</file>
         <file>forms/ImageEditor.qml</file>
-        <file>forms/SystemPreview.qml</file>
         <file>forms/MainMenu.qml</file>
         <file>forms/MainWindow.qml</file>
+        <file>forms/SystemPreview.qml</file>
         <file>qtquickcontrols2.conf</file>
     </qresource>
 </RCC>
