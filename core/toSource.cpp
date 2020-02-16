@@ -8,10 +8,6 @@ namespace chaoskit::core {
 
 namespace {
 
-ast::Expression noopColoringMethod() {
-  return ast::Input(ast::Input_Type::COLOR);
-}
-
 std::vector<ast::WeightedFormula> prepareWeightedFormulas(
     const BlendBase &blend) {
   std::vector<ast::WeightedFormula> weightedFormulas;
@@ -35,9 +31,7 @@ std::vector<ast::WeightedFormula> prepareWeightedFormulas(
 
 ast::Blend toSource(const BlendBase &blend) {
   return ast::Blend{prepareWeightedFormulas(blend), toSource(blend.pre),
-                    toSource(blend.post),
-                    blend.coloringMethod ? toSource(*blend.coloringMethod)
-                                         : noopColoringMethod()};
+                    toSource(blend.post), toSource(blend.coloringMethod)};
 }
 
 ast::WeightedFormula toSource(const Formula &formula) {

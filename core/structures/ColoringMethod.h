@@ -3,13 +3,14 @@
 
 #include <vector>
 #include "ast/Expression.h"
+#include "ast/Input.h"
 #include "library/ColoringMethodType.h"
 #include "library/util.h"
 
 namespace chaoskit::core {
 
 struct ColoringMethod {
-  ast::Expression source;
+  ast::Expression source = ast::Input(ast::Input_Type::COLOR);
   library::ColoringMethodType type = library::ColoringMethodType::Noop;
   std::vector<float> params = {};
 
