@@ -125,10 +125,13 @@ class DebugStringGenerator {
     indentation();
     stream_ << "Params (" << formula.params.size() << "):" << std::endl;
     indent();
+    auto oldPrecision =
+        stream_.precision(std::numeric_limits<float>::max_digits10 + 1);
     for (auto param : formula.params) {
       indentation();
       stream_ << param << std::endl;
     }
+    stream_.precision(oldPrecision);
     outdent();
   }
 
