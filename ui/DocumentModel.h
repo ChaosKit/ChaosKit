@@ -53,6 +53,8 @@ class DocumentModel : public QAbstractItemModel {
     EnabledRole,
     PreTransformRole,
     PostTransformRole,
+    ColoringMethodTypeRole,
+    ColoringMethodParamsRole,
     // Related to both formulas and blends
     SingleFormulaIndexRole,
     WeightRole,

@@ -109,6 +109,11 @@ int main(int argc, char* argv[]) {
 
   auto* documentModel = new DocumentModel();
   QModelIndex blendIndex = documentModel->addBlend(FormulaType::DeJong);
+  documentModel->setData(blendIndex, QVariant("Distance"),
+                         DocumentModel::ColoringMethodTypeRole);
+  documentModel->setData(blendIndex,
+                         QVariant::fromValue(std::vector<float>{.2f}),
+                         DocumentModel::ColoringMethodParamsRole);
   QModelIndex formulaIndex = documentModel->formulaAt(0, blendIndex);
   documentModel->setData(formulaIndex,
                          QVariant::fromValue(std::vector<float>{

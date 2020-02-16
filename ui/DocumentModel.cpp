@@ -358,6 +358,8 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   names[EnabledRole] = "enabled";
   names[PreTransformRole] = "pre";
   names[PostTransformRole] = "post";
+  names[ColoringMethodTypeRole] = "coloringMethodType";
+  names[ColoringMethodParamsRole] = "coloringMethodParams";
   // Related to both formulas and blends
   names[SingleFormulaIndexRole] = "singleFormulaIndex";
   names[WeightRole] = "weight";
@@ -533,6 +535,10 @@ QVariant commonBlendData(const core::BlendBase* blend, int role) {
       return QVariant::fromValue(toQtTransform(blend->post));
     case DocumentModel::EnabledRole:
       return blend->enabled;
+    case DocumentModel::ColoringMethodTypeRole:
+      return QString::fromUtf8(blend->coloringMethod.type._to_string());
+    case DocumentModel::ColoringMethodParamsRole:
+      return QVariant::fromValue(blend->coloringMethod.params);
     default:
       return QVariant();
   }
@@ -593,6 +599,19 @@ QVector<int> setCommonBlendData(core::BlendBase* blend, const QVariant& value,
       return {role};
     case DocumentModel::EnabledRole:
       blend->enabled = value.toBool();
+      return {role};
+    case DocumentModel::ColoringMethodTypeRole: {
+      auto type = library::ColoringMethodType::_from_string_nothrow(
+          value.toString().toUtf8());
+      if (!type) return {};
+
+      blend->coloringMethod.setType(*type);
+      // The above resets params, we need to signal that they've changed.
+      return {DocumentModel::ColoringMethodTypeRole,
+              DocumentModel::ColoringMethodParamsRole};
+    }
+    case DocumentModel::ColoringMethodParamsRole:
+      blend->coloringMethod.params = value.value<std::vector<float>>();
       return {role};
     default:
       return {};

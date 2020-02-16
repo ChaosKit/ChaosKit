@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_CORE_COLORINGMETHOD_H
 #define CHAOSKIT_CORE_COLORINGMETHOD_H
 
+#include <algorithm>
 #include <vector>
 #include "ast/Expression.h"
 #include "ast/Input.h"
@@ -17,6 +18,10 @@ struct ColoringMethod {
   void setType(library::ColoringMethodType newType) {
     type = newType;
     source = library::source(newType);
+
+    // Fill the params with decent default values
+    params.resize(library::paramCount(newType));
+    std::fill(params.begin(), params.end(), .4f);
   }
 };
 
