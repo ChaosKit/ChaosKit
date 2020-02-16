@@ -13,6 +13,7 @@ namespace chaoskit::core {
 
 ast::Blend toSource(const BlendBase &blend);
 ast::WeightedFormula toSource(const Formula &formula);
+ast::Expression toSource(const ColoringMethod &coloringMethod);
 ast::Transform toSource(const Transform &transform);
 ast::System toSource(const System &system);
 

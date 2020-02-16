@@ -26,6 +26,12 @@ class Params {
           result[SystemIndex{blendIndex, j}] = formula->params;
         }
       }
+
+      if (blend->coloringMethod && !blend->coloringMethod->params.empty()) {
+        result[SystemIndex{blendIndex, SystemIndex::COLORING_METHOD}] =
+            blend->coloringMethod->params;
+      }
+
       blendIndex++;
     }
 
@@ -38,6 +44,13 @@ class Params {
       if (!formula->params.empty()) {
         result[SystemIndex{SystemIndex::FINAL_BLEND, j}] = formula->params;
       }
+    }
+
+    if (system.finalBlend->coloringMethod &&
+        !system.finalBlend->coloringMethod->params.empty()) {
+      result[SystemIndex{SystemIndex::FINAL_BLEND,
+                         SystemIndex::COLORING_METHOD}] =
+          system.finalBlend->coloringMethod->params;
     }
 
     return result;

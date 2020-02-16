@@ -5,11 +5,11 @@
 #include <functional>
 #include <limits>
 
-namespace chaoskit {
-namespace core {
+namespace chaoskit::core {
 
 struct SystemIndex {
   static const size_t FINAL_BLEND = std::numeric_limits<size_t>::max();
+  static const size_t COLORING_METHOD = std::numeric_limits<size_t>::max();
 
   size_t blend = 0;
   size_t formula = 0;
@@ -19,8 +19,7 @@ struct SystemIndex {
   }
 };
 
-}  // namespace core
-}  // namespace chaoskit
+}  // namespace chaoskit::core
 
 namespace std {
 template <>

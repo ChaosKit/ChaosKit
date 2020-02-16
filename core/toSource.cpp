@@ -2,25 +2,13 @@
 
 #include <cmath>
 #include <vector>
-#include "ast/helpers.h"
+#include "ast/Input.h"
 
 namespace chaoskit::core {
 
 namespace {
 
-ast::Expression makeBlendColoringMethod() {
-  using namespace ast::helpers;
-  InputHelper input;
-  OutputHelper output;
-
-  auto dx = input.x() - output.x();
-  auto dy = input.y() - output.y();
-  auto distance = sqrt(dx * dx + dy * dy);
-
-  return frac(distance * .2f);
-}
-
-ast::Expression makeFinalBlendColoringMethod() {
+ast::Expression noopColoringMethod() {
   return ast::Input(ast::Input_Type::COLOR);
 }
 
@@ -45,21 +33,20 @@ std::vector<ast::WeightedFormula> prepareWeightedFormulas(
 
 }  // namespace
 
-ast::Blend toSource(const Blend &blend) {
-  // TODO: allow for customizing the coloring method
+ast::Blend toSource(const BlendBase &blend) {
   return ast::Blend{prepareWeightedFormulas(blend), toSource(blend.pre),
-                    toSource(blend.post), makeBlendColoringMethod()};
-}
-
-ast::Blend toSource(const FinalBlend &blend) {
-  // TODO: allow for customizing the coloring method
-  return ast::Blend{prepareWeightedFormulas(blend), toSource(blend.pre),
-                    toSource(blend.post), makeFinalBlendColoringMethod()};
+                    toSource(blend.post),
+                    blend.coloringMethod ? toSource(*blend.coloringMethod)
+                                         : noopColoringMethod()};
 }
 
 ast::WeightedFormula toSource(const Formula &formula) {
   return ast::WeightedFormula{formula.source, formula.weight.x,
                               formula.weight.y};
+}
+
+ast::Expression toSource(const ColoringMethod &coloringMethod) {
+  return coloringMethod.source;
 }
 
 ast::Transform toSource(const Transform &transform) {

@@ -136,6 +136,7 @@ class BlendInterpreter {
     }
 
     output_ = (*this)(blend.post());
+    index_.formula = SystemIndex::COLORING_METHOD;
     output_.color = apply_visitor(*this, blend.coloringMethod());
     return output_;
   }
