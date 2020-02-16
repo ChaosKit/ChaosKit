@@ -1,4 +1,5 @@
 #include "DocumentModel.h"
+#include <core/util.h>
 #include <QDebug>
 #include <QLoggingCategory>
 #include <QRandomGenerator>
@@ -160,10 +161,7 @@ ModelEntry* DocumentModel::entryAtIndex(const QModelIndex& index) {
 DocumentProxy* DocumentModel::documentProxy() { return documentProxy_; }
 
 QString DocumentModel::debugSource() const {
-  ast::System ast = core::toSource(*system());
-  std::stringstream ss;
-  ss << ast;
-  return QString::fromStdString(ss.str());
+  return QString::fromStdString(core::debugString(*system()));
 }
 
 ///////////////////////////////////////////////////////////// Custom API — Slots

@@ -14,7 +14,7 @@ Popup {
 
   Label {
     id: title
-    text: "AST Inspector"
+    text: "Debug Source"
     font.letterSpacing: Theme.letterSpacing(Theme.headline6FontSize)
     font.pointSize: Theme.headline6FontSize
     font.weight: Font.Medium

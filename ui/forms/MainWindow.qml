@@ -67,7 +67,7 @@ ApplicationWindow {
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.margins: Theme.units(4)
-    text: "AST Inspector"
+    text: "Debug Source"
     outlined: true
 
     onClicked: {
