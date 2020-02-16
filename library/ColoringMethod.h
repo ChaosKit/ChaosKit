@@ -1,15 +1,15 @@
-#ifndef CHAOSKIT_LIBRARY_FORMULA_H
-#define CHAOSKIT_LIBRARY_FORMULA_H
+#ifndef CHAOSKIT_LIBRARY_COLORINGMETHOD_H
+#define CHAOSKIT_LIBRARY_COLORINGMETHOD_H
 
-#include "ast/Formula.h"
+#include "ast/Expression.h"
 #include "ast/helpers.h"
 
 namespace chaoskit::library {
 
-class Formula {
+class ColoringMethod {
  public:
-  virtual ~Formula() = default;
-  virtual ast::Formula source() = 0;
+  virtual ~ColoringMethod() = default;
+  virtual ast::Expression source() = 0;
   virtual uint32_t paramCount() { return 0; }
 
  protected:
@@ -20,4 +20,4 @@ class Formula {
 
 }  // namespace chaoskit::library
 
-#endif  // CHAOSKIT_LIBRARY_FORMULA_H
+#endif  // CHAOSKIT_LIBRARY_COLORINGMETHOD_H
