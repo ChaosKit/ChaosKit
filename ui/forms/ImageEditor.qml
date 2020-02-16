@@ -98,10 +98,10 @@ GridLayout {
     Layout.columnSpan: 3
     Layout.fillWidth: true
 
-    from: -5
+    from: -1
     leftPadding: Theme.units(2)
     rightPadding: Theme.units(2)
-    to: 5
+    to: 2
     value: 0
   }
   Binding {
