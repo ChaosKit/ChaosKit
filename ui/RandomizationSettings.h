@@ -2,6 +2,7 @@
 #define CHAOSKIT_UI_RANDOMIZATIONSETTINGS_H
 
 #include <QVector>
+#include "library/ColoringMethodType.h"
 #include "library/FormulaType.h"
 
 namespace chaoskit::ui {
@@ -14,6 +15,8 @@ class RandomizationSettings {
   int minFormulasInFinalBlend_ = 0;
   int maxFormulasInFinalBlend_ = 0;
   QVector<library::FormulaType> allowedFormulaTypes_;
+  QVector<library::ColoringMethodType> allowedColoringMethodsInBlend_;
+  QVector<library::ColoringMethodType> allowedColoringMethodsInFinalBlend_;
 
   RandomizationSettings() = default;
 
@@ -31,6 +34,14 @@ class RandomizationSettings {
   [[nodiscard]] const QVector<library::FormulaType>& allowedFormulaTypes()
       const {
     return allowedFormulaTypes_;
+  }
+  [[nodiscard]] const QVector<library::ColoringMethodType>&
+  allowedColoringMethodsInBlend() const {
+    return allowedColoringMethodsInBlend_;
+  }
+  [[nodiscard]] const QVector<library::ColoringMethodType>&
+  allowedColoringMethodsInFinalBlend() const {
+    return allowedColoringMethodsInFinalBlend_;
   }
 
   class Builder {
@@ -68,6 +79,16 @@ class RandomizationSettings {
     Builder& setAllowedFormulaTypes(
         const QVector<library::FormulaType>& types) {
       settings_->allowedFormulaTypes_ = types;
+      return *this;
+    }
+    Builder& setAllowedColoringMethodsInBlend(
+        const QVector<library::ColoringMethodType>& methods) {
+      settings_->allowedColoringMethodsInBlend_ = methods;
+      return *this;
+    }
+    Builder& setAllowedColoringMethodsInFinalBlend(
+        const QVector<library::ColoringMethodType>& methods) {
+      settings_->allowedColoringMethodsInFinalBlend_ = methods;
       return *this;
     }
 

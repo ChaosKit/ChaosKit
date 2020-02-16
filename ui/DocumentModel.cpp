@@ -36,6 +36,18 @@ std::vector<float> generateFormulaParams(library::FormulaType type) {
   return params;
 }
 
+std::vector<float> generateColoringMethodParams(
+    library::ColoringMethodType type) {
+  std::vector<float> params(library::paramCount(type));
+  auto* rng = QRandomGenerator::global();
+  for (float& param : params) {
+    param = static_cast<float>(type == +library::ColoringMethodType::Distance
+                                   ? rng->bounded(0.4)
+                                   : rng->generateDouble());
+  }
+  return params;
+}
+
 QVector<float> generateUniformWeights(int count) {
   if (count <= 0) {
     return QVector<float>();
@@ -240,6 +252,11 @@ void DocumentModel::randomizeSystem() {
                       .setMaxFormulasInBlend(2)
                       .setAllowedFormulaTypes({library::FormulaType::DeJong,
                                                library::FormulaType::Drain})
+                      .setAllowedColoringMethodsInBlend(
+                          {library::ColoringMethodType::SingleColor,
+                           library::ColoringMethodType::Distance})
+                      .setAllowedColoringMethodsInFinalBlend(
+                          {library::ColoringMethodType::Noop})
                       .build();
 
   randomizeSystem(settings);
@@ -260,9 +277,19 @@ void DocumentModel::randomizeSystem(const RandomizationSettings& settings) {
   // Generate blends
   for (int i = 0; i < numBlends; ++i) {
     float blendWeight = blendWeights[i];
+
+    int coloringMethodTypeIndex =
+        rng->bounded(settings.allowedColoringMethodsInBlend().size());
+    auto coloringMethod =
+        settings.allowedColoringMethodsInBlend()[coloringMethodTypeIndex];
+
     Id blendId = store_.associateNewChildWith<core::System, core::Blend>(
-        systemId(),
-        [blendWeight](core::Blend* blend) { blend->weight = blendWeight; });
+        systemId(), [blendWeight, coloringMethod](core::Blend* blend) {
+          blend->weight = blendWeight;
+          blend->coloringMethod.setType(coloringMethod);
+          blend->coloringMethod.params =
+              generateColoringMethodParams(coloringMethod);
+        });
     int numFormulas = rng->bounded(settings.minFormulasInBlend(),
                                    settings.maxFormulasInBlend() + 1);
     QVector<float> formulaWeights = generateUniformWeights(numFormulas);
@@ -284,6 +311,11 @@ void DocumentModel::randomizeSystem(const RandomizationSettings& settings) {
   }
 
   // Randomize final blend
+  int coloringMethodTypeIndex =
+      rng->bounded(settings.allowedColoringMethodsInFinalBlend().size());
+  auto coloringMethod =
+      settings.allowedColoringMethodsInFinalBlend()[coloringMethodTypeIndex];
+
   int numFormulas = rng->bounded(settings.minFormulasInFinalBlend(),
                                  settings.maxFormulasInFinalBlend() + 1);
   for (int j = 0; j < numFormulas; ++j) {
@@ -299,10 +331,15 @@ void DocumentModel::randomizeSystem(const RandomizationSettings& settings) {
         });
   }
 
-  // Temporary hack to make the randomized images more interesting
-  // TODO: remove this one we have bounds editing
   store_.update<core::FinalBlend>(
-      store_.lastId<core::FinalBlend>(), [](core::FinalBlend* blend) {
+      store_.lastId<core::FinalBlend>(),
+      [coloringMethod](core::FinalBlend* blend) {
+        blend->coloringMethod.setType(coloringMethod);
+        blend->coloringMethod.params =
+            generateColoringMethodParams(coloringMethod);
+
+        // Temporary hack to make the randomized images more interesting
+        // TODO: remove this one we have bounds editing
         blend->post = fromQtTransform(QTransform::fromScale(0.5, 0.5));
       });
 

@@ -15,6 +15,18 @@ RandomizationSettings RandomizationSettings::Builder::build() {
     }
   }
 
+  // Empty set means all coloring methods
+  if (settings_->allowedColoringMethodsInBlend_.isEmpty()) {
+    for (const auto& type : library::ColoringMethodType::_values()) {
+      settings_->allowedColoringMethodsInBlend_.append(type);
+    }
+  }
+  if (settings_->allowedColoringMethodsInFinalBlend_.isEmpty()) {
+    for (const auto& type : library::ColoringMethodType::_values()) {
+      settings_->allowedColoringMethodsInFinalBlend_.append(type);
+    }
+  }
+
   return *settings_;
 }
 
