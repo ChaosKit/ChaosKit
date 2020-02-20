@@ -19,5 +19,5 @@ IconButton {
   }
   flat: false
   icon.color: enabled ? Theme.onPrimaryHigh : Theme.onSurfaceDisabled
-  innerOffset: Theme.units(4)
+  innerOffset: Theme.units(3)
 }

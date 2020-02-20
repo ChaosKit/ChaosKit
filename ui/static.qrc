@@ -5,19 +5,11 @@
         <file>fonts/Inter-Medium.otf</file>
         <file>fonts/Inter-Regular.otf</file>
         <file>fonts/Inter-SemiBold.otf</file>
-        <file>icons/caret-down.svg</file>
-        <file>icons/caret-right.svg</file>
-        <file>icons/chevron-left.svg</file>
-        <file>icons/chevron-right.svg</file>
-        <file>icons/eye-slash.svg</file>
-        <file>icons/eye.svg</file>
-        <file>icons/image.svg</file><!-- free regular 5.12 -->
-        <file>icons/low-vision.svg</file>
-        <file>icons/plus.svg</file>
-        <file>icons/random.svg</file><!-- pro regular 5.12 -->
-        <file>icons/solar-system.svg</file><!-- pro regular 5.12 -->
-        <file>icons/times.svg</file>
-        <file>icons/trash-alt.svg</file>
-        <file>icons/undo.svg</file><!-- free solid 5.12 -->
+    </qresource>
+    <qresource prefix="/icons">
+        <file alias="image.svg">icons/image-x-generic.svg</file>
+        <file alias="random.svg">icons/media-playlist-shuffle.svg</file>
+        <file alias="solar-system.svg">icons/kstars_solarsystem.svg</file>
+        <file alias="undo.svg">icons/edit-undo.svg</file>
     </qresource>
 </RCC>

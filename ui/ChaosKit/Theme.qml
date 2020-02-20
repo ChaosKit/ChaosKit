@@ -9,7 +9,8 @@ QtObject {
   function units(count) {
     return unit * count;
   }
-  readonly property int iconSize: 16
+  readonly property int iconSize: 22
+  readonly property int smallIconSize: 16
 
   // Fonts
 

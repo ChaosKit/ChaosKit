@@ -22,7 +22,7 @@ GridLayout {
   IconButton {
     Layout.rightMargin: Theme.units(2)
     iconName: 'undo'
-    size: 10
+    size: Theme.smallIconSize
 
     onClicked: {
       gammaSlider.value = 2.2;
@@ -46,7 +46,7 @@ GridLayout {
   IconButton {
     Layout.rightMargin: Theme.units(2)
     iconName: 'undo'
-    size: 10
+    size: Theme.smallIconSize
 
     onClicked: {
       gammaSlider.value = 2.2;
@@ -85,7 +85,7 @@ GridLayout {
   IconButton {
     Layout.rightMargin: Theme.units(2)
     iconName: 'undo'
-    size: 10
+    size: Theme.smallIconSize
 
     onClicked: {
       exposureSlider.value = 0.0;
@@ -125,7 +125,7 @@ GridLayout {
   IconButton {
     Layout.rightMargin: Theme.units(2)
     iconName: 'undo'
-    size: 10
+    size: Theme.smallIconSize
 
     onClicked: {
       vibrancySlider.value = 0.0;
