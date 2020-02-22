@@ -9,6 +9,14 @@ struct Color {
   Color(float r, float g, float b, float a = 1.f) : r(r), g(g), b(b), a(a) {}
 
   float r, g, b, a;
+
+  Color& operator+=(const Color& other) {
+    r += other.r;
+    g += other.g;
+    b += other.b;
+    a += other.a;
+    return *this;
+  }
 };
 
 }  // namespace chaoskit::core

@@ -13,6 +13,7 @@ SimpleHistogramGenerator::SimpleHistogramGenerator(const System &system,
       buffer_(width * height),
       iteration_count_(stdx::nullopt),
       interpreter_(toSource(system), ttl, Params::fromSystem(system)),
+      color_map_(nullptr),
       rng_(std::move(rng)) {}
 
 SimpleHistogramGenerator::SimpleHistogramGenerator(const System &system,
@@ -43,8 +44,12 @@ void SimpleHistogramGenerator::setInfiniteIterationCount() {
   iteration_count_ = stdx::nullopt;
 }
 
+void SimpleHistogramGenerator::setColorMap(const ColorMap *color_map) {
+  color_map_ = color_map;
+}
+
 void SimpleHistogramGenerator::clear() {
-  std::fill(buffer_.begin(), buffer_.end(), 0.f);
+  std::fill(buffer_.begin(), buffer_.end(), Color{0.0, 0.0, 0.0, 0.0});
 }
 
 void SimpleHistogramGenerator::run() {
@@ -56,7 +61,6 @@ void SimpleHistogramGenerator::run() {
     add(output);
   }
 }
-
 void SimpleHistogramGenerator::add(const Particle &particle) {
   float x = (particle.x() + 1.f) * (width_ * .5f);
   float y = (particle.y() + 1.f) * (height_ * .5f);
@@ -68,8 +72,15 @@ void SimpleHistogramGenerator::add(const Particle &particle) {
 
   add(static_cast<uint32_t>(x), static_cast<uint32_t>(y), particle.color);
 }
+
 void SimpleHistogramGenerator::add(uint32_t x, uint32_t y, float factor) {
-  buffer_[y * width_ + x] += factor;
+  auto &color = buffer_[y * width_ + x];
+
+  if (color_map_) {
+    color += color_map_->map(factor);
+  } else {
+    color += {1, 1, 1, factor};
+  }
 }
 
 }  // namespace chaoskit::core
