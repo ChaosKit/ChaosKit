@@ -14,6 +14,8 @@ class DocumentProxy : public QObject {
       float exposure READ exposure WRITE setExposure NOTIFY exposureChanged)
   Q_PROPERTY(
       float vibrancy READ vibrancy WRITE setVibrancy NOTIFY vibrancyChanged)
+  Q_PROPERTY(
+      QString colorMap READ colorMap WRITE setColorMap NOTIFY colorMapChanged)
  public:
   explicit DocumentProxy(DocumentModel* model);
 
@@ -26,10 +28,14 @@ class DocumentProxy : public QObject {
   float vibrancy();
   void setVibrancy(float vibrancy);
 
+  QString colorMap();
+  void setColorMap(const QString& colorMap);
+
  signals:
   void gammaChanged();
   void exposureChanged();
   void vibrancyChanged();
+  void colorMapChanged();
 
  private:
   DocumentModel* model_;

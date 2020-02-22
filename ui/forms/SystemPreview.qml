@@ -9,6 +9,7 @@ SystemView {
   property bool autoRefresh: true
   property int refreshInterval: 100
 
+  colorMap: documentModel.documentProxy.colorMap
   colorMapRegistry: globalColorMapRegistry
   height: 1024
   model: documentModel

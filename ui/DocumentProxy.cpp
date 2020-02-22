@@ -29,6 +29,14 @@ void DocumentProxy::setVibrancy(float vibrancy) {
                   DocumentModel::VibrancyRole);
 }
 
+QString DocumentProxy::colorMap() {
+  return QString::fromStdString(model_->document()->colorMap);
+}
+void DocumentProxy::setColorMap(const QString& colorMap) {
+  model_->setData(model_->documentIndex(), colorMap,
+                  DocumentModel::ColorMapRole);
+}
+
 void DocumentProxy::onModelDataChanged(const QModelIndex& topLeft,
                                        const QModelIndex& bottomRight,
                                        const QVector<int>& roles) {
@@ -48,15 +56,18 @@ void DocumentProxy::onModelDataChanged(const QModelIndex& topLeft,
       case DocumentModel::VibrancyRole:
         emit vibrancyChanged();
         break;
+      case DocumentModel::ColorMapRole:
+        emit colorMapChanged();
+        break;
       default:;
     }
   }
 }
-
 void DocumentProxy::onDocumentReset() {
   emit gammaChanged();
   emit exposureChanged();
   emit vibrancyChanged();
+  emit colorMapChanged();
 }
 
 }  // namespace chaoskit::ui
