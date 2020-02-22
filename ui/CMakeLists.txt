@@ -6,13 +6,13 @@ find_package(Qt5 REQUIRED
 # Library that deals with interfacing with the core.
 add_library(ui_core
         BlenderTask.cpp BlenderTask.h
+        ColorMap.h
         GathererTask.cpp GathererTask.h
         GLToneMapper.cpp GLToneMapper.h
         HistogramBuffer.h
         HistogramGenerator.cpp HistogramGenerator.h
         Point.h
-        Particle.h
-        )
+        Particle.h)
 set_target_properties(ui_core PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_core PUBLIC
         core

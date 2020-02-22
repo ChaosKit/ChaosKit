@@ -3,8 +3,8 @@
 
 namespace chaoskit::ui {
 
+using core::Color;
 using core::HistogramBuffer;
-using core::HistogramColor;
 using core::Point;
 
 void GathererTask::addPoint(const Point &point, float color) {
@@ -15,13 +15,13 @@ void GathererTask::addPoint(const Point &point, float color) {
   // Add the color if it fits inside
   if (x >= 0 && y >= 0 && x < buffer_.width() && y < buffer_.height()) {
     auto *entry = buffer_(static_cast<size_t>(x), static_cast<size_t>(y));
-    // TODO: replace this with a palette
-    auto mappedColor = QColor::fromHsvF(color, 0.7, 0.9);
+    Color mappedColor{1, 1, 1, color};
+    if (colorMap_) {
+      mappedColor = colorMap_->map(color);
+    }
 
     mutex_.lock();
-    *entry += HistogramColor{static_cast<float>(mappedColor.redF()),
-                             static_cast<float>(mappedColor.greenF()),
-                             static_cast<float>(mappedColor.blueF()), 1.f};
+    *entry += mappedColor;
     mutex_.unlock();
   }
 }
@@ -30,6 +30,12 @@ void GathererTask::setSize(const QSize &size) {
   QMutexLocker locker(&mutex_);
   buffer_.resize(static_cast<size_t>(size.width()),
                  static_cast<size_t>(size.height()));
+}
+
+void GathererTask::setColorMap(const chaoskit::core::ColorMap *colorMap) {
+  QMutexLocker locker(&mutex_);
+  colorMap_ = colorMap;
+  buffer_.clear();
 }
 
 void GathererTask::clear() {

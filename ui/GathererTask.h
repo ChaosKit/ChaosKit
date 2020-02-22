@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSize>
 #include <QVector>
+#include "ColorMap.h"
 #include "HistogramBuffer.h"
 #include "Point.h"
 
@@ -19,11 +20,13 @@ class GathererTask : public QObject {
  public slots:
   void addPoint(const chaoskit::core::Point &point, float color);
   void setSize(const QSize &size);
+  void setColorMap(const chaoskit::core::ColorMap *colorMap);
   void clear();
 
  private:
   QMutex mutex_;
   core::HistogramBuffer buffer_;
+  const core::ColorMap *colorMap_ = nullptr;
 };
 
 }  // namespace chaoskit::ui
