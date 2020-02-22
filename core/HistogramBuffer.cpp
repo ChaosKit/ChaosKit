@@ -3,7 +3,7 @@
 namespace chaoskit::core {
 
 void HistogramBuffer::clear() {
-  std::fill(buffer_.begin(), buffer_.end(), HistogramColor::zero());
+  std::fill(buffer_.begin(), buffer_.end(), Color::zero());
 }
 
 void HistogramBuffer::resize(size_t width, size_t height) {

@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include <vector>
-#include "HistogramColor.h"
+#include "Color.h"
 
 namespace chaoskit::core {
 
@@ -13,24 +13,24 @@ class HistogramBuffer {
   HistogramBuffer(size_t width, size_t height)
       : width_(width), height_(height), buffer_(width * height) {}
 
-  HistogramColor* operator()(size_t x, size_t y) {
-    return &buffer_[index(x, y)];
-  }
+  Color* operator()(size_t x, size_t y) { return &buffer_[index(x, y)]; }
 
-  size_t width() const { return width_; }
-  size_t height() const { return height_; }
-  size_t size() const { return buffer_.size(); }
+  [[nodiscard]] size_t width() const { return width_; }
+  [[nodiscard]] size_t height() const { return height_; }
+  [[nodiscard]] size_t size() const { return buffer_.size(); }
   void clear();
   void resize(size_t width, size_t height);
 
-  HistogramColor* data() { return buffer_.data(); }
-  const HistogramColor* data() const { return buffer_.data(); }
+  Color* data() { return buffer_.data(); }
+  [[nodiscard]] const Color* data() const { return buffer_.data(); }
 
  private:
-  size_t index(size_t x, size_t y) const { return y * width_ + x; }
+  [[nodiscard]] size_t index(size_t x, size_t y) const {
+    return y * width_ + x;
+  }
 
   size_t width_, height_;
-  std::vector<HistogramColor> buffer_;
+  std::vector<Color> buffer_;
 };
 
 }  // namespace chaoskit::core

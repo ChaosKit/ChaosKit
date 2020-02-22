@@ -49,7 +49,7 @@ void SimpleHistogramGenerator::setColorMap(const ColorMap *color_map) {
 }
 
 void SimpleHistogramGenerator::clear() {
-  std::fill(buffer_.begin(), buffer_.end(), Color{0.0, 0.0, 0.0, 0.0});
+  std::fill(buffer_.begin(), buffer_.end(), Color::zero());
 }
 
 void SimpleHistogramGenerator::run() {

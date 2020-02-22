@@ -17,6 +17,8 @@ struct Color {
     a += other.a;
     return *this;
   }
+
+  static Color zero() { return Color{0.f, 0.f, 0.f, 0.f}; }
 };
 
 }  // namespace chaoskit::core
