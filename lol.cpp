@@ -1,5 +1,7 @@
 #include <QImage>
 #include <iostream>
+#include "core/Color.h"
+#include "core/ColorMapRegistry.h"
 #include "core/SimpleHistogramGenerator.h"
 #include "core/structures/Blend.h"
 #include "core/structures/Formula.h"
@@ -7,8 +9,11 @@
 #include "core/toSource.h"
 #include "core/transforms.h"
 #include "library/DeJong.h"
+#include "library/coloring_methods/Distance.h"
 
 using chaoskit::core::Blend;
+using chaoskit::core::Color;
+using chaoskit::core::ColorMapRegistry;
 using chaoskit::core::FinalBlend;
 using chaoskit::core::Formula;
 using chaoskit::core::scale;
@@ -17,6 +22,7 @@ using chaoskit::core::System;
 using chaoskit::core::toSource;
 using chaoskit::core::translate;
 using chaoskit::library::DeJong;
+using chaoskit::library::coloring_methods::Distance;
 
 #define CLAMP(X, L, U) std::min(std::max((X), (L)), (U))
 
@@ -31,25 +37,37 @@ int main(int argc, char **argv) {
 
   auto blend = std::make_unique<Blend>();
   blend->formulas.push_back(formula.get());
+  blend->coloringMethod.source = Distance().source();
+  blend->coloringMethod.params = {0.2f};
 
   auto system = std::make_unique<System>();
   system->blends.push_back(blend.get());
   system->finalBlend = finalBlend.get();
   std::cout << toSource(*system) << std::endl;
 
+  ColorMapRegistry colorMaps;
   SimpleHistogramGenerator generator(*system, 512, 512);
+  generator.setColorMap(colorMaps.get("Rainbow"));
   generator.setIterationCount(1000000);
   generator.run();
 
-  const float* buffer = generator.data();
+  const Color *buffer = generator.data();
 
-  QImage image(512, 512, QImage::Format_Grayscale8);
+  QImage image(512, 512, QImage::Format_RGB32);
   for (int y = 0; y < 512; y++) {
     for (int x = 0; x < 512; x++) {
       int index = y * 512 + x;
-      int color =
-          CLAMP(static_cast<int>(std::log10(buffer[index] + 1.f) * 64), 0, 255);
-      image.setPixelColor(x, y, QColor(color, color, color));
+      const Color &color = buffer[index];
+      double intensity = color.a * M_E;
+      double logScale = std::log10(intensity + 1) / intensity;
+      double scaledIntensity = color.a * logScale;
+      double scale =
+          logScale * std::pow(scaledIntensity, 2.2) / scaledIntensity;
+
+      image.setPixelColor(x, y,
+                          QColor::fromRgbF(CLAMP(color.r * scale, 0.0, 1.0),
+                                           CLAMP(color.g * scale, 0.0, 1.0),
+                                           CLAMP(color.b * scale, 0.0, 1.0)));
     }
   }
   image.save("lol.png");
