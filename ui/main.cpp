@@ -20,9 +20,11 @@
 #include "Point.h"
 #include "SystemView.h"
 #include "Utilities.h"
+#include "core/PaletteColorMap.h"
 #include "library/FormulaType.h"
 #include "resources.h"
 
+using chaoskit::core::Color;
 using chaoskit::core::ColorMap;
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
@@ -110,9 +112,21 @@ int main(int argc, char* argv[]) {
   qRegisterMetaType<HistogramBuffer>();
   qRegisterMetaType<Point>();
 
+  // Set up color maps
+  auto* colorMapRegistry = new ColorMapRegistry(&app);
+  colorMapRegistry->add(
+      "BGR",
+      std::make_unique<chaoskit::core::PaletteColorMap>(std::vector<Color>{
+          Color{0.f, 0.f, 1.f},
+          Color{0.f, 1.f, 0.f},
+          Color{1.f, 0.f, 0.f},
+      }));
+
   // Set up models
 
   auto* documentModel = new DocumentModel();
+  documentModel->setData(documentModel->documentIndex(), QVariant("BGR"),
+                         DocumentModel::ColorMapRole);
   QModelIndex blendIndex = documentModel->addBlend(FormulaType::DeJong);
   documentModel->setData(blendIndex, QVariant("Distance"),
                          DocumentModel::ColoringMethodTypeRole);
@@ -140,9 +154,6 @@ int main(int argc, char* argv[]) {
       QFontDatabase::addApplicationFont(it.next());
     }
   }
-
-  // Set up color maps
-  auto* colorMapRegistry = new ColorMapRegistry(&app);
 
   // Set up QML and pass data to the context
   auto* engineManager = new EngineManager(&app);
