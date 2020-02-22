@@ -11,6 +11,11 @@ class MissingParameterError : public std::out_of_range {
   MissingParameterError(const SystemIndex& elementIndex, size_t parameterIndex);
 };
 
+class InvalidColorMap : public std::out_of_range {
+ public:
+  InvalidColorMap(const std::string& name);
+};
+
 }  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_ERRORS_H

@@ -1,12 +1,17 @@
 add_subdirectory(structures)
 
 add_library(core
+        BlackWhiteColorMap.h
+        Color.h
+        ColorMap.h
+        ColorMapRegistry.cpp ColorMapRegistry.h
         errors.cpp errors.h
         HistogramBuffer.h HistogramBuffer.cpp
         HistogramColor.h
         Params.h
         Particle.h
         Point.h Point.cpp
+        RainbowColorMap.cpp RainbowColorMap.h
         Rng.h
         SimpleHistogramGenerator.h SimpleHistogramGenerator.cpp
         SimpleInterpreter.h SimpleInterpreter.cpp

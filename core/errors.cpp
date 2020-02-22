@@ -10,4 +10,7 @@ MissingParameterError::MissingParameterError(const SystemIndex& elementIndex,
                         std::to_string(elementIndex.formula) + " in blend " +
                         std::to_string(elementIndex.blend)) {}
 
+InvalidColorMap::InvalidColorMap(const std::string& name)
+    : std::out_of_range("Color map '" + name + "' does not exist") {}
+
 }  // namespace chaoskit::core
