@@ -399,6 +399,7 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   names[SingleFormulaIndexRole] = "singleFormulaIndex";
   names[WeightRole] = "weight";
   // Document-specific roles
+  names[ColorMapRole] = "colorMap";
   names[ExposureRole] = "exposure";
   names[GammaRole] = "gamma";
   names[VibrancyRole] = "vibrancy";
@@ -540,6 +541,8 @@ QVariant documentData(const core::Document* document, int role) {
       return QStringLiteral("Document");
     case DocumentModel::TypeRole:
       return DocumentEntryType::Document;
+    case DocumentModel::ColorMapRole:
+      return QString::fromStdString(document->colorMap);
     case DocumentModel::GammaRole:
       return document->gamma;
     case DocumentModel::ExposureRole:
@@ -695,6 +698,9 @@ QVector<int> setDocumentData(core::Document* document, const QVariant& value,
   if (!document) return {};
 
   switch (role) {
+    case DocumentModel::ColorMapRole:
+      document->colorMap = value.toString().toStdString();
+      return {role};
     case DocumentModel::GammaRole:
       document->gamma = value.toFloat();
       return {role};
@@ -880,7 +886,8 @@ bool DocumentModel::fixInvariants() {
 
   Id documentId;
   if (store_.count<core::Document>() < 1) {
-    documentId = store_.create<core::Document>();
+    documentId = store_.create<core::Document>(
+        [](core::Document* doc) { doc->colorMap = "Distance"; });
     performedChanges = true;
   } else {
     documentId = store_.lastId<core::Document>();

@@ -7,6 +7,7 @@ find_package(Qt5 REQUIRED
 add_library(ui_core
         BlenderTask.cpp BlenderTask.h
         ColorMap.h
+        ColorMapRegistry.cpp ColorMapRegistry.h
         GathererTask.cpp GathererTask.h
         GLToneMapper.cpp GLToneMapper.h
         HistogramBuffer.h

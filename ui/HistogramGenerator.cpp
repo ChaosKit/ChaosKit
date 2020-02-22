@@ -47,6 +47,12 @@ void HistogramGenerator::setSystem(const core::System *system) {
       blenderTask_, [this, system] { blenderTask_->setSystem(system); });
 }
 
+void HistogramGenerator::setColorMap(const chaoskit::core::ColorMap *colorMap) {
+  QMetaObject::invokeMethod(gathererTask_, [colorMap, this] {
+    gathererTask_->setColorMap(colorMap);
+  });
+}
+
 void HistogramGenerator::setSize(quint32 width, quint32 height) {
   QMetaObject::invokeMethod(
       blenderTask_, [=] { gathererTask_->setSize(QSize(width, height)); });
@@ -65,7 +71,6 @@ void HistogramGenerator::stop() {
   QMetaObject::invokeMethod(blenderTask_, &BlenderTask::stop);
   running_ = false;
 }
-
 void HistogramGenerator::clear() {
   // No MetaObject because the mutex handles synchronization.
   gathererTask_->clear();

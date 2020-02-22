@@ -9,6 +9,7 @@ SystemView {
   property bool autoRefresh: true
   property int refreshInterval: 100
 
+  colorMapRegistry: globalColorMapRegistry
   height: 1024
   model: documentModel
   scale: 1.0 / Screen.devicePixelRatio

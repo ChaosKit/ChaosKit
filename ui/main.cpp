@@ -9,6 +9,8 @@
 #include <QRegularExpression>
 #include <QSurfaceFormat>
 #include <QtGui/QTransform>
+#include "ColorMap.h"
+#include "ColorMapRegistry.h"
 #include "DocumentModel.h"
 #include "DocumentProxy.h"
 #include "EngineManager.h"
@@ -21,9 +23,11 @@
 #include "library/FormulaType.h"
 #include "resources.h"
 
+using chaoskit::core::ColorMap;
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
 using chaoskit::library::FormulaType;
+using chaoskit::ui::ColorMapRegistry;
 using chaoskit::ui::DocumentEntryType;
 using chaoskit::ui::DocumentModel;
 using chaoskit::ui::DocumentProxy;
@@ -102,6 +106,7 @@ int main(int argc, char* argv[]) {
   QSurfaceFormat::setDefaultFormat(format);
 
   // Register types
+  qRegisterMetaType<ColorMap*>();
   qRegisterMetaType<HistogramBuffer>();
   qRegisterMetaType<Point>();
 
@@ -136,11 +141,15 @@ int main(int argc, char* argv[]) {
     }
   }
 
+  // Set up color maps
+  auto* colorMapRegistry = new ColorMapRegistry(&app);
+
   // Set up QML and pass data to the context
   auto* engineManager = new EngineManager(&app);
   engineManager->setLoadUrl(resources::createUrl("forms/MainWindow.qml"));
 
   QObject::connect(engineManager, &EngineManager::engineAboutToBeCreated, [] {
+    qmlRegisterType<ColorMapRegistry>();
     qmlRegisterType<DocumentModel>();
     qmlRegisterType<DocumentProxy>();
     qmlRegisterUncreatableType<DocumentEntryType>(
@@ -153,8 +162,8 @@ int main(int argc, char* argv[]) {
         [](QQmlEngine*, QJSEngine*) -> QObject* { return new Utilities(); });
   });
 
-  auto onEngineCreated = [documentModel, selectionModel,
-                          engineManager](QQmlApplicationEngine* engine) {
+  auto onEngineCreated = [documentModel, selectionModel, engineManager,
+                          colorMapRegistry](QQmlApplicationEngine* engine) {
     // This bit prevents segfaults when calling Qt.quit(). I think it's because
     // the engineManager was being deleted in wrong order or from QML's thread.
     QObject::connect(engine, &QQmlEngine::quit, engineManager,
@@ -173,15 +182,17 @@ int main(int argc, char* argv[]) {
 
     const QFont monospaceFont =
         QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    engine->rootContext()->setContextProperties({
-        {QStringLiteral("formulaList"),
-         QVariant::fromValue(createFormulaList())},
-        {QStringLiteral("monospaceFont"), QVariant::fromValue(monospaceFont)},
-        {QStringLiteral("documentModel"), QVariant::fromValue(documentModel)},
-        {QStringLiteral("selectionModel"), QVariant::fromValue(selectionModel)},
-        {QStringLiteral("exportFormats"), QVariant::fromValue(exportFormats)},
-        {QStringLiteral("defaultExportFormat"), QVariant(defaultExportFormat)},
-    });
+    engine->rootContext()->setContextProperties(
+        {{QStringLiteral("formulaList"),
+          QVariant::fromValue(createFormulaList())},
+         {QStringLiteral("monospaceFont"), QVariant::fromValue(monospaceFont)},
+         {QStringLiteral("documentModel"), QVariant::fromValue(documentModel)},
+         {QStringLiteral("selectionModel"),
+          QVariant::fromValue(selectionModel)},
+         {QStringLiteral("exportFormats"), QVariant::fromValue(exportFormats)},
+         {QStringLiteral("defaultExportFormat"), QVariant(defaultExportFormat)},
+         {QStringLiteral("globalColorMapRegistry"),
+          QVariant::fromValue(colorMapRegistry)}});
   };
   QObject::connect(engineManager, &EngineManager::engineCreated,
                    onEngineCreated);

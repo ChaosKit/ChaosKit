@@ -22,6 +22,7 @@ class HistogramGenerator : public QObject {
 
  public slots:
   void setSystem(const chaoskit::core::System *system);
+  void setColorMap(const chaoskit::core::ColorMap *colorMap);
   void setSize(quint32 width, quint32 height);
   void setTtl(int32_t ttl);
   void start();

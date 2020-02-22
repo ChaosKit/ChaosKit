@@ -2,6 +2,7 @@
 #define CHAOSKIT_UI_SYSTEMVIEW_H
 
 #include <QQuickFramebufferObject>
+#include "ColorMapRegistry.h"
 #include "DocumentModel.h"
 #include "HistogramGenerator.h"
 
@@ -18,6 +19,10 @@ class SystemView : public QQuickFramebufferObject {
       float exposure READ exposure WRITE setExposure NOTIFY exposureChanged)
   Q_PROPERTY(
       float vibrancy READ vibrancy WRITE setVibrancy NOTIFY vibrancyChanged)
+  Q_PROPERTY(ColorMapRegistry *colorMapRegistry READ colorMapRegistry WRITE
+                 setColorMapRegistry NOTIFY colorMapRegistryChanged)
+  Q_PROPERTY(
+      QString colorMap READ colorMap WRITE setColorMap NOTIFY colorMapChanged)
  public:
   explicit SystemView(QQuickItem *parent = nullptr);
 
@@ -31,6 +36,10 @@ class SystemView : public QQuickFramebufferObject {
   float exposure() const { return exposure_; }
   float vibrancy() const { return vibrancy_; }
   bool running() const { return generator_->running(); }
+  [[nodiscard]] ColorMapRegistry *colorMapRegistry() {
+    return colorMapRegistry_;
+  }
+  [[nodiscard]] const QString &colorMap() const { return colorMap_; }
 
  public slots:
   void start();
@@ -42,6 +51,8 @@ class SystemView : public QQuickFramebufferObject {
   void setGamma(float gamma);
   void setExposure(float exposure);
   void setVibrancy(float vibrancy);
+  void setColorMapRegistry(ColorMapRegistry *colorMapRegistry);
+  void setColorMap(const QString &name);
 
  signals:
   void runningChanged();
@@ -50,6 +61,8 @@ class SystemView : public QQuickFramebufferObject {
   void gammaChanged();
   void exposureChanged();
   void vibrancyChanged();
+  void colorMapRegistryChanged();
+  void colorMapChanged();
 
  private:
   HistogramGenerator *generator_;
@@ -59,8 +72,11 @@ class SystemView : public QQuickFramebufferObject {
   float gamma_ = 2.2f;
   float exposure_ = 0.f;
   float vibrancy_ = 0.f;
+  ColorMapRegistry *colorMapRegistry_ = nullptr;
+  QString colorMap_ = "Rainbow";
 
  private slots:
+  void updateColorMap();
   void updateSystem();
   void updateBufferSize();
 };

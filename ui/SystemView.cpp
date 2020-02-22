@@ -146,6 +146,36 @@ void SystemView::setVibrancy(float vibrancy) {
   emit vibrancyChanged();
 }
 
+void SystemView::setColorMapRegistry(ColorMapRegistry *colorMapRegistry) {
+  if (colorMapRegistry_ == colorMapRegistry) {
+    return;
+  }
+
+  colorMapRegistry_ = colorMapRegistry;
+  updateColorMap();
+  update();
+  emit colorMapRegistryChanged();
+}
+
+void SystemView::setColorMap(const QString &name) {
+  if (colorMap_ == name) {
+    return;
+  }
+
+  colorMap_ = name;
+  updateColorMap();
+  update();
+  emit colorMapChanged();
+}
+
+void SystemView::updateColorMap() {
+  if (!colorMapRegistry_ || colorMap_.isEmpty()) {
+    return;
+  }
+
+  generator_->setColorMap(colorMapRegistry_->get(colorMap_));
+}
+
 void SystemView::updateBufferSize() {
   generator_->setSize(static_cast<quint32>(width()),
                       static_cast<quint32>(height()));
