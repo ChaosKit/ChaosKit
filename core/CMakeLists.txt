@@ -7,6 +7,7 @@ add_library(core
         ColorMapRegistry.cpp ColorMapRegistry.h
         errors.cpp errors.h
         HistogramBuffer.h HistogramBuffer.cpp
+        PaletteColorMap.cpp PaletteColorMap.h
         Params.h
         Particle.h
         Point.h Point.cpp
