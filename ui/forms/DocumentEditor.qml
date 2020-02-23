@@ -7,6 +7,7 @@ RowLayout {
   spacing: 0
 
   readonly property bool opened: tabs.currentIndex >= 0
+  property alias currentIndex: tabs.currentIndex
 
   Separator {
     direction: Separator.Direction.Vertical
