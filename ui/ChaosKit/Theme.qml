@@ -15,6 +15,7 @@ QtObject {
   // Fonts
 
   readonly property int headline6FontSize: 14
+  readonly property int body1FontSize: 12
   readonly property int buttonFontSize: 12
   readonly property int captionFontSize: 10
   function letterSpacing(fontSize) {

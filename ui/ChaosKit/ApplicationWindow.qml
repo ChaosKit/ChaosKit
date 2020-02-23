@@ -7,6 +7,7 @@ import ChaosKit 1.0
 T.ApplicationWindow {
     color: Theme.backgroundColor
     font.family: Theme.fontFamily
+    font.pointSize: Theme.body1FontSize
 
     overlay.modal: Rectangle {
         color: Color.transparent(window.palette.shadow, 0.5)

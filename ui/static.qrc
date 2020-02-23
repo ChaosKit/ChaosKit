@@ -7,6 +7,8 @@
         <file>fonts/Inter-SemiBold.otf</file>
     </qresource>
     <qresource prefix="/icons">
+        <file alias="arrow-down.svg">icons/go-down.svg</file>
+        <file alias="arrow-up.svg">icons/go-up.svg</file>
         <file alias="image.svg">icons/image-x-generic.svg</file>
         <file alias="random.svg">icons/media-playlist-shuffle.svg</file>
         <file alias="solar-system.svg">icons/kstars_solarsystem.svg</file>
