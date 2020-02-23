@@ -887,7 +887,7 @@ bool DocumentModel::fixInvariants() {
   Id documentId;
   if (store_.count<core::Document>() < 1) {
     documentId = store_.create<core::Document>(
-        [](core::Document* doc) { doc->colorMap = "Distance"; });
+        [](core::Document* doc) { doc->colorMap = "Rainbow"; });
     performedChanges = true;
   } else {
     documentId = store_.lastId<core::Document>();
