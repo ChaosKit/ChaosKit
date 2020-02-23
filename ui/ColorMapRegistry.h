@@ -9,13 +9,19 @@ namespace chaoskit::ui {
 
 class ColorMapRegistry : public QObject {
   Q_OBJECT
+  Q_PROPERTY(QStringList names READ names NOTIFY namesChanged)
  public:
   explicit ColorMapRegistry(QObject* parent = nullptr);
   void add(const QString& name, std::unique_ptr<core::ColorMap> colorMap);
   [[nodiscard]] const core::ColorMap* get(const QString& name) const;
+  [[nodiscard]] const QStringList& names() const { return nameCache_; }
+
+ signals:
+  void namesChanged();
 
  private:
   core::ColorMapRegistry registry_;
+  QStringList nameCache_;
 };
 
 }  // namespace chaoskit::ui

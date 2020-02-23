@@ -8,6 +8,8 @@ GridLayout {
 
   columns: 3
 
+  // Tone Mapping
+
   Label {
     Layout.columnSpan: 2
     Layout.fillWidth: true
@@ -34,12 +36,12 @@ GridLayout {
   // Gamma
 
   Label {
-    Layout.fillWidth: true
     leftPadding: Theme.units(2)
     text: "Gamma"
   }
   Label {
     Layout.alignment: Qt.AlignRight
+    Layout.fillWidth: true
     horizontalAlignment: Text.AlignRight
     text: document.gamma.toFixed(2)
   }
@@ -73,12 +75,12 @@ GridLayout {
   // Exposure
 
   Label {
-    Layout.fillWidth: true
     leftPadding: Theme.units(2)
     text: "Exposure"
   }
   Label {
     Layout.alignment: Qt.AlignRight
+    Layout.fillWidth: true
     horizontalAlignment: Text.AlignRight
     text: document.exposure.toFixed(2)
   }
@@ -113,12 +115,12 @@ GridLayout {
   // Vibrancy
 
   Label {
-    Layout.fillWidth: true
     leftPadding: Theme.units(2)
     text: "Vibrancy"
   }
   Label {
     Layout.alignment: Qt.AlignRight
+    Layout.fillWidth: true
     horizontalAlignment: Text.AlignRight
     text: document.vibrancy.toFixed(2)
   }
@@ -147,5 +149,36 @@ GridLayout {
     target: document
     property: 'vibrancy'
     value: vibrancySlider.value
+  }
+
+  // Color map
+
+  Label {
+    Layout.columnSpan: 3
+
+    color: Theme.onSurfaceMedium
+    font.pointSize: 14
+    font.letterSpacing: Theme.letterSpacing(14)
+    font.weight: Font.DemiBold
+    padding: Theme.units(2)
+    text: "Color Map"
+  }
+
+  Label {
+    leftPadding: Theme.units(2)
+    text: "Preset"
+  }
+  ComboBox {
+    Layout.columnSpan: 2
+    Layout.fillWidth: true
+    Layout.rightMargin: Theme.units(2)
+    model: globalColorMapRegistry.names
+
+    onActivated: {
+      document.colorMap = currentText;
+    }
+    Component.onCompleted: {
+      currentIndex = model.indexOf(document.colorMap);
+    }
   }
 }
