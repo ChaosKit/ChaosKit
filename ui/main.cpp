@@ -10,6 +10,7 @@
 #include <QSurfaceFormat>
 #include <QtGui/QTransform>
 #include "ColorMap.h"
+#include "ColorMapPreviewProvider.h"
 #include "ColorMapRegistry.h"
 #include "DocumentModel.h"
 #include "DocumentProxy.h"
@@ -29,6 +30,7 @@ using chaoskit::core::ColorMap;
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
 using chaoskit::library::FormulaType;
+using chaoskit::ui::ColorMapPreviewProvider;
 using chaoskit::ui::ColorMapRegistry;
 using chaoskit::ui::DocumentEntryType;
 using chaoskit::ui::DocumentModel;
@@ -178,6 +180,8 @@ int main(int argc, char* argv[]) {
     engine->addImportPath(resources::importPath());
     engine->addImageProvider(QStringLiteral("formula"),
                              new FormulaPreviewProvider);
+    engine->addImageProvider("colormap",
+                             new ColorMapPreviewProvider(colorMapRegistry));
 
     auto exportFormats = createExportFormatList();
     QRegularExpression pngRx(".*\\.png.*");

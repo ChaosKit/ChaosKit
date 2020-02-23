@@ -54,6 +54,7 @@ target_compile_definitions(ui_resources
 
 set(ChaosKit_SOURCES
         main.cpp
+        ColorMapPreviewProvider.cpp ColorMapPreviewProvider.h
         EngineManager.cpp EngineManager.h
         SystemView.h SystemView.cpp
         FormulaPreviewProvider.cpp FormulaPreviewProvider.h

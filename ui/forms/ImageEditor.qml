@@ -169,10 +169,31 @@ GridLayout {
     text: "Preset"
   }
   ComboBox {
+    id: colorMapPicker
     Layout.columnSpan: 2
     Layout.fillWidth: true
     Layout.rightMargin: Theme.units(2)
     model: globalColorMapRegistry.names
+    delegate: ItemDelegate {
+      id: itemDelegate
+      contentItem: Label {
+        font.weight: Font.DemiBold
+        text: modelData
+        style: Text.Outline
+        styleColor: Theme.onPrimaryHigh
+      }
+      background: Image {
+        width: colorMapPicker.implicitWidth
+        height: colorMapPicker.implicitHeight + Theme.units(1)
+        source: `image://colormap/${modelData}`
+
+        Rectangle {
+          anchors.fill: parent
+          color: Theme.onSurface
+          opacity: itemDelegate.hovered ? 0.12 : 0.0
+        }
+      }
+    }
 
     onActivated: {
       document.colorMap = currentText;
@@ -180,5 +201,14 @@ GridLayout {
     Component.onCompleted: {
       currentIndex = model.indexOf(document.colorMap);
     }
+  }
+
+  Image {
+    Layout.columnSpan: 3
+    Layout.fillWidth: true
+    Layout.preferredHeight: Theme.units(1)
+    Layout.leftMargin: Theme.units(2)
+    Layout.rightMargin: Theme.units(2)
+    source: `image://colormap/${document.colorMap}`
   }
 }
