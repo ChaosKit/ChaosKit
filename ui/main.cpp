@@ -156,7 +156,7 @@ int main(int argc, char* argv[]) {
   }
 
   // Set up QML and pass data to the context
-  auto* engineManager = new EngineManager(&app);
+  auto* engineManager = new EngineManager();
   engineManager->setLoadUrl(resources::createUrl("forms/MainWindow.qml"));
 
   QObject::connect(engineManager, &EngineManager::engineAboutToBeCreated, [] {
@@ -175,11 +175,6 @@ int main(int argc, char* argv[]) {
 
   auto onEngineCreated = [documentModel, selectionModel, engineManager,
                           colorMapRegistry](QQmlApplicationEngine* engine) {
-    // This bit prevents segfaults when calling Qt.quit(). I think it's because
-    // the engineManager was being deleted in wrong order or from QML's thread.
-    QObject::connect(engine, &QQmlEngine::quit, engineManager,
-                     &QObject::deleteLater);
-
     engine->addImportPath(resources::importPath());
     engine->addImageProvider(QStringLiteral("formula"),
                              new FormulaPreviewProvider);
