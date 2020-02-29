@@ -127,8 +127,10 @@ int main(int argc, char* argv[]) {
   // Set up models
 
   auto* documentModel = new DocumentModel();
-  documentModel->setData(documentModel->documentIndex(), QVariant("BGR"),
-                         DocumentModel::ColorMapRole);
+  documentModel->setItemData(documentModel->documentIndex(),
+                             {{DocumentModel::ColorMapRole, "BGR"},
+                              {DocumentModel::WidthRole, 1024},
+                              {DocumentModel::HeightRole, 1024}});
   QModelIndex blendIndex = documentModel->addBlend(FormulaType::DeJong);
   documentModel->setData(blendIndex, QVariant("Distance"),
                          DocumentModel::ColoringMethodTypeRole);

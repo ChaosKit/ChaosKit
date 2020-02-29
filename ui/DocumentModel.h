@@ -62,7 +62,9 @@ class DocumentModel : public QAbstractItemModel {
     ColorMapRole,
     ExposureRole,
     GammaRole,
+    HeightRole,
     VibrancyRole,
+    WidthRole,
   };
 
   explicit DocumentModel(QObject* parent = nullptr);

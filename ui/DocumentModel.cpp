@@ -4,7 +4,6 @@
 #include <QLoggingCategory>
 #include <QRandomGenerator>
 #include <QtGui/QTransform>
-#include <sstream>
 #include "core/toSource.h"
 #include "library/util.h"
 #include "state/Id.h"
@@ -401,8 +400,9 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   // Document-specific roles
   names[ColorMapRole] = "colorMap";
   names[ExposureRole] = "exposure";
+  names[HeightRole] = "height";
   names[GammaRole] = "gamma";
-  names[VibrancyRole] = "vibrancy";
+  names[WidthRole] = "width";
   return names;
 }
 
@@ -549,6 +549,10 @@ QVariant documentData(const core::Document* document, int role) {
       return document->exposure;
     case DocumentModel::VibrancyRole:
       return document->vibrancy;
+    case DocumentModel::HeightRole:
+      return document->height;
+    case DocumentModel::WidthRole:
+      return document->width;
     default:
       return QVariant();
   }
@@ -709,6 +713,12 @@ QVector<int> setDocumentData(core::Document* document, const QVariant& value,
       return {role};
     case DocumentModel::VibrancyRole:
       document->vibrancy = value.toFloat();
+      return {role};
+    case DocumentModel::WidthRole:
+      document->width = value.toUInt();
+      return {role};
+    case DocumentModel::HeightRole:
+      document->height = value.toUInt();
       return {role};
     default:
       return {};

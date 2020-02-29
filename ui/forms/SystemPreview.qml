@@ -11,11 +11,11 @@ SystemView {
 
   colorMap: documentModel.documentProxy.colorMap
   colorMapRegistry: globalColorMapRegistry
-  height: 1024
+  height: documentModel.documentProxy.height
   model: documentModel
   scale: 1.0 / Screen.devicePixelRatio
   ttl: 20
-  width: 1024
+  width: documentModel.documentProxy.width
 
   Timer {
     interval: parent.refreshInterval

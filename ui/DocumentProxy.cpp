@@ -37,6 +37,22 @@ void DocumentProxy::setColorMap(const QString& colorMap) {
                   DocumentModel::ColorMapRole);
 }
 
+qreal DocumentProxy::width() const {
+  return static_cast<qreal>(model_->document()->width);
+}
+void DocumentProxy::setWidth(qreal width) {
+  model_->setData(model_->documentIndex(), static_cast<uint>(width),
+                  DocumentModel::WidthRole);
+}
+
+qreal DocumentProxy::height() const {
+  return static_cast<qreal>(model_->document()->height);
+}
+void DocumentProxy::setHeight(qreal height) {
+  model_->setData(model_->documentIndex(), static_cast<uint>(height),
+                  DocumentModel::HeightRole);
+}
+
 void DocumentProxy::onModelDataChanged(const QModelIndex& topLeft,
                                        const QModelIndex& bottomRight,
                                        const QVector<int>& roles) {
@@ -59,6 +75,12 @@ void DocumentProxy::onModelDataChanged(const QModelIndex& topLeft,
       case DocumentModel::ColorMapRole:
         emit colorMapChanged();
         break;
+      case DocumentModel::HeightRole:
+        emit heightChanged();
+        break;
+      case DocumentModel::WidthRole:
+        emit widthChanged();
+        break;
       default:;
     }
   }
@@ -68,6 +90,8 @@ void DocumentProxy::onDocumentReset() {
   emit exposureChanged();
   emit vibrancyChanged();
   emit colorMapChanged();
+  emit widthChanged();
+  emit heightChanged();
 }
 
 }  // namespace chaoskit::ui

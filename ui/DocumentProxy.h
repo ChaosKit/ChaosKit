@@ -2,6 +2,8 @@
 #define CHAOSKIT_UI_DOCUMENTPROXY_H
 
 #include <QObject>
+#include <QSize>
+#include <QString>
 
 namespace chaoskit::ui {
 
@@ -16,6 +18,9 @@ class DocumentProxy : public QObject {
       float vibrancy READ vibrancy WRITE setVibrancy NOTIFY vibrancyChanged)
   Q_PROPERTY(
       QString colorMap READ colorMap WRITE setColorMap NOTIFY colorMapChanged)
+  Q_PROPERTY(qreal width READ width WRITE setWidth NOTIFY widthChanged)
+  Q_PROPERTY(qreal height READ height WRITE setHeight NOTIFY heightChanged)
+
  public:
   explicit DocumentProxy(DocumentModel* model);
 
@@ -31,11 +36,19 @@ class DocumentProxy : public QObject {
   QString colorMap();
   void setColorMap(const QString& colorMap);
 
+  [[nodiscard]] qreal width() const;
+  void setWidth(qreal width);
+
+  [[nodiscard]] qreal height() const;
+  void setHeight(qreal height);
+
  signals:
   void gammaChanged();
   void exposureChanged();
   void vibrancyChanged();
   void colorMapChanged();
+  void widthChanged();
+  void heightChanged();
 
  private:
   DocumentModel* model_;
