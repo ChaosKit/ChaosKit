@@ -14,6 +14,8 @@ struct Document {
   float exposure = 0.0f;
   float vibrancy = 0.0f;
   std::string colorMap;
+  uint32_t width;
+  uint32_t height;
 };
 
 }  // namespace chaoskit::core
