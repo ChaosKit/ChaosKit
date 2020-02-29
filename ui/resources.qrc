@@ -21,6 +21,7 @@
         <file>ChaosKit/Theme.qml</file>
         <file>ChaosKit/ToolTip.qml</file>
         <file>forms/AstInspector.qml</file>
+        <file>forms/ColorMapEditor.qml</file>
         <file>forms/DocumentEditor.qml</file>
         <file>forms/EditorTabs.qml</file>
         <file>forms/ExportImageDialog.qml</file>
@@ -28,6 +29,7 @@
         <file>forms/MainMenu.qml</file>
         <file>forms/MainWindow.qml</file>
         <file>forms/SystemPreview.qml</file>
+        <file>forms/ToneMappingEditor.qml</file>
         <file>qtquickcontrols2.conf</file>
     </qresource>
 </RCC>
