@@ -1,6 +1,8 @@
 #ifndef CHAOSKIT_UI_GATHERERTASK_H
 #define CHAOSKIT_UI_GATHERERTASK_H
 
+#include <QMutex>
+#include <QMutexLocker>
 #include <QObject>
 #include <QSize>
 #include <QVector>
@@ -14,8 +16,11 @@ class GathererTask : public QObject {
   Q_OBJECT
 
  public:
-  void withHistogram(
-      const std::function<void(const core::HistogramBuffer &)> &action);
+  template <typename Action>
+  void withHistogram(Action action) {
+    QMutexLocker locker(&mutex_);
+    action(buffer_);
+  }
 
  public slots:
   void addPoint(const chaoskit::core::Point &point, float color);

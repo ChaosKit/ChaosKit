@@ -43,10 +43,4 @@ void GathererTask::clear() {
   buffer_.clear();
 }
 
-void GathererTask::withHistogram(
-    const std::function<void(const HistogramBuffer &)> &action) {
-  QMutexLocker locker(&mutex_);
-  action(buffer_);
-}
-
 }  // namespace chaoskit::ui
