@@ -5,6 +5,7 @@
 #include <QMutexLocker>
 #include <QObject>
 #include <QSize>
+#include <QTransform>
 #include <QVector>
 #include "ColorMap.h"
 #include "HistogramBuffer.h"
@@ -29,9 +30,12 @@ class GathererTask : public QObject {
   void clear();
 
  private:
+  QTransform imageSpaceTransform_;
   QMutex mutex_;
   core::HistogramBuffer buffer_;
   const core::ColorMap *colorMap_ = nullptr;
+
+  void updateImageSpaceTransform(const QSizeF &size);
 };
 
 }  // namespace chaoskit::ui
