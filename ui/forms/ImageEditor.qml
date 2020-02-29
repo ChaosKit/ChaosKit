@@ -6,6 +6,7 @@ import ChaosKit 1.0
 ColumnLayout {
   spacing: Theme.padding
 
+  ImageSizeEditor {}
   ToneMappingEditor {}
   ColorMapEditor {}
 }
