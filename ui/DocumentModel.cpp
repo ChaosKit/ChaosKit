@@ -403,6 +403,7 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   names[HeightRole] = "height";
   names[GammaRole] = "gamma";
   names[WidthRole] = "width";
+  names[VibrancyRole] = "vibrancy";
   return names;
 }
 
