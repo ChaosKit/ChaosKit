@@ -10,14 +10,10 @@ GridLayout {
 
   // Tone Mapping
 
-  Label {
+  Heading {
     Layout.columnSpan: 2
     Layout.fillWidth: true
 
-    color: Theme.onSurfaceMedium
-    font.pointSize: 14
-    font.letterSpacing: Theme.letterSpacing(14)
-    font.weight: Font.DemiBold
     padding: Theme.units(2)
     text: "Tone Mapping"
   }
@@ -153,13 +149,9 @@ GridLayout {
 
   // Color map
 
-  Label {
+  Heading {
     Layout.columnSpan: 3
 
-    color: Theme.onSurfaceMedium
-    font.pointSize: 14
-    font.letterSpacing: Theme.letterSpacing(14)
-    font.weight: Font.DemiBold
     padding: Theme.units(2)
     text: "Color Map"
   }
