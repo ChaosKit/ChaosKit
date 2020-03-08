@@ -43,9 +43,6 @@ ApplicationWindow {
   SystemPreview {
     id: systemPreview
     anchors.centerIn: parent
-    transform: Translate {
-      x: documentEditor.opened ? -documentEditor.width * 0.33 : 0
-    }
 
     gamma: documentModel.documentProxy.gamma
     exposure: documentModel.documentProxy.exposure

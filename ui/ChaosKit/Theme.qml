@@ -13,6 +13,7 @@ QtObject {
   readonly property int smallIconSize: 16
   readonly property int padding: units(2)
   readonly property int smallPadding: units(1)
+  readonly property int windowPadding: units(8)
 
   // Fonts
 
