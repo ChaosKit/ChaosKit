@@ -60,10 +60,21 @@ ApplicationWindow {
     anchors.bottom: parent.bottom
   }
 
-  Button {
+  Label {
+    id: zoomLabel
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.margins: Theme.units(4)
+    font.pointSize: Theme.captionFontSize
+    font.letterSpacing: Theme.letterSpacing(Theme.captionFontSize)
+    font.weight: Font.DemiBold
+    text: `Zoom: ${(systemPreview.zoom * 100).toFixed(0)}%`
+  }
+
+  Button {
+    anchors.bottom: zoomLabel.top
+    anchors.left: zoomLabel.left
+    anchors.bottomMargin: Theme.padding
     text: "Debug Source"
     outlined: true
 
