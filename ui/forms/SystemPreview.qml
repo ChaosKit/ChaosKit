@@ -42,35 +42,40 @@ SystemView {
     .167, .25, .333, .5, .667, 1., 2., 3., 4., 5., 6., 7., 8., 12., 16., 32.,
   ]
 
-  Behavior on zoom {
-    SmoothedAnimation {
-      duration: 150
-      velocity: -1
-    }
+  SmoothedAnimation {
+    id: zoomAnimation
+    target: systemView
+    property: 'zoom'
+    duration: 150
+    velocity: -1
   }
 
   Shortcut {
-    sequence: StandardKey.ZoomIn
+    sequences: [StandardKey.ZoomIn, "Ctrl+="]
     onActivated: {
-      const nextZoom = presetZoomLevels.find(level => level > zoom);
+      const currentZoom = zoomAnimation.to || zoom;
+      const nextZoom = presetZoomLevels.find(level => level > currentZoom);
       if (nextZoom) {
-        zoom = nextZoom;
+        zoomAnimation.to = nextZoom;
+        zoomAnimation.restart();
       }
     }
   }
   Shortcut {
     sequence: StandardKey.ZoomOut
     onActivated: {
+      const currentZoom = zoomAnimation.to || zoom;
       let nextZoom;
       for (let i = presetZoomLevels.length - 1; i >= 0; --i) {
-        if (presetZoomLevels[i] < zoom) {
+        if (presetZoomLevels[i] < currentZoom) {
           nextZoom = presetZoomLevels[i];
           break;
         }
       }
 
       if (nextZoom) {
-        zoom = nextZoom;
+        zoomAnimation.to = nextZoom;
+        zoomAnimation.restart();
       }
     }
   }
@@ -84,14 +89,17 @@ SystemView {
       const scaleY =
           systemView.Window.height / (
               systemView.height * systemView.scale + Theme.windowPadding);
-      zoom = Math.min(1, scaleX, scaleY);
+
+      zoomAnimation.to = Math.min(1, scaleX, scaleY);
+      zoomAnimation.restart();
     }
   }
   // Zoom to 100%
   Shortcut {
     sequence: "Ctrl+1"
     onActivated: {
-      zoom = 1;
+      zoomAnimation.to = 1;
+      zoomAnimation.restart();
     }
   }
 }
