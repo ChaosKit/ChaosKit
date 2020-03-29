@@ -9,6 +9,8 @@ SystemView {
   property bool autoRefresh: true
   property int refreshInterval: 100
   property real zoom: 1.0
+  property real translationX: 0
+  property real translationY: 0
 
   colorMap: documentModel.documentProxy.colorMap
   colorMapRegistry: globalColorMapRegistry
@@ -21,6 +23,10 @@ SystemView {
       origin.y: height * .5
       xScale: zoom
       yScale: zoom
+    },
+    Translate {
+      x: translationX
+      y: translationY
     }
   ]
   ttl: 20
@@ -33,6 +39,35 @@ SystemView {
     onTriggered: {
       systemView.update();
     }
+  }
+
+  // Panning
+
+  DragHandler {
+    id: dragHandler
+    target: null
+
+    property real initialTranslationX
+    property real initialTranslationY
+    onActiveChanged: {
+      if (active) {
+        initialTranslationX = systemView.translationX;
+        initialTranslationY = systemView.translationY;
+      }
+    }
+    onTranslationChanged: {
+      systemView.translationX = initialTranslationX + translation.x;
+      systemView.translationY = initialTranslationY + translation.y;
+    }
+  }
+
+  NumberAnimation {
+    id: panResetAnimation
+    duration: 150
+    easing.type: Easing.InOutQuad
+    target: systemView
+    properties: "translationX,translationY"
+    to: 0
   }
 
   // Zooming
@@ -114,6 +149,7 @@ SystemView {
 
       zoomAnimation.to = Math.min(1, scaleX, scaleY);
       zoomAnimation.restart();
+      panResetAnimation.start();
     }
   }
   // Zoom to 100%
@@ -122,6 +158,7 @@ SystemView {
     onActivated: {
       zoomAnimation.to = 1;
       zoomAnimation.restart();
+      panResetAnimation.start();
     }
   }
 }
