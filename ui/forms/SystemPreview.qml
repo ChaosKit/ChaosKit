@@ -42,6 +42,28 @@ SystemView {
     .167, .25, .333, .5, .667, 1., 2., 3., 4., 5., 6., 7., 8., 12., 16., 32.,
   ]
 
+  PinchHandler {
+    id: zoomHandler
+    target: null
+    minimumRotation: 0
+    maximumRotation: 0
+
+    // We need initialZoom to play well with keyboard-based zooming.
+    property real initialZoom
+
+    onActiveChanged: {
+      if (active) {
+        // activeScale doesn't get reset to 1.0 every time a pinch happens.
+        // Since it's readonly, we need to correct it ourselves.
+        initialZoom = systemView.zoom / activeScale;
+      }
+    }
+
+    onActiveScaleChanged: {
+      systemView.zoom = initialZoom * activeScale;
+    }
+  }
+
   SmoothedAnimation {
     id: zoomAnimation
     target: systemView
@@ -53,7 +75,7 @@ SystemView {
   Shortcut {
     sequences: [StandardKey.ZoomIn, "Ctrl+="]
     onActivated: {
-      const currentZoom = zoomAnimation.to || zoom;
+      const currentZoom = zoomAnimation.running ? zoomAnimation.to : zoom;
       const nextZoom = presetZoomLevels.find(level => level > currentZoom);
       if (nextZoom) {
         zoomAnimation.to = nextZoom;
@@ -64,7 +86,7 @@ SystemView {
   Shortcut {
     sequence: StandardKey.ZoomOut
     onActivated: {
-      const currentZoom = zoomAnimation.to || zoom;
+      const currentZoom = zoomAnimation.running ? zoomAnimation.to : zoom;
       let nextZoom;
       for (let i = presetZoomLevels.length - 1; i >= 0; --i) {
         if (presetZoomLevels[i] < currentZoom) {
