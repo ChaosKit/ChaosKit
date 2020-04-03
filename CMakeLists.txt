@@ -14,6 +14,7 @@ add_subdirectory(ast)
 add_subdirectory(core)
 add_subdirectory(state)
 add_subdirectory(library)
+add_subdirectory(io)
 add_subdirectory(ui)
 
 add_executable(lol lol.cpp)

@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package chaoskit.io;
+
+message Document {
+  System system = 1;
+
+  float gamma = 2;
+  float exposure = 3;
+  float vibrancy = 4;
+
+  ColorMap color_map = 5;
+
+  uint32 width = 6;
+  uint32 height = 7;
+}
+
+message System {
+  repeated Blend blends = 1;
+  Blend final_blend = 2;
+}
+
+message Blend {
+  repeated Formula formulas = 1;
+  bool enabled = 2;
+  Transform pre = 3;
+  Transform post = 4;
+  ColoringMethod coloring_method = 5;
+
+  // Only used in non-final blends
+  float weight = 6;
+}
+
+message Transform {
+  float m11 = 1;
+  float m21 = 2;
+  float m31 = 3;
+  float m12 = 4;
+  float m22 = 5;
+  float m32 = 6;
+}
+
+message Formula {
+  string type = 1;
+  repeated float params = 2;
+
+  message Weight {
+    float x = 1;
+    float y = 2;
+  }
+  Weight weight = 3;
+}
+
+message ColoringMethod {
+  // unset means noop
+  oneof method {
+    float single_color = 1;
+    float distance = 2;
+  }
+}
+
+message ColorMap {
+  string name = 1;
+}
