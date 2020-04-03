@@ -5,6 +5,8 @@ add_library(core
         Color.h
         ColorMap.h
         ColorMapRegistry.cpp ColorMapRegistry.h
+        DocumentDeleter.cpp DocumentDeleter.h
+        DocumentVisitor.h
         errors.cpp errors.h
         HistogramBuffer.h HistogramBuffer.cpp
         PaletteColorMap.cpp PaletteColorMap.h
