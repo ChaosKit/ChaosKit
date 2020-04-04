@@ -6,9 +6,19 @@ import ChaosKit 1.0
 GridLayout {
   readonly property var document: documentModel.documentProxy
 
+  property string currentColorMap
+  Binding on currentColorMap {
+    value: document.colorMap
+  }
+
   columns: 2
   columnSpacing: Theme.padding
   rowSpacing: Theme.smallPadding
+
+  onCurrentColorMapChanged: {
+    colorMapPicker.currentIndex =
+        colorMapPicker.model.indexOf(document.colorMap);
+  }
 
   Heading {
     Layout.columnSpan: 2
@@ -51,9 +61,6 @@ GridLayout {
 
     onActivated: {
       document.colorMap = currentText;
-    }
-    Component.onCompleted: {
-      currentIndex = model.indexOf(document.colorMap);
     }
   }
 
