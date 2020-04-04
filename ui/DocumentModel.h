@@ -3,6 +3,7 @@
 
 #include <QAbstractItemModel>
 #include "DocumentProxy.h"
+#include "DocumentStore.h"
 #include "ModelEntry.h"
 #include "RandomizationSettings.h"
 #include "core/structures/Blend.h"
@@ -37,10 +38,7 @@ class DocumentModel : public QAbstractItemModel {
   Q_PROPERTY(
       DocumentProxy* documentProxy READ documentProxy NOTIFY documentReset)
 
-  using Store =
-      state::HierarchicalStore<core::Blend, core::Document, core::FinalBlend,
-                               core::Formula, core::System>;
-  Store store_;
+  DocumentStore store_;
 
  public:
   enum Roles {
@@ -95,7 +93,7 @@ class DocumentModel : public QAbstractItemModel {
     if (!index.isValid()) {
       return false;
     }
-    return Store::matchesType<T>(state::Id(index.internalId()));
+    return DocumentStore::matchesType<T>(state::Id(index.internalId()));
   }
   [[nodiscard]] bool isBlend(const QModelIndex& index) const;
   [[nodiscard]] Q_INVOKABLE bool isFinalBlend(const QModelIndex& index) const;
@@ -115,6 +113,10 @@ class DocumentModel : public QAbstractItemModel {
 
   Q_INVOKABLE void absorbBlend(const QModelIndex& source,
                                const QModelIndex& destination);
+
+  void adoptDocument(core::Document* document);
+  Q_INVOKABLE bool loadFromFile(const QString& path);
+  Q_INVOKABLE bool saveToFile(const QString& path);
 
   [[nodiscard]] QModelIndex documentIndex() const;
   [[nodiscard]] QModelIndex systemIndex() const;
@@ -137,6 +139,7 @@ class DocumentModel : public QAbstractItemModel {
   void structureChanged();
   void systemReset();
   void documentReset();
+  void ioFailed(const QString& error);
 
  private:
   DocumentProxy* documentProxy_;

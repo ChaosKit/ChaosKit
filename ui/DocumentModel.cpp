@@ -1,10 +1,13 @@
 #include "DocumentModel.h"
-#include <core/util.h>
 #include <QDebug>
 #include <QLoggingCategory>
 #include <QRandomGenerator>
 #include <QtGui/QTransform>
+#include "DocumentAdopter.h"
+#include "core/DocumentDeleter.h"
 #include "core/toSource.h"
+#include "core/util.h"
+#include "io/io.h"
 #include "library/util.h"
 #include "state/Id.h"
 
@@ -102,6 +105,8 @@ DocumentModel::DocumentModel(QObject* parent)
           &DocumentModel::structureChanged);
   connect(this, &QAbstractItemModel::modelReset, this,
           &DocumentModel::systemReset);
+  connect(this, &QAbstractItemModel::modelReset, this,
+          &DocumentModel::documentReset);
 }
 
 ///////////////////////////////////////////////////////////////////// Custom API
@@ -163,6 +168,43 @@ QString DocumentModel::debugSource() const {
   return QString::fromStdString(core::debugString(*system()));
 }
 
+void DocumentModel::adoptDocument(core::Document* document) {
+  beginResetModel();
+
+  store_.clearAll();
+  DocumentAdopter(store_).visit(*document);
+
+  fixInvariants();
+  endResetModel();
+}
+
+bool DocumentModel::loadFromFile(const QString& path) {
+  auto* doc = new core::Document();
+
+  try {
+    io::loadFromFile(path.toStdString(), doc);
+  } catch (io::Error& e) {
+    emit ioFailed(QString::fromUtf8(e.what()));
+    return false;
+  }
+
+  adoptDocument(doc);
+  core::DocumentDeleter().visit(*doc);
+  delete doc;
+
+  return true;
+}
+
+bool DocumentModel::saveToFile(const QString& path) {
+  try {
+    io::saveToFile(path.toStdString(), *document());
+    return true;
+  } catch (io::Error& e) {
+    emit ioFailed(QString::fromUtf8(e.what()));
+    return false;
+  }
+}
+
 ///////////////////////////////////////////////////////////// Custom API — Slots
 
 QModelIndex DocumentModel::addBlend(chaoskit::library::FormulaType type) {
@@ -206,7 +248,7 @@ QModelIndex DocumentModel::addFormula(library::FormulaType type,
     formula->params = generateFormulaParams(type);
   });
 
-  if (Store::matchesType<core::FinalBlend>(blendId)) {
+  if (DocumentStore::matchesType<core::FinalBlend>(blendId)) {
     store_.associateChildWith<core::FinalBlend, core::Formula>(blendId,
                                                                formulaId);
   } else {
@@ -234,7 +276,7 @@ void DocumentModel::randomizeParams(const QModelIndex& index) {
 
   // Get the FormulaType
   Id id = toId(index.internalId());
-  if (!Store::matchesType<core::Formula>(id)) {
+  if (!DocumentStore::matchesType<core::Formula>(id)) {
     return;
   }
   library::FormulaType formulaType = store_.find<core::Formula>(id)->type;
@@ -363,7 +405,7 @@ void DocumentModel::absorbBlend(const QModelIndex& source,
   }
   for (const auto& formulaId : sourceFormulas) {
     store_.dissociateChildFrom<core::Blend, core::Formula>(sourceId, formulaId);
-    if (Store::matchesType<core::Blend>(destinationId)) {
+    if (DocumentStore::matchesType<core::Blend>(destinationId)) {
       store_.associateChildWith<core::Blend, core::Formula>(destinationId,
                                                             formulaId);
     } else {
@@ -413,7 +455,7 @@ Qt::ItemFlags DocumentModel::flags(const QModelIndex& index) const {
   }
 
   Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-  if (Store::matchesType<core::Blend>(toId(index.internalId()))) {
+  if (DocumentStore::matchesType<core::Blend>(toId(index.internalId()))) {
     flags |= Qt::ItemIsEditable;
   }
 
@@ -435,7 +477,7 @@ QModelIndex DocumentModel::index(int row, int column,
 
   // Special case for children of the System. Blends and the Final Blend should
   // be displayed in that order.
-  if (Store::matchesType<core::System>(parentId)) {
+  if (DocumentStore::matchesType<core::System>(parentId)) {
     size_t offset = 0;
     const auto& blends = store_.children<core::Blend>(parentId);
     offset = blends.size();
@@ -481,12 +523,12 @@ QModelIndex DocumentModel::parent(const QModelIndex& child) const {
 
   // Special case for Blends and the Final Blend because of their forced
   // ordering.
-  if (Store::matchesType<core::Blend>(*parentId)) {
+  if (DocumentStore::matchesType<core::Blend>(*parentId)) {
     const auto& blends = store_.children<core::Blend>(*grandparentId);
     auto it = std::find(blends.begin(), blends.end(), *parentId);
     return createIndex(std::distance(blends.begin(), it), 0, fromId(*parentId));
   }
-  if (Store::matchesType<core::FinalBlend>(*parentId)) {
+  if (DocumentStore::matchesType<core::FinalBlend>(*parentId)) {
     size_t blendCount = store_.countChildren<core::Blend>(*grandparentId);
     return createIndex(blendCount, 0, fromId(*parentId));
   }
@@ -738,13 +780,13 @@ QVariant DocumentModel::data(const QModelIndex& index, int role) const {
   }
 
   Id id = toId(index.internalId());
-  if (Store::matchesType<core::Document>(id)) {
+  if (DocumentStore::matchesType<core::Document>(id)) {
     return documentData(store_.find<core::Document>(id), role);
   }
-  if (Store::matchesType<core::System>(id)) {
+  if (DocumentStore::matchesType<core::System>(id)) {
     return systemData(store_.find<core::System>(id), role);
   }
-  if (Store::matchesType<core::Blend>(id)) {
+  if (DocumentStore::matchesType<core::Blend>(id)) {
     if (role == DocumentModel::SingleFormulaIndexRole &&
         store_.countAllChildren(id) <= 1) {
       return formulaAt(0, index);
@@ -752,10 +794,10 @@ QVariant DocumentModel::data(const QModelIndex& index, int role) const {
 
     return blendData(store_.find<core::Blend>(id), role);
   }
-  if (Store::matchesType<core::FinalBlend>(id)) {
+  if (DocumentStore::matchesType<core::FinalBlend>(id)) {
     return finalBlendData(store_.find<core::FinalBlend>(id), role);
   }
-  if (Store::matchesType<core::Formula>(id)) {
+  if (DocumentStore::matchesType<core::Formula>(id)) {
     return formulaData(store_.find<core::Formula>(id), role);
   }
   return QVariant();
@@ -780,22 +822,22 @@ bool DocumentModel::setData(const QModelIndex& index, const QVariant& value,
 
   Id id = toId(index.internalId());
   QVector<int> updatedRoles;
-  if (Store::matchesType<core::Blend>(id)) {
+  if (DocumentStore::matchesType<core::Blend>(id)) {
     updatedRoles =
         store_.update<core::Blend>(id, [&value, role](core::Blend* blend) {
           return setBlendData(blend, value, role);
         });
-  } else if (Store::matchesType<core::FinalBlend>(id)) {
+  } else if (DocumentStore::matchesType<core::FinalBlend>(id)) {
     updatedRoles = store_.update<core::FinalBlend>(
         id, [&value, role](core::FinalBlend* blend) {
           return setFinalBlendData(blend, value, role);
         });
-  } else if (Store::matchesType<core::Formula>(id)) {
+  } else if (DocumentStore::matchesType<core::Formula>(id)) {
     updatedRoles = store_.update<core::Formula>(
         id, [&value, role](core::Formula* formula) {
           return setFormulaData(formula, value, role);
         });
-  } else if (Store::matchesType<core::Document>(id)) {
+  } else if (DocumentStore::matchesType<core::Document>(id)) {
     updatedRoles = store_.update<core::Document>(
         id, [&value, role](core::Document* document) {
           return setDocumentData(document, value, role);
@@ -835,14 +877,14 @@ bool DocumentModel::removeRows(int row, int count, const QModelIndex& parent) {
   }
 
   Id parentId = toId(parent.internalId());
-  if (Store::matchesType<core::Document>(parentId)) {
+  if (DocumentStore::matchesType<core::Document>(parentId)) {
     // Trying to remove the System, remove all Blends.
     auto system = systemIndex();
     return removeRows(0, rowCount(system), system);
   }
 
   const std::vector<Id>* children;
-  if (Store::matchesType<core::System>(parentId)) {
+  if (DocumentStore::matchesType<core::System>(parentId)) {
     // Trying to remove Blends
 
     if (row + count > store_.countChildren<core::Blend>(parentId)) {

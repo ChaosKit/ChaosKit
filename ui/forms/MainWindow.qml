@@ -1,4 +1,5 @@
 import Qt.labs.platform 1.1
+import QtQml 2.12
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import ChaosKit 1.0
@@ -18,6 +19,42 @@ ApplicationWindow {
     snackbar.open();
   }
 
+  Connections {
+    target: documentModel
+
+    function onIoFailed(error) {
+      openSnackbar(error);
+    }
+  }
+
+  FileDialog {
+    id: openDialog
+
+    acceptLabel: 'Open'
+    fileMode: FileDialog.OpenFile
+    nameFilters: ["ChaosKit files (*.ck)"]
+    options: FileDialog.ReadOnly
+
+    onAccepted: {
+      const fileName = Utilities.urlToLocalPath(file);
+      documentModel.loadFromFile(fileName);
+    }
+  }
+  FileDialog {
+    id: saveDialog
+
+    acceptLabel: 'Save'
+    defaultSuffix: 'ck'
+    fileMode: FileDialog.SaveFile
+    nameFilters: ["ChaosKit files (*.ck)"]
+
+    onAccepted: {
+      const fileName = Utilities.urlToLocalPath(file);
+      if (documentModel.saveToFile(fileName)) {
+        openSnackbar("File saved");
+      }
+    }
+  }
   ExportImageDialog {
     id: exportImageDialog
     onAccepted: {
@@ -35,6 +72,12 @@ ApplicationWindow {
   }
 
   MainMenu {
+    onOpen: {
+      openDialog.open()
+    }
+    onSaveAs: {
+      saveDialog.open()
+    }
     onExportImage: {
       exportImageDialog.open()
     }

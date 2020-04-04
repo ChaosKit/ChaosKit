@@ -3,10 +3,32 @@ import QtQuick 2.12
 
 MenuBar {
   id: menuBar
+  signal open()
+  signal saveAs()
   signal exportImage()
 
   Menu {
     title: "File"
+
+    MenuItem {
+      shortcut: StandardKey.Open
+      text: "Open"
+
+      onTriggered: {
+        menuBar.open();
+      }
+    }
+    MenuItem {
+      shortcut: StandardKey.SaveAs
+      text: "Save as…"
+
+      onTriggered: {
+        menuBar.saveAs();
+      }
+    }
+
+    MenuSeparator {}
+
     MenuItem {
       text: "Export image…"
 

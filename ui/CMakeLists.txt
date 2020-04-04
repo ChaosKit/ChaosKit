@@ -22,16 +22,20 @@ target_link_libraries(ui_core PUBLIC
 
 # The Qt Model interface to chaoskit::state.
 add_library(ui_state
+        DocumentAdopter.cpp DocumentAdopter.h
         DocumentModel.cpp DocumentModel.h
+        DocumentStore.h
+        DocumentProxy.cpp DocumentProxy.h
         ModelEntry.cpp ModelEntry.h
         RandomizationSettings.cpp RandomizationSettings.h
-        DocumentProxy.cpp DocumentProxy.h)
+        )
 set_target_properties(ui_state PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_state PUBLIC
         core
         library
         state
         Qt5::Core Qt5::Qml
+        PRIVATE io
         )
 
 ##### Static resource management
