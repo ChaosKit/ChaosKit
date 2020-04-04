@@ -23,9 +23,9 @@ GridLayout {
     size: Theme.smallIconSize
 
     onClicked: {
-      gammaSlider.value = 2.2;
-      exposureSlider.value = 0.0;
-      vibrancySlider.value = 0.0;
+      document.gamma = 2.2;
+      document.exposure = 0.0;
+      document.vibrancy = 0.0;
     }
   }
 
@@ -47,7 +47,7 @@ GridLayout {
     size: Theme.smallIconSize
 
     onClicked: {
-      gammaSlider.value = 2.2;
+      document.gamma = 2.2;
     }
   }
   Slider {
@@ -59,12 +59,11 @@ GridLayout {
     leftPadding: Theme.padding
     rightPadding: Theme.padding
     to: 10
-    value: 2.2
-  }
-  Binding {
-    target: document
-    property: 'gamma'
-    value: gammaSlider.value
+    value: document.gamma
+
+    onMoved: {
+      document.gamma = value;
+    }
   }
 
   // Exposure
@@ -85,7 +84,7 @@ GridLayout {
     size: Theme.smallIconSize
 
     onClicked: {
-      exposureSlider.value = 0.0;
+      document.exposure = 0.0;
     }
   }
   Slider {
@@ -98,12 +97,11 @@ GridLayout {
     leftPadding: Theme.padding
     rightPadding: Theme.padding
     to: 2
-    value: 0
-  }
-  Binding {
-    target: document
-    property: 'exposure'
-    value: exposureSlider.value
+    value: document.exposure
+
+    onMoved: {
+      document.exposure = value;
+    }
   }
 
   // Vibrancy
@@ -124,7 +122,7 @@ GridLayout {
     size: Theme.smallIconSize
 
     onClicked: {
-      vibrancySlider.value = 0.0;
+      document.vibrancy = 0.0;
     }
   }
   Slider {
@@ -137,11 +135,10 @@ GridLayout {
     leftPadding: Theme.padding
     rightPadding: Theme.padding
     to: 1
-    value: 0
-  }
-  Binding {
-    target: document
-    property: 'vibrancy'
-    value: vibrancySlider.value
+    value: document.vibrancy
+
+    onMoved: {
+      document.vibrancy = value;
+    }
   }
 }
