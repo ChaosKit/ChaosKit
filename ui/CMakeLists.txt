@@ -6,8 +6,6 @@ find_package(Qt5 REQUIRED
 # Library that deals with interfacing with the core.
 add_library(ui_core
         BlenderTask.cpp BlenderTask.h
-        ColorMap.h
-        ColorMapRegistry.cpp ColorMapRegistry.h
         GathererTask.cpp GathererTask.h
         GLToneMapper.cpp GLToneMapper.h
         HistogramBuffer.h
@@ -22,6 +20,8 @@ target_link_libraries(ui_core PUBLIC
 
 # The Qt Model interface to chaoskit::state.
 add_library(ui_state
+        ColorMap.h
+        ColorMapRegistry.cpp ColorMapRegistry.h
         DocumentAdopter.cpp DocumentAdopter.h
         DocumentModel.cpp DocumentModel.h
         DocumentStore.h

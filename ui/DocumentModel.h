@@ -2,6 +2,7 @@
 #define CHAOSKIT_UI_DOCUMENTMODEL_H
 
 #include <QAbstractItemModel>
+#include "ColorMapRegistry.h"
 #include "DocumentProxy.h"
 #include "DocumentStore.h"
 #include "ModelEntry.h"
@@ -133,11 +134,16 @@ class DocumentModel : public QAbstractItemModel {
 
   [[nodiscard]] QString debugSource() const;
 
+  void setColorMapRegistry(ColorMapRegistry* colorMapRegistry) {
+    colorMapRegistry_ = colorMapRegistry;
+  }
+
   [[nodiscard]] bool isModified() const { return modified_; }
   [[nodiscard]] const QString& filePath() const { return filePath_; }
   [[nodiscard]] QString name() const;
 
  public slots:
+  void resetDocument();
   void randomizeParams(const QModelIndex& index);
   void randomizeSystem();
   void randomizeSystem(const RandomizationSettings& settings);
@@ -155,6 +161,7 @@ class DocumentModel : public QAbstractItemModel {
   DocumentProxy* documentProxy_;
   bool modified_ = true;
   QString filePath_ = "";
+  ColorMapRegistry* colorMapRegistry_;
 
   [[nodiscard]] state::Id documentId() const;
   [[nodiscard]] state::Id systemId() const;

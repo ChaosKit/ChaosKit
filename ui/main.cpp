@@ -127,6 +127,7 @@ int main(int argc, char* argv[]) {
   // Set up models
 
   auto* documentModel = new DocumentModel();
+  documentModel->setColorMapRegistry(colorMapRegistry);
   documentModel->setItemData(documentModel->documentIndex(),
                              {{DocumentModel::ColorMapRole, "BGR"},
                               {DocumentModel::WidthRole, 1024},
