@@ -23,4 +23,8 @@ const core::ColorMap* ColorMapRegistry::get(const QString& name) const {
   return registry_.get(name.toStdString());
 }
 
+const QString& ColorMapRegistry::defaultName() const {
+  return nameCache_.front();
+}
+
 }  // namespace chaoskit::ui

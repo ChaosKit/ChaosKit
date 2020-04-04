@@ -15,6 +15,7 @@ class ColorMapRegistry : public QObject {
   void add(const QString& name, std::unique_ptr<core::ColorMap> colorMap);
   [[nodiscard]] const core::ColorMap* get(const QString& name) const;
   [[nodiscard]] const QStringList& names() const { return nameCache_; }
+  [[nodiscard]] const QString& defaultName() const;
 
  signals:
   void namesChanged();
