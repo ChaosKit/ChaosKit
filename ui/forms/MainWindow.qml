@@ -72,6 +72,9 @@ ApplicationWindow {
   }
 
   MainMenu {
+    onNewTriggered: {
+      documentModel.resetDocument();
+    }
     onOpen: {
       openDialog.open()
     }

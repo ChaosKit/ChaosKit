@@ -3,6 +3,7 @@ import QtQuick 2.12
 
 MenuBar {
   id: menuBar
+  signal newTriggered()
   signal open()
   signal save()
   signal saveAs()
@@ -11,6 +12,14 @@ MenuBar {
   Menu {
     title: "File"
 
+    MenuItem {
+      shortcut: StandardKey.New
+      text: "New"
+
+      onTriggered: {
+        menuBar.newTriggered();
+      }
+    }
     MenuItem {
       shortcut: StandardKey.Open
       text: "Open"

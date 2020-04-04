@@ -431,6 +431,20 @@ void DocumentModel::absorbBlend(const QModelIndex& source,
   endRemoveRows();
 }
 
+void DocumentModel::resetDocument() {
+  core::Document defaultDoc;
+  setItemData(documentIndex(),
+              {{WidthRole, 1024},
+               {HeightRole, 1024},
+               {GammaRole, defaultDoc.gamma},
+               {ExposureRole, defaultDoc.exposure},
+               {VibrancyRole, defaultDoc.vibrancy},
+               {ColorMapRole, colorMapRegistry_->defaultName()}});
+  setFilePath("");
+  randomizeSystem();
+  setModified(true);
+}
+
 /////////////////////// QAbstractItemModel method overrides for read-only access
 
 QHash<int, QByteArray> DocumentModel::roleNames() const {
