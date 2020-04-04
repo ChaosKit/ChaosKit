@@ -39,11 +39,11 @@ void readColoringMethod(const ColoringMethod& proto,
       break;
     case ColoringMethod::kSingleColor:
       coloringMethod->setType(ColoringMethodType::SingleColor);
-      coloringMethod->params.push_back(proto.single_color());
+      coloringMethod->params = {proto.single_color()};
       break;
     case ColoringMethod::kDistance:
       coloringMethod->setType(ColoringMethodType::Distance);
-      coloringMethod->params.push_back(proto.distance());
+      coloringMethod->params = {proto.distance()};
       break;
   }
 }
