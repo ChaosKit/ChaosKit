@@ -37,6 +37,9 @@ class DocumentModel : public QAbstractItemModel {
   Q_PROPERTY(QModelIndex systemIndex READ systemIndex NOTIFY systemReset)
   Q_PROPERTY(
       DocumentProxy* documentProxy READ documentProxy NOTIFY documentReset)
+  Q_PROPERTY(bool modified READ isModified NOTIFY modifiedChanged)
+  Q_PROPERTY(QString name READ name NOTIFY filePathChanged)
+  Q_PROPERTY(QString filePath READ filePath NOTIFY filePathChanged)
 
   DocumentStore store_;
 
@@ -130,6 +133,10 @@ class DocumentModel : public QAbstractItemModel {
 
   [[nodiscard]] QString debugSource() const;
 
+  [[nodiscard]] bool isModified() const { return modified_; }
+  [[nodiscard]] const QString& filePath() const { return filePath_; }
+  [[nodiscard]] QString name() const;
+
  public slots:
   void randomizeParams(const QModelIndex& index);
   void randomizeSystem();
@@ -141,11 +148,19 @@ class DocumentModel : public QAbstractItemModel {
   void documentReset();
   void ioFailed(const QString& error);
 
+  void modifiedChanged();
+  void filePathChanged();
+
  private:
   DocumentProxy* documentProxy_;
+  bool modified_ = true;
+  QString filePath_ = "";
 
   [[nodiscard]] state::Id documentId() const;
   [[nodiscard]] state::Id systemId() const;
+
+  void setModified(bool modified);
+  void setFilePath(const QString& path);
 
   bool fixInvariants();
   void maybeUpdateBlendDisplayName(const QModelIndex& blend);

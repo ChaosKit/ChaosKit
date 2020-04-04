@@ -1,5 +1,6 @@
 #include "DocumentModel.h"
 #include <QDebug>
+#include <QFileInfo>
 #include <QLoggingCategory>
 #include <QRandomGenerator>
 #include <QtGui/QTransform>
@@ -192,17 +193,24 @@ bool DocumentModel::loadFromFile(const QString& path) {
   core::DocumentDeleter().visit(*doc);
   delete doc;
 
+  setModified(false);
+  setFilePath(path);
+
   return true;
 }
 
 bool DocumentModel::saveToFile(const QString& path) {
   try {
     io::saveToFile(path.toStdString(), *document());
-    return true;
   } catch (io::Error& e) {
     emit ioFailed(QString::fromUtf8(e.what()));
     return false;
   }
+
+  setModified(false);
+  setFilePath(path);
+
+  return true;
 }
 
 ///////////////////////////////////////////////////////////// Custom API — Slots
@@ -383,6 +391,8 @@ void DocumentModel::randomizeSystem(const RandomizationSettings& settings) {
       });
 
   endResetModel();
+
+  setModified(true);
 }
 
 void DocumentModel::absorbBlend(const QModelIndex& source,
@@ -980,14 +990,36 @@ QModelIndex DocumentModel::getFormulaIndex(const QModelIndex& blendOrFormula) {
   return QModelIndex();
 }
 
+void DocumentModel::setModified(bool modified) {
+  if (modified_ == modified) return;
+
+  modified_ = modified;
+  emit modifiedChanged();
+}
+
+void DocumentModel::setFilePath(const QString& path) {
+  if (filePath_ == path) return;
+
+  filePath_ = path;
+  emit filePathChanged();
+}
+
+QString DocumentModel::name() const {
+  if (filePath_.isEmpty()) {
+    return QStringLiteral("Untitled");
+  }
+  return QFileInfo(filePath_).fileName();
+}
+
 void DocumentModel::handleDataChanges(const QModelIndex& topLeft,
                                       const QModelIndex& bottomRight,
                                       const QVector<int>& roles) {
   if (topLeft != documentIndex() && !roles.contains(Qt::DisplayRole)) {
     emit structureChanged();
   }
-}
 
+  setModified(true);
+}
 void DocumentModel::handleRowInsertion(const QModelIndex& parent, int first,
                                        int last) {
   if (parent.isValid() && parent != documentIndex()) {
@@ -995,6 +1027,8 @@ void DocumentModel::handleRowInsertion(const QModelIndex& parent, int first,
 
     maybeUpdateBlendDisplayName(parent);
   }
+
+  setModified(true);
 }
 void DocumentModel::handleRowRemoval(const QModelIndex& parent, int first,
                                      int last) {
@@ -1003,6 +1037,8 @@ void DocumentModel::handleRowRemoval(const QModelIndex& parent, int first,
 
     maybeUpdateBlendDisplayName(parent);
   }
+
+  setModified(true);
 }
 void DocumentModel::handleRowMove(const QModelIndex& parent, int first,
                                   int last, const QModelIndex& destination,
@@ -1015,6 +1051,8 @@ void DocumentModel::handleRowMove(const QModelIndex& parent, int first,
   emit structureChanged();
   maybeUpdateBlendDisplayName(parent);
   maybeUpdateBlendDisplayName(destination);
+
+  setModified(true);
 }
 
 }  // namespace chaoskit::ui

@@ -4,6 +4,7 @@ import QtQuick 2.12
 MenuBar {
   id: menuBar
   signal open()
+  signal save()
   signal saveAs()
   signal exportImage()
 
@@ -16,6 +17,14 @@ MenuBar {
 
       onTriggered: {
         menuBar.open();
+      }
+    }
+    MenuItem {
+      shortcut: StandardKey.Save
+      text: "Save"
+
+      onTriggered: {
+        menuBar.save();
       }
     }
     MenuItem {

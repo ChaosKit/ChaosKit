@@ -6,7 +6,7 @@ import ChaosKit 1.0
 
 ApplicationWindow {
   height: 768
-  title: "ChaosKit"
+  title: `${documentModel.modified ? '*' : ''}${documentModel.name} — ChaosKit`
   visible: true
   width: 1024
 
@@ -74,6 +74,13 @@ ApplicationWindow {
   MainMenu {
     onOpen: {
       openDialog.open()
+    }
+    onSave: {
+      if (documentModel.filePath === '') {
+        saveDialog.open();
+      } else if (documentModel.saveToFile(documentModel.filePath)) {
+        openSnackbar("File saved");
+      }
     }
     onSaveAs: {
       saveDialog.open()
