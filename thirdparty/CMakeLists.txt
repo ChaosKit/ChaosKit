@@ -17,7 +17,7 @@ if (GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif ()
 endif ()
 
-if (NOT EXISTS "${PROJECT_SOURCE_DIR}/thirdparty/better_enums/enum.h")
+if (NOT EXISTS "${PROJECT_SOURCE_DIR}/thirdparty/googletest/CMakeLists.txt")
     message(FATAL_ERROR
             "The submodules were not downloaded! GIT_SUBMODULE was turned off \
             or failed. Please update submodules and try again.")
@@ -34,13 +34,6 @@ target_sources(variant INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/variant/include/mapbox/variant_io.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/variant/include/mapbox/variant_visitor.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/variant/include/mapbox/variant.hpp)
-
-# Better Enums (https://github.com/aantron/better-enums)
-add_library(better_enums INTERFACE)
-target_include_directories(better_enums INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/better_enums)
-target_sources(better_enums INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/better_enums/enum.h)
 
 # randutils.hpp (https://gist.github.com/imneme/540829265469e673d045)
 add_library(randutils INTERFACE)
