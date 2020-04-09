@@ -9,6 +9,7 @@ add_library(core
         DocumentVisitor.h
         errors.cpp errors.h
         HistogramBuffer.h HistogramBuffer.cpp
+        ManagedDocument.cpp ManagedDocument.h
         PaletteColorMap.cpp PaletteColorMap.h
         Params.h
         Particle.h
