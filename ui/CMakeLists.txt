@@ -32,6 +32,7 @@ add_library(ui_state
 set_target_properties(ui_state PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_state PUBLIC
         core
+        core_hierarchy
         library
         state
         Qt5::Core Qt5::Qml

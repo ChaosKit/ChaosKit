@@ -5,6 +5,7 @@
 #include "core/structures/Document.h"
 #include "core/structures/Formula.h"
 #include "core/structures/System.h"
+#include "core/structures/hierarchy.h"
 #include "state/HierarchicalStore.h"
 
 namespace chaoskit::ui {
