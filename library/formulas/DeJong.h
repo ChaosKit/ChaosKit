@@ -1,7 +1,7 @@
 #ifndef CHAOSKIT_LIBRARY_DEJONG_H
 #define CHAOSKIT_LIBRARY_DEJONG_H
 
-#include "Formula.h"
+#include "library/Formula.h"
 
 namespace chaoskit {
 namespace library {

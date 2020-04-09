@@ -3,12 +3,12 @@
 #include <stdexcept>
 #include <string>
 #include "ColoringMethod.h"
-#include "DeJong.h"
-#include "Drain.h"
-#include "Linear.h"
 #include "coloring_methods/Distance.h"
 #include "coloring_methods/Noop.h"
 #include "coloring_methods/SingleColor.h"
+#include "formulas/DeJong.h"
+#include "formulas/Drain.h"
+#include "formulas/Linear.h"
 
 namespace chaoskit::library {
 

@@ -8,8 +8,8 @@
 #include "core/structures/System.h"
 #include "core/toSource.h"
 #include "core/transforms.h"
-#include "library/DeJong.h"
 #include "library/coloring_methods/Distance.h"
+#include "library/formulas/DeJong.h"
 
 using chaoskit::core::Blend;
 using chaoskit::core::Color;
