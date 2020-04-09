@@ -55,3 +55,6 @@ target_sources(randutils INTERFACE
 # settings on Windows
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
+
+# Magic Enum (https://github.com/Neargye/magic_enum)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/magic_enum)
