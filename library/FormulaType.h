@@ -6,7 +6,8 @@
 namespace chaoskit {
 namespace library {
 
-BETTER_ENUM(FormulaType, int, Invalid = 0, DeJong, Drain, Linear);
+BETTER_ENUM(FormulaType, int, Invalid = 0, DeJong, Drain, Linear,
+            Trigonometric);
 
 }  // namespace library
 }  // namespace chaoskit
