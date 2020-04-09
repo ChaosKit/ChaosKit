@@ -5,8 +5,7 @@
 #include <QRandomGenerator>
 #include <QtGui/QTransform>
 #include "DocumentAdopter.h"
-#include "core/DocumentDeleter.h"
-#include "core/toSource.h"
+#include "core/ManagedDocument.h"
 #include "core/util.h"
 #include "io/io.h"
 #include "library/util.h"
@@ -180,18 +179,16 @@ void DocumentModel::adoptDocument(core::Document* document) {
 }
 
 bool DocumentModel::loadFromFile(const QString& path) {
-  auto* doc = new core::Document();
+  auto doc = core::makeManagedDocument();
 
   try {
-    io::loadFromFile(path.toStdString(), doc);
+    io::loadFromFile(path.toStdString(), doc.get());
   } catch (io::Error& e) {
     emit ioFailed(QString::fromUtf8(e.what()));
     return false;
   }
 
-  adoptDocument(doc);
-  core::DocumentDeleter().visit(*doc);
-  delete doc;
+  adoptDocument(doc.get());
 
   setModified(false);
   setFilePath(path);
