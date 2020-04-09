@@ -1,16 +1,13 @@
 #ifndef CHAOSKIT_AST_INPUT_H
 #define CHAOSKIT_AST_INPUT_H
 
-#include <enum.h>
 #include <ostream>
 
 namespace chaoskit::ast {
 
-BETTER_ENUM(Input_Type, char, X, Y, COLOR)
-
 class Input {
  public:
-  typedef Input_Type Type;
+  enum Type : char { X, Y, COLOR };
 
   explicit Input(Type type) : type_(type) {}
 

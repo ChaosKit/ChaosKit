@@ -11,8 +11,8 @@
 
 namespace chaoskit::core {
 
-using UnaryFn = ast::UnaryFunction_Type;
-using BinaryFn = ast::BinaryFunction_Type;
+using UnaryFn = ast::UnaryFunction::Type;
+using BinaryFn = ast::BinaryFunction::Type;
 using ast::apply_visitor;
 
 namespace {
@@ -66,20 +66,20 @@ class BlendInterpreter {
 
   float operator()(const ast::Input &input) const {
     switch (input.type()) {
-      case ast::Input_Type::X:
+      case ast::Input::Type::X:
         return input_.x();
-      case ast::Input_Type::Y:
+      case ast::Input::Type::Y:
         return input_.y();
-      case ast::Input_Type::COLOR:
+      case ast::Input::Type::COLOR:
         return input_.color;
     }
   }
 
   float operator()(const ast::Output &output) const {
     switch (output.type()) {
-      case ast::Output_Type::X:
+      case ast::Output::Type::X:
         return output_.x();
-      case ast::Output_Type::Y:
+      case ast::Output::Type::Y:
         return output_.y();
     }
   }
@@ -94,13 +94,13 @@ class BlendInterpreter {
 
   float operator()(const ast::UnaryFunction &function) const {
     float value = apply_visitor(*this, function.argument());
-    return UNARY_FUNCTIONS.at(function.type()._to_integral())(value);
+    return UNARY_FUNCTIONS.at(function.type())(value);
   }
 
   float operator()(const ast::BinaryFunction &function) const {
     float first = apply_visitor(*this, function.first());
     float second = apply_visitor(*this, function.second());
-    return BINARY_FUNCTIONS.at(function.type()._to_integral())(first, second);
+    return BINARY_FUNCTIONS.at(function.type())(first, second);
   }
 
   Particle operator()(const ast::Transform &transform) const {

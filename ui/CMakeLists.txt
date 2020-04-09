@@ -36,7 +36,7 @@ target_link_libraries(ui_state PUBLIC
         library
         state
         Qt5::Core Qt5::Qml
-        PRIVATE io
+        PRIVATE magic_enum io
         )
 
 ##### Static resource management
@@ -81,6 +81,7 @@ target_link_libraries(ChaosKit PRIVATE
         ui_core
         ui_resources
         ui_state
+        magic_enum
         Qt5::Core Qt5::Gui Qt5::Qml Qt5::Quick Qt5::QuickControls2
         )
 

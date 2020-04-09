@@ -62,7 +62,7 @@ TEST_F(SimpleInterpreterTest, DecrementsTtl) {
 TEST_F(SimpleInterpreterTest, UsesOutput) {
   auto input = make_immortal_particle({0.f, 0.f}, 0.f);
   ast::Formula formula{1.f, 0.f};
-  ast::Expression coloringMethod = ast::Output(ast::Output_Type::X);
+  ast::Expression coloringMethod = ast::Output(ast::Output::Type::X);
   ast::LimitedBlend blend{
       {{ast::WeightedFormula(formula)}, {}, {}, coloringMethod}, 1.f};
   ast::System system{{blend}};

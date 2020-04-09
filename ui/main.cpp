@@ -9,6 +9,7 @@
 #include <QRegularExpression>
 #include <QSurfaceFormat>
 #include <QtGui/QTransform>
+#include <magic_enum.hpp>
 #include "ColorMap.h"
 #include "ColorMapPreviewProvider.h"
 #include "ColorMapRegistry.h"
@@ -44,8 +45,8 @@ namespace resources = chaoskit::resources;
 
 QStringList createFormulaList() {
   QStringList result;
-  for (const char* name : FormulaType::_names()) {
-    QString formula = QString::fromUtf8(name);
+  for (const auto& name : magic_enum::enum_names<FormulaType>()) {
+    QString formula = QString::fromUtf8(name.data(), name.size());
     if (formula != QStringLiteral("Invalid")) {
       result.append(formula);
     }

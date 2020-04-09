@@ -1,6 +1,7 @@
 #include "io.h"
 #include <algorithm>
 #include <fstream>
+#include <magic_enum.hpp>
 #include "chaoskit.pb.h"
 #include "library/ColoringMethodType.h"
 #include "library/FormulaType.h"
@@ -18,7 +19,7 @@ void readTransform(const Transform& proto, core::Transform* transform) {
 }
 
 void readFormula(const Formula& proto, core::Formula* formula) {
-  auto formulaType = FormulaType::_from_string_nothrow(proto.type().c_str());
+  auto formulaType = magic_enum::enum_cast<FormulaType>(proto.type());
   if (!formulaType) {
     throw Error("Unsupported formula type: " + proto.type());
   }
@@ -110,7 +111,8 @@ void writeTransform(const core::Transform& transform, Transform* proto) {
 }
 
 void writeFormula(const core::Formula& formula, Formula* proto) {
-  proto->set_type(formula.type._to_string());
+  proto->set_type(
+      std::string(magic_enum::enum_name<FormulaType>(formula.type)));
   for (float param : formula.params) {
     proto->add_params(param);
   }

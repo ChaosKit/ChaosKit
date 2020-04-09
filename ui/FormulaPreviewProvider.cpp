@@ -5,6 +5,7 @@
 #include <QQuickImageResponse>
 #include <QRunnable>
 #include <QSize>
+#include <magic_enum.hpp>
 #include <memory>
 #include <vector>
 #include "core/Params.h"
@@ -113,7 +114,7 @@ class FormulaPreviewResponse : public QQuickImageResponse, public QRunnable {
     painter.setPen(primary);
 
     auto formulaType =
-        library::FormulaType::_from_string_nothrow(type_.toUtf8());
+        magic_enum::enum_cast<library::FormulaType>(type_.toStdString());
     if (formulaType) {
       QVector<QPointF> grid =
           generateGrid(*formulaType, GRID_WIDTH, GRID_HEIGHT);

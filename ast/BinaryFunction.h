@@ -1,20 +1,30 @@
 #ifndef CHAOSKIT_AST_BINARYFUNCTION_H
 #define CHAOSKIT_AST_BINARYFUNCTION_H
 
-#include <enum.h>
 #include <ostream>
 #include <utility>
 #include "Expression.h"
 
 namespace chaoskit::ast {
 
-BETTER_ENUM(BinaryFunction_Type, char, ADD, SUBTRACT, MULTIPLY, DIVIDE, POWER,
-            MODULO, AND, OR, LESS_THAN, GREATER_THAN, EQUALS,
-            LESS_THAN_OR_EQUAL, GREATER_THAN_OR_EQUAL, DISTANCE)
-
 class BinaryFunction {
  public:
-  typedef BinaryFunction_Type Type;
+  enum Type : char {
+    ADD,
+    SUBTRACT,
+    MULTIPLY,
+    DIVIDE,
+    POWER,
+    MODULO,
+    AND,
+    OR,
+    LESS_THAN,
+    GREATER_THAN,
+    EQUALS,
+    LESS_THAN_OR_EQUAL,
+    GREATER_THAN_OR_EQUAL,
+    DISTANCE,
+  };
 
   BinaryFunction(Type type, Expression first, Expression second)
       : type_(type), first_(std::move(first)), second_(std::move(second)) {}

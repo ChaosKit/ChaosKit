@@ -1,4 +1,5 @@
 #include "RandomizationSettings.h"
+#include <magic_enum.hpp>
 
 namespace chaoskit::ui {
 
@@ -8,8 +9,8 @@ RandomizationSettings::Builder::Builder()
 RandomizationSettings RandomizationSettings::Builder::build() {
   // Empty set means all formula types
   if (settings_->allowedFormulaTypes_.isEmpty()) {
-    for (const auto& type : library::FormulaType::_values()) {
-      if (type == +library::FormulaType::Invalid) continue;
+    for (const auto& type : magic_enum::enum_values<library::FormulaType>()) {
+      if (type == library::FormulaType::Invalid) continue;
 
       settings_->allowedFormulaTypes_.append(type);
     }
@@ -17,12 +18,14 @@ RandomizationSettings RandomizationSettings::Builder::build() {
 
   // Empty set means all coloring methods
   if (settings_->allowedColoringMethodsInBlend_.isEmpty()) {
-    for (const auto& type : library::ColoringMethodType::_values()) {
+    for (const auto& type :
+         magic_enum::enum_values<library::ColoringMethodType>()) {
       settings_->allowedColoringMethodsInBlend_.append(type);
     }
   }
   if (settings_->allowedColoringMethodsInFinalBlend_.isEmpty()) {
-    for (const auto& type : library::ColoringMethodType::_values()) {
+    for (const auto& type :
+         magic_enum::enum_values<library::ColoringMethodType>()) {
       settings_->allowedColoringMethodsInFinalBlend_.append(type);
     }
   }

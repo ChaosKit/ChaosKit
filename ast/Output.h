@@ -1,15 +1,13 @@
 #ifndef CHAOSKIT_AST_OUTPUT_H
 #define CHAOSKIT_AST_OUTPUT_H
 
-#include "thirdparty/better_enums/enum.h"
+#include <ostream>
 
 namespace chaoskit::ast {
 
-BETTER_ENUM(Output_Type, char, X, Y)
-
 class Output {
  public:
-  typedef Output_Type Type;
+  enum Type : char { X, Y };
 
   explicit Output(Type type) : type_(type) {}
 

@@ -3,6 +3,7 @@
 #include <unordered_set>
 
 #include <gmock/gmock.h>
+#include <magic_enum.hpp>
 #include "ast.h"
 #include "helpers.h"
 
@@ -188,7 +189,7 @@ TEST_F(AstTest, Input) {
   helpers::InputHelper input;
 
   Node result = input.x();
-  Node expected = Input(Input_Type::X);
+  Node expected = Input(Input::Type::X);
 
   ASSERT_THAT(result, EqualsTree(expected));
 }
@@ -206,7 +207,7 @@ TEST_F(AstTest, Output) {
   helpers::OutputHelper output;
 
   Node result = output.y();
-  Node expected = Output(Output_Type::Y);
+  Node expected = Output(Output::Type::Y);
 
   ASSERT_THAT(result, EqualsTree(expected));
 }
@@ -240,35 +241,36 @@ TEST_F(AstTest, ParameterIndicesMatter) {
 }
 
 TEST_F(AstTest, AllUnaryFunctionTypesHaveWorkingHelpers) {
-  std::unordered_map<UnaryFunction_Type::_enumerated,
+  std::unordered_map<UnaryFunction::Type,
                      std::function<UnaryFunction(const Expression&)>>
-      helper_map{{UnaryFunction_Type::SIN, helpers::sin},
-                 {UnaryFunction_Type::COS, helpers::cos},
-                 {UnaryFunction_Type::ATAN, helpers::atan},
-                 {UnaryFunction_Type::CEIL, helpers::ceil},
-                 {UnaryFunction_Type::TAN, helpers::tan},
-                 {UnaryFunction_Type::MINUS, helpers::negative},
-                 {UnaryFunction_Type::SQRT, helpers::sqrt},
-                 {UnaryFunction_Type::TRUNC, helpers::trunc},
-                 {UnaryFunction_Type::EXP, helpers::exp},
-                 {UnaryFunction_Type::FLOOR, helpers::floor},
-                 {UnaryFunction_Type::SIGNUM, helpers::signum},
-                 {UnaryFunction_Type::ABS, helpers::abs},
-                 {UnaryFunction_Type::NOT, helpers::operator!},
-                  {UnaryFunction_Type::FRAC, helpers::frac}, };
+      helper_map{{UnaryFunction::Type::SIN, helpers::sin},
+                 {UnaryFunction::Type::COS, helpers::cos},
+                 {UnaryFunction::Type::ATAN, helpers::atan},
+                 {UnaryFunction::Type::CEIL, helpers::ceil},
+                 {UnaryFunction::Type::TAN, helpers::tan},
+                 {UnaryFunction::Type::MINUS, helpers::negative},
+                 {UnaryFunction::Type::SQRT, helpers::sqrt},
+                 {UnaryFunction::Type::TRUNC, helpers::trunc},
+                 {UnaryFunction::Type::EXP, helpers::exp},
+                 {UnaryFunction::Type::FLOOR, helpers::floor},
+                 {UnaryFunction::Type::SIGNUM, helpers::signum},
+                 {UnaryFunction::Type::ABS, helpers::abs},
+                 {UnaryFunction::Type::NOT, helpers::operator!},
+                  {UnaryFunction::Type::FRAC, helpers::frac}, };
 
   // Fill sets with type names as strings
   std::unordered_set<std::string> all_types;
   std::unordered_set<std::string> defined_helpers;
 
-  auto names = UnaryFunction::Type::_names();
+  auto names = magic_enum::enum_names<UnaryFunction::Type>();
   std::transform(names.begin(), names.end(),
                  std::inserter(all_types, all_types.end()),
-                 [](const char* str) { return std::string(str); });
+                 [](std::string_view str) { return std::string(str); });
   std::transform(helper_map.begin(), helper_map.end(),
                  std::inserter(defined_helpers, defined_helpers.end()),
                  [](const decltype(helper_map)::value_type& pair) {
-                   return std::string((+pair.first)._to_string());
+                   return std::string(
+                       magic_enum::enum_name<UnaryFunction::Type>(pair.first));
                  });
 
   EXPECT_THAT(defined_helpers, ContainerEq(all_types));
@@ -282,37 +284,38 @@ TEST_F(AstTest, AllUnaryFunctionTypesHaveWorkingHelpers) {
 
 TEST_F(AstTest, AllBinaryFunctionTypesHaveWorkingHelpers) {
   std::unordered_map<
-      BinaryFunction_Type::_enumerated,
+      BinaryFunction::Type,
       std::function<BinaryFunction(const Expression&, const Expression&)>>
       helper_map{
-          {BinaryFunction_Type::ADD, (helpers::operator+)},
-          {BinaryFunction_Type::SUBTRACT, helpers::subtract},
-          {BinaryFunction_Type::MULTIPLY, (helpers::operator*)},
-          {BinaryFunction_Type::DIVIDE, (helpers::operator/)},
-          {BinaryFunction_Type::POWER, helpers::pow},
-          {BinaryFunction_Type::MODULO, (helpers::operator%)},
-          {BinaryFunction_Type::AND, (helpers::operator&&)},
-          {BinaryFunction_Type::OR, (helpers::operator||)},
-          {BinaryFunction_Type::LESS_THAN, helpers::lt},
-          {BinaryFunction_Type::GREATER_THAN, helpers::gt},
-          {BinaryFunction_Type::EQUALS, helpers::eq},
-          {BinaryFunction_Type::LESS_THAN_OR_EQUAL, helpers::lte},
-          {BinaryFunction_Type::GREATER_THAN_OR_EQUAL, helpers::gte},
-          {BinaryFunction_Type::DISTANCE, helpers::distance},
+          {BinaryFunction::Type::ADD, (helpers::operator+)},
+          {BinaryFunction::Type::SUBTRACT, helpers::subtract},
+          {BinaryFunction::Type::MULTIPLY, (helpers::operator*)},
+          {BinaryFunction::Type::DIVIDE, (helpers::operator/)},
+          {BinaryFunction::Type::POWER, helpers::pow},
+          {BinaryFunction::Type::MODULO, (helpers::operator%)},
+          {BinaryFunction::Type::AND, (helpers::operator&&)},
+          {BinaryFunction::Type::OR, (helpers::operator||)},
+          {BinaryFunction::Type::LESS_THAN, helpers::lt},
+          {BinaryFunction::Type::GREATER_THAN, helpers::gt},
+          {BinaryFunction::Type::EQUALS, helpers::eq},
+          {BinaryFunction::Type::LESS_THAN_OR_EQUAL, helpers::lte},
+          {BinaryFunction::Type::GREATER_THAN_OR_EQUAL, helpers::gte},
+          {BinaryFunction::Type::DISTANCE, helpers::distance},
       };
 
   // Fill sets with type names as strings
   std::unordered_set<std::string> all_types;
   std::unordered_set<std::string> defined_helpers;
 
-  auto names = BinaryFunction::Type::_names();
+  auto names = magic_enum::enum_names<BinaryFunction::Type>();
   std::transform(names.begin(), names.end(),
                  std::inserter(all_types, all_types.end()),
-                 [](const char* str) { return std::string(str); });
+                 [](std::string_view str) { return std::string(str); });
   std::transform(helper_map.begin(), helper_map.end(),
                  std::inserter(defined_helpers, defined_helpers.end()),
                  [](const decltype(helper_map)::value_type& pair) {
-                   return std::string((+pair.first)._to_string());
+                   return std::string(
+                       magic_enum::enum_name<BinaryFunction::Type>(pair.first));
                  });
 
   EXPECT_THAT(defined_helpers, ContainerEq(all_types));
@@ -329,7 +332,7 @@ TEST_F(AstTest, UnaryMinusOverload) {
   using namespace helpers;
 
   Node actual = -helpers::n(2.f);
-  Node expected = UnaryFunction(UnaryFunction_Type::MINUS, 2.f);
+  Node expected = UnaryFunction(UnaryFunction::Type::MINUS, 2.f);
 
   ASSERT_THAT(actual, EqualsTree(expected));
 }
@@ -338,7 +341,7 @@ TEST_F(AstTest, BinaryMinusOverload) {
   using namespace helpers;
 
   Node actual = n(2.f) - 3.f;
-  Node expected = BinaryFunction(BinaryFunction_Type::SUBTRACT, 2.f, 3.f);
+  Node expected = BinaryFunction(BinaryFunction::Type::SUBTRACT, 2.f, 3.f);
 
   ASSERT_THAT(actual, EqualsTree(expected));
 }

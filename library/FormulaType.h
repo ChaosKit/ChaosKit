@@ -1,13 +1,10 @@
 #ifndef CHAOSKIT_LIBRARY_FORMULATYPE_H
 #define CHAOSKIT_LIBRARY_FORMULATYPE_H
 
-#include <thirdparty/better_enums/enum.h>
-
 namespace chaoskit {
 namespace library {
 
-BETTER_ENUM(FormulaType, int, Invalid = 0, DeJong, Drain, Linear,
-            Trigonometric);
+enum class FormulaType { Invalid = 0, DeJong, Drain, Linear, Trigonometric };
 
 }  // namespace library
 }  // namespace chaoskit

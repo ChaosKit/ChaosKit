@@ -8,5 +8,5 @@ target_link_libraries(io_proto PUBLIC ${Protobuf_LIBRARIES})
 
 add_library(io io.h io.cpp)
 target_link_libraries(io
-        PRIVATE io_proto library
+        PRIVATE io_proto library magic_enum
         PUBLIC core)

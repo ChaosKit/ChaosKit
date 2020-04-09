@@ -14,148 +14,149 @@ namespace chaoskit::ast::helpers {
 inline Expression n(float value) { return Expression(value); }
 
 inline UnaryFunction sin(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::SIN, expression);
+  return UnaryFunction(UnaryFunction::Type::SIN, expression);
 }
 
 inline UnaryFunction cos(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::COS, expression);
+  return UnaryFunction(UnaryFunction::Type::COS, expression);
 }
 
 inline UnaryFunction tan(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::TAN, expression);
+  return UnaryFunction(UnaryFunction::Type::TAN, expression);
 }
 
 inline UnaryFunction sqrt(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::SQRT, expression);
+  return UnaryFunction(UnaryFunction::Type::SQRT, expression);
 }
 
 inline UnaryFunction atan(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::ATAN, expression);
+  return UnaryFunction(UnaryFunction::Type::ATAN, expression);
 }
 
 inline UnaryFunction trunc(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::TRUNC, expression);
+  return UnaryFunction(UnaryFunction::Type::TRUNC, expression);
 }
 
 inline UnaryFunction exp(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::EXP, expression);
+  return UnaryFunction(UnaryFunction::Type::EXP, expression);
 }
 
 inline UnaryFunction floor(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::FLOOR, expression);
+  return UnaryFunction(UnaryFunction::Type::FLOOR, expression);
 }
 
 inline UnaryFunction ceil(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::CEIL, expression);
+  return UnaryFunction(UnaryFunction::Type::CEIL, expression);
 }
 
 inline UnaryFunction signum(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::SIGNUM, expression);
+  return UnaryFunction(UnaryFunction::Type::SIGNUM, expression);
 }
 
 inline UnaryFunction abs(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::ABS, expression);
+  return UnaryFunction(UnaryFunction::Type::ABS, expression);
 }
 
 inline UnaryFunction operator-(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::MINUS, expression);
+  return UnaryFunction(UnaryFunction::Type::MINUS, expression);
 }
 
 inline UnaryFunction negative(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::MINUS, expression);
+  return UnaryFunction(UnaryFunction::Type::MINUS, expression);
 }
 
 inline UnaryFunction operator!(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::NOT, expression);
+  return UnaryFunction(UnaryFunction::Type::NOT, expression);
 }
 
 inline UnaryFunction frac(const Expression& expression) {
-  return UnaryFunction(UnaryFunction_Type::FRAC, expression);
+  return UnaryFunction(UnaryFunction::Type::FRAC, expression);
 }
 
 inline BinaryFunction pow(const Expression& first, const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::POWER, first, second);
+  return BinaryFunction(BinaryFunction::Type::POWER, first, second);
 }
 
 inline BinaryFunction distance(const Expression& first,
                                const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::DISTANCE, first, second);
+  return BinaryFunction(BinaryFunction::Type::DISTANCE, first, second);
 }
 
 inline BinaryFunction eq(const Expression& first, const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::EQUALS, first, second);
+  return BinaryFunction(BinaryFunction::Type::EQUALS, first, second);
 }
 
 inline BinaryFunction lt(const Expression& first, const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::LESS_THAN, first, second);
+  return BinaryFunction(BinaryFunction::Type::LESS_THAN, first, second);
 }
 
 inline BinaryFunction gt(const Expression& first, const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::GREATER_THAN, first, second);
+  return BinaryFunction(BinaryFunction::Type::GREATER_THAN, first, second);
 }
 
 inline BinaryFunction lte(const Expression& first, const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::LESS_THAN_OR_EQUAL, first, second);
+  return BinaryFunction(BinaryFunction::Type::LESS_THAN_OR_EQUAL, first,
+                        second);
 }
 
 inline BinaryFunction gte(const Expression& first, const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::GREATER_THAN_OR_EQUAL, first,
+  return BinaryFunction(BinaryFunction::Type::GREATER_THAN_OR_EQUAL, first,
                         second);
 }
 
 inline BinaryFunction plus(const Expression& first, const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::ADD, first, second);
+  return BinaryFunction(BinaryFunction::Type::ADD, first, second);
 }
 
 inline BinaryFunction operator+(const Expression& first,
                                 const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::ADD, first, second);
+  return BinaryFunction(BinaryFunction::Type::ADD, first, second);
 }
 
 inline BinaryFunction operator-(const Expression& first,
                                 const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::SUBTRACT, first, second);
+  return BinaryFunction(BinaryFunction::Type::SUBTRACT, first, second);
 }
 
 inline BinaryFunction subtract(const Expression& first,
                                const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::SUBTRACT, first, second);
+  return BinaryFunction(BinaryFunction::Type::SUBTRACT, first, second);
 }
 
 inline BinaryFunction operator*(const Expression& first,
                                 const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::MULTIPLY, first, second);
+  return BinaryFunction(BinaryFunction::Type::MULTIPLY, first, second);
 }
 
 inline BinaryFunction operator/(const Expression& first,
                                 const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::DIVIDE, first, second);
+  return BinaryFunction(BinaryFunction::Type::DIVIDE, first, second);
 }
 
 inline BinaryFunction operator&&(const Expression& first,
                                  const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::AND, first, second);
+  return BinaryFunction(BinaryFunction::Type::AND, first, second);
 }
 
 inline BinaryFunction operator||(const Expression& first,
                                  const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::OR, first, second);
+  return BinaryFunction(BinaryFunction::Type::OR, first, second);
 }
 
 inline BinaryFunction operator%(const Expression& first,
                                 const Expression& second) {
-  return BinaryFunction(BinaryFunction_Type::MODULO, first, second);
+  return BinaryFunction(BinaryFunction::Type::MODULO, first, second);
 }
 
 struct InputHelper {
-  [[nodiscard]] Input x() const { return Input(Input_Type::X); }
-  [[nodiscard]] Input y() const { return Input(Input_Type::Y); }
-  [[nodiscard]] Input color() const { return Input(Input_Type::COLOR); }
+  [[nodiscard]] Input x() const { return Input(Input::Type::X); }
+  [[nodiscard]] Input y() const { return Input(Input::Type::Y); }
+  [[nodiscard]] Input color() const { return Input(Input::Type::COLOR); }
 };
 
 struct OutputHelper {
-  [[nodiscard]] Output x() const { return Output(Output_Type::X); }
-  [[nodiscard]] Output y() const { return Output(Output_Type::Y); }
+  [[nodiscard]] Output x() const { return Output(Output::Type::X); }
+  [[nodiscard]] Output y() const { return Output(Output::Type::Y); }
 };
 
 struct ParameterHelper {

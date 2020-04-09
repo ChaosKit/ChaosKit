@@ -26,6 +26,7 @@ add_library(core
         util.h util.cpp)
 target_link_libraries(core
         PUBLIC ast stdx randutils
+        PRIVATE magic_enum
         INTERFACE core_structures)
 
 add_executable(core_test SimpleInterpreterTest.cpp)

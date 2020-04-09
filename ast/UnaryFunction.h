@@ -1,19 +1,30 @@
 #ifndef CHAOSKIT_AST_UNARYFUNCTION_H
 #define CHAOSKIT_AST_UNARYFUNCTION_H
 
-#include <enum.h>
 #include <ostream>
 #include <utility>
 #include "Expression.h"
 
 namespace chaoskit::ast {
 
-BETTER_ENUM(UnaryFunction_Type, char, SIN, COS, TAN, MINUS, SQRT, ATAN, TRUNC,
-            EXP, FLOOR, CEIL, SIGNUM, ABS, NOT, FRAC)
-
 class UnaryFunction {
  public:
-  typedef UnaryFunction_Type Type;
+  enum Type : char {
+    SIN,
+    COS,
+    TAN,
+    MINUS,
+    SQRT,
+    ATAN,
+    TRUNC,
+    EXP,
+    FLOOR,
+    CEIL,
+    SIGNUM,
+    ABS,
+    NOT,
+    FRAC,
+  };
 
   UnaryFunction(Type type, Expression argument)
       : type_(type), argument_(std::move(argument)) {}

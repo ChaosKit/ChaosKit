@@ -1,7 +1,8 @@
-#include <ast/ast.h>
-#include <sstream>
-
 #include "util.h"
+
+#include <magic_enum.hpp>
+#include <sstream>
+#include "ast/ast.h"
 
 namespace chaoskit::core {
 
@@ -116,7 +117,9 @@ class DebugStringGenerator {
 
   void generate(const Formula &formula) {
     indentation();
-    stream_ << "Type: " << formula.type._to_string() << std::endl;
+    stream_ << "Type: "
+            << magic_enum::enum_name<library::FormulaType>(formula.type)
+            << std::endl;
 
     indentation();
     stream_ << "Weight: (" << formula.weight.x << ", " << formula.weight.y
@@ -141,7 +144,8 @@ class DebugStringGenerator {
     }
   }
   void generate(const ColoringMethod &coloringMethod) {
-    stream_ << coloringMethod.type._to_string();
+    stream_ << magic_enum::enum_name<library::ColoringMethodType>(
+        coloringMethod.type);
     for (auto param : coloringMethod.params) {
       stream_ << ' ' << param;
     }

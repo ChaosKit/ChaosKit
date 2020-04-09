@@ -4,6 +4,7 @@
 #include <QLoggingCategory>
 #include <QRandomGenerator>
 #include <QtGui/QTransform>
+#include <magic_enum.hpp>
 #include "DocumentAdopter.h"
 #include "core/ManagedDocument.h"
 #include "core/util.h"
@@ -44,7 +45,7 @@ std::vector<float> generateColoringMethodParams(
   std::vector<float> params(library::paramCount(type));
   auto* rng = QRandomGenerator::global();
   for (float& param : params) {
-    param = static_cast<float>(type == +library::ColoringMethodType::Distance
+    param = static_cast<float>(type == library::ColoringMethodType::Distance
                                    ? rng->bounded(0.4)
                                    : rng->generateDouble());
   }
@@ -229,7 +230,8 @@ QModelIndex DocumentModel::addBlend(chaoskit::library::FormulaType type) {
 }
 
 QModelIndex DocumentModel::addBlend(const QString& type) {
-  auto optionalType = library::FormulaType::_from_string_nothrow(type.toUtf8());
+  auto optionalType =
+      magic_enum::enum_cast<library::FormulaType>(type.toStdString());
   if (!optionalType) {
     return QModelIndex();
   }
@@ -266,7 +268,8 @@ QModelIndex DocumentModel::addFormula(library::FormulaType type,
 
 QModelIndex DocumentModel::addFormula(const QString& type,
                                       const QModelIndex& blendIndex) {
-  auto optionalType = library::FormulaType::_from_string_nothrow(type.toUtf8());
+  auto optionalType =
+      magic_enum::enum_cast<library::FormulaType>(type.toStdString());
   if (!optionalType) {
     return QModelIndex();
   }
@@ -592,7 +595,8 @@ QString displayName(const core::Blend* blend) {
 
   QStringList formulaTypes;
   for (const auto* formula : blend->formulas) {
-    formulaTypes.push_back(QString::fromUtf8(formula->type._to_string()));
+    auto type = magic_enum::enum_name<library::FormulaType>(formula->type);
+    formulaTypes.push_back(QString::fromUtf8(type.data(), type.size()));
   }
   return formulaTypes.join(QStringLiteral(" + "));
 }
@@ -641,8 +645,11 @@ QVariant commonBlendData(const core::BlendBase* blend, int role) {
       return QVariant::fromValue(toQtTransform(blend->post));
     case DocumentModel::EnabledRole:
       return blend->enabled;
-    case DocumentModel::ColoringMethodTypeRole:
-      return QString::fromUtf8(blend->coloringMethod.type._to_string());
+    case DocumentModel::ColoringMethodTypeRole: {
+      auto type = magic_enum::enum_name<library::ColoringMethodType>(
+          blend->coloringMethod.type);
+      return QString::fromUtf8(type.data(), type.size());
+    }
     case DocumentModel::ColoringMethodParamsRole:
       return QVariant::fromValue(blend->coloringMethod.params);
     default:
@@ -681,8 +688,10 @@ QVariant formulaData(const core::Formula* formula, int role) {
   if (!formula) return QVariant();
 
   switch (role) {
-    case Qt::DisplayRole:
-      return QString(formula->type._to_string());
+    case Qt::DisplayRole: {
+      auto type = magic_enum::enum_name<library::FormulaType>(formula->type);
+      return QString::fromUtf8(type.data(), type.size());
+    }
     case DocumentModel::TypeRole:
       return DocumentEntryType::Formula;
     case DocumentModel::ParamsRole:
@@ -707,8 +716,8 @@ QVector<int> setCommonBlendData(core::BlendBase* blend, const QVariant& value,
       blend->enabled = value.toBool();
       return {role};
     case DocumentModel::ColoringMethodTypeRole: {
-      auto type = library::ColoringMethodType::_from_string_nothrow(
-          value.toString().toUtf8());
+      auto type = magic_enum::enum_cast<library::ColoringMethodType>(
+          value.toString().toStdString());
       if (!type) return {};
 
       blend->coloringMethod.setType(*type);

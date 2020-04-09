@@ -11,7 +11,7 @@
 namespace chaoskit::core {
 
 struct ColoringMethod {
-  ast::Expression source = ast::Input(ast::Input_Type::COLOR);
+  ast::Expression source = ast::Input(ast::Input::Type::COLOR);
   library::ColoringMethodType type = library::ColoringMethodType::Noop;
   std::vector<float> params = {};
 

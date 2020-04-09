@@ -1,4 +1,5 @@
 #include "util.h"
+#include <magic_enum.hpp>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -16,7 +17,7 @@ namespace chaoskit::library {
 namespace {
 
 std::unique_ptr<Formula> createFormula(FormulaType type) {
-  switch (type._value) {
+  switch (type) {
     case FormulaType::DeJong:
       return std::make_unique<DeJong>();
     case FormulaType::Drain:
@@ -27,13 +28,14 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
       return std::make_unique<Trigonometric>();
     case FormulaType::Invalid:
     default:
-      throw std::runtime_error(std::string("Invalid formula type: ") +
-                               type._to_string());
+      throw std::runtime_error(
+          std::string("Invalid formula type: ") +
+          std::string(magic_enum::enum_name<FormulaType>(type)));
   }
 }
 
 std::unique_ptr<ColoringMethod> createColoringMethod(ColoringMethodType type) {
-  switch (type._value) {
+  switch (type) {
     case ColoringMethodType::Noop:
       return std::make_unique<coloring_methods::Noop>();
     case ColoringMethodType::SingleColor:
@@ -41,8 +43,9 @@ std::unique_ptr<ColoringMethod> createColoringMethod(ColoringMethodType type) {
     case ColoringMethodType::Distance:
       return std::make_unique<coloring_methods::Distance>();
     default:
-      throw std::runtime_error(std::string("Invalid coloring method type: ") +
-                               type._to_string());
+      throw std::runtime_error(
+          std::string("Invalid coloring method type: ") +
+          std::string(magic_enum::enum_name<ColoringMethodType>(type)));
   }
 }
 
@@ -57,7 +60,7 @@ uint32_t paramCount(ColoringMethodType type) {
   return createColoringMethod(type)->paramCount();
 }
 uint32_t paramCount(FormulaType type) {
-  if (type == +FormulaType::Invalid) {
+  if (type == FormulaType::Invalid) {
     return 0;
   }
 

@@ -12,4 +12,4 @@ add_library(library
         FormulaType.h
         util.cpp util.h
         )
-target_link_libraries(library PUBLIC ast better_enums)
+target_link_libraries(library PUBLIC ast better_enums PRIVATE magic_enum)

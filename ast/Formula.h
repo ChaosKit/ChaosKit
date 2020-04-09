@@ -9,7 +9,7 @@ namespace chaoskit::ast {
 
 class Formula {
  public:
-  Formula() : x_(Input(Input_Type::X)), y_(Input(Input_Type::Y)) {}
+  Formula() : x_(Input(Input::Type::X)), y_(Input(Input::Type::Y)) {}
   Formula(Expression x, Expression y) : x_(std::move(x)), y_(std::move(y)) {}
 
   explicit Formula(const Expression (&list)[2]) : x_(list[0]), y_(list[1]) {}
