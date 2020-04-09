@@ -5,6 +5,7 @@ add_library(library
         formulas/DeJong.h
         formulas/Drain.h
         formulas/Linear.h
+        formulas/Quadratic.h
         formulas/Trigonometric.h
         ColoringMethod.h
         ColoringMethodType.h

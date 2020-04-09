@@ -4,7 +4,14 @@
 namespace chaoskit {
 namespace library {
 
-enum class FormulaType { Invalid = 0, DeJong, Drain, Linear, Trigonometric };
+enum class FormulaType {
+  Invalid = 0,
+  DeJong,
+  Drain,
+  Linear,
+  Quadratic,
+  Trigonometric,
+};
 
 }  // namespace library
 }  // namespace chaoskit
