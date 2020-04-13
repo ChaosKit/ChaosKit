@@ -73,8 +73,11 @@ void DocumentAdopter::visit(core::Formula& formula) {
 
 void DocumentAdopter::visit(core::System& system) {
   Id documentId = idStack_.back();
-  Id systemId =
-      store_.associateNewChildWith<core::Document, core::System>(documentId);
+  Id systemId = store_.associateNewChildWith<core::Document, core::System>(
+      documentId, [&system](core::System* target) {
+        target->ttl = system.ttl;
+        target->initialTransform = system.initialTransform;
+      });
 
   idStack_.push_back(systemId);
   for (auto* blend : system.blends) {
