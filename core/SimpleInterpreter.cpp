@@ -55,6 +55,12 @@ const std::unordered_map<char, std::function<float(float, float)>>
         {BinaryFn::DISTANCE, [](float a, float b) { return std::abs(a - b); }},
     };
 
+Point applyTransform(const Transform &transform, const Point &point) {
+  auto &values = transform.values;
+  return Point(values[0] * point.x() + values[1] * point.y() + values[2],
+               values[3] * point.x() + values[4] * point.y() + values[5]);
+}
+
 class BlendInterpreter {
  public:
   BlendInterpreter(Particle input, const Params &params, size_t blend_index)
@@ -155,17 +161,20 @@ class BlendInterpreter {
 }  // namespace
 
 SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, Params params,
+                                     Transform initialTransform,
                                      std::shared_ptr<Rng> rng)
     : system_(std::move(system)),
       ttl_(ttl),
       params_(std::move(params)),
+      initialTransform_(initialTransform),
       rng_(std::move(rng)) {
   updateMaxLimit();
 }
 
-SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, Params params)
+SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, Params params,
+                                     Transform initialTransform)
     : SimpleInterpreter(std::move(system), ttl, std::move(params),
-                        std::make_shared<ThreadLocalRng>()) {}
+                        initialTransform, std::make_shared<ThreadLocalRng>()) {}
 
 SimpleInterpreter::SimpleInterpreter(const core::System &system, int ttl)
     : SimpleInterpreter(toSource(system), ttl, Params::fromSystem(system)) {}
@@ -183,8 +192,9 @@ Particle SimpleInterpreter::randomizeParticle() {
 }
 
 void SimpleInterpreter::randomizeParticle(Particle &particle) {
-  particle.point =
-      Point(rng_->randomFloat(-1.f, 1.f), rng_->randomFloat(-1.f, 1.f));
+  particle.point = applyTransform(
+      initialTransform_,
+      Point(rng_->randomFloat(-1.f, 1.f), rng_->randomFloat(-1.f, 1.f)));
   particle.color = rng_->randomFloat(0.f, 1.f);
 }
 
@@ -198,6 +208,11 @@ void SimpleInterpreter::setParams(Params params) {
 }
 
 void SimpleInterpreter::setTtl(int ttl) { ttl_ = ttl; }
+
+void SimpleInterpreter::setInitialTransform(Transform transform) {
+  initialTransform_ = transform;
+}
+
 SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) {
   Particle next_state = input;
 

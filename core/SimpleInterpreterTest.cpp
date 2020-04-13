@@ -3,11 +3,30 @@
 #include "SimpleInterpreter.h"
 #include "ast/helpers.h"
 #include "core/errors.h"
+#include "transforms.h"
 
 namespace chaoskit::core {
 
 using ast::helpers::make_system;
 using testing::Eq;
+
+class StaticRng : public Rng {
+ public:
+  StaticRng() : f_(0), i_(0) {}
+  explicit StaticRng(float f) : f_(f), i_(0) {}
+  explicit StaticRng(int i) : f_(0), i_(i) {}
+  StaticRng(float f, int i) : f_(f), i_(i) {}
+
+  void setFloat(float f) { f_ = f; }
+  void setInt(int i) { i_ = i; }
+
+  float randomFloat(float min, float max) override { return f_; }
+  int randomInt(int min, int max) override { return i_; }
+
+ private:
+  float f_;
+  int i_;
+};
 
 class SimpleInterpreterTest : public testing::Test {};
 
@@ -72,6 +91,19 @@ TEST_F(SimpleInterpreterTest, UsesOutput) {
   auto output = make_immortal_particle({1.f, 0.f}, 1.f);
   ASSERT_THAT(interpreter(input),
               Eq(SimpleInterpreter::Result{output, output}));
+}
+
+TEST_F(SimpleInterpreterTest, AppliesInitialTransform) {
+  ast::System system{};
+  std::shared_ptr<Rng> rng = std::make_shared<StaticRng>();
+  Transform initialTransform = translate(1, 1);
+
+  SimpleInterpreter interpreter(system, Particle::IMMORTAL, {},
+                                initialTransform, rng);
+
+  auto particle = interpreter.randomizeParticle();
+
+  ASSERT_THAT(particle.point, Eq(Point{1, 1}));
 }
 
 }  // namespace chaoskit::core

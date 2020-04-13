@@ -20,15 +20,17 @@ class SimpleInterpreter {
   };
 
   explicit SimpleInterpreter(ast::System system, int ttl = Particle::IMMORTAL,
-                             Params params = Params{});
+                             Params params = Params{},
+                             Transform initialTransform = Transform());
   explicit SimpleInterpreter(const core::System &system,
                              int ttl = Particle::IMMORTAL);
   SimpleInterpreter(ast::System system, int ttl, Params params,
-                    std::shared_ptr<Rng> rng);
+                    Transform initialTransform, std::shared_ptr<Rng> rng);
 
   void setSystem(const ast::System &system);
   void setParams(Params params);
   void setTtl(int ttl);
+  void setInitialTransform(Transform transform);
   Particle randomizeParticle();
   Result operator()(Particle input);
 
@@ -36,6 +38,7 @@ class SimpleInterpreter {
   ast::System system_;
   int ttl_;
   Params params_;
+  Transform initialTransform_;
   float max_limit_;
   std::shared_ptr<Rng> rng_;
 
