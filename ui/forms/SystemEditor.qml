@@ -9,23 +9,56 @@ ColumnLayout {
   readonly property var system: documentModel.systemProxy
 
   RowLayout {
-    spacing: Theme.smallPadding
+    spacing: Theme.padding
 
     Label {
       Layout.leftMargin: Theme.padding
       text: "Lifetime"
     }
-    TextField {
+    GridLayout {
       Layout.fillWidth: true
       Layout.rightMargin: Theme.padding
 
-      validator: IntValidator { bottom: -1 }
+      columns: 2
+      columnSpacing: Theme.smallPadding
+      rowSpacing: Theme.padding
 
-      onEditingFinished: {
-        system.ttl = parseInt(text, 10);
+      ButtonGroup {
+        buttons: [finiteRadio, infiniteRadio]
       }
-      Component.onCompleted: {
-        text = `${system.ttl}`;
+
+      RadioButton {
+        id: finiteRadio
+
+        checked: system.ttl >= 0
+        onClicked: {
+          system.ttl = parseInt(ttlField.text, 10);
+        }
+      }
+      TextField {
+        Layout.fillWidth: true
+
+        id: ttlField
+        text: system.ttl < 0 ? '20' : `${system.ttl}`;
+        validator: IntValidator { bottom: 1 }
+
+        onEditingFinished: {
+          finiteRadio.checked = true;
+          system.ttl = parseInt(text, 10);
+        }
+      }
+
+      RadioButton {
+        Layout.columnSpan: 2
+        Layout.leftMargin: 2 // pixel-pushing
+
+        id: infiniteRadio
+        checked: system.ttl < 0
+        text: 'Infinite'
+
+        onClicked: {
+          system.ttl = -1;
+        }
       }
     }
   }
