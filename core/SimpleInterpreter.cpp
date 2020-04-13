@@ -8,6 +8,7 @@
 #include "ThreadLocalRng.h"
 #include "ast/ast.h"
 #include "errors.h"
+#include "toSource.h"
 
 namespace chaoskit::core {
 
@@ -166,6 +167,9 @@ SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, Params params)
     : SimpleInterpreter(std::move(system), ttl, std::move(params),
                         std::make_shared<ThreadLocalRng>()) {}
 
+SimpleInterpreter::SimpleInterpreter(const core::System &system, int ttl)
+    : SimpleInterpreter(toSource(system), ttl, Params::fromSystem(system)) {}
+
 void SimpleInterpreter::updateMaxLimit() {
   max_limit_ = system_.blends().empty() ? 0 : system_.blends().back().limit();
 }
@@ -194,7 +198,6 @@ void SimpleInterpreter::setParams(Params params) {
 }
 
 void SimpleInterpreter::setTtl(int ttl) { ttl_ = ttl; }
-
 SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) {
   Particle next_state = input;
 

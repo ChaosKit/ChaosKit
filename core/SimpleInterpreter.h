@@ -21,6 +21,8 @@ class SimpleInterpreter {
 
   explicit SimpleInterpreter(ast::System system, int ttl = Particle::IMMORTAL,
                              Params params = Params{});
+  explicit SimpleInterpreter(const core::System &system,
+                             int ttl = Particle::IMMORTAL);
   SimpleInterpreter(ast::System system, int ttl, Params params,
                     std::shared_ptr<Rng> rng);
 
