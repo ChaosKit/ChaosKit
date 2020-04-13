@@ -18,6 +18,8 @@ message Document {
 message System {
   repeated Blend blends = 1;
   Blend final_blend = 2;
+  int32 ttl = 3;
+  Transform initial_transform = 4;
 }
 
 message Blend {

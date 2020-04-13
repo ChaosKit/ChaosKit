@@ -75,6 +75,14 @@ void readSystem(const System& proto, core::System* system) {
 
   system->finalBlend = new core::FinalBlend;
   readBlendBase(proto.final_blend(), system->finalBlend);
+
+  if (proto.ttl() != 0) {
+    system->ttl = proto.ttl();
+  }
+
+  if (proto.has_initial_transform()) {
+    readTransform(proto.initial_transform(), &system->initialTransform);
+  }
 }
 
 void readDocument(const Document& proto, core::Document* document) {
@@ -157,6 +165,8 @@ void writeSystem(const core::System& system, System* proto) {
   if (system.finalBlend) {
     writeBlendBase(*system.finalBlend, proto->mutable_final_blend());
   }
+  proto->set_ttl(system.ttl);
+  writeTransform(system.initialTransform, proto->mutable_initial_transform());
 }
 
 void writeDocument(const core::Document& document, Document* proto) {
