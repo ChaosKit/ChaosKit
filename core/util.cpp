@@ -49,6 +49,12 @@ class DebugStringGenerator {
   }
 
   std::string generate(const System &system) {
+    stream_ << "TTL: " << system.ttl << std::endl;
+
+    stream_ << "Initial Transform: ";
+    generate(system.initialTransform);
+    stream_ << std::endl;
+
     stream_ << "Blends (" << system.blends.size() << ")" << std::endl;
     indent();
     int index = 0;
