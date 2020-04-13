@@ -24,9 +24,7 @@ float distance(const Point &a, const Point &b) {
 }  // namespace
 
 void BlenderTask::setSystem(const core::System *system) {
-  interpreter_ = std::make_unique<SimpleInterpreter>(
-      toSource(*system), ttl_, core::Params::fromSystem(*system), Transform(),
-      rng_);
+  interpreter_ = std::make_unique<SimpleInterpreter>(*system, rng_);
   particle_ = interpreter_->randomizeParticle();
 }
 
@@ -63,14 +61,6 @@ void BlenderTask::calculate() {
   } catch (MissingParameterError &e) {
     qCritical() << "In BlenderTask::calculate():" << e.what();
     stop();
-  }
-}
-
-void BlenderTask::setTtl(int32_t ttl) {
-  ttl_ = ttl;
-  if (interpreter_) {
-    interpreter_->setTtl(ttl);
-    particle_ = interpreter_->randomizeParticle();
   }
 }
 

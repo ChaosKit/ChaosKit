@@ -10,15 +10,13 @@ namespace chaoskit::ui {
 class BlenderTask : public QObject {
   Q_OBJECT
  public:
-  explicit BlenderTask(std::shared_ptr<core::Rng> rng,
-                       int32_t ttl = core::Particle::IMMORTAL)
-      : interpreter_(), particle_{}, ttl_(ttl), rng_(std::move(rng)) {}
+  explicit BlenderTask(std::shared_ptr<core::Rng> rng)
+      : interpreter_(), particle_{}, rng_(std::move(rng)) {}
 
  public slots:
   void setSystem(const chaoskit::core::System *system);
   void start();
   void stop();
-  void setTtl(int32_t ttl);
 
  signals:
   void started();
@@ -31,7 +29,6 @@ class BlenderTask : public QObject {
  private:
   std::unique_ptr<core::SimpleInterpreter> interpreter_;
   core::Particle particle_;
-  int32_t ttl_;
   bool running_ = false;
   std::shared_ptr<core::Rng> rng_;
 };

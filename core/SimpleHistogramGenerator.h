@@ -14,13 +14,12 @@ namespace chaoskit::core {
 class SimpleHistogramGenerator {
  public:
   SimpleHistogramGenerator(const System &system, uint32_t width,
-                           uint32_t height, int ttl, std::shared_ptr<Rng> rng);
+                           uint32_t height, std::shared_ptr<Rng> rng);
   SimpleHistogramGenerator(const System &system, uint32_t width,
-                           uint32_t height, int ttl = Particle::IMMORTAL);
+                           uint32_t height);
 
   void setSystem(const System &system);
   void setSize(uint32_t width, uint32_t height);
-  void setTtl(int ttl);
   void setColorMap(const ColorMap *color_map);
   void setIterationCount(uint32_t count);
   void setInfiniteIterationCount();
@@ -36,7 +35,6 @@ class SimpleHistogramGenerator {
   stdx::optional<uint32_t> iteration_count_;
   SimpleInterpreter interpreter_;
   const ColorMap *color_map_;
-  std::shared_ptr<Rng> rng_;
 
   void add(const Particle &particle);
   void add(uint32_t x, uint32_t y, float factor = 1);

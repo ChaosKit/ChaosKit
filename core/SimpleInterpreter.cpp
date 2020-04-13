@@ -176,8 +176,14 @@ SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, Params params,
     : SimpleInterpreter(std::move(system), ttl, std::move(params),
                         initialTransform, std::make_shared<ThreadLocalRng>()) {}
 
-SimpleInterpreter::SimpleInterpreter(const core::System &system, int ttl)
-    : SimpleInterpreter(toSource(system), ttl, Params::fromSystem(system)) {}
+SimpleInterpreter::SimpleInterpreter(const core::System &system)
+    : SimpleInterpreter(system, std::make_shared<ThreadLocalRng>()) {}
+
+SimpleInterpreter::SimpleInterpreter(const core::System &system,
+                                     std::shared_ptr<Rng> rng)
+    : SimpleInterpreter(toSource(system), system.ttl,
+                        Params::fromSystem(system), system.initialTransform,
+                        rng) {}
 
 void SimpleInterpreter::updateMaxLimit() {
   max_limit_ = system_.blends().empty() ? 0 : system_.blends().back().limit();
@@ -212,7 +218,6 @@ void SimpleInterpreter::setTtl(int ttl) { ttl_ = ttl; }
 void SimpleInterpreter::setInitialTransform(Transform transform) {
   initialTransform_ = transform;
 }
-
 SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) {
   Particle next_state = input;
 

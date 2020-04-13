@@ -104,18 +104,6 @@ void SystemView::updateSystem() {
   update();
 }
 
-void SystemView::setTtl(int ttl) {
-  if (ttl == ttl_) {
-    return;
-  }
-
-  ttl_ = ttl;
-  generator_->setTtl(ttl);
-  generator_->clear();
-  update();
-  emit ttlChanged();
-}
-
 void SystemView::setGamma(float gamma) {
   if (qFuzzyCompare(gamma_, gamma)) {
     return;

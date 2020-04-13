@@ -13,7 +13,6 @@ class SystemView : public QQuickFramebufferObject {
   Q_PROPERTY(chaoskit::ui::DocumentModel *model READ model WRITE setModel NOTIFY
                  modelChanged)
   Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
-  Q_PROPERTY(int ttl READ ttl WRITE setTtl NOTIFY ttlChanged)
   Q_PROPERTY(float gamma READ gamma WRITE setGamma NOTIFY gammaChanged)
   Q_PROPERTY(
       float exposure READ exposure WRITE setExposure NOTIFY exposureChanged)
@@ -31,7 +30,6 @@ class SystemView : public QQuickFramebufferObject {
       const std::function<void(const core::HistogramBuffer &)> &action) const;
 
   DocumentModel *model() const { return model_; }
-  int ttl() const { return ttl_; }
   float gamma() const { return gamma_; }
   float exposure() const { return exposure_; }
   float vibrancy() const { return vibrancy_; }
@@ -47,7 +45,6 @@ class SystemView : public QQuickFramebufferObject {
   void clear();
   void setRunning(bool running);
   void setModel(DocumentModel *documentModel);
-  void setTtl(int ttl);
   void setGamma(float gamma);
   void setExposure(float exposure);
   void setVibrancy(float vibrancy);
@@ -57,7 +54,6 @@ class SystemView : public QQuickFramebufferObject {
  signals:
   void runningChanged();
   void modelChanged();
-  void ttlChanged();
   void gammaChanged();
   void exposureChanged();
   void vibrancyChanged();
@@ -68,7 +64,6 @@ class SystemView : public QQuickFramebufferObject {
   HistogramGenerator *generator_;
   DocumentModel *model_ = nullptr;
 
-  int ttl_ = chaoskit::core::Particle::IMMORTAL;
   float gamma_ = 2.2f;
   float exposure_ = 0.f;
   float vibrancy_ = 0.f;

@@ -6,28 +6,25 @@ namespace chaoskit::core {
 
 SimpleHistogramGenerator::SimpleHistogramGenerator(const System &system,
                                                    uint32_t width,
-                                                   uint32_t height, int ttl,
+                                                   uint32_t height,
                                                    std::shared_ptr<Rng> rng)
     : width_(width),
       height_(height),
       buffer_(width * height),
       iteration_count_(stdx::nullopt),
-      interpreter_(toSource(system), ttl, Params::fromSystem(system)),
-      color_map_(nullptr),
-      rng_(std::move(rng)) {}
+      interpreter_(system, std::move(rng)),
+      color_map_(nullptr) {}
 
 SimpleHistogramGenerator::SimpleHistogramGenerator(const System &system,
                                                    uint32_t width,
-                                                   uint32_t height, int ttl)
-    : SimpleHistogramGenerator(system, width, height, ttl,
+                                                   uint32_t height)
+    : SimpleHistogramGenerator(system, width, height,
                                std::make_shared<ThreadLocalRng>()) {}
 
 void SimpleHistogramGenerator::setSystem(const System &system) {
   interpreter_.setSystem(toSource(system));
   interpreter_.setParams(Params::fromSystem(system));
 }
-
-void SimpleHistogramGenerator::setTtl(int ttl) { interpreter_.setTtl(ttl); }
 
 void SimpleHistogramGenerator::setSize(uint32_t width, uint32_t height) {
   width_ = width;

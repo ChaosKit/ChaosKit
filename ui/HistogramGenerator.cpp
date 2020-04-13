@@ -58,10 +58,6 @@ void HistogramGenerator::setSize(quint32 width, quint32 height) {
       blenderTask_, [=] { gathererTask_->setSize(QSize(width, height)); });
 }
 
-void HistogramGenerator::setTtl(int32_t ttl) {
-  QMetaObject::invokeMethod(blenderTask_, [=] { blenderTask_->setTtl(ttl); });
-}
-
 void HistogramGenerator::start() {
   QMetaObject::invokeMethod(blenderTask_, &BlenderTask::start);
   running_ = true;

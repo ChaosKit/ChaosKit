@@ -28,7 +28,6 @@ TestWindow::TestWindow() {
   histogramGenerator_ = new HistogramGenerator(this);
   histogramGenerator_->setSize(512, 512);
   histogramGenerator_->setSystem(model->document()->system);
-  histogramGenerator_->setTtl(20);
   toneMapper_ = new GLToneMapper(this);
 
   connect(this, &QOpenGLWindow::frameSwapped, this, &TestWindow::syncHistogram);

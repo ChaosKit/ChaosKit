@@ -29,7 +29,6 @@ SystemView {
       y: translationY
     }
   ]
-  ttl: 20
   width: documentModel.documentProxy.width
 
   Timer {
