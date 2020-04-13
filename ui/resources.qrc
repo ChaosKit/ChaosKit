@@ -11,6 +11,7 @@
         <file>ChaosKit/Label.qml</file>
         <file>ChaosKit/Popup.qml</file>
         <file>ChaosKit/qmldir</file>
+        <file>ChaosKit/RadioButton.qml</file>
         <file>ChaosKit/RoundButton.qml</file>
         <file>ChaosKit/Separator.qml</file>
         <file>ChaosKit/Slider.qml</file>
@@ -29,6 +30,7 @@
         <file>forms/ImageSizeEditor.qml</file>
         <file>forms/MainMenu.qml</file>
         <file>forms/MainWindow.qml</file>
+        <file>forms/SystemEditor.qml</file>
         <file>forms/SystemPreview.qml</file>
         <file>forms/ToneMappingEditor.qml</file>
         <file>qtquickcontrols2.conf</file>
