@@ -21,10 +21,11 @@ Popup {
   }
 
   IconButton {
-    iconName: "times"
-    y: Theme.units(-1)
+    iconName: "close"
+    anchors.top: parent.top
+    anchors.topMargin: -6
     anchors.right: parent.right
-    anchors.rightMargin: Theme.units(-1)
+    anchors.rightMargin: Theme.units(-2)
     onClicked: popup.close()
   }
 
