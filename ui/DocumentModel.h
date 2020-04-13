@@ -7,6 +7,7 @@
 #include "DocumentStore.h"
 #include "ModelEntry.h"
 #include "RandomizationSettings.h"
+#include "SystemProxy.h"
 #include "core/structures/Blend.h"
 #include "core/structures/Document.h"
 #include "core/structures/Formula.h"
@@ -38,6 +39,7 @@ class DocumentModel : public QAbstractItemModel {
   Q_PROPERTY(QModelIndex systemIndex READ systemIndex NOTIFY systemReset)
   Q_PROPERTY(
       DocumentProxy* documentProxy READ documentProxy NOTIFY documentReset)
+  Q_PROPERTY(SystemProxy* systemProxy READ systemProxy NOTIFY systemReset)
   Q_PROPERTY(bool modified READ isModified NOTIFY modifiedChanged)
   Q_PROPERTY(QString name READ name NOTIFY filePathChanged)
   Q_PROPERTY(QString filePath READ filePath NOTIFY filePathChanged)
@@ -60,6 +62,8 @@ class DocumentModel : public QAbstractItemModel {
     // Related to both formulas and blends
     SingleFormulaIndexRole,
     WeightRole,
+    // System-specific roles
+    TtlRole,
     // Document-specific roles
     ColorMapRole,
     ExposureRole,
@@ -131,6 +135,7 @@ class DocumentModel : public QAbstractItemModel {
 
   [[nodiscard]] Q_INVOKABLE ModelEntry* entryAtIndex(const QModelIndex& index);
   [[nodiscard]] DocumentProxy* documentProxy();
+  [[nodiscard]] SystemProxy* systemProxy();
 
   [[nodiscard]] QString debugSource() const;
 
@@ -159,6 +164,7 @@ class DocumentModel : public QAbstractItemModel {
 
  private:
   DocumentProxy* documentProxy_;
+  SystemProxy* systemProxy_;
   bool modified_ = true;
   QString filePath_ = "";
   ColorMapRegistry* colorMapRegistry_;

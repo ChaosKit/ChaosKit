@@ -91,7 +91,9 @@ core::Transform fromQtTransform(const QTransform& transform) {
 }  // namespace
 
 DocumentModel::DocumentModel(QObject* parent)
-    : QAbstractItemModel(parent), documentProxy_(new DocumentProxy(this)) {
+    : QAbstractItemModel(parent),
+      documentProxy_(new DocumentProxy(this)),
+      systemProxy_(new SystemProxy(this)) {
   fixInvariants();
 
   connect(this, &QAbstractItemModel::dataChanged, this,
@@ -164,6 +166,8 @@ ModelEntry* DocumentModel::entryAtIndex(const QModelIndex& index) {
 }
 
 DocumentProxy* DocumentModel::documentProxy() { return documentProxy_; }
+
+SystemProxy* DocumentModel::systemProxy() { return systemProxy_; }
 
 QString DocumentModel::debugSource() const {
   return QString::fromStdString(core::debugString(*system()));
@@ -463,6 +467,8 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   // Related to both formulas and blends
   names[SingleFormulaIndexRole] = "singleFormulaIndex";
   names[WeightRole] = "weight";
+  // System-specific roles
+  names[TtlRole] = "ttl";
   // Document-specific roles
   names[ColorMapRole] = "colorMap";
   names[ExposureRole] = "exposure";
@@ -633,6 +639,8 @@ QVariant systemData(const core::System* system, int role) {
       return QStringLiteral("System");
     case DocumentModel::TypeRole:
       return DocumentEntryType::System;
+    case DocumentModel::TtlRole:
+      return system->ttl;
     default:
       return QVariant();
   }
@@ -770,6 +778,25 @@ QVector<int> setFormulaData(core::Formula* formula, const QVariant& value,
       return {};
   }
 }
+
+QVector<int> setSystemData(core::System* system, const QVariant& value,
+                           int role) {
+  if (!system) return {};
+
+  switch (role) {
+    case DocumentModel::TtlRole: {
+      int ttl = value.toInt();
+      if (ttl != system->ttl) {
+        system->ttl = ttl;
+        return {role};
+      }
+    }
+    default:;
+  }
+
+  return {};
+}
+
 QVector<int> setDocumentData(core::Document* document, const QVariant& value,
                              int role) {
   if (!document) return {};
@@ -866,6 +893,11 @@ bool DocumentModel::setData(const QModelIndex& index, const QVariant& value,
     updatedRoles = store_.update<core::Formula>(
         id, [&value, role](core::Formula* formula) {
           return setFormulaData(formula, value, role);
+        });
+  } else if (DocumentStore::matchesType<core::System>(id)) {
+    updatedRoles =
+        store_.update<core::System>(id, [&value, role](core::System* system) {
+          return setSystemData(system, value, role);
         });
   } else if (DocumentStore::matchesType<core::Document>(id)) {
     updatedRoles = store_.update<core::Document>(
@@ -1030,7 +1062,6 @@ QString DocumentModel::name() const {
   }
   return QFileInfo(filePath_).fileName();
 }
-
 void DocumentModel::handleDataChanges(const QModelIndex& topLeft,
                                       const QModelIndex& bottomRight,
                                       const QVector<int>& roles) {

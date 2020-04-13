@@ -28,6 +28,7 @@ add_library(ui_state
         DocumentProxy.cpp DocumentProxy.h
         ModelEntry.cpp ModelEntry.h
         RandomizationSettings.cpp RandomizationSettings.h
+        SystemProxy.cpp SystemProxy.h
         )
 set_target_properties(ui_state PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_state PUBLIC

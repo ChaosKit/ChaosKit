@@ -23,9 +23,7 @@ RowLayout {
       anchors.fill: parent
       currentIndex: tabs.currentIndex
 
-      Rectangle {
-        color: 'red'
-      }
+      SystemEditor {}
       ImageEditor {}
     }
   }
