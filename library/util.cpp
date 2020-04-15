@@ -11,6 +11,7 @@
 #include "formulas/Drain.h"
 #include "formulas/Linear.h"
 #include "formulas/Quadratic.h"
+#include "formulas/Tinkerbell.h"
 #include "formulas/Trigonometric.h"
 
 namespace chaoskit::library {
@@ -27,6 +28,8 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
       return std::make_unique<Linear>();
     case FormulaType::Quadratic:
       return std::make_unique<Quadratic>();
+    case FormulaType::Tinkerbell:
+      return std::make_unique<Tinkerbell>();
     case FormulaType::Trigonometric:
       return std::make_unique<Trigonometric>();
     case FormulaType::Invalid:

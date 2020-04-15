@@ -12,5 +12,5 @@ add_library(library
         Formula.h
         FormulaType.h
         util.cpp util.h
-        )
+        formulas/Tinkerbell.h)
 target_link_libraries(library PUBLIC ast PRIVATE magic_enum)
