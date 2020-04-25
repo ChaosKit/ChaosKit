@@ -73,4 +73,11 @@ uint32_t paramCount(FormulaType type) {
   return createFormula(type)->paramCount();
 }
 
+std::vector<float> exampleParams(FormulaType type) {
+  if (type == FormulaType::Invalid) {
+    return {};
+  }
+  return createFormula(type)->exampleParams();
+}
+
 }  // namespace chaoskit::library

@@ -15,6 +15,11 @@ class DeJong : public Formula {
   }
 
   uint32_t paramCount() override { return 4; }
+
+  std::vector<float> exampleParams() override {
+    return {-1.9292301883127383f, -1.7559409159631594f, -1.8413772506711874f,
+            -1.972643807513176f};
+  }
 };
 
 }  // namespace library

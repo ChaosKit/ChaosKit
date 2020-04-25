@@ -26,23 +26,10 @@ constexpr int GRID_HEIGHT = 16;
 constexpr double GRID_EXPANSION_FACTOR = .2;
 constexpr int ITERATIONS = 3;
 
-/** Returns a vector of good-looking params for a formula. */
-std::vector<float> getParamsForFormula(library::FormulaType type) {
-  switch (type) {
-    case library::FormulaType::DeJong:
-      return {-1.9292301883127383f, -1.7559409159631594f, -1.8413772506711874f,
-              -1.972643807513176f};
-    case library::FormulaType::Drain:
-      return {0.7f, -0.5f, 0.3f, 0.f};
-    default:
-      return {};
-  }
-}
-
 core::SimpleInterpreter createInterpreter(library::FormulaType type) {
   auto formula = std::make_unique<core::Formula>();
   formula->setType(type);
-  formula->params = getParamsForFormula(type);
+  formula->params = library::exampleParams(type);
 
   auto blend = std::make_unique<core::Blend>();
   blend->formulas.push_back(formula.get());

@@ -11,6 +11,9 @@ class Formula {
   virtual ~Formula() = default;
   virtual ast::Formula source() = 0;
   virtual uint32_t paramCount() { return 0; }
+  virtual std::vector<float> exampleParams() {
+    return std::vector(paramCount(), 1.f);
+  }
 
  protected:
   ast::helpers::InputHelper input;

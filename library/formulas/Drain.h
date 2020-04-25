@@ -17,6 +17,10 @@ class Drain : public Formula {
   }
 
   uint32_t paramCount() override { return 4; }
+
+  std::vector<float> exampleParams() override {
+    return {0.7f, -0.5f, 0.3f, 0.f};
+  }
 };
 
 }  // namespace library
