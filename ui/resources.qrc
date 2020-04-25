@@ -3,6 +3,7 @@
     <qresource>
         <file>ChaosKit/ApplicationWindow.qml</file>
         <file>ChaosKit/Button.qml</file>
+        <file>ChaosKit/Chip.qml</file>
         <file>ChaosKit/ComboBox.qml</file>
         <file>ChaosKit/Fab.qml</file>
         <file>ChaosKit/Heading.qml</file>
@@ -22,15 +23,19 @@
         <file>ChaosKit/Theme.qml</file>
         <file>ChaosKit/ToolTip.qml</file>
         <file>forms/AstInspector.qml</file>
+        <file>forms/BlendIndicator.qml</file>
         <file>forms/ColorMapEditor.qml</file>
+        <file>forms/ColumnRail.qml</file>
         <file>forms/DocumentEditor.qml</file>
         <file>forms/EditorTabs.qml</file>
         <file>forms/ExportImageDialog.qml</file>
+        <file>forms/FinalBlendIndicator.qml</file>
         <file>forms/ImageEditor.qml</file>
         <file>forms/ImageSizeEditor.qml</file>
         <file>forms/LifetimeEditor.qml</file>
         <file>forms/MainMenu.qml</file>
         <file>forms/MainWindow.qml</file>
+        <file>forms/StructureEditor.qml</file>
         <file>forms/SystemEditor.qml</file>
         <file>forms/SystemPreview.qml</file>
         <file>forms/ToneMappingEditor.qml</file>

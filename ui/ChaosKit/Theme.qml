@@ -14,6 +14,10 @@ QtObject {
   readonly property int padding: units(2)
   readonly property int smallPadding: units(1)
   readonly property int windowPadding: units(8)
+  readonly property int chipHeight: units(4)
+
+  readonly property int blendIndicatorWidth: units(5)
+  readonly property int blendIndicatorHeight: units(3)
 
   // Fonts
 
@@ -89,6 +93,8 @@ QtObject {
   readonly property color borderColor: Qt.rgba(1, 1, 1, 0.12)
   readonly property color disabledColor: Qt.rgba(1, 1, 1, 0.12)
   readonly property color surfaceOverlay: Qt.rgba(1, 1, 1, 0.12)
+
+  readonly property real hoverRatio: 0.12
 
   readonly property color black: "black"
   readonly property color white: "white"

@@ -6,5 +6,10 @@ import ChaosKit 1.0
 ColumnLayout {
   spacing: Theme.padding
 
-  LifetimeEditor {}
+  StructureEditor {
+    Layout.fillWidth: true
+  }
+  LifetimeEditor {
+    Layout.fillWidth: true
+  }
 }

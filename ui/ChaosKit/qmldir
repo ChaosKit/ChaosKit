@@ -1,5 +1,6 @@
 module ChaosKit
 singleton Theme 1.0 Theme.qml
+Chip 1.0 Chip.qml
 Heading 1.0 Heading.qml
 Fab 1.0 Fab.qml
 IconButton 1.0 IconButton.qml
