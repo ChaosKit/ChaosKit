@@ -25,6 +25,7 @@
         <file>ChaosKit/ToolTip.qml</file>
         <file>forms/AstInspector.qml</file>
         <file>forms/BlendIndicator.qml</file>
+        <file>forms/BlendListItem.qml</file>
         <file>forms/ColorMapEditor.qml</file>
         <file>forms/ColumnRail.qml</file>
         <file>forms/DocumentEditor.qml</file>
