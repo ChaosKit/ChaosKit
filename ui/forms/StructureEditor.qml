@@ -79,11 +79,13 @@ ColumnLayout {
     }
 
     IconButton {
-      enabled: false
+      enabled:
+          selectionModel.currentIndex.valid
+              && !documentModel.isFinalBlend(selectionModel.currentIndex)
       iconName: 'trash'
 
       onClicked: {
-        console.log('not implemented');
+        documentModel.removeRowAtIndex(selectionModel.currentIndex);
       }
     }
   }

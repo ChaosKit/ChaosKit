@@ -95,6 +95,7 @@ QtObject {
   readonly property color surfaceOverlay: Qt.rgba(1, 1, 1, 0.12)
 
   readonly property real hoverRatio: 0.04
+  readonly property real focusRatio: 0.12
 
   readonly property color black: "black"
   readonly property color white: "white"

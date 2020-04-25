@@ -10,6 +10,9 @@ Item {
   property var dragContainer
   implicitHeight: layout.implicitHeight
 
+  readonly property bool isSelected:
+      selectionModel.currentIndex === formulaModel.rootIndex
+
   DropArea {
     id: dropArea
     anchors.fill: parent
@@ -22,12 +25,21 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: hoverHandler.hovered
-        ? Theme.alpha(Theme.onSurface, Theme.hoverRatio)
-        : 'transparent'
+    color:
+        item.isSelected
+            ? Theme.alpha(Theme.onSurface, Theme.focusRatio) :
+        hoverHandler.hovered
+            ? Theme.alpha(Theme.onSurface, Theme.hoverRatio) :
+        'transparent'
 
     HoverHandler {
       id: hoverHandler
+    }
+    TapHandler {
+      onSingleTapped: {
+        selectionModel.setCurrentIndex(
+            formulaModel.rootIndex, ItemSelectionModel.ClearAndSelect);
+      }
     }
 
     DelegateModel {
@@ -96,7 +108,9 @@ Item {
           y: layout.topPadding
 
           onWeightChanged: {
-            model.weight = weight;
+            if (model.weight !== weight) {
+              model.weight = weight;
+            }
           }
         }
 
