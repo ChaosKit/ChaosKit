@@ -5,7 +5,7 @@ Rectangle {
 
   property alias text: label.text
 
-  color: Theme.surfaceOverlay
+  color: Theme.alpha(Theme.onSurface, Drag.active ? 0.2 : 0.12)
   implicitHeight: label.height
   implicitWidth: label.implicitWidth
   radius: Theme.borderRadius
