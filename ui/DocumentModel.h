@@ -94,6 +94,9 @@ class DocumentModel : public QAbstractItemModel {
   bool setData(const QModelIndex& index, const QVariant& value,
                int role) override;
   bool removeRows(int row, int count, const QModelIndex& parent) override;
+  bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count,
+                const QModelIndex& destinationParent,
+                int destinationChild) override;
 
   // Custom API
   template <typename T>
@@ -121,6 +124,8 @@ class DocumentModel : public QAbstractItemModel {
 
   Q_INVOKABLE void absorbBlend(const QModelIndex& source,
                                const QModelIndex& destination);
+  Q_INVOKABLE void moveFormulaToBlend(const QModelIndex& sourceFormula,
+                                      const QModelIndex& destinationBlend);
 
   void adoptDocument(core::Document* document);
   Q_INVOKABLE bool loadFromFile(const QString& path);
@@ -178,6 +183,8 @@ class DocumentModel : public QAbstractItemModel {
   bool fixInvariants();
   void maybeUpdateBlendDisplayName(const QModelIndex& blend);
   QModelIndex getFormulaIndex(const QModelIndex& blendOrFormula);
+  bool moveRowsBetweenBlends(const QModelIndex& sourceParent, int sourceRow,
+                             int count, const QModelIndex& destinationParent);
 
  private slots:
   void handleDataChanges(const QModelIndex& topLeft,

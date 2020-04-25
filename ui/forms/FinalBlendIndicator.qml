@@ -7,6 +7,6 @@ Rectangle {
   color: Theme.surfaceColor
   height: Theme.blendIndicatorHeight / Math.SQRT2 + 1
   rotation: 45
-  transform: [ Translate {x: -0.5; y: 1} ]  // pixel-pushing
+  transform: [ Translate {x: 0; y: 1} ]  // pixel-pushing
   width: Theme.blendIndicatorHeight / Math.SQRT2 + 1
 }

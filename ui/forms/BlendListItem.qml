@@ -15,7 +15,8 @@ Item {
     anchors.fill: parent
 
     onDropped: {
-      console.log('dropped on', index, drop.source);
+      documentModel.moveFormulaToBlend(
+          drop.source.modelIndex, formulaModel.rootIndex);
     }
   }
 
@@ -33,6 +34,9 @@ Item {
       rootIndex: delegateModel.modelIndex(index)
       delegate: Chip {
         id: chip
+
+        property var modelIndex: formulaModel.modelIndex(index)
+
         text: display
         states: [
           State {
@@ -45,6 +49,8 @@ Item {
         ]
 
         Drag.active: dragHandler.active
+        Drag.hotSpot.x: chip.implicitWidth / 2
+        Drag.hotSpot.y: chip.height / 2
 
         DragHandler {
           id: dragHandler
@@ -62,6 +68,7 @@ Item {
       id: layout
       columns: 2
       columnSpacing: Theme.padding
+      rowSpacing: 0
       x: Theme.padding
       width: item.width - 2 * Theme.padding
 
@@ -101,7 +108,7 @@ Item {
         text: display
         visible: display !== ''
         Layout.alignment: Qt.AlignTop
-        Layout.bottomMargin: Theme.smallPadding
+        Layout.bottomMargin: formulaModel.count > 0 ? 0 : Theme.smallPadding
         Layout.fillWidth: true
         Layout.topMargin: layout.topPadding
       }

@@ -435,6 +435,14 @@ void DocumentModel::absorbBlend(const QModelIndex& source,
   endRemoveRows();
 }
 
+void DocumentModel::moveFormulaToBlend(const QModelIndex& sourceFormula,
+                                       const QModelIndex& destinationBlend) {
+  if (!matchesType<core::Formula>(sourceFormula)) return;
+  if (!isBlend(destinationBlend)) return;
+
+  moveRow(parent(sourceFormula), sourceFormula.row(), destinationBlend, 0);
+}
+
 void DocumentModel::resetDocument() {
   core::Document defaultDoc;
   setItemData(documentIndex(),
@@ -972,6 +980,86 @@ bool DocumentModel::removeRows(int row, int count, const QModelIndex& parent) {
   return true;
 }
 
+bool DocumentModel::moveRows(const QModelIndex& sourceParent, int sourceRow,
+                             int count, const QModelIndex& destinationParent,
+                             int destinationChild) {
+  if (!sourceParent.isValid() || !destinationParent.isValid()) return false;
+  if (count < 1) return false;
+
+  // We don't support reordering.
+  if (sourceParent == destinationParent) return false;
+
+  // It's only possible to move formulas.
+  if (!isBlend(sourceParent)) return false;
+
+  Id sourceParentId = toId(sourceParent);
+  Id destinationParentId = toId(destinationParent);
+
+  // Sanity check for number of formulas.
+  if (sourceRow + count > store_.countAllChildren(sourceParentId)) return false;
+
+  // Promoting formulas to a new blend
+  if (matchesType<core::System>(destinationParent)) {
+    // We override destinationChild because Store doesn't support reordering
+    // yet.
+    destinationChild = store_.countChildren<core::Blend>(destinationParentId);
+
+    // Add a blend and set it as new destination
+    beginInsertRows(destinationParent, destinationChild, destinationChild);
+    store_.associateNewChildWith<core::System, core::Blend>(
+        destinationParentId);
+    endInsertRows();
+
+    return moveRowsBetweenBlends(sourceParent, sourceRow, count,
+                                 index(destinationChild, 0, destinationParent));
+  }
+
+  // Moving formulas between blends
+  if (DocumentStore::matchesType<core::Blend>(destinationParentId) ||
+      DocumentStore::matchesType<core::FinalBlend>(destinationParentId)) {
+    return moveRowsBetweenBlends(sourceParent, sourceRow, count,
+                                 destinationParent);
+  }
+
+  return false;
+}
+
+bool DocumentModel::moveRowsBetweenBlends(
+    const QModelIndex& sourceParent, int sourceRow, int count,
+    const QModelIndex& destinationParent) {
+  Id sourceParentId = toId(sourceParent);
+  Id destinationParentId = toId(destinationParent);
+  int destinationChild = store_.countAllChildren(destinationParentId);
+  const auto& sourceChildren = store_.allChildren(sourceParentId);
+
+  beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1,
+                destinationParent, destinationChild);
+
+  std::vector<Id> idsToMove(sourceChildren.begin() + sourceRow,
+                            sourceChildren.begin() + sourceRow + count);
+
+  for (Id id : idsToMove) {
+    if (DocumentStore::matchesType<core::Blend>(sourceParentId)) {
+      store_.dissociateChildFrom<core::Blend, core::Formula>(sourceParentId,
+                                                             id);
+    } else {
+      store_.dissociateChildFrom<core::FinalBlend, core::Formula>(
+          sourceParentId, id);
+    }
+
+    if (DocumentStore::matchesType<core::Blend>(destinationParentId)) {
+      store_.associateChildWith<core::Blend, core::Formula>(destinationParentId,
+                                                            id);
+    } else {
+      store_.associateChildWith<core::FinalBlend, core::Formula>(
+          destinationParentId, id);
+    }
+  }
+
+  endMoveRows();
+  return true;
+}
+
 //////////////////////////////////////////////////////////////// Private methods
 
 state::Id DocumentModel::documentId() const {
@@ -1027,21 +1115,18 @@ QModelIndex DocumentModel::getFormulaIndex(const QModelIndex& blendOrFormula) {
   }
   return QModelIndex();
 }
-
 void DocumentModel::setModified(bool modified) {
   if (modified_ == modified) return;
 
   modified_ = modified;
   emit modifiedChanged();
 }
-
 void DocumentModel::setFilePath(const QString& path) {
   if (filePath_ == path) return;
 
   filePath_ = path;
   emit filePathChanged();
 }
-
 QString DocumentModel::name() const {
   if (filePath_.isEmpty()) {
     return QStringLiteral("Untitled");
