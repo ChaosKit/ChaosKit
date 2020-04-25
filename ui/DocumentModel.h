@@ -117,13 +117,12 @@ class DocumentModel : public QAbstractItemModel {
   Q_INVOKABLE QModelIndex addFormula(const QString& type,
                                      const QModelIndex& blendIndex);
 
+  Q_INVOKABLE QModelIndex addBlend();
   QModelIndex addBlend(library::FormulaType type);
   Q_INVOKABLE QModelIndex addBlend(const QString& type);
 
   Q_INVOKABLE bool removeRowAtIndex(const QModelIndex& index);
 
-  Q_INVOKABLE void absorbBlend(const QModelIndex& source,
-                               const QModelIndex& destination);
   Q_INVOKABLE void moveFormulaToBlend(const QModelIndex& sourceFormula,
                                       const QModelIndex& destinationBlend);
 

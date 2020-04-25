@@ -8,6 +8,16 @@ import ChaosKit 1.0
 ColumnLayout {
   spacing: 0
 
+  // Changing the rootIndex on DelegateModel doesn't work, it gets reset to the
+  // model's root. Fortunately reloading the component helps.
+  Connections {
+    target: documentModel
+    onSystemIndexChanged: {
+      loader.sourceComponent = undefined;
+      loader.sourceComponent = blendColumn;
+    }
+  }
+
   Heading {
     padding: Theme.padding
     text: 'Structure'
@@ -50,13 +60,31 @@ ColumnLayout {
     }
   }
 
-  // Changing the rootIndex on DelegateModel doesn't work, it gets reset to the
-  // model's root. Fortunately reloading the component helps.
-  Connections {
-    target: documentModel
-    onSystemIndexChanged: {
-      loader.sourceComponent = undefined;
-      loader.sourceComponent = blendColumn;
+
+  RowLayout {
+    Layout.fillWidth: true
+    Layout.leftMargin: Theme.padding
+    Layout.rightMargin: Theme.padding
+
+    IconButton {
+      iconName: 'plus'
+
+      onClicked: {
+        documentModel.addBlend();
+      }
+    }
+
+    Item {
+      Layout.fillWidth: true
+    }
+
+    IconButton {
+      enabled: false
+      iconName: 'trash'
+
+      onClicked: {
+        console.log('not implemented');
+      }
     }
   }
 }

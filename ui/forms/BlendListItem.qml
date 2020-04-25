@@ -22,7 +22,9 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: hoverHandler.hovered ? Theme.alpha(Theme.onSurface, 0.04) : 'transparent'
+    color: hoverHandler.hovered
+        ? Theme.alpha(Theme.onSurface, Theme.hoverRatio)
+        : 'transparent'
 
     HoverHandler {
       id: hoverHandler

@@ -217,6 +217,14 @@ bool DocumentModel::saveToFile(const QString& path) {
 
 ///////////////////////////////////////////////////////////// Custom API — Slots
 
+QModelIndex DocumentModel::addBlend() {
+  size_t newRowNumber = store_.countChildren<core::Blend>(systemId());
+  beginInsertRows(systemIndex(), newRowNumber, newRowNumber);
+  store_.associateNewChildWith<core::System, core::Blend>(systemId());
+  endInsertRows();
+  return blendAt(newRowNumber);
+}
+
 QModelIndex DocumentModel::addBlend(chaoskit::library::FormulaType type) {
   size_t newRowNumber = store_.countChildren<core::Blend>(systemId());
   beginInsertRows(systemIndex(), newRowNumber, newRowNumber);
@@ -397,42 +405,6 @@ void DocumentModel::randomizeSystem(const RandomizationSettings& settings) {
   endResetModel();
 
   setModified(true);
-}
-
-void DocumentModel::absorbBlend(const QModelIndex& source,
-                                const QModelIndex& destination) {
-  if (!source.isValid() || !destination.isValid() ||
-      !matchesType<core::Blend>(source) || !isBlend(destination)) {
-    return;
-  }
-
-  Id sourceId = toId(source.internalId());
-  Id destinationId = toId(destination.internalId());
-
-  // Get formulas to move to destination
-  std::vector<Id> sourceFormulas = store_.allChildren(sourceId);
-
-  // Move the formulas to the destination blend
-  if (!beginMoveRows(source, 0, (int)(sourceFormulas.size()) - 1, destination,
-                     rowCount(destination))) {
-    return;
-  }
-  for (const auto& formulaId : sourceFormulas) {
-    store_.dissociateChildFrom<core::Blend, core::Formula>(sourceId, formulaId);
-    if (DocumentStore::matchesType<core::Blend>(destinationId)) {
-      store_.associateChildWith<core::Blend, core::Formula>(destinationId,
-                                                            formulaId);
-    } else {
-      store_.associateChildWith<core::FinalBlend, core::Formula>(destinationId,
-                                                                 formulaId);
-    }
-  }
-  endMoveRows();
-
-  // Remove the source blend, as it's now empty
-  beginRemoveRows(source.parent(), source.row(), source.row());
-  store_.remove(sourceId);
-  endRemoveRows();
 }
 
 void DocumentModel::moveFormulaToBlend(const QModelIndex& sourceFormula,
@@ -1109,7 +1081,6 @@ void DocumentModel::maybeUpdateBlendDisplayName(const QModelIndex& blend) {
     emit dataChanged(blend, blend, {Qt::DisplayRole});
   }
 }
-
 QModelIndex DocumentModel::getFormulaIndex(const QModelIndex& blendOrFormula) {
   if (matchesType<core::Formula>(blendOrFormula)) {
     return blendOrFormula;
