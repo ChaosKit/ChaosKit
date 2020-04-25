@@ -594,19 +594,6 @@ bool DocumentModel::hasChildren(const QModelIndex& parent) const {
 
 namespace {
 
-QString displayName(const core::Blend* blend) {
-  if (!blend->name.empty()) {
-    return QString::fromStdString(blend->name);
-  }
-
-  QStringList formulaTypes;
-  for (const auto* formula : blend->formulas) {
-    auto type = magic_enum::enum_name<library::FormulaType>(formula->type);
-    formulaTypes.push_back(QString::fromUtf8(type.data(), type.size()));
-  }
-  return formulaTypes.join(QStringLiteral(" + "));
-}
-
 QVariant documentData(const core::Document* document, int role) {
   if (!document) return QVariant();
 
@@ -669,7 +656,6 @@ QVariant blendData(const core::Blend* blend, int role) {
 
   switch (role) {
     case Qt::DisplayRole:
-      return displayName(blend);
     case Qt::EditRole:
       return QString::fromStdString(blend->name);
     case DocumentModel::TypeRole:
