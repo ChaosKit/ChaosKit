@@ -741,9 +741,13 @@ QVector<int> setBlendData(core::Blend* blend, const QVariant& value, int role) {
     case Qt::EditRole:
       blend->name = value.toString().toStdString();
       return {Qt::DisplayRole, Qt::EditRole};
-    case DocumentModel::WeightRole:
-      blend->weight = value.toFloat();
-      return {role};
+    case DocumentModel::WeightRole: {
+      float weight = value.toFloat();
+      if (!qFuzzyCompare(blend->weight, weight)) {
+        blend->weight = weight;
+        return {role};
+      }
+    }
     default:
       return setCommonBlendData(blend, value, role);
   }

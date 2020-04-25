@@ -92,6 +92,10 @@ Item {
           weight: model.weight || 1
           visible: type === DocumentEntryType.Blend
           y: layout.topPadding
+
+          onWeightChanged: {
+            model.weight = weight;
+          }
         }
 
         FinalBlendIndicator {
