@@ -3,59 +3,58 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import ChaosKit 1.0
 
-RowLayout {
+GridLayout {
   readonly property var system: documentModel.systemProxy
 
-  spacing: Theme.padding
+  columns: 2
+  columnSpacing: Theme.smallPadding
+  rowSpacing: 0
 
-  Label {
-    Layout.leftMargin: Theme.padding
+  Heading {
+    padding: Theme.padding
     text: "Lifetime"
+    Layout.columnSpan: 2
   }
-  GridLayout {
+
+  ButtonGroup {
+    buttons: [finiteRadio, infiniteRadio]
+  }
+
+  RadioButton {
+    id: finiteRadio
+    checked: system.ttl >= 0
+
+    Layout.leftMargin: Theme.padding
+
+    onClicked: {
+      system.ttl = parseInt(ttlField.text, 10);
+    }
+  }
+  TextField {
+    id: ttlField
+    text: system.ttl < 0 ? '20' : `${system.ttl}`;
+    validator: IntValidator { bottom: 1 }
+
     Layout.fillWidth: true
     Layout.rightMargin: Theme.padding
 
-    columns: 2
-    columnSpacing: Theme.smallPadding
-    rowSpacing: Theme.padding
-
-    ButtonGroup {
-      buttons: [finiteRadio, infiniteRadio]
+    onEditingFinished: {
+      finiteRadio.checked = true;
+      system.ttl = parseInt(text, 10);
     }
+  }
 
-    RadioButton {
-      id: finiteRadio
+  RadioButton {
+    id: infiniteRadio
+    checked: system.ttl < 0
+    text: 'Infinite'
 
-      checked: system.ttl >= 0
-      onClicked: {
-        system.ttl = parseInt(ttlField.text, 10);
-      }
-    }
-    TextField {
-      Layout.fillWidth: true
+    Layout.columnSpan: 2
+    Layout.leftMargin: Theme.padding + 2  // pixel-pushing
+    Layout.topMargin: Theme.padding
 
-      id: ttlField
-      text: system.ttl < 0 ? '20' : `${system.ttl}`;
-      validator: IntValidator { bottom: 1 }
-
-      onEditingFinished: {
-        finiteRadio.checked = true;
-        system.ttl = parseInt(text, 10);
-      }
-    }
-
-    RadioButton {
-      Layout.columnSpan: 2
-      Layout.leftMargin: 2 // pixel-pushing
-
-      id: infiniteRadio
-      checked: system.ttl < 0
-      text: 'Infinite'
-
-      onClicked: {
-        system.ttl = -1;
-      }
+    onClicked: {
+      system.ttl = -1;
     }
   }
 }
