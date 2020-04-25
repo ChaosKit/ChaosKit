@@ -20,7 +20,11 @@ T.RoundButton {
 
   icon.width: Theme.iconSize
   icon.height: Theme.iconSize
-  icon.color: control.flat ? Theme.primaryColor : Theme.onPrimaryHigh
+  icon.color: !control.enabled
+      ? Theme.onSurfaceDisabled
+      : control.flat
+          ? Theme.primaryColor
+          : Theme.onPrimaryHigh
 
   contentItem: IconLabel {
     spacing: control.spacing
@@ -30,11 +34,16 @@ T.RoundButton {
     icon: control.icon
     text: control.text
     font: control.font
-    color: control.flat ? Theme.primaryColor : Theme.onPrimaryHigh
+    color: !control.enabled
+        ? Theme.onSurfaceDisabled
+        : control.flat
+            ? Theme.primaryColor
+            : Theme.onPrimaryHigh
   }
 
   function getColor() {
-    if (!enabled) return Theme.disabledColor;
+    if (!control.enabled) return Theme.disabledColor;
+
     const value =
       control.visualFocus ? 0.12 :
       control.down ? 0.1 :

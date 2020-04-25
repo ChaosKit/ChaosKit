@@ -23,7 +23,7 @@ QtObject {
 
   readonly property int headline6FontSize: 14
   readonly property int body1FontSize: 12
-  readonly property int buttonFontSize: 12
+  readonly property int buttonFontSize: 10
   readonly property int captionFontSize: 10
   function letterSpacing(fontSize) {
     // Based on Inter Dynamic Metrics: https://rsms.me/inter/dynmetrics/
@@ -94,7 +94,7 @@ QtObject {
   readonly property color disabledColor: Qt.rgba(1, 1, 1, 0.12)
   readonly property color surfaceOverlay: Qt.rgba(1, 1, 1, 0.12)
 
-  readonly property real hoverRatio: 0.12
+  readonly property real hoverRatio: 0.04
 
   readonly property color black: "black"
   readonly property color white: "white"

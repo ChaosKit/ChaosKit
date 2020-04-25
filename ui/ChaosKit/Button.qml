@@ -21,27 +21,36 @@ T.Button {
   font.weight: Font.DemiBold
 
   padding: 0
-  leftPadding: (icon.name || icon.source.toString()) ? Theme.units(3) : Theme.units(4)
-  rightPadding: Theme.units(4)
-  spacing: Theme.units(2)
+  leftPadding: (icon.name || icon.source.toString()) ? Theme.units(2) : Theme.units(3)
+  rightPadding: Theme.units(3)
+  spacing: Theme.units(1)
 
-  icon.width: Theme.iconSize
-  icon.height: Theme.iconSize
-  icon.color: control.flat ? Theme.primaryColor : Theme.onPrimaryHigh
+  icon.width: Theme.smallIconSize
+  icon.height: Theme.smallIconSize
+  icon.color: !control.enabled
+      ? Theme.onSurfaceDisabled
+      : control.flat
+          ? Theme.primaryColor
+          : Theme.onPrimaryHigh
 
   contentItem: IconLabel {
-      spacing: control.spacing
-      mirrored: control.mirrored
-      display: control.display
+    spacing: control.spacing
+    mirrored: control.mirrored
+    display: control.display
 
-      icon: control.icon
-      text: control.text
-      font: control.font
-      color: control.flat ? Theme.primaryColor : Theme.onPrimaryHigh
+    icon: control.icon
+    text: control.text
+    font: control.font
+    color: !control.enabled
+        ? Theme.onSurfaceDisabled
+        : control.flat
+            ? Theme.primaryColor
+            : Theme.onPrimaryHigh
   }
 
   function getColor() {
     if (!enabled) return Theme.disabledColor;
+
     const value =
       control.visualFocus ? 0.12 :
       control.down ? 0.1 :
@@ -56,12 +65,12 @@ T.Button {
   }
 
   background: Rectangle {
-      implicitWidth: Theme.units(16)
-      implicitHeight: Theme.units(8)
-      visible: !control.flat || control.outlined || control.hovered || control.down
-      radius: Theme.borderRadius
-      color: getColor()
-      border.color: Qt.rgba(255, 255, 255, 0.12)
-      border.width: control.outlined ? 1 : 0
+    implicitWidth: Theme.units(14)
+    implicitHeight: Theme.units(6)
+    visible: !control.flat || control.outlined || control.hovered || control.down
+    radius: Theme.borderRadius
+    color: getColor()
+    border.color: Qt.rgba(255, 255, 255, 0.12)
+    border.width: control.outlined ? 1 : 0
   }
 }

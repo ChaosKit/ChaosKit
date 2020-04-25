@@ -3,7 +3,7 @@ import QtQuick.Controls 2.12
 
 RoundButton {
   property string iconName
-  property int size: Theme.iconSize
+  property int size: Theme.smallIconSize
   property int innerOffset: Theme.units(1)
 
   icon.source: Theme.iconUrl(iconName)
