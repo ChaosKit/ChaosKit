@@ -29,7 +29,8 @@ T.ToolTip {
   }
 
   background: Rectangle {
-    color: Theme.onSurfaceMedium
+    // color: Theme.onSurfaceMedium
+    color: Theme.blend(Theme.surfaceColor, Theme.onSurface, 0.6)
     radius: Theme.borderRadius
   }
 

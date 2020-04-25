@@ -91,7 +91,7 @@ class FormulaPreviewResponse : public QQuickImageResponse, public QRunnable {
   }
 
   void run() override {
-    QSize imageSize(200, 200);
+    QSize imageSize(192, 192);
 
     image_ = QImage(imageSize, QImage::Format_RGBA64);
     image_.fill(QColor(0, 0, 0, 0));

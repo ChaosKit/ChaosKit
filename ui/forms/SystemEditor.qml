@@ -4,9 +4,14 @@ import QtQuick.Layouts 1.12
 import ChaosKit 1.0
 
 ColumnLayout {
-  spacing: Theme.padding
+  id: root
+  spacing: 0
 
   StructureEditor {
+    Layout.fillWidth: true
+  }
+  FormulaGallery {
+    dragContainer: root
     Layout.fillWidth: true
   }
   LifetimeEditor {

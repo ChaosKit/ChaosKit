@@ -48,28 +48,12 @@ T.Button {
             : Theme.onPrimaryHigh
   }
 
-  function getColor() {
-    if (!enabled) return Theme.disabledColor;
-
-    const value =
-      control.visualFocus ? 0.12 :
-      control.down ? 0.1 :
-      control.hovered ? 0.04 :
-      0.0;
-
-    if (control.flat) {
-      return Qt.rgba(255, 255, 255, value);
-    } else {
-      return Theme.blend(Theme.primaryColor, Theme.white, value);
-    }
-  }
-
   background: Rectangle {
     implicitWidth: Theme.units(14)
     implicitHeight: Theme.units(6)
     visible: !control.flat || control.outlined || control.hovered || control.down
     radius: Theme.borderRadius
-    color: getColor()
+    color: Theme.buttonColor(control)
     border.color: Qt.rgba(255, 255, 255, 0.12)
     border.width: control.outlined ? 1 : 0
   }

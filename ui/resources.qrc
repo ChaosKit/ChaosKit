@@ -4,6 +4,7 @@
         <file>ChaosKit/ApplicationWindow.qml</file>
         <file>ChaosKit/Button.qml</file>
         <file>ChaosKit/Chip.qml</file>
+        <file>ChaosKit/CollapsibleHeading.qml</file>
         <file>ChaosKit/ComboBox.qml</file>
         <file>ChaosKit/Fab.qml</file>
         <file>ChaosKit/Heading.qml</file>
@@ -30,6 +31,7 @@
         <file>forms/EditorTabs.qml</file>
         <file>forms/ExportImageDialog.qml</file>
         <file>forms/FinalBlendIndicator.qml</file>
+        <file>forms/FormulaGallery.qml</file>
         <file>forms/ImageEditor.qml</file>
         <file>forms/ImageSizeEditor.qml</file>
         <file>forms/LifetimeEditor.qml</file>

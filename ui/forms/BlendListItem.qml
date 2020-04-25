@@ -18,8 +18,13 @@ Item {
     anchors.fill: parent
 
     onDropped: {
-      documentModel.moveFormulaToBlend(
-          drop.source.modelIndex, formulaModel.rootIndex);
+      if (drop.keys.includes('formula')) {
+        documentModel.moveFormulaToBlend(
+            drop.source.modelIndex, formulaModel.rootIndex);
+      } else if (drop.keys.includes('formulaType')) {
+        documentModel.addFormula(
+            drop.source.formulaType, formulaModel.rootIndex);
+      }
     }
   }
 
@@ -28,7 +33,7 @@ Item {
     color:
         item.isSelected
             ? Theme.alpha(Theme.onSurface, Theme.focusRatio) :
-        hoverHandler.hovered
+        (hoverHandler.hovered || dropArea.containsDrag)
             ? Theme.alpha(Theme.onSurface, Theme.hoverRatio) :
         'transparent'
 
@@ -63,6 +68,7 @@ Item {
         ]
 
         Drag.active: dragHandler.active
+        Drag.keys: ['formula']
         Drag.hotSpot.x: chip.implicitWidth / 2
         Drag.hotSpot.y: chip.height / 2
 

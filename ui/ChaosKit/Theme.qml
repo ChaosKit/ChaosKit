@@ -62,6 +62,22 @@ QtObject {
     );
   }
 
+  function buttonColor(control) {
+    if (!control.enabled) return Theme.disabledColor;
+
+    const value =
+      control.visualFocus ? 0.12 :
+      control.down ? 0.1 :
+      control.hovered ? 0.04 :
+      0.0;
+
+    if (control.flat) {
+      return Qt.rgba(255, 255, 255, value);
+    } else {
+      return Theme.blend(Theme.primaryColor, Theme.white, value);
+    }
+  }
+
   readonly property color primary900: "#F8791C"
   readonly property color primary800: "#FA9621"
   readonly property color primary700: "#FAA625"
