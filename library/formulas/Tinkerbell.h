@@ -20,7 +20,8 @@ class Tinkerbell : public Formula {
   uint32_t paramCount() override { return 4; }
 
   std::vector<float> exampleParams() override {
-    return {-1.35592556, 1.83391309, -0.965122283, 0.392343};
+    return {0.8633418083190918, -1.6312825679779053, 0.35952901840209961,
+            -1.1720921993255615};
   }
 };
 

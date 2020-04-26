@@ -17,6 +17,12 @@ class Trigonometric : public Formula {
   }
 
   uint32_t paramCount() override { return 8; }
+
+  std::vector<float> exampleParams() override {
+    return {1.4778001308441162,  -1.1086369752883911, 0.98350691795349121,
+            -1.1360578536987305, 1.3531618118286133,  -1.5285334587097168,
+            0.16106557846069336, -1.2036832571029663};
+  }
 };
 
 }  // namespace chaoskit::library
