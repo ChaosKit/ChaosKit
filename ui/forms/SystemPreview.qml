@@ -44,6 +44,7 @@ SystemView {
 
   DragHandler {
     id: dragHandler
+    grabPermissions: PointerHandler.ApprovesTakeOverByAnything
     target: null
 
     property real initialTranslationX
