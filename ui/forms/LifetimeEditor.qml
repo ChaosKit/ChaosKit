@@ -10,8 +10,8 @@ GridLayout {
   columnSpacing: Theme.smallPadding
   rowSpacing: 0
 
-  Heading {
-    padding: Theme.padding
+  CollapsibleHeading {
+    id: heading
     text: "Lifetime"
     Layout.columnSpan: 2
   }
@@ -23,6 +23,7 @@ GridLayout {
   RadioButton {
     id: finiteRadio
     checked: system.ttl >= 0
+    visible: heading.opened
 
     Layout.leftMargin: Theme.padding
 
@@ -34,6 +35,7 @@ GridLayout {
     id: ttlField
     text: system.ttl < 0 ? '20' : `${system.ttl}`;
     validator: IntValidator { bottom: 1 }
+    visible: heading.opened
 
     Layout.fillWidth: true
     Layout.rightMargin: Theme.padding
@@ -48,6 +50,7 @@ GridLayout {
     id: infiniteRadio
     checked: system.ttl < 0
     text: 'Infinite'
+    visible: heading.opened
 
     Layout.columnSpan: 2
     Layout.leftMargin: Theme.padding + 2  // pixel-pushing

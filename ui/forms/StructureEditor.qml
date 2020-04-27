@@ -18,8 +18,9 @@ ColumnLayout {
     }
   }
 
-  Heading {
-    padding: Theme.padding
+  CollapsibleHeading {
+    id: heading
+    opened: true
     text: 'Structure'
   }
 
@@ -44,6 +45,7 @@ ColumnLayout {
   ScrollView {
     id: root
     clip: true
+    visible: heading.opened
 
     Layout.fillWidth: true
     Layout.preferredHeight: 100
@@ -62,6 +64,8 @@ ColumnLayout {
 
 
   RowLayout {
+    visible: heading.opened
+
     Layout.fillWidth: true
     Layout.leftMargin: Theme.padding
     Layout.rightMargin: Theme.padding
