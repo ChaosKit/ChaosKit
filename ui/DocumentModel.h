@@ -63,6 +63,7 @@ class DocumentModel : public QAbstractItemModel {
     SingleFormulaIndexRole,
     WeightRole,
     // System-specific roles
+    IsolatedBlendIndexRole,
     TtlRole,
     // Document-specific roles
     ColorMapRole,

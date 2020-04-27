@@ -11,6 +11,7 @@ class Utilities : public QObject {
   explicit Utilities(QObject* parent = nullptr) : QObject(parent) {}
 
   Q_INVOKABLE QString urlToLocalPath(const QUrl& url);
+  Q_INVOKABLE QModelIndex invalidModelIndex();
 };
 
 }  // namespace chaoskit::ui

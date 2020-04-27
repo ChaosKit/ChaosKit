@@ -448,6 +448,7 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   names[SingleFormulaIndexRole] = "singleFormulaIndex";
   names[WeightRole] = "weight";
   // System-specific roles
+  names[IsolatedBlendIndexRole] = "isolatedBlendIndex";
   names[TtlRole] = "ttl";
   // Document-specific roles
   names[ColorMapRole] = "colorMap";
@@ -608,6 +609,8 @@ QVariant systemData(const core::System* system, int role) {
       return DocumentEntryType::System;
     case DocumentModel::TtlRole:
       return system->ttl;
+    // case DocumentModel::IsolatedBlendIndexRole:
+    //   Handled directly in data().
     default:
       return QVariant();
   }
@@ -811,7 +814,21 @@ QVariant DocumentModel::data(const QModelIndex& index, int role) const {
     return documentData(store_.find<core::Document>(id), role);
   }
   if (DocumentStore::matchesType<core::System>(id)) {
-    return systemData(store_.find<core::System>(id), role);
+    const auto* system = store_.find<core::System>(id);
+
+    if (role == DocumentModel::IsolatedBlendIndexRole) {
+      if (system->isolatedBlend != nullptr) {
+        const auto& blends = system->blends;
+        auto it =
+            std::find(blends.begin(), blends.end(), system->isolatedBlend);
+        if (it != blends.end()) {
+          return this->index(std::distance(blends.begin(), it), 0, index);
+        }
+      }
+      return QModelIndex();
+    }
+
+    return systemData(system, role);
   }
   if (DocumentStore::matchesType<core::Blend>(id)) {
     if (role == DocumentModel::SingleFormulaIndexRole &&
@@ -865,10 +882,25 @@ bool DocumentModel::setData(const QModelIndex& index, const QVariant& value,
           return setFormulaData(formula, value, role);
         });
   } else if (DocumentStore::matchesType<core::System>(id)) {
-    updatedRoles =
-        store_.update<core::System>(id, [&value, role](core::System* system) {
-          return setSystemData(system, value, role);
-        });
+    if (role == DocumentModel::IsolatedBlendIndexRole) {
+      auto blendIndex = value.toModelIndex();
+      updatedRoles = store_.update<core::System>(
+          id, [blendIndex](core::System* system) -> QVector<int> {
+            const core::Blend* isolatedBlend =
+                blendIndex.isValid() ? system->blends[blendIndex.row()]
+                                     : nullptr;
+            if (isolatedBlend != system->isolatedBlend) {
+              system->isolatedBlend = isolatedBlend;
+              return {DocumentModel::IsolatedBlendIndexRole};
+            }
+            return {};
+          });
+    } else {
+      updatedRoles =
+          store_.update<core::System>(id, [&value, role](core::System* system) {
+            return setSystemData(system, value, role);
+          });
+    }
   } else if (DocumentStore::matchesType<core::Document>(id)) {
     updatedRoles = store_.update<core::Document>(
         id, [&value, role](core::Document* document) {

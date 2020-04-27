@@ -15,6 +15,16 @@ void SystemProxy::setTtl(int ttl) {
   model_->setData(model_->systemIndex(), ttl, DocumentModel::TtlRole);
 }
 
+QModelIndex SystemProxy::isolatedBlendIndex() const {
+  return model_
+      ->data(model_->systemIndex(), DocumentModel::IsolatedBlendIndexRole)
+      .toModelIndex();
+}
+void SystemProxy::setIsolatedBlendIndex(const QModelIndex& blendIndex) {
+  model_->setData(model_->systemIndex(), blendIndex,
+                  DocumentModel::IsolatedBlendIndexRole);
+}
+
 void SystemProxy::onModelDataChanged(const QModelIndex& topLeft,
                                      const QModelIndex& bottomRight,
                                      const QVector<int>& roles) {
@@ -28,11 +38,16 @@ void SystemProxy::onModelDataChanged(const QModelIndex& topLeft,
       case DocumentModel::TtlRole:
         emit ttlChanged();
         break;
+      case DocumentModel::IsolatedBlendIndexRole:
+        emit isolatedBlendIndexChanged();
+        break;
       default:;
     }
   }
 }
-
-void SystemProxy::onSystemReset() { emit ttlChanged(); }
+void SystemProxy::onSystemReset() {
+  emit ttlChanged();
+  emit isolatedBlendIndexChanged();
+}
 
 }  // namespace chaoskit::ui

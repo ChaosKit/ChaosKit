@@ -10,6 +10,7 @@ Item {
   property var dragContainer
   implicitHeight: layout.implicitHeight
 
+  readonly property var system: documentModel.systemProxy
   readonly property bool isSelected:
       selectionModel.currentIndex === formulaModel.rootIndex
 
@@ -109,10 +110,28 @@ Item {
         Layout.fillHeight: true
 
         BlendIndicator {
+          state:
+            (system.isolatedBlendIndex === formulaModel.rootIndex)
+                ? 'isolated' :
+            (system.isolatedBlendIndex.valid || !model.enabled)
+                ? 'disabled' :
+            ''
           weight: model.weight || 1
           visible: type === DocumentEntryType.Blend
           y: layout.topPadding
 
+          onEnabled: {
+            system.isolatedBlendIndex = Utilities.invalidModelIndex();
+            model.enabled = true;
+          }
+          onDisabled: {
+            system.isolatedBlendIndex = Utilities.invalidModelIndex();
+            model.enabled = false;
+          }
+          onIsolated: {
+            system.isolatedBlendIndex = formulaModel.rootIndex;
+            model.enabled = true;
+          }
           onWeightChanged: {
             if (model.weight !== weight) {
               model.weight = weight;
