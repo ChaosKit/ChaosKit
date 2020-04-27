@@ -51,10 +51,14 @@ ast::System toSource(const System &system) {
   std::vector<ast::LimitedBlend> limitedBlends;
   float currentLimit = 0.f;
 
-  for (const core::Blend *blend : system.blends) {
-    if (!blend->enabled) continue;
-    currentLimit += blend->weight;
-    limitedBlends.emplace_back(toSource(*blend), currentLimit);
+  if (system.isolatedBlend) {
+    limitedBlends.emplace_back(toSource(*system.isolatedBlend), 0);
+  } else {
+    for (const core::Blend *blend : system.blends) {
+      if (!blend->enabled) continue;
+      currentLimit += blend->weight;
+      limitedBlends.emplace_back(toSource(*blend), currentLimit);
+    }
   }
 
   if (system.finalBlend && system.finalBlend->enabled) {

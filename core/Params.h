@@ -16,23 +16,15 @@ class Params {
   static Params fromSystem(const System &system) {
     Params result;
 
-    size_t blendIndex = 0;
-    for (const auto &blend : system.blends) {
-      if (!blend->enabled) continue;
-
-      for (size_t j = 0; j < blend->formulas.size(); ++j) {
-        const auto &formula = blend->formulas[j];
-        if (!formula->params.empty()) {
-          result[SystemIndex{blendIndex, j}] = formula->params;
-        }
+    if (system.isolatedBlend) {
+      addBlend(system.isolatedBlend, 0, result);
+    } else {
+      size_t blendIndex = 0;
+      for (const auto &blend : system.blends) {
+        if (!blend->enabled) continue;
+        addBlend(blend, blendIndex, result);
+        blendIndex++;
       }
-
-      if (!blend->coloringMethod.params.empty()) {
-        result[SystemIndex{blendIndex, SystemIndex::COLORING_METHOD}] =
-            blend->coloringMethod.params;
-      }
-
-      blendIndex++;
     }
 
     if (!system.finalBlend || !system.finalBlend->enabled) {
@@ -62,6 +54,21 @@ class Params {
   std::vector<float> &at(const SystemIndex &index) { return values_.at(index); }
   [[nodiscard]] const std::vector<float> &at(const SystemIndex &index) const {
     return values_.at(index);
+  }
+
+ private:
+  static void addBlend(const Blend *blend, size_t blendIndex, Params &result) {
+    for (size_t j = 0; j < blend->formulas.size(); ++j) {
+      const auto &formula = blend->formulas[j];
+      if (!formula->params.empty()) {
+        result[SystemIndex{blendIndex, j}] = formula->params;
+      }
+    }
+
+    if (!blend->coloringMethod.params.empty()) {
+      result[SystemIndex{blendIndex, SystemIndex::COLORING_METHOD}] =
+          blend->coloringMethod.params;
+    }
   }
 };
 

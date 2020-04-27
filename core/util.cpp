@@ -60,7 +60,13 @@ class DebugStringGenerator {
     int index = 0;
     for (const Blend *blend : system.blends) {
       indentation();
-      stream_ << "Blend " << index << ":" << std::endl;
+      stream_ << "Blend " << index;
+
+      if (blend == system.isolatedBlend) {
+        stream_ << " (ISOLATED)";
+      }
+
+      stream_ << ":" << std::endl;
       indent();
       generate(*blend);
       outdent();
