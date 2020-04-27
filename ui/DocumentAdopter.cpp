@@ -82,6 +82,12 @@ void DocumentAdopter::visit(core::System& system) {
   idStack_.push_back(systemId);
   for (auto* blend : system.blends) {
     visit(*blend);
+
+    if (blend == system.isolatedBlend) {
+      store_.update<core::System>(systemId, [](core::System* target) {
+        target->isolatedBlend = target->blends.back();
+      });
+    }
   }
   if (system.finalBlend) {
     visit(*system.finalBlend);

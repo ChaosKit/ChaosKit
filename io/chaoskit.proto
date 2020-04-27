@@ -20,6 +20,7 @@ message System {
   Blend final_blend = 2;
   int32 ttl = 3;
   Transform initial_transform = 4;
+  Index isolated_blend = 5;
 }
 
 message Blend {
@@ -63,4 +64,8 @@ message ColoringMethod {
 
 message ColorMap {
   string name = 1;
+}
+
+message Index {
+  uint32 index = 1;
 }

@@ -83,6 +83,10 @@ void readSystem(const System& proto, core::System* system) {
   if (proto.has_initial_transform()) {
     readTransform(proto.initial_transform(), &system->initialTransform);
   }
+
+  if (proto.has_isolated_blend()) {
+    system->isolatedBlend = system->blends.at(proto.isolated_blend().index());
+  }
 }
 
 void readDocument(const Document& proto, core::Document* document) {
@@ -167,6 +171,15 @@ void writeSystem(const core::System& system, System* proto) {
   }
   proto->set_ttl(system.ttl);
   writeTransform(system.initialTransform, proto->mutable_initial_transform());
+
+  if (system.isolatedBlend) {
+    const auto& blends = system.blends;
+    auto it = std::find(blends.begin(), blends.end(), system.isolatedBlend);
+    if (it != blends.end()) {
+      proto->mutable_isolated_blend()->set_index(
+          std::distance(blends.begin(), it));
+    }
+  }
 }
 
 void writeDocument(const core::Document& document, Document* proto) {
