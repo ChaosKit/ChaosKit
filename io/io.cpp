@@ -63,6 +63,7 @@ void readBlendBase(const Blend& proto, core::BlendBase* blend) {
 
 void readBlend(const Blend& proto, core::Blend* blend) {
   readBlendBase(proto, blend);
+  blend->name = proto.name();
   blend->weight = proto.weight();
 }
 
@@ -159,6 +160,7 @@ void writeBlendBase(const core::BlendBase& blend, Blend* proto) {
 
 void writeBlend(const core::Blend& blend, Blend* proto) {
   writeBlendBase(blend, proto);
+  proto->set_name(blend.name);
   proto->set_weight(blend.weight);
 }
 

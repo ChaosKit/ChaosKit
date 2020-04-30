@@ -32,6 +32,7 @@ message Blend {
 
   // Only used in non-final blends
   float weight = 6;
+  string name = 7;
 }
 
 message Transform {
