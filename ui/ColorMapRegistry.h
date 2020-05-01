@@ -13,6 +13,7 @@ class ColorMapRegistry : public QObject {
  public:
   explicit ColorMapRegistry(QObject* parent = nullptr);
   void add(const QString& name, std::unique_ptr<core::ColorMap> colorMap);
+  [[nodiscard]] const core::ColorMap* get(const std::string& name) const;
   [[nodiscard]] const core::ColorMap* get(const QString& name) const;
   [[nodiscard]] const QStringList& names() const { return nameCache_; }
   [[nodiscard]] const QString& defaultName() const;

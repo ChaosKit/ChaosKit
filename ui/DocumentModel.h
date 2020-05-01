@@ -2,6 +2,7 @@
 #define CHAOSKIT_UI_DOCUMENTMODEL_H
 
 #include <QAbstractItemModel>
+#include <QColor>
 #include "ColorMapRegistry.h"
 #include "DocumentProxy.h"
 #include "DocumentStore.h"
@@ -58,7 +59,7 @@ class DocumentModel : public QAbstractItemModel {
     PreTransformRole,
     PostTransformRole,
     ColoringMethodTypeRole,
-    ColoringMethodParamsRole,
+    ColoringMethodParamRole,
     // Related to both formulas and blends
     SingleFormulaIndexRole,
     WeightRole,
@@ -130,6 +131,8 @@ class DocumentModel : public QAbstractItemModel {
   void adoptDocument(core::Document* document);
   Q_INVOKABLE bool loadFromFile(const QString& path);
   Q_INVOKABLE bool saveToFile(const QString& path);
+
+  Q_INVOKABLE QColor colorAt(qreal position);
 
   [[nodiscard]] QModelIndex documentIndex() const;
   [[nodiscard]] QModelIndex systemIndex() const;

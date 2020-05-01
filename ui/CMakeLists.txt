@@ -36,7 +36,7 @@ target_link_libraries(ui_state PUBLIC
         core_hierarchy
         library
         state
-        Qt5::Core Qt5::Qml
+        Qt5::Core Qt5::Gui Qt5::Qml
         PRIVATE magic_enum io
         )
 

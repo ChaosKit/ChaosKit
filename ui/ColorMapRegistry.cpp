@@ -23,6 +23,10 @@ const core::ColorMap* ColorMapRegistry::get(const QString& name) const {
   return registry_.get(name.toStdString());
 }
 
+const core::ColorMap* ColorMapRegistry::get(const std::string& name) const {
+  return registry_.get(name);
+}
+
 const QString& ColorMapRegistry::defaultName() const {
   return nameCache_.front();
 }

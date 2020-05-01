@@ -6,10 +6,39 @@ import QtQuick.Layouts 1.12
 import ChaosKit 1.0
 
 ColumnLayout {
+  id: root
   spacing: 0
 
   property var currentBlend:
       documentModel.entryAtIndex(selectionModel.currentIndex)
+
+  function updateColoringMethod() {
+    for (let i = 0; i < coloringMethodModel.count; i++) {
+      const item = coloringMethodModel.get(i);
+      if (currentBlend.coloringMethodType === item.value) {
+        colorComboBox.currentIndex = i;
+        return;
+      }
+    }
+  }
+  ListModel {
+    id: coloringMethodModel
+    ListElement { label: 'No color'; value: 'Noop' }
+    ListElement { label: 'Single color'; value: 'SingleColor' }
+    ListElement { label: 'Distance-based'; value: 'Distance' }
+  }
+  Connections {
+    target: selectionModel
+    onCurrentChanged: {
+      if (current.valid) {
+        root.updateColoringMethod();
+      }
+
+      // Clear the formula selection every time the blend selection changes
+      // or gets cleared.
+      formulaSelectionModel.clearCurrentIndex();
+    }
+  }
 
   CollapsibleHeading {
     id: heading
@@ -51,6 +80,67 @@ ColumnLayout {
       }
     }
 
+    Label {
+      text: 'Coloring method'
+      visible: selectionModel.currentIndex.valid
+      Layout.leftMargin: Theme.padding
+    }
+    ComboBox {
+      id: colorComboBox
+      model: coloringMethodModel
+      textRole: 'label'
+      visible: selectionModel.currentIndex.valid
+      Layout.fillWidth: true
+      Layout.rightMargin: Theme.padding
+
+      onActivated: {
+        currentBlend.coloringMethodType = coloringMethodModel.get(index).value;
+      }
+    }
+
+    Label {
+      text: 'Color'
+      visible: currentBlend.coloringMethodType === 'SingleColor'
+      Layout.leftMargin: Theme.padding
+    }
+    RowLayout {
+      spacing: Theme.padding
+      visible: currentBlend.coloringMethodType === 'SingleColor'
+      Layout.fillWidth: true
+      Layout.rightMargin: Theme.padding
+
+      Rectangle {
+        color: documentModel.colorAt(currentBlend.coloringMethodParam)
+        Layout.preferredWidth: Theme.units(4)
+        Layout.preferredHeight: Theme.units(4)
+      }
+
+      Slider {
+        value: currentBlend.coloringMethodParam || 0
+        Layout.fillWidth: true
+
+        onMoved: {
+          currentBlend.coloringMethodParam = value;
+        }
+      }
+    }
+
+    Label {
+      text: 'Scale'
+      visible: currentBlend.coloringMethodType === 'Distance'
+      Layout.leftMargin: Theme.padding
+    }
+    Slider {
+      value: currentBlend.coloringMethodParam || 0
+      visible: currentBlend.coloringMethodType === 'Distance'
+      Layout.fillWidth: true
+      Layout.rightMargin: Theme.padding
+
+      onMoved: {
+        currentBlend.coloringMethodParam = value;
+      }
+    }
+
     ScrollView {
       id: scrollView
       clip: true
@@ -71,16 +161,6 @@ ColumnLayout {
       ItemSelectionModel {
         id: formulaSelectionModel
         model: documentModel
-      }
-
-      // Clear the formula selection every time the blend selection changes
-      // or gets cleared.
-      Connections {
-        target: selectionModel
-
-        onCurrentChanged: {
-          formulaSelectionModel.clearCurrentIndex();
-        }
       }
 
       Column {
@@ -113,8 +193,6 @@ ColumnLayout {
         color: Theme.onSurfaceDisabled
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        // font.pointSize: Theme.captionFontSize
-        // font.letterSpacing: Theme.letterSpacing(Theme.captionFontSize)
         text: "This blend has no formulas"
         visible: formulaModel.count === 0
       }

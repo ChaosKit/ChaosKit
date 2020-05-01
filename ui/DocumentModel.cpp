@@ -74,6 +74,10 @@ QVector<float> generateUniformWeights(int count) {
   return weights;
 }
 
+QColor toQtColor(const core::Color& color) {
+  return QColor::fromRgbF(color.r, color.g, color.b, color.a);
+}
+
 QTransform toQtTransform(const core::Transform& transform) {
   return QTransform(transform.values[0], transform.values[3],
                     transform.values[1], transform.values[4],
@@ -213,6 +217,12 @@ bool DocumentModel::saveToFile(const QString& path) {
   setFilePath(path);
 
   return true;
+}
+
+QColor DocumentModel::colorAt(qreal position) {
+  const core::ColorMap* colorMap = colorMapRegistry_->get(document()->colorMap);
+  if (!colorMap) return QColor();
+  return toQtColor(colorMap->map(position));
 }
 
 ///////////////////////////////////////////////////////////// Custom API — Slots
@@ -443,7 +453,7 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   names[PreTransformRole] = "pre";
   names[PostTransformRole] = "post";
   names[ColoringMethodTypeRole] = "coloringMethodType";
-  names[ColoringMethodParamsRole] = "coloringMethodParams";
+  names[ColoringMethodParamRole] = "coloringMethodParam";
   // Related to both formulas and blends
   names[SingleFormulaIndexRole] = "singleFormulaIndex";
   names[WeightRole] = "weight";
@@ -628,8 +638,11 @@ QVariant commonBlendData(const core::BlendBase* blend, int role) {
           blend->coloringMethod.type);
       return QString::fromUtf8(type.data(), type.size());
     }
-    case DocumentModel::ColoringMethodParamsRole:
-      return QVariant::fromValue(blend->coloringMethod.params);
+    case DocumentModel::ColoringMethodParamRole:
+      if (!blend->coloringMethod.params.empty()) {
+        return blend->coloringMethod.params.front();
+      }
+      return QVariant();
     default:
       return QVariant();
   }
@@ -700,11 +713,17 @@ QVector<int> setCommonBlendData(core::BlendBase* blend, const QVariant& value,
       blend->coloringMethod.setType(*type);
       // The above resets params, we need to signal that they've changed.
       return {DocumentModel::ColoringMethodTypeRole,
-              DocumentModel::ColoringMethodParamsRole};
+              DocumentModel::ColoringMethodParamRole};
     }
-    case DocumentModel::ColoringMethodParamsRole:
-      blend->coloringMethod.params = value.value<std::vector<float>>();
-      return {role};
+    case DocumentModel::ColoringMethodParamRole: {
+      auto newParam = value.toFloat();
+      auto& paramRef = blend->coloringMethod.params[0];
+      if (paramRef != newParam) {
+        paramRef = newParam;
+        return {role};
+      }
+      return {};
+    }
     default:
       return {};
   }
@@ -1106,7 +1125,6 @@ bool DocumentModel::fixInvariants() {
 
   return performedChanges;
 }
-
 void DocumentModel::maybeUpdateBlendDisplayName(const QModelIndex& blend) {
   if (matchesType<core::Blend>(blend) &&
       data(blend, Qt::EditRole).toString().isEmpty()) {
