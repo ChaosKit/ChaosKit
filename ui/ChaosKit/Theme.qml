@@ -16,8 +16,8 @@ QtObject {
   readonly property int windowPadding: units(8)
   readonly property int chipHeight: units(4)
 
-  readonly property int blendIndicatorWidth: units(5)
-  readonly property int blendIndicatorHeight: units(3)
+  readonly property int weightIndicatorWidth: units(5)
+  readonly property int weightIndicatorHeight: units(3)
 
   // Fonts
 
@@ -40,6 +40,10 @@ QtObject {
   // Easing curves
 
   readonly property var standardCurve: [0.4, 0.0, 0.2, 1.0, 1.0, 1.0]
+
+  // Time
+
+  readonly property int toolTipDelay: 500
 
   // Icons
 

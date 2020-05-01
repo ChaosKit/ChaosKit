@@ -22,7 +22,7 @@ ApplicationWindow {
   Connections {
     target: documentModel
 
-    function onIoFailed(error) {
+    onIoFailed: {
       openSnackbar(error);
     }
   }
@@ -37,7 +37,9 @@ ApplicationWindow {
 
     onAccepted: {
       const fileName = Utilities.urlToLocalPath(file);
-      documentModel.loadFromFile(fileName);
+      if (documentModel.loadFromFile(fileName)) {
+        selectionModel.clearCurrentIndex();
+      }
     }
   }
   FileDialog {
@@ -73,6 +75,7 @@ ApplicationWindow {
 
   MainMenu {
     onNewTriggered: {
+      selectionModel.clearCurrentIndex();
       documentModel.resetDocument();
     }
     onOpen: {
@@ -154,11 +157,12 @@ ApplicationWindow {
     anchors.bottom: parent.bottom
     anchors.margins: Theme.units(4)
     enabled: true
-    iconName: "random"
+    iconName: "random-big"
     ToolTip.text: "Randomize the image"
     ToolTip.visible: hovered
 
     onClicked: {
+      selectionModel.clearCurrentIndex();
       documentModel.randomizeSystem();
     }
   }

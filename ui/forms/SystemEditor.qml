@@ -17,4 +17,7 @@ ColumnLayout {
   LifetimeEditor {
     Layout.fillWidth: true
   }
+  BlendEditor {
+    Layout.fillWidth: true
+  }
 }

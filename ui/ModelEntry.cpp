@@ -15,6 +15,8 @@ ModelEntry::ModelEntry(QAbstractItemModel *model, const QModelIndex &index)
     reverseRoleNames_.insert(name, it.key());
   }
 
+  connect(model, &QAbstractItemModel::dataChanged, this,
+          &ModelEntry::handleDataChanged);
   connect(this, &QQmlPropertyMap::valueChanged, this,
           &ModelEntry::handleValueChanged);
 }
@@ -37,6 +39,18 @@ void ModelEntry::handleValueChanged(const QString &key, const QVariant &value) {
     model_->setData(index_, value, reverseRoleNames_.value(key));
   } else {
     element_->setProperty(key.toUtf8(), value);
+  }
+}
+
+void ModelEntry::handleDataChanged(const QModelIndex &topLeft,
+                                   const QModelIndex &bottomRight,
+                                   const QVector<int> &roles) {
+  if (topLeft != index_ && bottomRight != index_) return;
+  auto roleNames = model_->roleNames();
+
+  for (int role : roles) {
+    auto roleName = QString::fromUtf8(roleNames.value(role));
+    insert(roleName, model_->data(index_, role));
   }
 }
 

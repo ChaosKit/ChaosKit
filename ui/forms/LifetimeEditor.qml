@@ -52,6 +52,7 @@ GridLayout {
     text: 'Infinite'
     visible: heading.opened
 
+    Layout.bottomMargin: Theme.padding
     Layout.columnSpan: 2
     Layout.leftMargin: Theme.padding + 2  // pixel-pushing
     Layout.topMargin: Theme.padding

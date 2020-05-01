@@ -21,6 +21,9 @@ class ModelEntry : public QQmlPropertyMap {
   QObject *element_;
 
  private slots:
+  void handleDataChanged(const QModelIndex &topLeft,
+                         const QModelIndex &bottomRight,
+                         const QVector<int> &roles);
   void handleValueChanged(const QString &key, const QVariant &value);
 };
 

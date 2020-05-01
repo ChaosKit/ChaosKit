@@ -17,7 +17,7 @@ Item {
     anchors.top: parent.top
     color: Theme.onSurfaceMedium
     width: 1
-    height: layout.topPadding
+    height: rail.topPadding
     visible: !rail.isFirstItem
   }
 

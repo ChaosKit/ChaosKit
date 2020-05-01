@@ -73,6 +73,10 @@ ColumnLayout {
     IconButton {
       iconName: 'plus'
 
+      ToolTip.delay: Theme.toolTipDelay
+      ToolTip.text: 'Add empty blend'
+      ToolTip.visible: hovered
+
       onClicked: {
         documentModel.addBlend();
       }
@@ -87,6 +91,10 @@ ColumnLayout {
           selectionModel.currentIndex.valid
               && !documentModel.isFinalBlend(selectionModel.currentIndex)
       iconName: 'trash'
+
+      ToolTip.delay: Theme.toolTipDelay
+      ToolTip.text: 'Remove blend'
+      ToolTip.visible: hovered
 
       onClicked: {
         documentModel.removeRowAtIndex(selectionModel.currentIndex);

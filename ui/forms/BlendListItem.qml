@@ -94,22 +94,22 @@ Item {
       width: item.width - 2 * Theme.padding
 
       readonly property int topPadding:
-          (Theme.chipHeight - Theme.blendIndicatorHeight) / 2
+          (Theme.chipHeight - Theme.weightIndicatorHeight) / 2
               + Theme.smallPadding
 
       ColumnRail {
         bottomPadding:
             layout.implicitHeight - layout.topPadding
-                - Theme.blendIndicatorHeight
+                - Theme.weightIndicatorHeight
         isFirstItem: item.Positioner.isFirstItem
         isLastItem: item.Positioner.isLastItem
         topPadding: layout.topPadding
-        width: Theme.blendIndicatorWidth
+        width: Theme.weightIndicatorWidth
 
         Layout.rowSpan: (display !== '' && formulaModel.count > 0) ? 2 : 1
         Layout.fillHeight: true
 
-        BlendIndicator {
+        WeightIndicator {
           state:
             (system.isolatedBlendIndex === formulaModel.rootIndex)
                 ? 'isolated' :
@@ -118,7 +118,7 @@ Item {
             ''
           weight: model.weight || 1
           visible: type === DocumentEntryType.Blend
-          y: layout.topPadding
+          y: state === 'editing' ? 2 : layout.topPadding
 
           onEnabled: {
             system.isolatedBlendIndex = Utilities.invalidModelIndex();
@@ -132,10 +132,8 @@ Item {
             system.isolatedBlendIndex = formulaModel.rootIndex;
             model.enabled = true;
           }
-          onWeightChanged: {
-            if (model.weight !== weight) {
-              model.weight = weight;
-            }
+          onWeightEdited: {
+            model.weight = weight;
           }
         }
 

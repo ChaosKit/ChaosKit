@@ -12,7 +12,8 @@
         <file alias="close.svg">icons/window-close.svg</file>
         <file alias="image.svg">icons/image-x-generic.svg</file>
         <file alias="plus.svg">icons/list-add-16.svg</file>
-        <file alias="random.svg">icons/media-playlist-shuffle.svg</file>
+        <file alias="random.svg">icons/media-playlist-shuffle-16.svg</file>
+        <file alias="random-big.svg">icons/media-playlist-shuffle-22.svg</file>
         <file alias="repeat.svg">icons/media-playlist-repeat.svg</file>
         <file alias="solar-system.svg">icons/kstars_solarsystem.svg</file>
         <file alias="trash.svg">icons/edit-delete-16.svg</file>
