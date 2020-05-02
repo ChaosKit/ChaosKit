@@ -14,9 +14,9 @@ T.TextField {
                            contentHeight + topPadding + bottomPadding,
                            placeholder.implicitHeight + topPadding + bottomPadding)
 
-  leftPadding: Theme.units(3)
-  rightPadding: Theme.units(3)
-  padding: Theme.units(2)
+  leftPadding: Theme.units(2)
+  rightPadding: Theme.units(2)
+  padding: Theme.units(1)
 
   color: Theme.onSurfaceHigh
   placeholderTextColor: Theme.onSurfaceMedium

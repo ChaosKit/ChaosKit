@@ -4,9 +4,11 @@
 #include <QLoggingCategory>
 #include <QRandomGenerator>
 #include <QtGui/QTransform>
+#include <QtGui/QVector2D>
 #include <magic_enum.hpp>
 #include "DocumentAdopter.h"
 #include "core/ManagedDocument.h"
+#include "core/transforms.h"
 #include "core/util.h"
 #include "io/io.h"
 #include "library/util.h"
@@ -90,6 +92,40 @@ core::Transform fromQtTransform(const QTransform& transform) {
        static_cast<float>(transform.m31()), static_cast<float>(transform.m12()),
        static_cast<float>(transform.m22()),
        static_cast<float>(transform.m32())});
+}
+
+QVector2D getTranslation(const core::Transform& transform) {
+  return QVector2D(transform.values[2], transform.values[5]);
+}
+
+QVector2D getScale(const core::Transform& transform) {
+  const auto& v = transform.values;
+  qreal sx = std::sqrt(v[0] * v[0] + v[3] * v[3]);
+  qreal sy = std::sqrt(v[1] * v[1] + v[4] * v[4]);
+  return QVector2D(sx, sy);
+}
+
+qreal getRotation(const core::Transform& transform) {
+  auto scale = getScale(transform);
+  return std::atan2(transform.values[3] / scale.y(),
+                    transform.values[0] / scale.x());
+}
+
+void setTranslation(core::Transform& transform, const QVector2D& translation) {
+  transform.values[2] = translation.x();
+  transform.values[5] = translation.y();
+}
+
+void setScale(core::Transform& transform, const QVector2D& scale) {
+  auto oldScale = getScale(transform);
+  transform *= core::scale(scale.x() / oldScale.x(), scale.y() / oldScale.y());
+}
+
+void setRotation(core::Transform& transform, qreal angle) {
+  auto translation = getTranslation(transform);
+  auto scale = getScale(transform);
+  transform = core::translate(translation.x(), translation.y()) *
+              core::rotate(angle) * core::scale(scale.x(), scale.y());
 }
 
 }  // namespace
@@ -450,7 +486,13 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   names[ParamsRole] = "params";
   // Blend-specific roles
   names[EnabledRole] = "enabled";
+  names[PreRotationRole] = "preRotation";
+  names[PreScaleRole] = "preScale";
+  names[PreTranslationRole] = "preTranslation";
   names[PreTransformRole] = "pre";
+  names[PostRotationRole] = "postRotation";
+  names[PostScaleRole] = "postScale";
+  names[PostTranslationRole] = "postTranslation";
   names[PostTransformRole] = "post";
   names[ColoringMethodTypeRole] = "coloringMethodType";
   names[ColoringMethodParamRole] = "coloringMethodParam";
@@ -627,8 +669,20 @@ QVariant systemData(const core::System* system, int role) {
 }
 QVariant commonBlendData(const core::BlendBase* blend, int role) {
   switch (role) {
+    case DocumentModel::PreTranslationRole:
+      return getTranslation(blend->pre);
+    case DocumentModel::PreRotationRole:
+      return getRotation(blend->pre) * 180 / M_PI;
+    case DocumentModel::PreScaleRole:
+      return getScale(blend->pre);
     case DocumentModel::PreTransformRole:
       return QVariant::fromValue(toQtTransform(blend->pre));
+    case DocumentModel::PostTranslationRole:
+      return getTranslation(blend->post);
+    case DocumentModel::PostRotationRole:
+      return getRotation(blend->post) * 180 / M_PI;
+    case DocumentModel::PostScaleRole:
+      return getScale(blend->post);
     case DocumentModel::PostTransformRole:
       return QVariant::fromValue(toQtTransform(blend->post));
     case DocumentModel::EnabledRole:
@@ -696,12 +750,32 @@ QVariant formulaData(const core::Formula* formula, int role) {
 QVector<int> setCommonBlendData(core::BlendBase* blend, const QVariant& value,
                                 int role) {
   switch (role) {
+    case DocumentModel::PreTranslationRole:
+      setTranslation(blend->pre, value.value<QVector2D>());
+      return {role, DocumentModel::PreTransformRole};
+    case DocumentModel::PreRotationRole:
+      setRotation(blend->pre, value.toReal() * M_PI / 180);
+      return {role, DocumentModel::PreTransformRole};
+    case DocumentModel::PreScaleRole:
+      setScale(blend->pre, value.value<QVector2D>());
+      return {role, DocumentModel::PreTransformRole};
     case DocumentModel::PreTransformRole:
       blend->pre = fromQtTransform(value.value<QTransform>());
-      return {role};
+      return {role, DocumentModel::PreTranslationRole,
+              DocumentModel::PreRotationRole, DocumentModel::PreScaleRole};
+    case DocumentModel::PostTranslationRole:
+      setTranslation(blend->post, value.value<QVector2D>());
+      return {role, DocumentModel::PostTransformRole};
+    case DocumentModel::PostRotationRole:
+      setRotation(blend->post, value.toReal() * M_PI / 180);
+      return {role, DocumentModel::PostTransformRole};
+    case DocumentModel::PostScaleRole:
+      setScale(blend->post, value.value<QVector2D>());
+      return {role, DocumentModel::PostTransformRole};
     case DocumentModel::PostTransformRole:
       blend->post = fromQtTransform(value.value<QTransform>());
-      return {role};
+      return {role, DocumentModel::PostTranslationRole,
+              DocumentModel::PostRotationRole, DocumentModel::PostScaleRole};
     case DocumentModel::EnabledRole:
       blend->enabled = value.toBool();
       return {role};

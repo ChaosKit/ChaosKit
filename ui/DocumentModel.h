@@ -56,7 +56,13 @@ class DocumentModel : public QAbstractItemModel {
     ParamsRole,
     // Blend-specific roles
     EnabledRole,
+    PreRotationRole,
+    PreScaleRole,
+    PreTranslationRole,
     PreTransformRole,
+    PostRotationRole,
+    PostScaleRole,
+    PostTranslationRole,
     PostTransformRole,
     ColoringMethodTypeRole,
     ColoringMethodParamRole,

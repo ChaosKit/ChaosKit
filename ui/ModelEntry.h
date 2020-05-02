@@ -12,13 +12,11 @@ class ModelEntry : public QQmlPropertyMap {
   Q_OBJECT
  public:
   ModelEntry(QAbstractItemModel *model, const QModelIndex &index);
-  void proxyElement(QObject *element);
 
  private:
   QAbstractItemModel *model_;
   QPersistentModelIndex index_;
   QHash<QString, int> reverseRoleNames_;
-  QObject *element_;
 
  private slots:
   void handleDataChanged(const QModelIndex &topLeft,

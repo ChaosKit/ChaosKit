@@ -8,6 +8,7 @@
         <file>ChaosKit/ComboBox.qml</file>
         <file>ChaosKit/Fab.qml</file>
         <file>ChaosKit/Heading.qml</file>
+        <file>ChaosKit/Icon.qml</file>
         <file>ChaosKit/IconButton.qml</file>
         <file>ChaosKit/ItemDelegate.qml</file>
         <file>ChaosKit/Label.qml</file>
@@ -43,6 +44,7 @@
         <file>forms/StructureEditor.qml</file>
         <file>forms/SystemEditor.qml</file>
         <file>forms/SystemPreview.qml</file>
+        <file>forms/TransformEditor.qml</file>
         <file>forms/ToneMappingEditor.qml</file>
         <file>forms/WeightIndicator.qml</file>
         <file>qtquickcontrols2.conf</file>

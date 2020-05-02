@@ -34,6 +34,14 @@ ColumnLayout {
         root.updateColoringMethod();
       }
 
+      // Update transform editors
+      preEditor.translation = currentBlend.preTranslation;
+      preEditor.rotation = currentBlend.preRotation;
+      preEditor.scale = currentBlend.preScale;
+      postEditor.translation = currentBlend.postTranslation;
+      postEditor.rotation = currentBlend.postRotation;
+      postEditor.scale = currentBlend.postScale;
+
       // Clear the formula selection every time the blend selection changes
       // or gets cleared.
       formulaSelectionModel.clearCurrentIndex();
@@ -58,7 +66,7 @@ ColumnLayout {
   GridLayout {
     columns: 2
     columnSpacing: Theme.padding
-    rowSpacing: Theme.smallPadding
+    rowSpacing: Theme.padding
     visible: heading.opened
 
     Layout.bottomMargin: Theme.smallPadding
@@ -138,6 +146,63 @@ ColumnLayout {
 
       onMoved: {
         currentBlend.coloringMethodParam = value;
+      }
+    }
+
+    GridLayout {
+      columns: 2
+      columnSpacing: Theme.padding
+      rowSpacing: Theme.padding
+      visible: selectionModel.currentIndex.valid
+      Layout.columnSpan: 2
+      Layout.fillWidth: true
+      Layout.leftMargin: Theme.padding
+      Layout.rightMargin: Theme.padding
+      Layout.topMargin: Theme.padding
+
+      Label {
+        text: 'Pre'
+        font.weight: Font.DemiBold
+      }
+
+      Label {
+        text: 'Post'
+        font.weight: Font.DemiBold
+      }
+
+      TransformEditor {
+        id: preEditor
+        translation: Qt.vector2d(0, 0)
+        rotation: 0
+        scale: Qt.vector2d(1, 1)
+        Layout.fillWidth: true
+
+        onTranslationEdited: {
+          currentBlend.preTranslation = translation;
+        }
+        onRotationEdited: {
+          currentBlend.preRotation = rotation;
+        }
+        onScaleEdited: {
+          currentBlend.preScale = scale;
+        }
+      }
+      TransformEditor {
+        id: postEditor
+        translation: Qt.vector2d(0, 0)
+        rotation: 0
+        scale: Qt.vector2d(1, 1)
+        Layout.fillWidth: true
+
+        onTranslationEdited: {
+          currentBlend.postTranslation = translation;
+        }
+        onRotationEdited: {
+          currentBlend.postRotation = rotation;
+        }
+        onScaleEdited: {
+          currentBlend.postScale = scale;
+        }
       }
     }
 
