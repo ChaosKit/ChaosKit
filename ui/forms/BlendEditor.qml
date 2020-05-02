@@ -157,14 +157,50 @@ ColumnLayout {
       Layout.rightMargin: Theme.padding
       Layout.topMargin: Theme.padding
 
-      Label {
-        text: 'Pre'
-        font.weight: Font.DemiBold
+      RowLayout {
+        Layout.fillWidth: true
+
+        Label {
+          text: 'Pre'
+          font.weight: Font.DemiBold
+          Layout.fillWidth: true
+        }
+
+        IconButton {
+          iconName: 'undo'
+
+          onClicked: {
+            currentBlend.preTranslation = Qt.vector2d(0, 0);
+            currentBlend.preScale = Qt.vector2d(1, 1);
+            currentBlend.preRotation = 0;
+            preEditor.translation = currentBlend.preTranslation;
+            preEditor.rotation = currentBlend.preRotation;
+            preEditor.scale = currentBlend.preScale;
+          }
+        }
       }
 
-      Label {
-        text: 'Post'
-        font.weight: Font.DemiBold
+      RowLayout {
+        Layout.fillWidth: true
+
+        Label {
+          text: 'Post'
+          font.weight: Font.DemiBold
+          Layout.fillWidth: true
+        }
+
+        IconButton {
+          iconName: 'undo'
+
+          onClicked: {
+            currentBlend.postTranslation = Qt.vector2d(0, 0);
+            currentBlend.postScale = Qt.vector2d(1, 1);
+            currentBlend.postRotation = 0;
+            postEditor.translation = currentBlend.postTranslation;
+            postEditor.rotation = currentBlend.postRotation;
+            postEditor.scale = currentBlend.postScale;
+          }
+        }
       }
 
       TransformEditor {
