@@ -25,6 +25,9 @@ ApplicationWindow {
     onIoFailed: {
       openSnackbar(error);
     }
+    onModelAboutToBeReset: {
+      selectionModel.clearCurrentIndex();
+    }
   }
 
   FileDialog {
@@ -37,9 +40,7 @@ ApplicationWindow {
 
     onAccepted: {
       const fileName = Utilities.urlToLocalPath(file);
-      if (documentModel.loadFromFile(fileName)) {
-        selectionModel.clearCurrentIndex();
-      }
+      documentModel.loadFromFile(fileName);
     }
   }
   FileDialog {
@@ -75,7 +76,6 @@ ApplicationWindow {
 
   MainMenu {
     onNewTriggered: {
-      selectionModel.clearCurrentIndex();
       documentModel.resetDocument();
     }
     onOpen: {
@@ -162,7 +162,6 @@ ApplicationWindow {
     ToolTip.visible: hovered
 
     onClicked: {
-      selectionModel.clearCurrentIndex();
       documentModel.randomizeSystem();
     }
   }

@@ -32,15 +32,15 @@ ColumnLayout {
     onCurrentChanged: {
       if (current.valid) {
         root.updateColoringMethod();
-      }
 
-      // Update transform editors
-      preEditor.translation = currentBlend.preTranslation;
-      preEditor.rotation = currentBlend.preRotation;
-      preEditor.scale = currentBlend.preScale;
-      postEditor.translation = currentBlend.postTranslation;
-      postEditor.rotation = currentBlend.postRotation;
-      postEditor.scale = currentBlend.postScale;
+        // Update transform editors
+        preEditor.translation = currentBlend.preTranslation;
+        preEditor.rotation = currentBlend.preRotation;
+        preEditor.scale = currentBlend.preScale;
+        postEditor.translation = currentBlend.postTranslation;
+        postEditor.rotation = currentBlend.postRotation;
+        postEditor.scale = currentBlend.postScale;
+      }
 
       // Clear the formula selection every time the blend selection changes
       // or gets cleared.
@@ -67,7 +67,7 @@ ColumnLayout {
     columns: 2
     columnSpacing: Theme.padding
     rowSpacing: Theme.padding
-    visible: heading.opened
+    visible: heading.opened && selectionModel.currentIndex.valid
 
     Layout.bottomMargin: Theme.smallPadding
     Layout.fillWidth: true
@@ -90,14 +90,12 @@ ColumnLayout {
 
     Label {
       text: 'Coloring method'
-      visible: selectionModel.currentIndex.valid
       Layout.leftMargin: Theme.padding
     }
     ComboBox {
       id: colorComboBox
       model: coloringMethodModel
       textRole: 'label'
-      visible: selectionModel.currentIndex.valid
       Layout.fillWidth: true
       Layout.rightMargin: Theme.padding
 
@@ -153,7 +151,6 @@ ColumnLayout {
       columns: 2
       columnSpacing: Theme.padding
       rowSpacing: Theme.padding
-      visible: selectionModel.currentIndex.valid
       Layout.columnSpan: 2
       Layout.fillWidth: true
       Layout.leftMargin: Theme.padding
@@ -211,7 +208,6 @@ ColumnLayout {
       clip: true
       contentHeight:
           formulaColumn.visible ? formulaColumn.implicitHeight : 100
-      visible: selectionModel.currentIndex.valid
 
       Layout.columnSpan: 2
       Layout.fillWidth: true
@@ -265,7 +261,6 @@ ColumnLayout {
 
     RowLayout {
       spacing: Theme.smallPadding
-      visible: selectionModel.currentIndex.valid
 
       Layout.columnSpan: 2
       Layout.leftMargin: Theme.padding
