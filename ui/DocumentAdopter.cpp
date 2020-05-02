@@ -75,6 +75,7 @@ void DocumentAdopter::visit(core::System& system) {
   Id documentId = idStack_.back();
   Id systemId = store_.associateNewChildWith<core::Document, core::System>(
       documentId, [&system](core::System* target) {
+        target->skip = system.skip;
         target->ttl = system.ttl;
         target->initialTransform = system.initialTransform;
       });

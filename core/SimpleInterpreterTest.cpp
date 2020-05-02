@@ -78,6 +78,20 @@ TEST_F(SimpleInterpreterTest, DecrementsTtl) {
               Eq(SimpleInterpreter::Result{output, output}));
 }
 
+TEST_F(SimpleInterpreterTest, SkipsNumberOfSteps) {
+  ast::System system{};
+  auto input = make_particle({0.f, 0.f}, 5);
+  input.skip = 2;
+
+  SimpleInterpreter interpreter(system);
+
+  auto output = make_particle({0.f, 0.f}, 2);
+  output.skip = 0;
+
+  ASSERT_THAT(interpreter(input),
+              Eq(SimpleInterpreter::Result{output, output}));
+}
+
 TEST_F(SimpleInterpreterTest, UsesOutput) {
   auto input = make_immortal_particle({0.f, 0.f}, 0.f);
   ast::Formula formula{1.f, 0.f};
@@ -98,7 +112,7 @@ TEST_F(SimpleInterpreterTest, AppliesInitialTransform) {
   std::shared_ptr<Rng> rng = std::make_shared<StaticRng>();
   Transform initialTransform = translate(1, 1);
 
-  SimpleInterpreter interpreter(system, Particle::IMMORTAL, {},
+  SimpleInterpreter interpreter(system, Particle::IMMORTAL, 0, {},
                                 initialTransform, rng);
 
   auto particle = interpreter.randomizeParticle();

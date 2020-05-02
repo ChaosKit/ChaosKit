@@ -15,6 +15,11 @@ void SystemProxy::setTtl(int ttl) {
   model_->setData(model_->systemIndex(), ttl, DocumentModel::TtlRole);
 }
 
+int SystemProxy::skip() const { return model_->system()->skip; }
+void SystemProxy::setSkip(int skip) {
+  model_->setData(model_->systemIndex(), skip, DocumentModel::SkipRole);
+}
+
 QModelIndex SystemProxy::isolatedBlendIndex() const {
   return model_
       ->data(model_->systemIndex(), DocumentModel::IsolatedBlendIndexRole)
@@ -38,6 +43,9 @@ void SystemProxy::onModelDataChanged(const QModelIndex& topLeft,
       case DocumentModel::TtlRole:
         emit ttlChanged();
         break;
+      case DocumentModel::SkipRole:
+        emit skipChanged();
+        break;
       case DocumentModel::IsolatedBlendIndexRole:
         emit isolatedBlendIndexChanged();
         break;
@@ -47,6 +55,7 @@ void SystemProxy::onModelDataChanged(const QModelIndex& topLeft,
 }
 void SystemProxy::onSystemReset() {
   emit ttlChanged();
+  emit skipChanged();
   emit isolatedBlendIndexChanged();
 }
 

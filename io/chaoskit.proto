@@ -19,6 +19,7 @@ message System {
   repeated Blend blends = 1;
   Blend final_blend = 2;
   int32 ttl = 3;
+  int32 skip = 6;
   Transform initial_transform = 4;
   Index isolated_blend = 5;
 }

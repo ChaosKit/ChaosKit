@@ -154,26 +154,29 @@ class BlendInterpreter {
   const Params &params_;
 
   [[nodiscard]] Particle outputWithPoint(Point point) const {
-    return {point, output_.color, output_.ttl};
+    Particle newParticle = output_;
+    newParticle.point = point;
+    return newParticle;
   }
 };
 
 }  // namespace
 
-SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, Params params,
-                                     Transform initialTransform,
+SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, int skip,
+                                     Params params, Transform initialTransform,
                                      std::shared_ptr<Rng> rng)
     : system_(std::move(system)),
       ttl_(ttl),
+      skip_(skip),
       params_(std::move(params)),
       initialTransform_(initialTransform),
       rng_(std::move(rng)) {
   updateMaxLimit();
 }
 
-SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, Params params,
-                                     Transform initialTransform)
-    : SimpleInterpreter(std::move(system), ttl, std::move(params),
+SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, int skip,
+                                     Params params, Transform initialTransform)
+    : SimpleInterpreter(std::move(system), ttl, skip, std::move(params),
                         initialTransform, std::make_shared<ThreadLocalRng>()) {}
 
 SimpleInterpreter::SimpleInterpreter(const core::System &system)
@@ -181,7 +184,7 @@ SimpleInterpreter::SimpleInterpreter(const core::System &system)
 
 SimpleInterpreter::SimpleInterpreter(const core::System &system,
                                      std::shared_ptr<Rng> rng)
-    : SimpleInterpreter(toSource(system), system.ttl,
+    : SimpleInterpreter(toSource(system), system.ttl, system.skip,
                         Params::fromSystem(system), system.initialTransform,
                         rng) {}
 
@@ -202,6 +205,7 @@ void SimpleInterpreter::randomizeParticle(Particle &particle) {
       initialTransform_,
       Point(rng_->randomFloat(-1.f, 1.f), rng_->randomFloat(-1.f, 1.f)));
   particle.color = rng_->randomFloat(0.f, 1.f);
+  particle.skip = skip_;
 }
 
 void SimpleInterpreter::setSystem(const ast::System &system) {
@@ -215,6 +219,8 @@ void SimpleInterpreter::setParams(Params params) {
 
 void SimpleInterpreter::setTtl(int ttl) { ttl_ = ttl; }
 
+void SimpleInterpreter::setSkip(int skip) { skip_ = skip; }
+
 void SimpleInterpreter::setInitialTransform(Transform transform) {
   initialTransform_ = transform;
 }
@@ -226,23 +232,31 @@ SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) {
     next_state.ttl = ttl_;
   }
 
-  if (!system_.blends().empty()) {
-    float limit = rng_->randomFloat(0.f, max_limit_);
-    auto blend_iterator = std::lower_bound(
-        system_.blends().begin(), system_.blends().end(), limit,
-        [](const ast::LimitedBlend &blend, float limit) {
-          return blend.limit() < limit;
-        });
-    auto blend_index = static_cast<size_t>(
-        std::distance(system_.blends().begin(), blend_iterator));
+  for (; next_state.skip >= 0; --next_state.skip) {
+    if (!system_.blends().empty()) {
+      float limit = rng_->randomFloat(0.f, max_limit_);
+      auto blend_iterator = std::lower_bound(
+          system_.blends().begin(), system_.blends().end(), limit,
+          [](const ast::LimitedBlend &blend, float limit) {
+            return blend.limit() < limit;
+          });
+      auto blend_index = static_cast<size_t>(
+          std::distance(system_.blends().begin(), blend_iterator));
 
-    next_state = BlendInterpreter(next_state, params_,
-                                  blend_index)(blend_iterator->blend());
-  }
+      next_state = BlendInterpreter(next_state, params_,
+                                    blend_index)(blend_iterator->blend());
+    }
 
-  if (next_state.ttl != Particle::IMMORTAL) {
-    --next_state.ttl;
+    if (next_state.ttl != Particle::IMMORTAL) {
+      --next_state.ttl;
+    }
+
+    if (next_state.ttl == 0) {
+      break;
+    }
   }
+  // Fix the skip state after the for loop.
+  next_state.skip = 0;
 
   Particle output = BlendInterpreter(
       next_state, params_, SystemIndex::FINAL_BLEND)(system_.final_blend());

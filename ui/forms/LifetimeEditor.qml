@@ -61,4 +61,30 @@ GridLayout {
       system.ttl = -1;
     }
   }
+
+  RowLayout {
+    spacing: Theme.padding
+    visible: heading.opened
+    Layout.columnSpan: 2
+    Layout.fillWidth: true
+    Layout.leftMargin: Theme.padding
+    Layout.rightMargin: Theme.padding
+    Layout.bottomMargin: Theme.padding
+
+    Label {
+      text: 'Skip first'
+    }
+    TextField {
+      text: system.skip
+      validator: IntValidator {
+        bottom: 0
+        top: system.ttl < 0 ? 2147483647 : system.ttl
+      }
+      Layout.fillWidth: true
+
+      onEditingFinished: {
+        system.skip = Number(text);
+      }
+    }
+  }
 }

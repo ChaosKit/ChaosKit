@@ -80,6 +80,7 @@ void readSystem(const System& proto, core::System* system) {
   if (proto.ttl() != 0) {
     system->ttl = proto.ttl();
   }
+  system->skip = proto.skip();
 
   if (proto.has_initial_transform()) {
     readTransform(proto.initial_transform(), &system->initialTransform);
@@ -172,6 +173,7 @@ void writeSystem(const core::System& system, System* proto) {
     writeBlendBase(*system.finalBlend, proto->mutable_final_blend());
   }
   proto->set_ttl(system.ttl);
+  proto->set_skip(system.skip);
   writeTransform(system.initialTransform, proto->mutable_initial_transform());
 
   if (system.isolatedBlend) {

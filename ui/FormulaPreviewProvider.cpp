@@ -38,7 +38,7 @@ core::SimpleInterpreter createInterpreter(library::FormulaType type) {
   system.blends.push_back(blend.get());
 
   return core::SimpleInterpreter(core::toSource(system),
-                                 core::Particle::IMMORTAL,
+                                 core::Particle::IMMORTAL, 0,
                                  core::Params::fromSystem(system));
 }
 

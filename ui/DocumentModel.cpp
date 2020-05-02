@@ -501,6 +501,7 @@ QHash<int, QByteArray> DocumentModel::roleNames() const {
   names[WeightRole] = "weight";
   // System-specific roles
   names[IsolatedBlendIndexRole] = "isolatedBlendIndex";
+  names[SkipRole] = "skip";
   names[TtlRole] = "ttl";
   // Document-specific roles
   names[ColorMapRole] = "colorMap";
@@ -661,6 +662,8 @@ QVariant systemData(const core::System* system, int role) {
       return DocumentEntryType::System;
     case DocumentModel::TtlRole:
       return system->ttl;
+    case DocumentModel::SkipRole:
+      return system->skip;
     // case DocumentModel::IsolatedBlendIndexRole:
     //   Handled directly in data().
     default:
@@ -854,6 +857,13 @@ QVector<int> setSystemData(core::System* system, const QVariant& value,
       int ttl = value.toInt();
       if (ttl != system->ttl) {
         system->ttl = ttl;
+        return {role};
+      }
+    }
+    case DocumentModel::SkipRole: {
+      int skip = value.toInt();
+      if (skip != system->skip) {
+        system->skip = skip;
         return {role};
       }
     }

@@ -15,6 +15,9 @@ struct System {
   // the blends vector.
   const Blend* isolatedBlend = nullptr;
 
+  // Number of steps that need to pass to start rendering.
+  int32_t skip = 0;
+
   // Lifetime of all particles in this system.
   int32_t ttl = 20;
 

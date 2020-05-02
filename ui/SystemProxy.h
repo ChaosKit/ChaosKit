@@ -10,6 +10,7 @@ class DocumentModel;
 class SystemProxy : public QObject {
   Q_OBJECT
   Q_PROPERTY(int ttl READ ttl WRITE setTtl NOTIFY ttlChanged)
+  Q_PROPERTY(int skip READ skip WRITE setSkip NOTIFY skipChanged)
   Q_PROPERTY(QModelIndex isolatedBlendIndex READ isolatedBlendIndex WRITE
                  setIsolatedBlendIndex NOTIFY isolatedBlendIndexChanged)
  public:
@@ -18,11 +19,15 @@ class SystemProxy : public QObject {
   [[nodiscard]] int ttl() const;
   void setTtl(int ttl);
 
+  [[nodiscard]] int skip() const;
+  void setSkip(int skip);
+
   [[nodiscard]] QModelIndex isolatedBlendIndex() const;
   void setIsolatedBlendIndex(const QModelIndex& blendIndex);
 
  signals:
   void ttlChanged();
+  void skipChanged();
   void isolatedBlendIndexChanged();
 
  private:

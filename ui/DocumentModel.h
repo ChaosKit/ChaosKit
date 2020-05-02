@@ -71,6 +71,7 @@ class DocumentModel : public QAbstractItemModel {
     WeightRole,
     // System-specific roles
     IsolatedBlendIndexRole,
+    SkipRole,
     TtlRole,
     // Document-specific roles
     ColorMapRole,
