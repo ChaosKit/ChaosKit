@@ -18,7 +18,7 @@ using chaoskit::state::Id;
 
 QDebug operator<<(QDebug debug, Id id) {
   QDebugStateSaver saver(debug);
-  debug.nospace().noquote() << hex << "(" << id.type << ":" << id.id << ")";
+  debug.nospace().noquote() << Qt::hex << "(" << id.type << ":" << id.id << ")";
   return debug;
 }
 

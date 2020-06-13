@@ -9,13 +9,12 @@ ColumnLayout {
   id: root
   spacing: 0
 
-  property var currentBlend:
-      documentModel.entryAtIndex(selectionModel.currentIndex)
+  property var blend
 
   function updateColoringMethod() {
     for (let i = 0; i < coloringMethodModel.count; i++) {
       const item = coloringMethodModel.get(i);
-      if (currentBlend.coloringMethodType === item.value) {
+      if (blend.coloringMethodType === item.value) {
         colorComboBox.currentIndex = i;
         return;
       }
@@ -29,38 +28,24 @@ ColumnLayout {
   }
   Connections {
     target: selectionModel
-    onCurrentChanged: {
+
+    function onCurrentChanged(current, previous) {
       if (current.valid) {
         root.updateColoringMethod();
 
         // Update transform editors
-        preEditor.translation = currentBlend.preTranslation;
-        preEditor.rotation = currentBlend.preRotation;
-        preEditor.scale = currentBlend.preScale;
-        postEditor.translation = currentBlend.postTranslation;
-        postEditor.rotation = currentBlend.postRotation;
-        postEditor.scale = currentBlend.postScale;
+        preEditor.translation = blend.preTranslation;
+        preEditor.rotation = blend.preRotation;
+        preEditor.scale = blend.preScale;
+        postEditor.translation = blend.postTranslation;
+        postEditor.rotation = blend.postRotation;
+        postEditor.scale = blend.postScale;
       }
 
       // Clear the formula selection every time the blend selection changes
       // or gets cleared.
       formulaSelectionModel.clearCurrentIndex();
     }
-  }
-
-  CollapsibleHeading {
-    id: heading
-    opened: true
-    text: 'Selected Blend'
-  }
-
-  Label {
-    color: Theme.onSurfaceDisabled
-    horizontalAlignment: Text.AlignHCenter
-    padding: Theme.padding
-    text: 'Nothing selected'
-    visible: heading.opened && !selectionModel.currentIndex.valid
-    Layout.fillWidth: true
   }
 
   GridLayout {
@@ -74,17 +59,17 @@ ColumnLayout {
 
     Label {
       text: 'Name'
-      visible: currentBlend.type === DocumentEntryType.Blend
+      visible: blend.type === DocumentEntryType.Blend
       Layout.leftMargin: Theme.padding
     }
     TextField {
-      text: currentBlend.edit || ''
-      visible: currentBlend.type === DocumentEntryType.Blend
+      text: blend.edit || ''
+      visible: blend.type === DocumentEntryType.Blend
       Layout.fillWidth: true
       Layout.rightMargin: Theme.padding
 
       onEditingFinished: {
-        currentBlend.edit = text;
+        blend.edit = text;
       }
     }
 
@@ -100,50 +85,50 @@ ColumnLayout {
       Layout.rightMargin: Theme.padding
 
       onActivated: {
-        currentBlend.coloringMethodType = coloringMethodModel.get(index).value;
+        blend.coloringMethodType = coloringMethodModel.get(index).value;
       }
     }
 
     Label {
       text: 'Color'
-      visible: currentBlend.coloringMethodType === 'SingleColor'
+      visible: blend.coloringMethodType === 'SingleColor'
       Layout.leftMargin: Theme.padding
     }
     RowLayout {
       spacing: Theme.padding
-      visible: currentBlend.coloringMethodType === 'SingleColor'
+      visible: blend.coloringMethodType === 'SingleColor'
       Layout.fillWidth: true
       Layout.rightMargin: Theme.padding
 
       Rectangle {
-        color: documentModel.colorAt(currentBlend.coloringMethodParam)
+        color: documentModel.colorAt(blend.coloringMethodParam)
         Layout.preferredWidth: Theme.units(4)
         Layout.preferredHeight: Theme.units(4)
       }
 
       Slider {
-        value: currentBlend.coloringMethodParam || 0
+        value: blend.coloringMethodParam || 0
         Layout.fillWidth: true
 
         onMoved: {
-          currentBlend.coloringMethodParam = value;
+          blend.coloringMethodParam = value;
         }
       }
     }
 
     Label {
       text: 'Scale'
-      visible: currentBlend.coloringMethodType === 'Distance'
+      visible: blend.coloringMethodType === 'Distance'
       Layout.leftMargin: Theme.padding
     }
     Slider {
-      value: currentBlend.coloringMethodParam || 0
-      visible: currentBlend.coloringMethodType === 'Distance'
+      value: blend.coloringMethodParam || 0
+      visible: blend.coloringMethodType === 'Distance'
       Layout.fillWidth: true
       Layout.rightMargin: Theme.padding
 
       onMoved: {
-        currentBlend.coloringMethodParam = value;
+        blend.coloringMethodParam = value;
       }
     }
 
@@ -170,12 +155,12 @@ ColumnLayout {
           iconName: 'undo'
 
           onClicked: {
-            currentBlend.preTranslation = Qt.vector2d(0, 0);
-            currentBlend.preScale = Qt.vector2d(1, 1);
-            currentBlend.preRotation = 0;
-            preEditor.translation = currentBlend.preTranslation;
-            preEditor.rotation = currentBlend.preRotation;
-            preEditor.scale = currentBlend.preScale;
+            blend.preTranslation = Qt.vector2d(0, 0);
+            blend.preScale = Qt.vector2d(1, 1);
+            blend.preRotation = 0;
+            preEditor.translation = blend.preTranslation;
+            preEditor.rotation = blend.preRotation;
+            preEditor.scale = blend.preScale;
           }
         }
       }
@@ -193,12 +178,12 @@ ColumnLayout {
           iconName: 'undo'
 
           onClicked: {
-            currentBlend.postTranslation = Qt.vector2d(0, 0);
-            currentBlend.postScale = Qt.vector2d(1, 1);
-            currentBlend.postRotation = 0;
-            postEditor.translation = currentBlend.postTranslation;
-            postEditor.rotation = currentBlend.postRotation;
-            postEditor.scale = currentBlend.postScale;
+            blend.postTranslation = Qt.vector2d(0, 0);
+            blend.postScale = Qt.vector2d(1, 1);
+            blend.postRotation = 0;
+            postEditor.translation = blend.postTranslation;
+            postEditor.rotation = blend.postRotation;
+            postEditor.scale = blend.postScale;
           }
         }
       }
@@ -211,13 +196,13 @@ ColumnLayout {
         Layout.fillWidth: true
 
         onTranslationEdited: {
-          currentBlend.preTranslation = translation;
+          blend.preTranslation = translation;
         }
         onRotationEdited: {
-          currentBlend.preRotation = rotation;
+          blend.preRotation = rotation;
         }
         onScaleEdited: {
-          currentBlend.preScale = scale;
+          blend.preScale = scale;
         }
       }
       TransformEditor {
@@ -228,13 +213,13 @@ ColumnLayout {
         Layout.fillWidth: true
 
         onTranslationEdited: {
-          currentBlend.postTranslation = translation;
+          blend.postTranslation = translation;
         }
         onRotationEdited: {
-          currentBlend.postRotation = rotation;
+          blend.postRotation = rotation;
         }
         onScaleEdited: {
-          currentBlend.postScale = scale;
+          blend.postScale = scale;
         }
       }
     }

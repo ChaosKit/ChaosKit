@@ -22,10 +22,10 @@ ApplicationWindow {
   Connections {
     target: documentModel
 
-    onIoFailed: {
+    function onIoFailed(error) {
       openSnackbar(error);
     }
-    onModelAboutToBeReset: {
+    function onModelAboutToBeReset() {
       selectionModel.clearCurrentIndex();
     }
   }

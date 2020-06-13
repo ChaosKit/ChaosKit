@@ -165,12 +165,11 @@ int main(int argc, char* argv[]) {
   engineManager->setLoadUrl(resources::createUrl("forms/MainWindow.qml"));
 
   QObject::connect(engineManager, &EngineManager::engineAboutToBeCreated, [] {
-    qmlRegisterType<ColorMapRegistry>();
-    qmlRegisterType<DocumentModel>();
-    qmlRegisterType<DocumentProxy>();
+    qmlRegisterAnonymousType<DocumentProxy>("ChaosKit", 1);
     qmlRegisterUncreatableType<DocumentEntryType>(
         "ChaosKit", 1, 0, "DocumentEntryType",
-        QStringLiteral("Not creatable because it's an enum"));
+        "Not creatable because it's an enum");
+    // TODO: figure out a non-deprecated way to make ModelEntry work
     qmlRegisterInterface<ModelEntry>("ModelEntry");
     qmlRegisterType<SystemView>("ChaosKit", 1, 0, "SystemView");
     qmlRegisterSingletonType<Utilities>(
@@ -181,8 +180,7 @@ int main(int argc, char* argv[]) {
   auto onEngineCreated = [documentModel, selectionModel, engineManager,
                           colorMapRegistry](QQmlApplicationEngine* engine) {
     engine->addImportPath(resources::importPath());
-    engine->addImageProvider(QStringLiteral("formula"),
-                             new FormulaPreviewProvider);
+    engine->addImageProvider("formula", new FormulaPreviewProvider);
     engine->addImageProvider("colormap",
                              new ColorMapPreviewProvider(colorMapRegistry));
 
@@ -193,19 +191,15 @@ int main(int argc, char* argv[]) {
       defaultExportFormat = exportFormats.size() - 1;
     }
 
-    const QFont monospaceFont =
-        QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    engine->rootContext()->setContextProperties(
-        {{QStringLiteral("formulaList"),
-          QVariant::fromValue(createFormulaList())},
-         {QStringLiteral("monospaceFont"), QVariant::fromValue(monospaceFont)},
-         {QStringLiteral("documentModel"), QVariant::fromValue(documentModel)},
-         {QStringLiteral("selectionModel"),
-          QVariant::fromValue(selectionModel)},
-         {QStringLiteral("exportFormats"), QVariant::fromValue(exportFormats)},
-         {QStringLiteral("defaultExportFormat"), QVariant(defaultExportFormat)},
-         {QStringLiteral("globalColorMapRegistry"),
-          QVariant::fromValue(colorMapRegistry)}});
+    QQmlContext* rootContext = engine->rootContext();
+    rootContext->setContextProperty("defaultExportFormat", defaultExportFormat);
+    rootContext->setContextProperty("documentModel", documentModel);
+    rootContext->setContextProperty("exportFormats", exportFormats);
+    rootContext->setContextProperty("formulaList", createFormulaList());
+    rootContext->setContextProperty("globalColorMapRegistry", colorMapRegistry);
+    rootContext->setContextProperty(
+        "monospaceFont", QFontDatabase::systemFont(QFontDatabase::FixedFont));
+    rootContext->setContextProperty("selectionModel", selectionModel);
   };
   QObject::connect(engineManager, &EngineManager::engineCreated,
                    onEngineCreated);

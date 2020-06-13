@@ -7,6 +7,9 @@ ColumnLayout {
   id: root
   spacing: 0
 
+  property var currentBlend:
+      documentModel.entryAtIndex(selectionModel.currentIndex)
+
   StructureEditor {
     Layout.fillWidth: true
   }
@@ -17,7 +20,32 @@ ColumnLayout {
   LifetimeEditor {
     Layout.fillWidth: true
   }
-  BlendEditor {
+
+  // Blend editor
+
+  CollapsibleHeading {
+    id: heading
+    opened: true
+    text: 'Selected Blend'
+  }
+  Label {
+    color: Theme.onSurfaceDisabled
+    horizontalAlignment: Text.AlignHCenter
+    padding: Theme.padding
+    text: 'Nothing selected'
+    visible: heading.opened && !selectionModel.currentIndex.valid
+    Layout.fillWidth: true
+  }
+  Component {
+    id: blendEditor
+
+    BlendEditor {
+      blend: currentBlend
+    }
+  }
+  Loader {
+    active: selectionModel.currentIndex.valid
+    sourceComponent: blendEditor
     Layout.fillWidth: true
   }
 }

@@ -12,7 +12,8 @@ ColumnLayout {
   // model's root. Fortunately reloading the component helps.
   Connections {
     target: documentModel
-    onSystemIndexChanged: {
+
+    function onSystemReset() {
       loader.sourceComponent = undefined;
       loader.sourceComponent = blendColumn;
     }
