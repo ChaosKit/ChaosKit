@@ -49,8 +49,9 @@ int main(int argc, char **argv) {
   SimpleHistogramGenerator generator(*system, 512, 512);
   generator.setColorMap(colorMaps.get("Rainbow"));
   generator.setIterationCount(1000000);
-  generator.run();
+  generator.setEnabled(true);
 
+  generator.beforeRendering();
   const Color *buffer = generator.data();
 
   QImage image(512, 512, QImage::Format_RGB32);
@@ -70,6 +71,8 @@ int main(int argc, char **argv) {
                                            CLAMP(color.b * scale, 0.0, 1.0)));
     }
   }
+  generator.afterRendering();
+
   image.save("lol.png");
 
   return 0;

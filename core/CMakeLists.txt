@@ -8,6 +8,7 @@ add_library(core
         DocumentDeleter.cpp DocumentDeleter.h
         DocumentVisitor.h
         errors.cpp errors.h
+        Generator.h
         HistogramBuffer.h HistogramBuffer.cpp
         ManagedDocument.cpp ManagedDocument.h
         PaletteColorMap.cpp PaletteColorMap.h

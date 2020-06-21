@@ -30,29 +30,26 @@ void SimpleHistogramGenerator::setSize(uint32_t width, uint32_t height) {
   width_ = width;
   height_ = height;
   buffer_.resize(width * height);
-  clear();
+  reset();
 }
 
 void SimpleHistogramGenerator::setIterationCount(uint32_t count) {
   iteration_count_ = count;
 }
 
-void SimpleHistogramGenerator::setInfiniteIterationCount() {
-  iteration_count_ = stdx::nullopt;
-}
-
 void SimpleHistogramGenerator::setColorMap(const ColorMap *color_map) {
   color_map_ = color_map;
 }
 
-void SimpleHistogramGenerator::clear() {
+void SimpleHistogramGenerator::reset() {
   std::fill(buffer_.begin(), buffer_.end(), Color::zero());
 }
 
-void SimpleHistogramGenerator::run() {
+void SimpleHistogramGenerator::beforeRendering() {
   auto particle = interpreter_.randomizeParticle();
 
   for (size_t i = 0; !iteration_count_ || i < *iteration_count_; i++) {
+    if (!enabled_) break;
     auto [next_state, output] = interpreter_(particle);
     particle = next_state;
     add(output);
