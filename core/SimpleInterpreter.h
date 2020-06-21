@@ -29,6 +29,7 @@ class SimpleInterpreter {
   SimpleInterpreter(const core::System &system, std::shared_ptr<Rng> rng);
 
   void setSystem(const ast::System &system);
+  void setSystem(const core::System &system);
   void setParams(Params params);
   void setTtl(int ttl);
   void setSkip(int skip);

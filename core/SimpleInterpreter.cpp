@@ -221,6 +221,14 @@ void SimpleInterpreter::setSystem(const ast::System &system) {
   updateMaxLimit();
 }
 
+void SimpleInterpreter::setSystem(const core::System &system) {
+  setSystem(toSource(system));
+  setParams(Params::fromSystem(system));
+  setTtl(system.ttl);
+  setSkip(system.skip);
+  setInitialTransform(system.initialTransform);
+}
+
 void SimpleInterpreter::setParams(Params params) {
   params_ = std::move(params);
 }
