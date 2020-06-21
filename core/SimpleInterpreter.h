@@ -19,6 +19,7 @@ class SimpleInterpreter {
     }
   };
 
+  SimpleInterpreter();
   explicit SimpleInterpreter(ast::System system, int ttl = Particle::IMMORTAL,
                              int skip = 0, Params params = Params{},
                              Transform initialTransform = Transform());

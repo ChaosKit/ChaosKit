@@ -162,6 +162,14 @@ class BlendInterpreter {
 
 }  // namespace
 
+SimpleInterpreter::SimpleInterpreter()
+    : system_(),
+      ttl_(Particle::IMMORTAL),
+      skip_(0),
+      params_(),
+      initialTransform_(),
+      rng_(std::make_shared<ThreadLocalRng>()) {}
+
 SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, int skip,
                                      Params params, Transform initialTransform,
                                      std::shared_ptr<Rng> rng)
@@ -220,7 +228,6 @@ void SimpleInterpreter::setParams(Params params) {
 void SimpleInterpreter::setTtl(int ttl) { ttl_ = ttl; }
 
 void SimpleInterpreter::setSkip(int skip) { skip_ = skip; }
-
 void SimpleInterpreter::setInitialTransform(Transform transform) {
   initialTransform_ = transform;
 }
