@@ -200,7 +200,7 @@ void SimpleInterpreter::updateMaxLimit() {
   max_limit_ = system_.blends().empty() ? 0 : system_.blends().back().limit();
 }
 
-Particle SimpleInterpreter::randomizeParticle() {
+Particle SimpleInterpreter::randomizeParticle() const {
   Particle particle;
   randomizeParticle(particle);
   particle.ttl = (ttl_ == Particle::IMMORTAL) ? Particle::IMMORTAL
@@ -208,7 +208,7 @@ Particle SimpleInterpreter::randomizeParticle() {
   return particle;
 }
 
-void SimpleInterpreter::randomizeParticle(Particle &particle) {
+void SimpleInterpreter::randomizeParticle(Particle &particle) const {
   particle.point = applyTransform(
       initialTransform_,
       Point(rng_->randomFloat(-1.f, 1.f), rng_->randomFloat(-1.f, 1.f)));
@@ -239,7 +239,7 @@ void SimpleInterpreter::setSkip(int skip) { skip_ = skip; }
 void SimpleInterpreter::setInitialTransform(Transform transform) {
   initialTransform_ = transform;
 }
-SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) {
+Particle SimpleInterpreter::processBlends(Particle input) const {
   Particle next_state = input;
 
   if (next_state.ttl == 0) {
@@ -273,10 +273,17 @@ SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) {
   // Fix the skip state after the for loop.
   next_state.skip = 0;
 
-  Particle output = BlendInterpreter(
-      next_state, params_, SystemIndex::FINAL_BLEND)(system_.final_blend());
+  return next_state;
+}
 
-  return {next_state, output};
+Particle SimpleInterpreter::processFinalBlend(Particle input) const {
+  return BlendInterpreter(input, params_,
+                          SystemIndex::FINAL_BLEND)(system_.final_blend());
+}
+
+SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) const {
+  Particle next_state = processBlends(input);
+  return {next_state, processFinalBlend(next_state)};
 }
 
 }  // namespace chaoskit::core

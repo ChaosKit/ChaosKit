@@ -34,8 +34,11 @@ class SimpleInterpreter {
   void setTtl(int ttl);
   void setSkip(int skip);
   void setInitialTransform(Transform transform);
-  Particle randomizeParticle();
-  Result operator()(Particle input);
+  Particle randomizeParticle() const;
+  Particle processBlends(Particle input) const;
+  Particle processFinalBlend(Particle input) const;
+
+  Result operator()(Particle input) const;
 
  private:
   ast::System system_;
@@ -47,7 +50,7 @@ class SimpleInterpreter {
   std::shared_ptr<Rng> rng_;
 
   void updateMaxLimit();
-  void randomizeParticle(Particle &particle);
+  void randomizeParticle(Particle &particle) const;
 };
 
 }  // namespace chaoskit::core
