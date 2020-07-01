@@ -12,8 +12,13 @@ TestWindow::TestWindow() {
   setTitle(QStringLiteral("ChaosKit (Test Window)"));
   setBaseSize(QSize(512, 512));
 
+  auto *colorMapRegistry = new ColorMapRegistry(this);
+
   auto *model = new DocumentModel(this);
+  model->setColorMapRegistry(colorMapRegistry);
   QModelIndex blendIndex = model->addBlend(FormulaType::DeJong);
+  model->setData(blendIndex, "Distance", DocumentModel::ColoringMethodTypeRole);
+  model->setData(blendIndex, 0.4, DocumentModel::ColoringMethodParamRole);
   QModelIndex formulaIndex = model->formulaAt(0, blendIndex);
   model->setData(formulaIndex,
                  QVariant::fromValue(std::vector<float>{
@@ -27,7 +32,9 @@ TestWindow::TestWindow() {
 
   histogramGenerator_ = new HistogramGenerator(this);
   histogramGenerator_->setSize(512, 512);
-  histogramGenerator_->setSystem(model->document()->system);
+  histogramGenerator_->setSystem(*model->document()->system);
+  histogramGenerator_->setColorMap(
+      colorMapRegistry->get(std::string("Rainbow")));
   toneMapper_ = new GLToneMapper(this);
 
   connect(this, &QOpenGLWindow::frameSwapped, this, &TestWindow::syncHistogram);
@@ -51,7 +58,7 @@ void TestWindow::paintGL() { toneMapper_->map(); }
 void TestWindow::keyPressEvent(QKeyEvent *event) {
   switch (event->key()) {
     case Qt::Key_R:
-      histogramGenerator_->clear();
+      histogramGenerator_->reset();
       break;
     case Qt::Key_Escape:
       close();
@@ -62,10 +69,12 @@ void TestWindow::keyPressEvent(QKeyEvent *event) {
 }
 
 void TestWindow::syncHistogram() {
-  histogramGenerator_->withHistogram([this](const HistogramBuffer &histogram) {
-    toneMapper_->syncBuffer(histogram);
-  });
+  histogramGenerator_->synchronizeResult(this);
   update();
+}
+
+void TestWindow::updateHistogramBuffer(const core::HistogramBuffer &buffer) {
+  toneMapper_->syncBuffer(buffer);
 }
 
 }  // namespace chaoskit::ui

@@ -29,6 +29,11 @@ void GathererTask::addPoint(const Point &point, float color) {
   }
 }
 
+void GathererTask::synchronizeResult(core::Renderer *renderer) {
+  QMutexLocker locker(&mutex_);
+  renderer->updateHistogramBuffer(buffer_);
+}
+
 void GathererTask::setSize(const QSize &size) {
   QMutexLocker locker(&mutex_);
   buffer_.resize(static_cast<size_t>(size.width()),
@@ -41,6 +46,7 @@ void GathererTask::setColorMap(const chaoskit::core::ColorMap *colorMap) {
   colorMap_ = colorMap;
   buffer_.clear();
 }
+
 void GathererTask::clear() {
   QMutexLocker locker(&mutex_);
   buffer_.clear();

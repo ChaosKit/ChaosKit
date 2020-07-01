@@ -10,6 +10,7 @@
 #include "ColorMap.h"
 #include "HistogramBuffer.h"
 #include "Point.h"
+#include "core/Renderer.h"
 
 namespace chaoskit::ui {
 
@@ -17,11 +18,7 @@ class GathererTask : public QObject {
   Q_OBJECT
 
  public:
-  template <typename Action>
-  void withHistogram(Action action) {
-    QMutexLocker locker(&mutex_);
-    action(buffer_);
-  }
+  void synchronizeResult(core::Renderer *renderer);
 
  public slots:
   void addPoint(const chaoskit::core::Point &point, float color);

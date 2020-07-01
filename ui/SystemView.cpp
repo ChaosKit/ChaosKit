@@ -3,6 +3,7 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 #include "GLToneMapper.h"
+#include "core/Renderer.h"
 
 using chaoskit::core::HistogramBuffer;
 
@@ -10,18 +11,21 @@ namespace chaoskit::ui {
 
 namespace {
 
-class HistogramRenderer : public QQuickFramebufferObject::Renderer {
+class HistogramRenderer : public QQuickFramebufferObject::Renderer,
+                          public core::Renderer {
  public:
   explicit HistogramRenderer(const SystemView *view)
       : toneMapper_(), systemView_(view) {
     toneMapper_.initializeGL();
   };
 
+  void updateHistogramBuffer(const HistogramBuffer &buffer) override {
+    toneMapper_.syncBuffer(buffer);
+  }
+
  protected:
   void synchronize(QQuickFramebufferObject *object) override {
-    systemView_->withHistogram([this](const HistogramBuffer &histogram) {
-      toneMapper_.syncBuffer(histogram);
-    });
+    systemView_->synchronizeResult(this);
 
     systemView_ = qobject_cast<const SystemView *>(object);
     toneMapper_.setGamma(systemView_->gamma());
@@ -49,37 +53,21 @@ SystemView::SystemView(QQuickItem *parent) : QQuickFramebufferObject(parent) {
   connect(this, &QQuickItem::widthChanged, this, &SystemView::updateBufferSize);
   connect(this, &QQuickItem::heightChanged, this,
           &SystemView::updateBufferSize);
-  connect(generator_, &HistogramGenerator::started, this,
-          &SystemView::runningChanged);
-  connect(generator_, &HistogramGenerator::stopped, this,
-          &SystemView::runningChanged);
-}
-
-void SystemView::withHistogram(
-    const std::function<void(const HistogramBuffer &)> &action) const {
-  generator_->withHistogram(action);
 }
 
 QQuickFramebufferObject::Renderer *SystemView::createRenderer() const {
   return new HistogramRenderer(this);
 }
 
-void SystemView::start() { generator_->start(); }
-
-void SystemView::stop() { generator_->stop(); }
-
-void SystemView::clear() { generator_->clear(); }
+void SystemView::clear() { generator_->reset(); }
 
 void SystemView::setRunning(bool running) {
-  if (generator_->running() == running) {
+  if (generator_->isEnabled() == running) {
     return;
   }
 
-  if (running) {
-    start();
-  } else {
-    stop();
-  }
+  generator_->setEnabled(running);
+  emit runningChanged();
 }
 
 void SystemView::setModel(DocumentModel *documentModel) {
@@ -99,8 +87,7 @@ void SystemView::setModel(DocumentModel *documentModel) {
 }
 
 void SystemView::updateSystem() {
-  generator_->setSystem(model_->system());
-  generator_->clear();
+  generator_->setSystem(*model_->system());
   update();
 }
 

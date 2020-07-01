@@ -1,6 +1,7 @@
 #include "HistogramGenerator.h"
-#include <core/ThreadLocalRng.h>
 #include <QDebug>
+#include "core/Renderer.h"
+#include "core/ThreadLocalRng.h"
 
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
@@ -36,15 +37,26 @@ HistogramGenerator::~HistogramGenerator() {
   thread_->wait();
 }
 
-void HistogramGenerator::withHistogram(
-    const std::function<void(const HistogramBuffer &)> &action) {
+void HistogramGenerator::synchronizeResult(core::Renderer *renderer) {
   // No MetaObject because the mutex handles synchronization.
-  gathererTask_->withHistogram(action);
+  gathererTask_->synchronizeResult(renderer);
 }
 
-void HistogramGenerator::setSystem(const core::System *system) {
+void HistogramGenerator::setEnabled(bool enabled) {
+  if (enabled == isEnabled()) return;
+
+  if (enabled) {
+    QMetaObject::invokeMethod(blenderTask_, &BlenderTask::start);
+  } else {
+    QMetaObject::invokeMethod(blenderTask_, &BlenderTask::stop);
+  }
+
+  core::Generator::setEnabled(enabled);
+}
+
+void HistogramGenerator::setSystem(const core::System &system) {
   QMetaObject::invokeMethod(
-      blenderTask_, [this, system] { blenderTask_->setSystem(system); });
+      blenderTask_, [this, &system] { blenderTask_->setSystem(&system); });
 }
 
 void HistogramGenerator::setColorMap(const chaoskit::core::ColorMap *colorMap) {
@@ -57,17 +69,9 @@ void HistogramGenerator::setSize(quint32 width, quint32 height) {
   QMetaObject::invokeMethod(
       blenderTask_, [=] { gathererTask_->setSize(QSize(width, height)); });
 }
-
-void HistogramGenerator::start() {
-  QMetaObject::invokeMethod(blenderTask_, &BlenderTask::start);
-  running_ = true;
-}
-
-void HistogramGenerator::stop() {
-  QMetaObject::invokeMethod(blenderTask_, &BlenderTask::stop);
-  running_ = false;
-}
-void HistogramGenerator::clear() {
+void HistogramGenerator::start() { setEnabled(true); }
+void HistogramGenerator::stop() { setEnabled(false); }
+void HistogramGenerator::reset() {
   // No MetaObject because the mutex handles synchronization.
   gathererTask_->clear();
 }

@@ -6,27 +6,26 @@
 #include "BlenderTask.h"
 #include "GathererTask.h"
 #include "HistogramBuffer.h"
+#include "core/Generator.h"
 
 namespace chaoskit::ui {
 
-class HistogramGenerator : public QObject {
+class HistogramGenerator : public QObject, public core::Generator {
   Q_OBJECT
  public:
   explicit HistogramGenerator(QObject *parent = nullptr);
   ~HistogramGenerator() override;
 
-  void withHistogram(
-      const std::function<void(const core::HistogramBuffer &)> &action);
-
-  [[nodiscard]] bool running() const { return running_; }
+  void synchronizeResult(core::Renderer *renderer) override;
+  void setEnabled(bool enabled) override;
+  void setSystem(const core::System &system) override;
 
  public slots:
-  void setSystem(const chaoskit::core::System *system);
   void setColorMap(const chaoskit::core::ColorMap *colorMap);
   void setSize(quint32 width, quint32 height);
   void start();
   void stop();
-  void clear();
+  void reset() override;
 
  signals:
   void started();
@@ -36,7 +35,6 @@ class HistogramGenerator : public QObject {
   QThread *thread_;
   BlenderTask *blenderTask_;
   GathererTask *gathererTask_;
-  bool running_ = false;
 };
 
 }  // namespace chaoskit::ui

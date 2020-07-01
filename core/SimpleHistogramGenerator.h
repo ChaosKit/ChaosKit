@@ -23,14 +23,13 @@ class SimpleHistogramGenerator : public Generator {
   void setColorMap(const ColorMap *color_map);
   void setIterationCount(uint32_t count);
 
-  void beforeRendering() override;
+  void synchronizeResult(Renderer *renderer) override;
   void reset() override;
 
   [[nodiscard]] const Color *data() const { return buffer_.data(); }
 
  private:
-  uint32_t width_, height_;
-  std::vector<Color> buffer_;
+  HistogramBuffer buffer_;
   stdx::optional<uint32_t> iteration_count_;
   SimpleInterpreter interpreter_;
   const ColorMap *color_map_;

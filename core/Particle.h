@@ -10,7 +10,7 @@ struct Particle {
 
   Point point;
   float color = .5f;
-  int32_t ttl = IMMORTAL;
+  int32_t ttl = 0;
   int32_t skip = 0;
 
   [[nodiscard]] float x() const { return point.x(); }

@@ -26,6 +26,38 @@ using chaoskit::library::coloring_methods::Distance;
 
 #define CLAMP(X, L, U) std::min(std::max((X), (L)), (U))
 
+class LolRenderer : public chaoskit::core::Renderer {
+ public:
+  void updateHistogramBuffer(
+      const chaoskit::core::HistogramBuffer &buffer) override {
+    buffer_ = buffer.data();
+  }
+
+  QImage render() {
+    QImage image(512, 512, QImage::Format_RGB32);
+    for (int y = 0; y < 512; y++) {
+      for (int x = 0; x < 512; x++) {
+        int index = y * 512 + x;
+        const Color &color = buffer_[index];
+        double intensity = color.a * M_E;
+        double logScale = std::log10(intensity + 1) / intensity;
+        double scaledIntensity = color.a * logScale;
+        double scale =
+            logScale * std::pow(scaledIntensity, 2.2) / scaledIntensity;
+
+        image.setPixelColor(x, y,
+                            QColor::fromRgbF(CLAMP(color.r * scale, 0.0, 1.0),
+                                             CLAMP(color.g * scale, 0.0, 1.0),
+                                             CLAMP(color.b * scale, 0.0, 1.0)));
+      }
+    }
+    return image;
+  }
+
+ private:
+  const Color *buffer_ = nullptr;
+};
+
 int main(int argc, char **argv) {
   auto finalBlend = std::make_unique<FinalBlend>();
   finalBlend->post = scale(.5f, 1.f) * translate(.5f, .5f);
@@ -51,27 +83,10 @@ int main(int argc, char **argv) {
   generator.setIterationCount(1000000);
   generator.setEnabled(true);
 
-  generator.beforeRendering();
-  const Color *buffer = generator.data();
-
-  QImage image(512, 512, QImage::Format_RGB32);
-  for (int y = 0; y < 512; y++) {
-    for (int x = 0; x < 512; x++) {
-      int index = y * 512 + x;
-      const Color &color = buffer[index];
-      double intensity = color.a * M_E;
-      double logScale = std::log10(intensity + 1) / intensity;
-      double scaledIntensity = color.a * logScale;
-      double scale =
-          logScale * std::pow(scaledIntensity, 2.2) / scaledIntensity;
-
-      image.setPixelColor(x, y,
-                          QColor::fromRgbF(CLAMP(color.r * scale, 0.0, 1.0),
-                                           CLAMP(color.g * scale, 0.0, 1.0),
-                                           CLAMP(color.b * scale, 0.0, 1.0)));
-    }
-  }
-  generator.afterRendering();
+  LolRenderer renderer;
+  generator.synchronizeResult(&renderer);
+  QImage image = renderer.render();
+  generator.finalizeStep(&renderer);
 
   image.save("lol.png");
 

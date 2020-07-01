@@ -26,22 +26,21 @@ class SystemView : public QQuickFramebufferObject {
   explicit SystemView(QQuickItem *parent = nullptr);
 
   Renderer *createRenderer() const override;
-  void withHistogram(
-      const std::function<void(const core::HistogramBuffer &)> &action) const;
+  void synchronizeResult(core::Renderer *renderer) const {
+    generator_->synchronizeResult(renderer);
+  }
 
   DocumentModel *model() const { return model_; }
   float gamma() const { return gamma_; }
   float exposure() const { return exposure_; }
   float vibrancy() const { return vibrancy_; }
-  bool running() const { return generator_->running(); }
-  [[nodiscard]] ColorMapRegistry *colorMapRegistry() {
+  bool running() const { return generator_->isEnabled(); }
+  [[nodiscard]] ColorMapRegistry *colorMapRegistry() const {
     return colorMapRegistry_;
   }
   [[nodiscard]] const QString &colorMap() const { return colorMap_; }
 
  public slots:
-  void start();
-  void stop();
   void clear();
   void setRunning(bool running);
   void setModel(DocumentModel *documentModel);

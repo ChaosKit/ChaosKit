@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_CORE_GENERATOR_H
 #define CHAOSKIT_CORE_GENERATOR_H
 
+#include "Renderer.h"
 #include "core/structures/System.h"
 
 namespace chaoskit::core {
@@ -8,13 +9,17 @@ namespace chaoskit::core {
 class Generator {
  public:
   /**
-   * Called by the render loop before rendering the system.
-   * This is the place to synchronize the current rendering result.
+   * Synchronizes the current result with the renderer.
+   * Usually, this is called by the render loop just before rendering the
+   * system.
    */
-  virtual void beforeRendering() = 0;
+  virtual void synchronizeResult(Renderer* renderer) = 0;
 
-  /** Called by the render loop after rendering the system. */
-  virtual void afterRendering() {}
+  /**
+   * Finalizes the current generation step.
+   * Usually, this is called by the render loop just after rendering the system.
+   */
+  virtual void finalizeStep(Renderer* renderer) {}
 
   /** Resets the generator state (e.g. particles, buffers, etc.) */
   virtual void reset() = 0;

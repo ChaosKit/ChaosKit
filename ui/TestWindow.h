@@ -5,12 +5,14 @@
 #include <QOpenGLWindow>
 #include "GLToneMapper.h"
 #include "HistogramGenerator.h"
+#include "core/Renderer.h"
 
 namespace chaoskit::ui {
 
-class TestWindow : public QOpenGLWindow {
+class TestWindow : public QOpenGLWindow, public core::Renderer {
  public:
   TestWindow();
+  void updateHistogramBuffer(const core::HistogramBuffer &buffer) override;
 
  protected:
   void initializeGL() override;

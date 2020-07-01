@@ -16,6 +16,7 @@ add_library(core
         Particle.h
         Point.h Point.cpp
         RainbowColorMap.cpp RainbowColorMap.h
+        Renderer.h
         Rng.h
         SimpleHistogramGenerator.h SimpleHistogramGenerator.cpp
         SimpleInterpreter.h SimpleInterpreter.cpp
