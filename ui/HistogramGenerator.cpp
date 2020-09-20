@@ -57,6 +57,7 @@ void HistogramGenerator::setEnabled(bool enabled) {
 void HistogramGenerator::setSystem(const core::System &system) {
   QMetaObject::invokeMethod(
       blenderTask_, [this, &system] { blenderTask_->setSystem(&system); });
+  gathererTask_->clear();
 }
 
 void HistogramGenerator::setColorMap(const chaoskit::core::ColorMap *colorMap) {
