@@ -12,6 +12,7 @@
 #include "Transform.h"
 #include "UnaryFunction.h"
 #include "VariableDeclaration.h"
+#include "VariableName.h"
 #include "WeightedFormula.h"
 
 #endif  // CHAOSKIT_AST_TYPES_H
