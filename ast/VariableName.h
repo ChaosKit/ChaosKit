@@ -10,6 +10,10 @@ class VariableName {
  public:
   explicit VariableName(std::string name) : name_(std::move(name)) {}
 
+  // Explicitly allow casting strings to variable names.
+  // NOLINTNEXTLINE(hicpp-explicit-conversions, google-explicit-constructor)
+  VariableName(const char* name) : name_(name) {}
+
   [[nodiscard]] const std::string& name() const { return name_; }
 
   bool operator==(const VariableName& other) const {

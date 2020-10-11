@@ -11,8 +11,8 @@ class Spherical : public Formula {
     using namespace ast::helpers;
     var("r") = sqrt(input.x() * input.x() + input.y() * input.y());
     return withVariables({
-        input.x() / (ast::VariableName("r") * ast::VariableName("r")),
-        input.y() / (ast::VariableName("r") * ast::VariableName("r")),
+        input.x() / (v("r") * "r"),
+        input.y() / (v("r") * "r"),
     });
   }
 };

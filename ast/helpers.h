@@ -13,6 +13,10 @@ namespace chaoskit::ast::helpers {
 
 inline Expression n(float value) { return Expression(value); }
 
+inline Expression v(const char* variableName) {
+  return Expression(variableName);
+}
+
 inline UnaryFunction sin(const Expression& expression) {
   return UnaryFunction(UnaryFunction::Type::SIN, expression);
 }
