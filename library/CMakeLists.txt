@@ -6,11 +6,12 @@ add_library(library
         formulas/Drain.h
         formulas/Linear.h
         formulas/Quadratic.h
+        formulas/Spherical.h
+        formulas/Tinkerbell.h
         formulas/Trigonometric.h
         ColoringMethod.h
         ColoringMethodType.h
         Formula.h
         FormulaType.h
-        util.cpp util.h
-        formulas/Tinkerbell.h)
+        util.cpp util.h)
 target_link_libraries(library PUBLIC ast PRIVATE magic_enum)

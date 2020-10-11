@@ -11,6 +11,7 @@
 #include "formulas/Drain.h"
 #include "formulas/Linear.h"
 #include "formulas/Quadratic.h"
+#include "formulas/Spherical.h"
 #include "formulas/Tinkerbell.h"
 #include "formulas/Trigonometric.h"
 
@@ -28,6 +29,8 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
       return std::make_unique<Linear>();
     case FormulaType::Quadratic:
       return std::make_unique<Quadratic>();
+    case FormulaType::Spherical:
+      return std::make_unique<Spherical>();
     case FormulaType::Tinkerbell:
       return std::make_unique<Tinkerbell>();
     case FormulaType::Trigonometric:
