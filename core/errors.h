@@ -11,6 +11,11 @@ class MissingParameterError : public std::out_of_range {
   MissingParameterError(const SystemIndex& elementIndex, size_t parameterIndex);
 };
 
+class UndefinedVariableError : public std::out_of_range {
+ public:
+  UndefinedVariableError(const std::string& name);
+};
+
 class InvalidColorMap : public std::out_of_range {
  public:
   InvalidColorMap(const std::string& name);

@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "Output.h"
 #include "Parameter.h"
+#include "VariableName.h"
 
 namespace chaoskit::ast {
 
@@ -12,7 +13,7 @@ class UnaryFunction;
 class BinaryFunction;
 
 using Expression =
-    mapbox::util::variant<float, Input, Output, Parameter,
+    mapbox::util::variant<float, Input, Output, Parameter, VariableName,
                           mapbox::util::recursive_wrapper<UnaryFunction>,
                           mapbox::util::recursive_wrapper<BinaryFunction>>;
 

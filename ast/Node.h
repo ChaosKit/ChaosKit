@@ -9,9 +9,11 @@
 #include "Parameter.h"
 #include "Transform.h"
 #include "UnaryFunction.h"
+#include "VariableName.h"
 
 namespace chaoskit::ast {
 
+class VariableDeclaration;
 class Formula;
 class WeightedFormula;
 class Blend;
@@ -21,6 +23,8 @@ class System;
 namespace {
 using NodeAlias =
     mapbox::util::variant<float, Input, Output, Parameter, Transform,
+                          VariableName,
+                          mapbox::util::recursive_wrapper<VariableDeclaration>,
                           mapbox::util::recursive_wrapper<UnaryFunction>,
                           mapbox::util::recursive_wrapper<BinaryFunction>,
                           mapbox::util::recursive_wrapper<Formula>,
@@ -44,6 +48,7 @@ struct Node : public NodeAlias {
 #include "Formula.h"
 #include "LimitedBlend.h"
 #include "System.h"
+#include "VariableDeclaration.h"
 #include "WeightedFormula.h"
 
 #endif  // CHAOSKIT_AST_NODE_H

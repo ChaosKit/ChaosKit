@@ -67,7 +67,8 @@ class BlendInterpreter {
       : input_(input),
         output_(input),
         params_(params),
-        index_{blend_index, 0} {}
+        index_{blend_index, 0},
+        variableValues_() {}
 
   float operator()(float number) const { return number; }
 
@@ -99,6 +100,14 @@ class BlendInterpreter {
     }
   }
 
+  float operator()(const ast::VariableName &variableName) const {
+    try {
+      return variableValues_.at(variableName.name());
+    } catch (std::out_of_range &e) {
+      throw UndefinedVariableError(variableName.name());
+    }
+  }
+
   float operator()(const ast::UnaryFunction &function) const {
     float value = apply_visitor(*this, function.argument());
     return UNARY_FUNCTIONS.at(function.type())(value);
@@ -110,6 +119,11 @@ class BlendInterpreter {
     return BINARY_FUNCTIONS.at(function.type())(first, second);
   }
 
+  void operator()(const ast::VariableDeclaration &declaration) {
+    variableValues_.insert(
+        {declaration.name(), apply_visitor(*this, declaration.definition())});
+  }
+
   Particle operator()(const ast::Transform &transform) const {
     const auto &point = output_.point;
     const auto &params = transform.params();
@@ -118,12 +132,16 @@ class BlendInterpreter {
               params[3] * point.x() + params[4] * point.y() + params[5]));
   }
 
-  Particle operator()(const ast::Formula &formula) const {
+  Particle operator()(const ast::Formula &formula) {
+    for (const auto &declaration : formula.variables()) {
+      (*this)(declaration);
+    }
+
     return outputWithPoint(Point(apply_visitor(*this, formula.x()),
                                  apply_visitor(*this, formula.y())));
   }
 
-  Particle operator()(const ast::WeightedFormula &formula) const {
+  Particle operator()(const ast::WeightedFormula &formula) {
     Particle particle((*this)(formula.formula()));
     particle.point = Point(particle.x() * formula.weight_x(),
                            particle.y() * formula.weight_y());
@@ -152,6 +170,7 @@ class BlendInterpreter {
   Particle input_, output_;
   SystemIndex index_;
   const Params &params_;
+  std::unordered_map<std::string, float> variableValues_;
 
   [[nodiscard]] Particle outputWithPoint(Point point) const {
     Particle newParticle = output_;

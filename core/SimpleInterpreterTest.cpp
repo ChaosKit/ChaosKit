@@ -55,6 +55,18 @@ TEST_F(SimpleInterpreterTest, InterpretsFormula) {
               Eq(SimpleInterpreter::Result{output, output}));
 }
 
+TEST_F(SimpleInterpreterTest, SupportsFormulasWithVariables) {
+  using namespace ast::helpers;
+  auto input = make_immortal_particle({0.f, 0.f});
+  ast::Formula formula(1.f + ast::VariableName("x"), 0.f,
+                       {ast::VariableDeclaration("x", 1.f)});
+
+  SimpleInterpreter interpreter(make_system(formula));
+
+  auto output = make_immortal_particle({2.f, 0.f});
+  ASSERT_THAT(interpreter.processBlends(input), Eq(output));
+}
+
 TEST_F(SimpleInterpreterTest, UpdatesColor) {
   auto input = make_immortal_particle({0.f, 0.f}, 0.0f);
   ast::LimitedBlend blend{{{}, {}, {}, 0.1f}, 1.f};
