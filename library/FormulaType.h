@@ -10,6 +10,7 @@ enum class FormulaType {
   Drain,
   Linear,
   Quadratic,
+  Sinusoidal,
   Spherical,
   Tinkerbell,
   Trigonometric,

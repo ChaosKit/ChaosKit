@@ -6,6 +6,7 @@ add_library(library
         formulas/Drain.h
         formulas/Linear.h
         formulas/Quadratic.h
+        formulas/Sinusoidal.h
         formulas/Spherical.h
         formulas/Tinkerbell.h
         formulas/Trigonometric.h
