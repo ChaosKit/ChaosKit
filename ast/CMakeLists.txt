@@ -11,6 +11,7 @@ add_library(ast
         System.cpp System.h
         Transform.cpp Transform.h
         UnaryFunction.cpp UnaryFunction.h
+        VariableDeclaration.cpp VariableDeclaration.h
         WeightedFormula.cpp WeightedFormula.h
         ast.h
         helpers.h
