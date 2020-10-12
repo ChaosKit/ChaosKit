@@ -18,6 +18,7 @@
 #include "formulas/Quadratic.h"
 #include "formulas/Sinusoidal.h"
 #include "formulas/Spherical.h"
+#include "formulas/Spiral.h"
 #include "formulas/Swirl.h"
 #include "formulas/Tinkerbell.h"
 #include "formulas/Trigonometric.h"
@@ -48,10 +49,12 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
       return std::make_unique<Quadratic>();
     case FormulaType::Sinusoidal:
       return std::make_unique<Sinusoidal>();
-    case FormulaType::Swirl:
-      return std::make_unique<Swirl>();
     case FormulaType::Spherical:
       return std::make_unique<Spherical>();
+    case FormulaType::Spiral:
+      return std::make_unique<Spiral>();
+    case FormulaType::Swirl:
+      return std::make_unique<Swirl>();
     case FormulaType::Tinkerbell:
       return std::make_unique<Tinkerbell>();
     case FormulaType::Trigonometric:
