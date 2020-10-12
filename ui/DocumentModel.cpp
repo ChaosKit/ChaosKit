@@ -6,8 +6,10 @@
 #include <QtGui/QTransform>
 #include <QtGui/QVector2D>
 #include <magic_enum.hpp>
+#include <sstream>
 #include "DocumentAdopter.h"
 #include "core/ManagedDocument.h"
+#include "core/toSource.h"
 #include "core/transforms.h"
 #include "core/util.h"
 #include "io/io.h"
@@ -208,6 +210,12 @@ ModelEntry* DocumentModel::entryAtIndex(const QModelIndex& index) {
 DocumentProxy* DocumentModel::documentProxy() { return documentProxy_; }
 
 SystemProxy* DocumentModel::systemProxy() { return systemProxy_; }
+
+QString DocumentModel::astSource() const {
+  std::stringstream stream;
+  stream << core::toSource(*system());
+  return QString::fromStdString(stream.str());
+}
 
 QString DocumentModel::debugSource() const {
   return QString::fromStdString(core::debugString(*system()));
@@ -1180,7 +1188,6 @@ state::Id DocumentModel::documentId() const {
 state::Id DocumentModel::systemId() const {
   return store_.lastId<core::System>();
 };
-
 bool DocumentModel::fixInvariants() {
   bool performedChanges = false;
 

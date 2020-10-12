@@ -10,7 +10,8 @@ Popup {
   modal: true
   visible: true
 
-  property alias source: sourceArea.text
+  property string modelSource
+  property string astSource
 
   Label {
     id: title
@@ -29,18 +30,32 @@ Popup {
     onClicked: popup.close()
   }
 
-  ScrollView {
+  TabBar {
+    id: tabs
     anchors.top: title.bottom
+    anchors.topMargin: Theme.units(3)
+    width: parent.width
+
+    TabButton {
+      text: "Model"
+    }
+    TabButton {
+      text: "AST"
+    }
+  }
+
+  ScrollView {
+    anchors.top: tabs.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    anchors.topMargin: Theme.units(3)
 
     TextArea {
       id: sourceArea
       font.family: monospaceFont.family
       font.pointSize: 11
       readOnly: true
+      text: tabs.currentIndex === 0 ? modelSource : astSource
     }
   }
 }

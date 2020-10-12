@@ -143,7 +143,8 @@ ApplicationWindow {
       active: false
       sourceComponent: AstInspector {
         anchors.centerIn: Overlay.overlay
-        source: documentModel.debugSource
+        modelSource: documentModel.debugSource
+        astSource: documentModel.astSource
 
         onClosed: {
           astInspectorLoader.active = false;

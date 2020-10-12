@@ -36,6 +36,7 @@ class DocumentEntryType {
 class DocumentModel : public QAbstractItemModel {
   Q_OBJECT
   Q_PROPERTY(QString debugSource READ debugSource NOTIFY structureChanged)
+  Q_PROPERTY(QString astSource READ astSource NOTIFY structureChanged)
   Q_PROPERTY(QModelIndex documentIndex READ documentIndex NOTIFY systemReset)
   Q_PROPERTY(QModelIndex systemIndex READ systemIndex NOTIFY systemReset)
   Q_PROPERTY(
@@ -153,6 +154,7 @@ class DocumentModel : public QAbstractItemModel {
   [[nodiscard]] SystemProxy* systemProxy();
 
   [[nodiscard]] QString debugSource() const;
+  [[nodiscard]] QString astSource() const;
 
   void setColorMapRegistry(ColorMapRegistry* colorMapRegistry) {
     colorMapRegistry_ = colorMapRegistry;
