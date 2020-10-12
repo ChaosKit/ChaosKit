@@ -11,6 +11,7 @@ enum class FormulaType {
   Linear,
   Quadratic,
   Sinusoidal,
+  Swirl,
   Spherical,
   Tinkerbell,
   Trigonometric,

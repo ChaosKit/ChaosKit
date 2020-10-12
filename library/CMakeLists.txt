@@ -14,5 +14,5 @@ add_library(library
         ColoringMethodType.h
         Formula.h
         FormulaType.h
-        util.cpp util.h)
+        util.cpp util.h formulas/Swirl.h)
 target_link_libraries(library PUBLIC ast PRIVATE magic_enum)
