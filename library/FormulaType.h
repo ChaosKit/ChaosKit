@@ -11,6 +11,7 @@ enum class FormulaType {
   Disc,
   Drain,
   Ex,
+  Fisheye,
   Handkerchief,
   Heart,
   Horseshoe,
