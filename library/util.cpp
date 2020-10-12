@@ -9,6 +9,8 @@
 #include "coloring_methods/SingleColor.h"
 #include "formulas/DeJong.h"
 #include "formulas/Drain.h"
+#include "formulas/Handkerchief.h"
+#include "formulas/Heart.h"
 #include "formulas/Horseshoe.h"
 #include "formulas/Linear.h"
 #include "formulas/Polar.h"
@@ -29,6 +31,10 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
       return std::make_unique<DeJong>();
     case FormulaType::Drain:
       return std::make_unique<Drain>();
+    case FormulaType::Handkerchief:
+      return std::make_unique<Handkerchief>();
+    case FormulaType::Heart:
+      return std::make_unique<Heart>();
     case FormulaType::Horseshoe:
       return std::make_unique<Horseshoe>();
     case FormulaType::Linear:
