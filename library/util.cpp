@@ -8,6 +8,7 @@
 #include "coloring_methods/Noop.h"
 #include "coloring_methods/SingleColor.h"
 #include "formulas/DeJong.h"
+#include "formulas/Diamond.h"
 #include "formulas/Disc.h"
 #include "formulas/Drain.h"
 #include "formulas/Handkerchief.h"
@@ -32,6 +33,8 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
   switch (type) {
     case FormulaType::DeJong:
       return std::make_unique<DeJong>();
+    case FormulaType::Diamond:
+      return std::make_unique<Diamond>();
     case FormulaType::Disc:
       return std::make_unique<Disc>();
     case FormulaType::Drain:
