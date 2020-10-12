@@ -12,6 +12,7 @@ enum class FormulaType {
   Handkerchief,
   Heart,
   Horseshoe,
+  Hyperbolic,
   Linear,
   Polar,
   Quadratic,

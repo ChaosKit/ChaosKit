@@ -13,6 +13,7 @@
 #include "formulas/Handkerchief.h"
 #include "formulas/Heart.h"
 #include "formulas/Horseshoe.h"
+#include "formulas/Hyperbolic.h"
 #include "formulas/Linear.h"
 #include "formulas/Polar.h"
 #include "formulas/Quadratic.h"
@@ -41,6 +42,8 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
       return std::make_unique<Heart>();
     case FormulaType::Horseshoe:
       return std::make_unique<Horseshoe>();
+    case FormulaType::Hyperbolic:
+      return std::make_unique<Hyperbolic>();
     case FormulaType::Linear:
       return std::make_unique<Linear>();
     case FormulaType::Polar:
