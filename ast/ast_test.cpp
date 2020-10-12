@@ -255,8 +255,11 @@ TEST_F(AstTest, AllUnaryFunctionTypesHaveWorkingHelpers) {
                  {UnaryFunction::Type::FLOOR, helpers::floor},
                  {UnaryFunction::Type::SIGNUM, helpers::signum},
                  {UnaryFunction::Type::ABS, helpers::abs},
-                 {UnaryFunction::Type::NOT, helpers::operator!},
-                  {UnaryFunction::Type::FRAC, helpers::frac}, };
+                 {
+                     UnaryFunction::Type::NOT,
+                     helpers::operator!},
+                     {UnaryFunction::Type::FRAC, helpers::frac},
+      };
 
   // Fill sets with type names as strings
   std::unordered_set<std::string> all_types;
@@ -301,6 +304,7 @@ TEST_F(AstTest, AllBinaryFunctionTypesHaveWorkingHelpers) {
           {BinaryFunction::Type::LESS_THAN_OR_EQUAL, helpers::lte},
           {BinaryFunction::Type::GREATER_THAN_OR_EQUAL, helpers::gte},
           {BinaryFunction::Type::DISTANCE, helpers::distance},
+          {BinaryFunction::Type::ATAN2, helpers::atan2},
       };
 
   // Fill sets with type names as strings

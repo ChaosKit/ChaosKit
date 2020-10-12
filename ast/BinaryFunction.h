@@ -24,6 +24,7 @@ class BinaryFunction {
     LESS_THAN_OR_EQUAL,
     GREATER_THAN_OR_EQUAL,
     DISTANCE,
+    ATAN2,
   };
 
   BinaryFunction(Type type, Expression first, Expression second)

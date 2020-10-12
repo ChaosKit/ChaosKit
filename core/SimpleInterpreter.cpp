@@ -53,6 +53,7 @@ const std::unordered_map<char, std::function<float(float, float)>>
         {BinaryFn::LESS_THAN_OR_EQUAL, std::less_equal<float>()},
         {BinaryFn::GREATER_THAN_OR_EQUAL, std::greater_equal<float>()},
         {BinaryFn::DISTANCE, [](float a, float b) { return std::abs(a - b); }},
+        {BinaryFn::ATAN2, atan2f},
     };
 
 Point applyTransform(const Transform &transform, const Point &point) {

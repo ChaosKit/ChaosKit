@@ -86,6 +86,10 @@ inline BinaryFunction distance(const Expression& first,
   return BinaryFunction(BinaryFunction::Type::DISTANCE, first, second);
 }
 
+inline BinaryFunction atan2(const Expression& y, const Expression& x) {
+  return BinaryFunction(BinaryFunction::Type::ATAN2, y, x);
+}
+
 inline BinaryFunction eq(const Expression& first, const Expression& second) {
   return BinaryFunction(BinaryFunction::Type::EQUALS, first, second);
 }
