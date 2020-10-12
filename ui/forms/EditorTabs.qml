@@ -33,7 +33,7 @@ Rectangle {
     Repeater {
       id: repeater
       model: tabs
-      delegate: TabButton {
+      delegate: EditorTabButton {
         Layout.fillWidth: true
         checked: root.currentIndex === index
         display: AbstractButton.TextUnderIcon

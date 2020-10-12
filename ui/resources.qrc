@@ -19,6 +19,7 @@
         <file>ChaosKit/Separator.qml</file>
         <file>ChaosKit/Slider.qml</file>
         <file>ChaosKit/Snackbar.qml</file>
+        <file>ChaosKit/TabBar.qml</file>
         <file>ChaosKit/TabButton.qml</file>
         <file>ChaosKit/TextArea.qml</file>
         <file>ChaosKit/TextField.qml</file>
@@ -30,6 +31,7 @@
         <file>forms/ColorMapEditor.qml</file>
         <file>forms/ColumnRail.qml</file>
         <file>forms/DocumentEditor.qml</file>
+        <file>forms/EditorTabButton.qml</file>
         <file>forms/EditorTabs.qml</file>
         <file>forms/ExportImageDialog.qml</file>
         <file>forms/FormulaGallery.qml</file>

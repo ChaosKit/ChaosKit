@@ -46,7 +46,7 @@ T.TabButton {
   }
 
   background: Rectangle {
-    implicitHeight: Theme.units(14)
+    implicitHeight: Theme.units(8)
     visible: control.hovered || control.down
     color: getColor()
   }
