@@ -11,6 +11,7 @@
 #include "formulas/Diamond.h"
 #include "formulas/Disc.h"
 #include "formulas/Drain.h"
+#include "formulas/Ex.h"
 #include "formulas/Handkerchief.h"
 #include "formulas/Heart.h"
 #include "formulas/Horseshoe.h"
@@ -39,6 +40,8 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
       return std::make_unique<Disc>();
     case FormulaType::Drain:
       return std::make_unique<Drain>();
+    case FormulaType::Ex:
+      return std::make_unique<Ex>();
     case FormulaType::Handkerchief:
       return std::make_unique<Handkerchief>();
     case FormulaType::Heart:

@@ -10,6 +10,7 @@ enum class FormulaType {
   Diamond,
   Disc,
   Drain,
+  Ex,
   Handkerchief,
   Heart,
   Horseshoe,
