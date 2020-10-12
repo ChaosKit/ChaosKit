@@ -10,6 +10,7 @@ ColumnLayout {
 
   CollapsibleHeading {
     id: heading
+    opened: true
     text: "Formula Gallery"
   }
 
