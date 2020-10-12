@@ -8,6 +8,7 @@ enum class FormulaType {
   Invalid = 0,
   DeJong,
   Drain,
+  Horseshoe,
   Linear,
   Quadratic,
   Sinusoidal,
