@@ -12,6 +12,7 @@
 #include "formulas/Disc.h"
 #include "formulas/Drain.h"
 #include "formulas/Ex.h"
+#include "formulas/Exponential.h"
 #include "formulas/Fisheye.h"
 #include "formulas/Handkerchief.h"
 #include "formulas/Heart.h"
@@ -43,6 +44,8 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
       return std::make_unique<Drain>();
     case FormulaType::Ex:
       return std::make_unique<Ex>();
+    case FormulaType::Exponential:
+      return std::make_unique<Exponential>();
     case FormulaType::Fisheye:
       return std::make_unique<Fisheye>();
     case FormulaType::Handkerchief:
