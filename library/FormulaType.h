@@ -10,6 +10,7 @@ enum class FormulaType {
   Drain,
   Horseshoe,
   Linear,
+  Polar,
   Quadratic,
   Sinusoidal,
   Swirl,

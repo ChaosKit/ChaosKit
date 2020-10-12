@@ -11,6 +11,7 @@
 #include "formulas/Drain.h"
 #include "formulas/Horseshoe.h"
 #include "formulas/Linear.h"
+#include "formulas/Polar.h"
 #include "formulas/Quadratic.h"
 #include "formulas/Sinusoidal.h"
 #include "formulas/Spherical.h"
@@ -32,6 +33,8 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
       return std::make_unique<Horseshoe>();
     case FormulaType::Linear:
       return std::make_unique<Linear>();
+    case FormulaType::Polar:
+      return std::make_unique<Polar>();
     case FormulaType::Quadratic:
       return std::make_unique<Quadratic>();
     case FormulaType::Sinusoidal:
