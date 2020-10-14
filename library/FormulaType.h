@@ -17,6 +17,7 @@ enum class FormulaType {
   Heart,
   Horseshoe,
   Hyperbolic,
+  Julia,
   Linear,
   Polar,
   Quadratic,
