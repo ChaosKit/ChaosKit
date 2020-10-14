@@ -64,12 +64,14 @@ Point applyTransform(const Transform &transform, const Point &point) {
 
 class BlendInterpreter {
  public:
-  BlendInterpreter(Particle input, const Params &params, size_t blend_index)
+  BlendInterpreter(Particle input, const Params &params, size_t blend_index,
+                   std::shared_ptr<Rng> rng)
       : input_(input),
         output_(input),
         params_(params),
         index_{blend_index, 0},
-        variableValues_() {}
+        variableValues_(),
+        rng_(std::move(rng)) {}
 
   float operator()(float number) const { return number; }
 
@@ -107,6 +109,10 @@ class BlendInterpreter {
     } catch (std::out_of_range &e) {
       throw UndefinedVariableError(variableName.name());
     }
+  }
+
+  float operator()(const ast::RandomNumber &) const {
+    return rng_->randomFloat(0.f, 1.f);
   }
 
   float operator()(const ast::UnaryFunction &function) const {
@@ -172,6 +178,7 @@ class BlendInterpreter {
   SystemIndex index_;
   const Params &params_;
   std::unordered_map<std::string, float> variableValues_;
+  std::shared_ptr<Rng> rng_;
 
   [[nodiscard]] Particle outputWithPoint(Point point) const {
     Particle newParticle = output_;
@@ -214,7 +221,7 @@ SimpleInterpreter::SimpleInterpreter(const core::System &system,
                                      std::shared_ptr<Rng> rng)
     : SimpleInterpreter(toSource(system), system.ttl, system.skip,
                         Params::fromSystem(system), system.initialTransform,
-                        rng) {}
+                        std::move(rng)) {}
 
 void SimpleInterpreter::updateMaxLimit() {
   max_limit_ = system_.blends().empty() ? 0 : system_.blends().back().limit();
@@ -278,8 +285,8 @@ Particle SimpleInterpreter::processBlends(Particle input) const {
       auto blend_index = static_cast<size_t>(
           std::distance(system_.blends().begin(), blend_iterator));
 
-      next_state = BlendInterpreter(next_state, params_,
-                                    blend_index)(blend_iterator->blend());
+      next_state = BlendInterpreter(next_state, params_, blend_index,
+                                    rng_)(blend_iterator->blend());
     }
 
     if (next_state.ttl != Particle::IMMORTAL) {
@@ -297,8 +304,8 @@ Particle SimpleInterpreter::processBlends(Particle input) const {
 }
 
 Particle SimpleInterpreter::processFinalBlend(Particle input) const {
-  return BlendInterpreter(input, params_,
-                          SystemIndex::FINAL_BLEND)(system_.final_blend());
+  return BlendInterpreter(input, params_, SystemIndex::FINAL_BLEND,
+                          rng_)(system_.final_blend());
 }
 
 SimpleInterpreter::Result SimpleInterpreter::operator()(Particle input) const {

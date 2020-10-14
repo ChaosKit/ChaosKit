@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "Output.h"
 #include "Parameter.h"
+#include "RandomNumber.h"
 #include "VariableName.h"
 
 namespace chaoskit::ast {
@@ -14,6 +15,7 @@ class BinaryFunction;
 
 using Expression =
     mapbox::util::variant<float, Input, Output, Parameter, VariableName,
+                          RandomNumber,
                           mapbox::util::recursive_wrapper<UnaryFunction>,
                           mapbox::util::recursive_wrapper<BinaryFunction>>;
 

@@ -7,6 +7,7 @@
 #include "Input.h"
 #include "Output.h"
 #include "Parameter.h"
+#include "RandomNumber.h"
 #include "Transform.h"
 #include "UnaryFunction.h"
 #include "VariableName.h"
@@ -23,7 +24,7 @@ class System;
 namespace {
 using NodeAlias =
     mapbox::util::variant<float, Input, Output, Parameter, Transform,
-                          VariableName,
+                          VariableName, RandomNumber,
                           mapbox::util::recursive_wrapper<VariableDeclaration>,
                           mapbox::util::recursive_wrapper<UnaryFunction>,
                           mapbox::util::recursive_wrapper<BinaryFunction>,

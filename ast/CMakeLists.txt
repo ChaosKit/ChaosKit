@@ -17,7 +17,7 @@ add_library(ast
         ast.h
         helpers.h
         types.h
-        util.cpp util.h)
+        util.cpp util.h RandomNumber.h RandomNumber.cpp)
 target_link_libraries(ast PUBLIC variant PRIVATE magic_enum)
 
 add_executable(ast_test ast_test.cpp)

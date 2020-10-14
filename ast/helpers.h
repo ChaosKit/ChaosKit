@@ -17,6 +17,8 @@ inline Expression v(const char* variableName) {
   return Expression(variableName);
 }
 
+inline RandomNumber random() { return RandomNumber(); }
+
 inline UnaryFunction sin(const Expression& expression) {
   return UnaryFunction(UnaryFunction::Type::SIN, expression);
 }

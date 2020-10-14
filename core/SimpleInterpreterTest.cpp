@@ -67,6 +67,19 @@ TEST_F(SimpleInterpreterTest, SupportsFormulasWithVariables) {
   ASSERT_THAT(interpreter.processBlends(input), Eq(output));
 }
 
+TEST_F(SimpleInterpreterTest, SupportsFormulasWithRandomNumbers) {
+  auto input = make_immortal_particle({0.f, 0.f});
+  auto rng = std::make_shared<StaticRng>();
+  rng->setFloat(0.25f);
+  ast::Formula formula(ast::RandomNumber(), 0.f);
+
+  SimpleInterpreter interpreter(make_system(formula), Particle::IMMORTAL, 0, {},
+                                {}, rng);
+
+  auto output = make_immortal_particle({0.25f, 0.f});
+  ASSERT_THAT(interpreter.processBlends(input), Eq(output));
+}
+
 TEST_F(SimpleInterpreterTest, UpdatesColor) {
   auto input = make_immortal_particle({0.f, 0.f}, 0.0f);
   ast::LimitedBlend blend{{{}, {}, {}, 0.1f}, 1.f};
