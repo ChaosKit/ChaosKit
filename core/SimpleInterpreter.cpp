@@ -156,7 +156,7 @@ class BlendInterpreter {
   }
 
   Particle operator()(const ast::Blend &blend) {
-    output_ = (*this)(blend.pre());
+    output_ = input_ = (*this)(blend.pre());
 
     if (!blend.formulas().empty()) {
       Point point;
