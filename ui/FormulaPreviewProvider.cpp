@@ -7,9 +7,9 @@
 #include <QSize>
 #include <magic_enum.hpp>
 #include <memory>
-#include <vector>
+#include <unordered_set>
+#include "ast/util.h"
 #include "core/Params.h"
-#include "core/Point.h"
 #include "core/SimpleInterpreter.h"
 #include "core/structures/Blend.h"
 #include "core/structures/Formula.h"
@@ -25,6 +25,52 @@ constexpr int GRID_WIDTH = 16;
 constexpr int GRID_HEIGHT = 16;
 constexpr double GRID_EXPANSION_FACTOR = .2;
 constexpr int ITERATIONS = 3;
+
+/** AST visitor that checks if an expression contains a random number. */
+class ContainsRandomNumber {
+ public:
+  bool operator()(const ast::RandomNumber&) const { return true; }
+
+  bool operator()(const ast::UnaryFunction& fn) const {
+    return ast::apply_visitor(*this, fn.argument());
+  }
+
+  bool operator()(const ast::BinaryFunction& fn) const {
+    return ast::apply_visitor(*this, fn.first()) ||
+           ast::apply_visitor(*this, fn.second());
+  }
+
+  bool operator()(const ast::VariableName& var) const {
+    return variablesWithRandomNumbers_.find(var.name()) !=
+           variablesWithRandomNumbers_.end();
+  }
+
+  template <typename T>
+  bool operator()(const T&) const {
+    return false;
+  }
+
+  void markVariable(std::string variableName) {
+    variablesWithRandomNumbers_.insert(std::move(variableName));
+  }
+
+ private:
+  std::unordered_set<std::string> variablesWithRandomNumbers_;
+};
+
+bool requiresScatterplot(library::FormulaType type) {
+  auto formula = library::source(type);
+
+  ContainsRandomNumber visitor;
+  for (const auto& var : formula.variables()) {
+    if (ast::apply_visitor(visitor, var.definition())) {
+      visitor.markVariable(var.name());
+    }
+  }
+
+  return ast::apply_visitor(visitor, formula.x()) ||
+         ast::apply_visitor(visitor, formula.y());
+}
 
 core::SimpleInterpreter createInterpreter(library::FormulaType type) {
   auto formula = std::make_unique<core::Formula>();
@@ -116,19 +162,34 @@ class FormulaPreviewResponse : public QQuickImageResponse, public QRunnable {
                                 imageSize.height() / bounds.height())
               .translate(-bounds.left(), -bounds.top());
 
-      for (int y = 0; y < GRID_HEIGHT; y++) {
-        for (int x = 0; x < GRID_WIDTH; x++) {
-          int index = y * GRID_WIDTH + x;
+      if (requiresScatterplot(*formulaType)) {
+        painter.setBrush(primary);
+        QSize pointSize(imageSize.width() / (8 * GRID_WIDTH),
+                        imageSize.height() / (8 * GRID_HEIGHT));
+        QPoint offset(-pointSize.width() / 2, -pointSize.height() / 2);
 
-          if (x < GRID_WIDTH - 1) {
-            int right = index + 1;
-            painter.drawLine(transform.map(grid[index]),
-                             transform.map(grid[right]));
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+          for (int x = 0; x < GRID_WIDTH; x++) {
+            int index = y * GRID_WIDTH + x;
+            painter.drawRect(QRectF(transform.map(grid[index]), pointSize)
+                                 .translated(offset));
           }
-          if (y < GRID_HEIGHT - 1) {
-            int bottom = index + GRID_WIDTH;
-            painter.drawLine(transform.map(grid[index]),
-                             transform.map(grid[bottom]));
+        }
+      } else {
+        for (int y = 0; y < GRID_HEIGHT; y++) {
+          for (int x = 0; x < GRID_WIDTH; x++) {
+            int index = y * GRID_WIDTH + x;
+
+            if (x < GRID_WIDTH - 1) {
+              int right = index + 1;
+              painter.drawLine(transform.map(grid[index]),
+                               transform.map(grid[right]));
+            }
+            if (y < GRID_HEIGHT - 1) {
+              int bottom = index + GRID_WIDTH;
+              painter.drawLine(transform.map(grid[index]),
+                               transform.map(grid[bottom]));
+            }
           }
         }
       }
