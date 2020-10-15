@@ -8,6 +8,7 @@
 #include "coloring_methods/Noop.h"
 #include "coloring_methods/SingleColor.h"
 #include "formulas/Bent.h"
+#include "formulas/Cosine.h"
 #include "formulas/DeJong.h"
 #include "formulas/Diamond.h"
 #include "formulas/Disc.h"
@@ -36,6 +37,8 @@ std::unique_ptr<Formula> createFormula(FormulaType type) {
   switch (type) {
     case FormulaType::Bent:
       return std::make_unique<Bent>();
+    case FormulaType::Cosine:
+      return std::make_unique<Cosine>();
     case FormulaType::DeJong:
       return std::make_unique<DeJong>();
     case FormulaType::Diamond:

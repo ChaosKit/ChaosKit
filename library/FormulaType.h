@@ -7,6 +7,7 @@ namespace library {
 enum class FormulaType {
   Invalid = 0,
   Bent,
+  Cosine,
   DeJong,
   Diamond,
   Disc,
