@@ -32,10 +32,14 @@ const std::unordered_map<char, std::function<float(float)>> UNARY_FUNCTIONS{
     {UnaryFn::SIGNUM, [](float f) { return std::signbit(f) ? -1 : 1; }},
     {UnaryFn::ABS, fabsf},
     {UnaryFn::NOT, std::logical_not<float>()},
-    {UnaryFn::FRAC, [](float f) {
+    {UnaryFn::FRAC,
+     [](float f) {
        float unused;
        return modff(f, &unused);
-     }}};
+     }},
+    {UnaryFn::SINH, sinhf},
+    {UnaryFn::COSH, coshf},
+};
 
 const std::unordered_map<char, std::function<float(float, float)>>
     BINARY_FUNCTIONS{

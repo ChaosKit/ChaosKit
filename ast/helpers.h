@@ -79,6 +79,14 @@ inline UnaryFunction frac(const Expression& expression) {
   return UnaryFunction(UnaryFunction::Type::FRAC, expression);
 }
 
+inline UnaryFunction sinh(const Expression& expression) {
+  return UnaryFunction(UnaryFunction::Type::SINH, expression);
+}
+
+inline UnaryFunction cosh(const Expression& expression) {
+  return UnaryFunction(UnaryFunction::Type::COSH, expression);
+}
+
 inline BinaryFunction pow(const Expression& first, const Expression& second) {
   return BinaryFunction(BinaryFunction::Type::POWER, first, second);
 }

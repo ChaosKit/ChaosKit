@@ -259,6 +259,8 @@ TEST_F(AstTest, AllUnaryFunctionTypesHaveWorkingHelpers) {
                      UnaryFunction::Type::NOT,
                      helpers::operator!},
                      {UnaryFunction::Type::FRAC, helpers::frac},
+                     {UnaryFunction::Type::SINH, helpers::sinh},
+                     {UnaryFunction::Type::COSH, helpers::cosh},
       };
 
   // Fill sets with type names as strings

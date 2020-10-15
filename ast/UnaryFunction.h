@@ -24,6 +24,8 @@ class UnaryFunction {
     ABS,
     NOT,
     FRAC,
+    SINH,
+    COSH,
   };
 
   UnaryFunction(Type type, Expression argument)
