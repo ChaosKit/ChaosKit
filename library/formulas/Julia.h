@@ -19,6 +19,11 @@ class Julia : public Formula {
         v("sqrtR") * sin(v("rho") / 2.f + "omega"),
     });
   }
+
+  ast::Transform examplePreTransform() override {
+    return {0.84660766961652,  0, -0.5000978933354223, 0, 0.84660766961652,
+            0.2566045370297865};
+  }
 };
 
 }  // namespace chaoskit::library

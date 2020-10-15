@@ -74,10 +74,14 @@ bool requiresScatterplot(library::FormulaType type) {
 
 core::SimpleInterpreter createInterpreter(library::FormulaType type) {
   auto formula = std::make_unique<core::Formula>();
-  formula->setType(type);
-  formula->params = library::exampleParams(type);
+
+  auto libraryFormula = library::createFormula(type);
+  formula->type = type;
+  formula->source = libraryFormula->source();
+  formula->params = libraryFormula->exampleParams();
 
   auto blend = std::make_unique<core::Blend>();
+  blend->pre = core::Transform(libraryFormula->examplePreTransform().params());
   blend->formulas.push_back(formula.get());
 
   core::System system{};

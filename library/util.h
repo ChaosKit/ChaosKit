@@ -2,12 +2,17 @@
 #define CHAOSKIT_LIBRARY_UTIL_H
 
 #include <vector>
+#include "ColoringMethod.h"
 #include "ColoringMethodType.h"
+#include "Formula.h"
 #include "FormulaType.h"
 #include "ast/Expression.h"
 #include "ast/Formula.h"
 
 namespace chaoskit::library {
+
+std::unique_ptr<Formula> createFormula(FormulaType type);
+std::unique_ptr<ColoringMethod> createColoringMethod(ColoringMethodType type);
 
 ast::Expression source(ColoringMethodType type);
 ast::Formula source(FormulaType type);
@@ -27,6 +32,12 @@ std::vector<float> exampleParams(FormulaType type);
 template <class T>
 std::vector<float> exampleParams() {
   return T().exampleParams();
+}
+
+ast::Transform examplePreTransform(FormulaType type);
+template <typename T>
+ast::Transform examplePreTransform() {
+  return T().examplePreTransform();
 }
 
 }  // namespace chaoskit::library

@@ -10,8 +10,7 @@ struct Transform {
   std::array<float, 6> values;
 
   constexpr Transform() : values{1, 0, 0, 0, 1, 0} {}
-  constexpr explicit Transform(std::array<float, 6> &&values)
-      : values(std::forward<std::array<float, 6>>(values)) {}
+  constexpr explicit Transform(std::array<float, 6> values) : values(values) {}
   Transform(const Transform &other) = default;
   Transform &operator=(const Transform &other) = default;
 

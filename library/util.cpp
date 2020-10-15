@@ -32,8 +32,6 @@
 
 namespace chaoskit::library {
 
-namespace {
-
 std::unique_ptr<Formula> createFormula(FormulaType type) {
   switch (type) {
     case FormulaType::Bent:
@@ -103,8 +101,6 @@ std::unique_ptr<ColoringMethod> createColoringMethod(ColoringMethodType type) {
   }
 }
 
-}  // namespace
-
 ast::Expression source(ColoringMethodType type) {
   return createColoringMethod(type)->source();
 }
@@ -126,6 +122,13 @@ std::vector<float> exampleParams(FormulaType type) {
     return {};
   }
   return createFormula(type)->exampleParams();
+}
+
+ast::Transform examplePreTransform(FormulaType type) {
+  if (type == FormulaType::Invalid) {
+    return {};
+  }
+  return createFormula(type)->examplePreTransform();
 }
 
 }  // namespace chaoskit::library
