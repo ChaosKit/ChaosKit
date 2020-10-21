@@ -1,11 +1,12 @@
-#include "Transform.h"
+#include "StaticAffineTransform.h"
 #include "util.h"
 
 namespace chaoskit::ast {
 
-GENERATE_NODE_TYPE(Transform);
+GENERATE_NODE_TYPE(StaticAffineTransform);
 
-std::ostream &operator<<(std::ostream &stream, const Transform &transform) {
+std::ostream &operator<<(std::ostream &stream,
+                         const StaticAffineTransform &transform) {
   stream << node_type(transform) << "(";
 
   bool prepend_comma = false;

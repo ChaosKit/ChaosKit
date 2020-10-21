@@ -135,7 +135,7 @@ class BlendInterpreter {
         {declaration.name(), apply_visitor(*this, declaration.definition())});
   }
 
-  Particle operator()(const ast::Transform &transform) const {
+  Particle operator()(const ast::StaticAffineTransform &transform) const {
     const auto &point = output_.point;
     const auto &params = transform.params();
     return outputWithPoint(

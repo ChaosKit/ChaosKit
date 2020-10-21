@@ -14,8 +14,8 @@ class Formula {
   virtual std::vector<float> exampleParams() {
     return std::vector(paramCount(), 1.f);
   }
-  virtual ast::Transform examplePreTransform() {
-    return ast::Transform::identity();
+  virtual ast::StaticAffineTransform examplePreTransform() {
+    return ast::StaticAffineTransform();
   }
 
  protected:

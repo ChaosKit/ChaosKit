@@ -255,13 +255,10 @@ TEST_F(AstTest, AllUnaryFunctionTypesHaveWorkingHelpers) {
                  {UnaryFunction::Type::FLOOR, helpers::floor},
                  {UnaryFunction::Type::SIGNUM, helpers::signum},
                  {UnaryFunction::Type::ABS, helpers::abs},
-                 {
-                     UnaryFunction::Type::NOT,
-                     helpers::operator!},
-                     {UnaryFunction::Type::FRAC, helpers::frac},
-                     {UnaryFunction::Type::SINH, helpers::sinh},
-                     {UnaryFunction::Type::COSH, helpers::cosh},
-      };
+                 {UnaryFunction::Type::NOT, helpers::operator!},
+                  {UnaryFunction::Type::FRAC, helpers::frac},
+                  {UnaryFunction::Type::SINH, helpers::sinh},
+                  {UnaryFunction::Type::COSH, helpers::cosh}, };
 
   // Fill sets with type names as strings
   std::unordered_set<std::string> all_types;
@@ -362,9 +359,11 @@ TEST_F(AstTest, MakeSystemWithFormula) {
                                {
                                    WeightedFormula(formula, 1.0f, 1.0f),
                                },
-                               Transform::identity(), Transform::identity()),
+                               StaticAffineTransform::StaticAffineTransform(),
+                               StaticAffineTransform::StaticAffineTransform()),
                            1.0f)},
-             Blend({}, Transform::identity(), Transform::identity()));
+             Blend({}, StaticAffineTransform::StaticAffineTransform(),
+                   StaticAffineTransform::StaticAffineTransform()));
   auto actual = make_system(formula);
 
   ASSERT_THAT(actual, EqualsTree(expected));

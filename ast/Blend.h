@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "Expression.h"
-#include "Transform.h"
+#include "StaticAffineTransform.h"
 #include "WeightedFormula.h"
 
 namespace chaoskit::ast {
@@ -13,11 +13,11 @@ class Blend {
   Blend() : formulas_(), pre_(), post_() {}
   explicit Blend(std::vector<WeightedFormula> formulas)
       : formulas_(std::move(formulas)), pre_(), post_() {}
-  Blend(std::vector<WeightedFormula> formulas, const Transform &pre,
-        const Transform &post)
+  Blend(std::vector<WeightedFormula> formulas, const StaticAffineTransform &pre,
+        const StaticAffineTransform &post)
       : formulas_(std::move(formulas)), pre_(pre), post_(post) {}
-  Blend(std::vector<WeightedFormula> formulas, const Transform &pre,
-        const Transform &post, const Expression &coloringMethod)
+  Blend(std::vector<WeightedFormula> formulas, const StaticAffineTransform &pre,
+        const StaticAffineTransform &post, const Expression &coloringMethod)
       : formulas_(std::move(formulas)),
         pre_(pre),
         post_(post),
@@ -26,8 +26,8 @@ class Blend {
   [[nodiscard]] const std::vector<WeightedFormula> &formulas() const {
     return formulas_;
   }
-  [[nodiscard]] const Transform &pre() const { return pre_; }
-  [[nodiscard]] const Transform &post() const { return post_; }
+  [[nodiscard]] const StaticAffineTransform &pre() const { return pre_; }
+  [[nodiscard]] const StaticAffineTransform &post() const { return post_; }
   [[nodiscard]] const Expression &coloringMethod() const {
     return coloringMethod_;
   }
@@ -39,7 +39,7 @@ class Blend {
 
  private:
   std::vector<WeightedFormula> formulas_;
-  Transform pre_, post_;
+  StaticAffineTransform pre_, post_;
   Expression coloringMethod_ = Input(Input::Type::COLOR);
 };
 

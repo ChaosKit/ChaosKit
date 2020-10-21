@@ -9,7 +9,7 @@ add_library(ast
         Node.cpp Node.h
         Parameter.cpp Parameter.h
         System.cpp System.h
-        Transform.cpp Transform.h
+        StaticAffineTransform.cpp StaticAffineTransform.h
         UnaryFunction.cpp UnaryFunction.h
         VariableDeclaration.cpp VariableDeclaration.h
         VariableName.cpp VariableName.h

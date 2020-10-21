@@ -43,8 +43,8 @@ ast::Expression toSource(const ColoringMethod &coloringMethod) {
   return coloringMethod.source;
 }
 
-ast::Transform toSource(const Transform &transform) {
-  return ast::Transform(transform.values);
+ast::StaticAffineTransform toSource(const Transform &transform) {
+  return ast::StaticAffineTransform(transform.values);
 }
 
 ast::System toSource(const System &system) {
