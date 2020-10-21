@@ -8,16 +8,21 @@ add_library(ast
         Output.cpp Output.h
         Node.cpp Node.h
         Parameter.cpp Parameter.h
+        RandomNumber.h RandomNumber.cpp
         System.cpp System.h
         StaticAffineTransform.cpp StaticAffineTransform.h
+        Transform.h
+        TransformWithWeight.h
         UnaryFunction.cpp UnaryFunction.h
         VariableDeclaration.cpp VariableDeclaration.h
         VariableName.cpp VariableName.h
         WeightedFormula.cpp WeightedFormula.h
+        WeightedSumTransform.h
         ast.h
+        debug.cpp debug.h
         helpers.h
         types.h
-        util.cpp util.h RandomNumber.h RandomNumber.cpp)
+        util.cpp util.h)
 target_link_libraries(ast PUBLIC variant PRIVATE magic_enum)
 
 add_executable(ast_test ast_test.cpp)
