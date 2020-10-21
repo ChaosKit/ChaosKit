@@ -6,10 +6,12 @@
 
 namespace chaoskit::ast {
 
+class RandomChoiceTransform;
 class WeightedSumTransform;
 
 using Transform = mapbox::util::variant<
-    Formula, mapbox::util::recursive_wrapper<WeightedSumTransform>>;
+    Formula, mapbox::util::recursive_wrapper<RandomChoiceTransform>,
+    mapbox::util::recursive_wrapper<WeightedSumTransform>>;
 
 }  // namespace chaoskit::ast
 

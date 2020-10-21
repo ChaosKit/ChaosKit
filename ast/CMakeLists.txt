@@ -8,6 +8,7 @@ add_library(ast
         Output.cpp Output.h
         Node.cpp Node.h
         Parameter.cpp Parameter.h
+        RandomChoiceTransform.h
         RandomNumber.h RandomNumber.cpp
         System.cpp System.h
         StaticAffineTransform.cpp StaticAffineTransform.h

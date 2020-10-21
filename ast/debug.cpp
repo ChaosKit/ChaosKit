@@ -33,6 +33,20 @@ std::ostream &operator<<(std::ostream &stream, const Transform &transform) {
 }
 
 std::ostream &operator<<(std::ostream &stream,
+                         const RandomChoiceTransform &transform) {
+  stream << "Random Choice (" << transform.transforms().size()
+         << "):" << indent;
+
+  int i = 0;
+  for (const auto &[transform, weight] : transform.transforms()) {
+    stream << nl << "[" << i << "] weight " << weight << ":" << indent << nl;
+    stream << transform << outdent;
+    ++i;
+  }
+  return stream << outdent;
+}
+
+std::ostream &operator<<(std::ostream &stream,
                          const WeightedSumTransform &transform) {
   stream << "Weighted Sum (" << transform.transforms().size() << "):" << indent;
 
