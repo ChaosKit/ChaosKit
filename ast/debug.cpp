@@ -33,6 +33,11 @@ std::ostream &operator<<(std::ostream &stream, const Transform &transform) {
 }
 
 std::ostream &operator<<(std::ostream &stream,
+                         const AffineTransform &transform) {
+  return stream << "Affine Transform";
+}
+
+std::ostream &operator<<(std::ostream &stream,
                          const RandomChoiceTransform &transform) {
   stream << "Random Choice (" << transform.transforms().size()
          << "):" << indent;

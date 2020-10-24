@@ -1,4 +1,5 @@
 add_library(ast
+        AffineTransform.h
         BinaryFunction.cpp BinaryFunction.h
         Blend.cpp Blend.h
         Expression.h
