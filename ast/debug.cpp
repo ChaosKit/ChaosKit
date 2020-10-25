@@ -25,7 +25,8 @@ std::basic_ostream<CharT, Traits> &nl(std::basic_ostream<CharT, Traits> &os) {
 
 }  // namespace
 
-std::ostream &operator<<(std::ostream &stream, const Transform &transform) {
+std::ostream &operator<<(std::ostream &stream,
+                         const PositionTransform &transform) {
   transform.match([&stream](const auto &concreteTransform) {
     stream << concreteTransform;
   });

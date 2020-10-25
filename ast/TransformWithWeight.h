@@ -2,16 +2,17 @@
 #define CHAOSKIT_AST_TRANSFORMWITHWEIGHT_H
 
 #include <utility>
-#include "Transform.h"
+#include "PositionTransform.h"
 
 namespace chaoskit::ast {
 
 struct TransformWithWeight {
   // Allow implicitly lifting a Transform to TransformWithWeight.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  TransformWithWeight(Transform transform) : transform(std::move(transform)) {}
+  TransformWithWeight(PositionTransform transform)
+      : transform(std::move(transform)) {}
 
-  Transform transform;
+  PositionTransform transform;
   double weight = 1.0;
 
   bool operator==(const TransformWithWeight& other) const {
