@@ -26,14 +26,6 @@ std::basic_ostream<CharT, Traits> &nl(std::basic_ostream<CharT, Traits> &os) {
 }  // namespace
 
 std::ostream &operator<<(std::ostream &stream,
-                         const PositionTransform &transform) {
-  transform.match([&stream](const auto &concreteTransform) {
-    stream << concreteTransform;
-  });
-  return stream;
-}
-
-std::ostream &operator<<(std::ostream &stream,
                          const AffineTransform &transform) {
   return stream << "Affine Transform";
 }
@@ -51,6 +43,14 @@ std::ostream &operator<<(std::ostream &stream,
 }
 
 std::ostream &operator<<(std::ostream &stream,
+                         const PositionTransform &transform) {
+  transform.match([&stream](const auto &concreteTransform) {
+    stream << concreteTransform;
+  });
+  return stream;
+}
+
+std::ostream &operator<<(std::ostream &stream,
                          const RandomChoiceTransform &transform) {
   stream << "Random Choice (" << transform.transforms().size()
          << "):" << indent;
@@ -62,6 +62,11 @@ std::ostream &operator<<(std::ostream &stream,
     ++i;
   }
   return stream << outdent;
+}
+
+std::ostream &operator<<(std::ostream &stream, const Transform &transform) {
+  stream << "position: " << transform.position() << nl;
+  stream << "color: " << transform.color() << nl;
 }
 
 std::ostream &operator<<(std::ostream &stream,

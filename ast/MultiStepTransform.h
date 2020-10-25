@@ -1,17 +1,17 @@
 #ifndef CHAOSKIT_AST_MULTISTEPTRANSFORM_H
 #define CHAOSKIT_AST_MULTISTEPTRANSFORM_H
 
-#include "PositionTransform.h"
+#include "Transform.h"
 
 namespace chaoskit::ast {
 
 class MultiStepTransform {
  public:
   MultiStepTransform() = default;
-  MultiStepTransform(std::initializer_list<PositionTransform> transforms)
+  MultiStepTransform(std::initializer_list<Transform> transforms)
       : transforms_(transforms) {}
 
-  [[nodiscard]] const std::vector<PositionTransform>& transforms() const {
+  [[nodiscard]] const std::vector<Transform>& transforms() const {
     return transforms_;
   }
 
@@ -20,7 +20,7 @@ class MultiStepTransform {
   }
 
  private:
-  std::vector<PositionTransform> transforms_;
+  std::vector<Transform> transforms_;
 };
 
 }  // namespace chaoskit::ast
