@@ -38,6 +38,18 @@ std::ostream &operator<<(std::ostream &stream,
 }
 
 std::ostream &operator<<(std::ostream &stream,
+                         const MultiStepTransform &transform) {
+  stream << "Multi Step (" << transform.transforms().size() << "):" << indent;
+
+  int i = 0;
+  for (const auto &step : transform.transforms()) {
+    stream << nl << "[" << i << "]:" << indent << nl << transform << outdent;
+    ++i;
+  }
+  return stream << outdent;
+}
+
+std::ostream &operator<<(std::ostream &stream,
                          const RandomChoiceTransform &transform) {
   stream << "Random Choice (" << transform.transforms().size()
          << "):" << indent;

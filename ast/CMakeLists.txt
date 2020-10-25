@@ -7,6 +7,7 @@ add_library(ast
         Input.cpp Input.h
         LimitedBlend.cpp LimitedBlend.h
         Output.cpp Output.h
+        MultiStepTransform.h
         Node.cpp Node.h
         Parameter.cpp Parameter.h
         RandomChoiceTransform.h
