@@ -1,7 +1,6 @@
 #ifndef CHAOSKIT_AST_UNARYFUNCTION_H
 #define CHAOSKIT_AST_UNARYFUNCTION_H
 
-#include <ostream>
 #include <utility>
 #include "Expression.h"
 
@@ -42,8 +41,6 @@ class UnaryFunction {
   Type type_;
   Expression argument_;
 };
-
-std::ostream& operator<<(std::ostream& stream, const UnaryFunction& function);
 
 }  // namespace chaoskit::ast
 

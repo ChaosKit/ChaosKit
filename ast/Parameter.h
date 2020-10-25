@@ -2,7 +2,6 @@
 #define CHAOSKIT_AST_PARAMETER_H
 
 #include <cstddef>
-#include <ostream>
 
 namespace chaoskit::ast {
 
@@ -19,8 +18,6 @@ class Parameter {
  private:
   size_t index_;
 };
-
-std::ostream& operator<<(std::ostream& stream, const Parameter& parameter);
 
 }  // namespace chaoskit::ast
 

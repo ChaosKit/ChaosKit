@@ -1,7 +1,6 @@
 #ifndef CHAOSKIT_AST_VARIABLEDECLARATION_H
 #define CHAOSKIT_AST_VARIABLEDECLARATION_H
 
-#include <ostream>
 #include <string>
 #include "Expression.h"
 
@@ -23,9 +22,6 @@ class VariableDeclaration {
   std::string name_;
   Expression definition_;
 };
-
-std::ostream& operator<<(std::ostream& stream,
-                         const VariableDeclaration& declaration);
 
 }  // namespace chaoskit::ast
 

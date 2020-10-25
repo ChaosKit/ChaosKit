@@ -24,8 +24,6 @@ class VariableName {
   std::string name_;
 };
 
-std::ostream& operator<<(std::ostream& stream, const VariableName& name);
-
 }  // namespace chaoskit::ast
 
 #endif  // CHAOSKIT_AST_VARIABLENAME_H

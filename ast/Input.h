@@ -1,8 +1,6 @@
 #ifndef CHAOSKIT_AST_INPUT_H
 #define CHAOSKIT_AST_INPUT_H
 
-#include <ostream>
-
 namespace chaoskit::ast {
 
 class Input {
@@ -18,8 +16,6 @@ class Input {
  private:
   Type type_;
 };
-
-std::ostream& operator<<(std::ostream& stream, const Input& input);
 
 }  // namespace chaoskit::ast
 

@@ -1,7 +1,6 @@
 #ifndef CHAOSKIT_AST_BINARYFUNCTION_H
 #define CHAOSKIT_AST_BINARYFUNCTION_H
 
-#include <ostream>
 #include <utility>
 #include "Expression.h"
 
@@ -43,8 +42,6 @@ class BinaryFunction {
   Type type_;
   Expression first_, second_;
 };
-
-std::ostream& operator<<(std::ostream& stream, const BinaryFunction& function);
 
 }  // namespace chaoskit::ast
 

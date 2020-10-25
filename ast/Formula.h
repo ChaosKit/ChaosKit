@@ -1,7 +1,6 @@
 #ifndef CHAOSKIT_AST_FORMULA_H
 #define CHAOSKIT_AST_FORMULA_H
 
-#include <ostream>
 #include <utility>
 #include <vector>
 #include "Expression.h"
@@ -34,8 +33,6 @@ class Formula {
   Expression x_, y_;
   std::vector<VariableDeclaration> variables_;
 };
-
-std::ostream& operator<<(std::ostream& stream, const Formula& formula);
 
 }  // namespace chaoskit::ast
 
