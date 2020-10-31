@@ -13,6 +13,12 @@ class TransformIndexTest : public testing::Test {};
 
 using namespace testing;
 
+TEST_F(TransformIndexTest, ThrowsWhenTryingToConstructTooLargeIndex) {
+  ASSERT_THROW((TransformIndex{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                               15, 16, 17}),
+               InvalidTransformIndex);
+}
+
 TEST_F(TransformIndexTest, SameIndicesAreEqual) {
   TransformIndex one{1, 2, 3};
   TransformIndex two{1, 2, 3};

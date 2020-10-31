@@ -5,6 +5,11 @@
 namespace chaoskit::core {
 
 TransformIndex::TransformIndex(std::initializer_list<uint16_t> prefix) {
+  if (prefix.size() > index_.size()) {
+    throw InvalidTransformIndex(
+        "Cannot create a TransformIndex with more than 16 levels");
+  }
+
   std::copy(prefix.begin(), prefix.end(), index_.begin());
   depth_ = prefix.size();
 }
