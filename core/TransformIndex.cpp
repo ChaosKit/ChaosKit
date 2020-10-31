@@ -6,6 +6,7 @@ namespace chaoskit::core {
 
 TransformIndex::TransformIndex(std::initializer_list<uint16_t> prefix) {
   std::copy(prefix.begin(), prefix.end(), index_.begin());
+  depth_ = prefix.size();
 }
 
 bool TransformIndex::operator==(const TransformIndex& other) const {
@@ -50,25 +51,17 @@ bool TransformIndex::operator<(const TransformIndex& other) const {
   return false;
 }
 
-int TransformIndex::getDepth() const {
-  for (int i = 0; i < index_.size(); i++) {
-    if (index_[i] == SENTINEL) return i;
-  }
-  return index_.size();
-}
-
 TransformIndex TransformIndex::firstChild() const {
-  int depth = getDepth();
-  if (depth >= index_.size()) {
+  if (depth_ >= index_.size()) {
     throw InvalidTransformIndex("Transform depth limit reached");
   }
 
   InternalIndex newIndex(index_);
-  newIndex[depth] = 0;
-  return TransformIndex(newIndex);
+  newIndex[depth_] = 0;
+  return TransformIndex(newIndex, depth_ + 1);
 }
 TransformIndex TransformIndex::nextSibling() const {
-  int level = getDepth() - 1;
+  int level = depth_ - 1;
   if (level < 0) {
     throw InvalidTransformIndex("Root transform cannot have siblings");
   }
@@ -79,17 +72,17 @@ TransformIndex TransformIndex::nextSibling() const {
 
   InternalIndex newIndex(index_);
   newIndex[level]++;
-  return TransformIndex(newIndex);
+  return TransformIndex(newIndex, depth_);
 }
 TransformIndex TransformIndex::parent() const {
-  int level = getDepth() - 1;
+  int level = depth_ - 1;
   if (level < 0) {
     throw InvalidTransformIndex("Root transform does not have a parent");
   }
 
   InternalIndex newIndex(index_);
   newIndex[level] = SENTINEL;
-  return TransformIndex(newIndex);
+  return TransformIndex(newIndex, level);
 }
 
 }  // namespace chaoskit::core

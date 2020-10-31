@@ -8,7 +8,6 @@ namespace chaoskit::core {
 class TransformIndex {
  public:
   TransformIndex() = default;
-  explicit TransformIndex(std::array<uint16_t, 16> index) : index_(index) {}
   TransformIndex(std::initializer_list<uint16_t> prefix);
 
   [[nodiscard]] TransformIndex firstChild() const;
@@ -22,13 +21,15 @@ class TransformIndex {
  private:
   constexpr static uint16_t SENTINEL = 0xffff;
   using InternalIndex = std::array<uint16_t, 16>;
+  int8_t depth_ = 0;
 
   InternalIndex index_ = {SENTINEL, SENTINEL, SENTINEL, SENTINEL,
                           SENTINEL, SENTINEL, SENTINEL, SENTINEL,
                           SENTINEL, SENTINEL, SENTINEL, SENTINEL,
                           SENTINEL, SENTINEL, SENTINEL, SENTINEL};
 
-  [[nodiscard]] int getDepth() const;
+  TransformIndex(std::array<uint16_t, 16> index, int depth)
+      : index_(index), depth_(depth) {}
 };
 
 }  // namespace chaoskit::core
