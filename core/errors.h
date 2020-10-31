@@ -27,6 +27,11 @@ class InvalidColorMap : public std::out_of_range {
   InvalidColorMap(const std::string& name);
 };
 
+class InvalidTransformIndex : public std::out_of_range {
+ public:
+  InvalidTransformIndex(const char* message);
+};
+
 }  // namespace chaoskit::core
 
 #endif  // CHAOSKIT_CORE_ERRORS_H
