@@ -10,3 +10,6 @@
 [submodule "thirdparty/magic_enum"]
 	path = thirdparty/magic_enum
 	url = https://github.com/Neargye/magic_enum.git
+[submodule "thirdparty/xxhash"]
+	path = thirdparty/xxhash
+	url = https://github.com/Cyan4973/xxHash
