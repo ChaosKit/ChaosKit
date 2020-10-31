@@ -31,6 +31,9 @@ target_link_libraries(core
         PRIVATE magic_enum
         INTERFACE core_structures)
 
-add_executable(core_test SimpleInterpreterTest.cpp)
+add_executable(core_test
+        testing/StaticRng.h
+        SimpleInterpreterTest.cpp)
+
 target_link_libraries(core_test PRIVATE gmock gmock_main ast core)
 add_test(NAME core_test COMMAND core_test)
