@@ -30,7 +30,15 @@ target_sources(randutils
 set(gtest_force_shared_crt
     ON
     CACHE BOOL "" FORCE)
+# Prevent RPATH warnings
+set(CMAKE_MACOSX_RPATH 1)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
 
 # Magic Enum (https://github.com/Neargye/magic_enum)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/magic_enum)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/magic_enum EXCLUDE_FROM_ALL)
+
+# xxHash (https://github.com/Cyan4973/xxHash)
+set(XXHASH_BUILD_XXHSUM OFF)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/xxhash/cmake_unofficial
+                 EXCLUDE_FROM_ALL)

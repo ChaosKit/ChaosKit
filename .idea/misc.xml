@@ -10,6 +10,7 @@
       <file path="$PROJECT_DIR$/thirdparty/magic_enum" />
       <file path="$PROJECT_DIR$/thirdparty/randutils" />
       <file path="$PROJECT_DIR$/thirdparty/variant" />
+      <file path="$PROJECT_DIR$/thirdparty/xxhash" />
     </excludeRoots>
   </component>
 </project>
