@@ -24,6 +24,7 @@ add_library(core
         SystemIndex.h
         ThreadLocalRng.h ThreadLocalRng.cpp
         TransformIndex.cpp TransformIndex.h
+        TransformInterpreter.cpp TransformInterpreter.h
         debug.cpp debug.h
         random.h
         toSource.h toSource.cpp
@@ -38,7 +39,8 @@ add_executable(core_test
         testing/StaticRng.h
         ExpressionInterpreterTest.cpp
         SimpleInterpreterTest.cpp
-        TransformIndexTest.cpp)
+        TransformIndexTest.cpp
+        TransformInterpreterTest.cpp)
 
 target_link_libraries(core_test PRIVATE gmock gmock_main ast core)
 add_test(NAME core_test COMMAND core_test)
