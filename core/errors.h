@@ -6,8 +6,14 @@
 
 namespace chaoskit::core {
 
+class OutputNotAvailable : public std::invalid_argument {
+ public:
+  OutputNotAvailable();
+};
+
 class MissingParameterError : public std::out_of_range {
  public:
+  explicit MissingParameterError(size_t parameterIndex);
   MissingParameterError(const SystemIndex& elementIndex, size_t parameterIndex);
 };
 

@@ -3,6 +3,13 @@
 
 namespace chaoskit::core {
 
+OutputNotAvailable::OutputNotAvailable()
+    : std::invalid_argument("Output is not yet available") {}
+
+MissingParameterError::MissingParameterError(size_t parameterIndex)
+    : std::out_of_range("Tried to access missing parameter " +
+                        std::to_string(parameterIndex)) {}
+
 MissingParameterError::MissingParameterError(const SystemIndex& elementIndex,
                                              size_t parameterIndex)
     : std::out_of_range("Tried to access missing parameter " +

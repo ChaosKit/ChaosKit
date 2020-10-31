@@ -8,6 +8,7 @@ add_library(core
         DocumentDeleter.cpp DocumentDeleter.h
         DocumentVisitor.h
         errors.cpp errors.h
+        ExpressionInterpreter.cpp ExpressionInterpreter.h
         Generator.h
         HistogramBuffer.h HistogramBuffer.cpp
         ManagedDocument.cpp ManagedDocument.h
@@ -33,6 +34,7 @@ target_link_libraries(core
 
 add_executable(core_test
         testing/StaticRng.h
+        ExpressionInterpreterTest.cpp
         SimpleInterpreterTest.cpp)
 
 target_link_libraries(core_test PRIVATE gmock gmock_main ast core)
