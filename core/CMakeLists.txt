@@ -15,7 +15,7 @@ add_library(core
         PaletteColorMap.cpp PaletteColorMap.h
         Params.h
         Particle.h
-        Point.h Point.cpp
+        Point.h
         RainbowColorMap.cpp RainbowColorMap.h
         Renderer.h
         Rng.h
@@ -24,6 +24,7 @@ add_library(core
         SystemIndex.h
         ThreadLocalRng.h ThreadLocalRng.cpp
         TransformIndex.cpp TransformIndex.h
+        debug.cpp debug.h
         random.h
         toSource.h toSource.cpp
         transforms.cpp transforms.h

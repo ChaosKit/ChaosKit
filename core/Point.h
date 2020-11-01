@@ -1,8 +1,6 @@
 #ifndef CHAOSKIT_CORE_POINT_H
 #define CHAOSKIT_CORE_POINT_H
 
-#include <ostream>
-
 namespace chaoskit::core {
 
 class Point {
@@ -31,8 +29,6 @@ class Point {
  private:
   float x_, y_;
 };
-
-std::ostream &operator<<(std::ostream &stream, const Point &point);
 
 }  // namespace chaoskit::core
 
