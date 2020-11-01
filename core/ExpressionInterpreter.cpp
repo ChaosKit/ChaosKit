@@ -85,6 +85,8 @@ class InterpreterVisitor {
         return state_.output->x();
       case ast::Output::Y:
         return state_.output->y();
+      case ast::Output::COLOR:
+        return state_.output->color;
     }
   }
 

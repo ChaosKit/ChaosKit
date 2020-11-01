@@ -5,7 +5,7 @@ namespace chaoskit::ast {
 
 class Output {
  public:
-  enum Type : char { X, Y };
+  enum Type : char { X, Y, COLOR };
 
   explicit Output(Type type) : type_(type) {}
 

@@ -9,8 +9,9 @@ namespace chaoskit::ast {
 class Transform {
  public:
   Transform() = delete;
-  explicit Transform(TransformVariant variant,
-                     Expression color = Input(Input::COLOR))
+  // Allow implicitly lifting a TransformVariant to Transform.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  Transform(TransformVariant variant, Expression color = Output(Output::COLOR))
       : variant_(std::move(variant)), color_(std::move(color)) {}
 
   [[nodiscard]] const TransformVariant& variant() const { return variant_; }

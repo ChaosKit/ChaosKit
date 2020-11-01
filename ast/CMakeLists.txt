@@ -25,6 +25,7 @@ add_library(ast
         ast.h
         debug.cpp debug.h
         helpers.h
+        transforms.h
         types.h
         util.cpp util.h)
 target_link_libraries(ast PUBLIC variant PRIVATE magic_enum)

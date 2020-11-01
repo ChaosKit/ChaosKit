@@ -96,6 +96,8 @@ class BlendInterpreter {
         return output_.x();
       case ast::Output::Type::Y:
         return output_.y();
+      case ast::Output::Type::COLOR:
+        return output_.color;
     }
   }
 

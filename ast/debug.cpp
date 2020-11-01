@@ -90,7 +90,7 @@ std::ostream &operator<<(std::ostream &stream,
 
 std::ostream &operator<<(std::ostream &stream, const Transform &transform) {
   stream << "variant: " << transform.variant() << nl;
-  stream << "color: " << transform.color() << nl;
+  return stream << "color: " << transform.color();
 }
 
 std::ostream &operator<<(std::ostream &stream,
