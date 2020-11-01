@@ -10,10 +10,10 @@
 #include "MultiStepTransform.h"
 #include "Output.h"
 #include "Parameter.h"
-#include "PositionTransform.h"
 #include "RandomChoiceTransform.h"
 #include "RandomNumber.h"
 #include "Transform.h"
+#include "TransformVariant.h"
 #include "UnaryFunction.h"
 #include "VariableDeclaration.h"
 #include "VariableName.h"
@@ -38,7 +38,7 @@ std::ostream& operator<<(std::ostream& stream, const VariableName& name);
 // Transforms
 
 std::ostream& operator<<(std::ostream& stream,
-                         const PositionTransform& transform);
+                         const TransformVariant& transform);
 std::ostream& operator<<(std::ostream& stream, const Transform& transform);
 
 std::ostream& operator<<(std::ostream& stream,

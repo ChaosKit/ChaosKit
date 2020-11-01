@@ -10,12 +10,12 @@ add_library(ast
         MultiStepTransform.h
         Node.cpp Node.h
         Parameter.h
-        PositionTransform.h
         RandomChoiceTransform.h
         RandomNumber.h
         System.cpp System.h
         StaticAffineTransform.cpp StaticAffineTransform.h
         Transform.h
+        TransformVariant.h
         TransformWithWeight.h
         UnaryFunction.h
         VariableDeclaration.h

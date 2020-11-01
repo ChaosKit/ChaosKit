@@ -81,7 +81,7 @@ std::ostream &operator<<(std::ostream &stream, const VariableName &name) {
 // Transforms
 
 std::ostream &operator<<(std::ostream &stream,
-                         const PositionTransform &transform) {
+                         const TransformVariant &transform) {
   transform.match([&stream](const auto &concreteTransform) {
     stream << concreteTransform;
   });
@@ -89,7 +89,7 @@ std::ostream &operator<<(std::ostream &stream,
 }
 
 std::ostream &operator<<(std::ostream &stream, const Transform &transform) {
-  stream << "position: " << transform.position() << nl;
+  stream << "variant: " << transform.variant() << nl;
   stream << "color: " << transform.color() << nl;
 }
 

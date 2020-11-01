@@ -2,7 +2,7 @@
 #define CHAOSKIT_AST_TRANSFORMWITHWEIGHT_H
 
 #include <utility>
-#include "PositionTransform.h"
+#include "TransformVariant.h"
 
 namespace chaoskit::ast {
 
