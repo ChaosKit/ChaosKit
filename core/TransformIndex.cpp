@@ -1,4 +1,5 @@
 #include "TransformIndex.h"
+#include <xxhash.h>
 #include <algorithm>
 #include "errors.h"
 
@@ -90,4 +91,13 @@ TransformIndex TransformIndex::parent() const {
   return TransformIndex(newIndex, level);
 }
 
+unsigned long long TransformIndex::hash() const noexcept {
+  return XXH3_64bits(index_.data(), index_.size() * sizeof(uint16_t));
+}
+
 }  // namespace chaoskit::core
+
+unsigned long long std::hash<chaoskit::core::TransformIndex>::operator()(
+    const chaoskit::core::TransformIndex& index) const noexcept {
+  return index.hash();
+}

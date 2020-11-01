@@ -30,7 +30,7 @@ add_library(core
         util.h util.cpp)
 target_link_libraries(core
         PUBLIC ast stdx randutils
-        PRIVATE magic_enum
+        PRIVATE magic_enum xxHash::xxhash
         INTERFACE core_structures)
 
 add_executable(core_test

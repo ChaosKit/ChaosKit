@@ -18,6 +18,8 @@ class TransformIndex {
   bool operator!=(const TransformIndex& other) const;
   bool operator<(const TransformIndex& other) const;
 
+  [[nodiscard]] unsigned long long hash() const noexcept;
+
  private:
   constexpr static uint16_t SENTINEL = 0xffff;
   using InternalIndex = std::array<uint16_t, 16>;
@@ -33,5 +35,13 @@ class TransformIndex {
 };
 
 }  // namespace chaoskit::core
+
+template <>
+struct std::hash<chaoskit::core::TransformIndex> {
+  typedef chaoskit::core::TransformIndex argument_type;
+  typedef unsigned long long result_type;
+
+  result_type operator()(const argument_type& index) const noexcept;
+};
 
 #endif  // CHAOSKIT_CORE_TRANSFORMINDEX_H
