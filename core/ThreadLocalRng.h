@@ -7,6 +7,7 @@ namespace chaoskit::core {
 
 class ThreadLocalRng : public Rng {
  public:
+  double randomDouble(double min, double max) override;
   float randomFloat(float min, float max) override;
   int randomInt(int min, int max) override;
 };

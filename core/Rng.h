@@ -6,6 +6,7 @@ namespace core {
 
 class Rng {
  public:
+  virtual double randomDouble(double min, double max) = 0;
   virtual float randomFloat(float min, float max) = 0;
   virtual int randomInt(int min, int max) = 0;
 };
