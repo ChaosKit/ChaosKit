@@ -15,27 +15,29 @@ namespace chaoskit::core {
 
 namespace {
 
-class InterpreterVisitor {
+class TransformVisitor {
  public:
-  InterpreterVisitor(TransformInterpreter::State state,
-                     std::shared_ptr<Rng> rng)
-      : state_(std::move(state)), rng_(std::move(rng)), index_() {}
+  TransformVisitor(Particle input, TransformParams params,
+                   std::shared_ptr<Rng> rng)
+      : input_(input),
+        params_(std::move(params)),
+        rng_(std::move(rng)),
+        index_() {}
 
   Particle operator()(const ast::AffineTransform&) const {
-    const auto& params = state_.params.at(index_);
-    Particle output = state_.input;
+    const auto& params = params_.at(index_);
+    Particle output = input_;
     output.point = {
-        params[0] * state_.input.x() + params[1] * state_.input.y() + params[2],
-        params[3] * state_.input.x() + params[4] * state_.input.y() +
-            params[5]};
+        params[0] * input_.x() + params[1] * input_.y() + params[2],
+        params[3] * input_.x() + params[4] * input_.y() + params[5]};
     return output;
   }
 
   Particle operator()(const ast::Formula& formula) const {
     ExpressionInterpreter interpreter(rng_);
-    ExpressionInterpreter::State state{state_.input};
-    auto it = state_.params.find(index_);
-    if (it != state_.params.end()) {
+    ExpressionInterpreter::State state{input_};
+    auto it = params_.find(index_);
+    if (it != params_.end()) {
       state.params = it->second;
     }
 
@@ -46,7 +48,7 @@ class InterpreterVisitor {
     }
 
     // Evaluate the formula.
-    Particle output = state_.input;
+    Particle output = input_;
     output.point = {
         interpreter.interpret(formula.x(), state),
         interpreter.interpret(formula.y(), state),
@@ -57,11 +59,11 @@ class InterpreterVisitor {
   Particle operator()(const ast::MultiStepTransform& transform) {
     index_ = index_.firstChild();
     for (const ast::Transform& step : transform.transforms()) {
-      state_.input = applyTransform(step);
+      input_ = applyTransform(step);
       index_ = index_.nextSibling();
     }
     index_ = index_.parent();
-    return state_.input;
+    return input_;
   }
 
   Particle operator()(const ast::RandomChoiceTransform& transform) {
@@ -118,9 +120,9 @@ class InterpreterVisitor {
 
     // Calculate the color.
     ExpressionInterpreter interpreter(rng_);
-    ExpressionInterpreter::State colorState{state_.input, output};
-    auto it = state_.params.find(index_);
-    if (it != state_.params.end()) {
+    ExpressionInterpreter::State colorState{input_, output};
+    auto it = params_.find(index_);
+    if (it != params_.end()) {
       colorState.params = it->second;
     }
     output.color = interpreter.interpret(transform.color(), colorState);
@@ -129,16 +131,19 @@ class InterpreterVisitor {
   }
 
  private:
-  TransformInterpreter::State state_;
+  Particle input_;
+  TransformParams params_;
   std::shared_ptr<Rng> rng_;
   TransformIndex index_;
 };
 
 }  // namespace
 
-Particle TransformInterpreter::interpret(const ast::Transform& transform,
-                                         State state) const {
-  return InterpreterVisitor(std::move(state), rng_).applyTransform(transform);
+Particle TransformInterpreter::interpret(Particle input,
+                                         const ast::Transform& transform,
+                                         TransformParams params) const {
+  return TransformVisitor(input, std::move(params), rng_)
+      .applyTransform(transform);
 }
 
 }  // namespace chaoskit::core

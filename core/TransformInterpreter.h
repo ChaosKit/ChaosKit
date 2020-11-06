@@ -7,24 +7,19 @@
 #include "Particle.h"
 #include "Rng.h"
 #include "TransformIndex.h"
+#include "TransformParams.h"
 #include "ast/Transform.h"
 
 namespace chaoskit::core {
 
 class TransformInterpreter {
  public:
-  using Params = std::unordered_map<TransformIndex, std::vector<float>>;
-
-  struct State {
-    Particle input;
-    Params params;
-  };
-
   explicit TransformInterpreter(std::shared_ptr<Rng> rng)
       : rng_(std::move(rng)) {}
 
-  [[nodiscard]] Particle interpret(const ast::Transform& transform,
-                                   State state) const;
+  [[nodiscard]] Particle interpret(Particle input,
+                                   const ast::Transform& transform,
+                                   TransformParams params = {}) const;
 
  private:
   std::shared_ptr<Rng> rng_;

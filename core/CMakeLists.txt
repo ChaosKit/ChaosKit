@@ -25,6 +25,7 @@ add_library(core
         ThreadLocalRng.h ThreadLocalRng.cpp
         TransformIndex.cpp TransformIndex.h
         TransformInterpreter.cpp TransformInterpreter.h
+        TransformParams.h
         debug.cpp debug.h
         random.h
         toSource.h toSource.cpp
