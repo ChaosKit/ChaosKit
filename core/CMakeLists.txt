@@ -21,11 +21,14 @@ add_library(core
         Rng.h
         SimpleHistogramGenerator.h SimpleHistogramGenerator.cpp
         SimpleInterpreter.h SimpleInterpreter.cpp
+        SystemProcessor.cpp SystemProcessor.h
         SystemIndex.h
+        SystemParticle.h
         ThreadLocalRng.h ThreadLocalRng.cpp
         TransformIndex.cpp TransformIndex.h
         TransformInterpreter.cpp TransformInterpreter.h
         TransformParams.h
+        TransformSystem.h
         debug.cpp debug.h
         random.h
         toSource.h toSource.cpp
@@ -41,6 +44,7 @@ add_executable(core_test
         testing/StaticRng.h
         ExpressionInterpreterTest.cpp
         SimpleInterpreterTest.cpp
+        SystemProcessorTest.cpp
         TransformIndexTest.cpp
         TransformInterpreterTest.cpp)
 
