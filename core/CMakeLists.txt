@@ -37,6 +37,7 @@ target_link_libraries(core
         INTERFACE core_structures)
 
 add_executable(core_test
+        testing/MockRng.h
         testing/StaticRng.h
         ExpressionInterpreterTest.cpp
         SimpleInterpreterTest.cpp
