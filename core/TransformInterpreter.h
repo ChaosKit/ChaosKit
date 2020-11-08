@@ -8,7 +8,7 @@
 #include "Rng.h"
 #include "TransformIndex.h"
 #include "TransformParams.h"
-#include "ast/Transform.h"
+#include "ast/transforms.h"
 
 namespace chaoskit::core {
 

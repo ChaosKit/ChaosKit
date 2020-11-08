@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_CORE_PARTICLE_H
 #define CHAOSKIT_CORE_PARTICLE_H
 
+#include <cstdint>
 #include "Point.h"
 
 namespace chaoskit::core {
