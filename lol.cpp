@@ -3,11 +3,11 @@
 #include "core/Color.h"
 #include "core/ColorMapRegistry.h"
 #include "core/SimpleHistogramGenerator.h"
-#include "core/toSource.h"
 #include "core/transforms.h"
 #include "flame/Blend.h"
 #include "flame/Formula.h"
 #include "flame/System.h"
+#include "flame/toSource.h"
 #include "library/coloring_methods/Distance.h"
 #include "library/formulas/DeJong.h"
 

@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QTimer>
 #include "core/errors.h"
-#include "core/toSource.h"
+#include "flame/toSource.h"
 
 using chaoskit::core::MissingParameterError;
 using chaoskit::core::Particle;

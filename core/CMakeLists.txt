@@ -7,9 +7,6 @@ add_library(
   ColorMapRegistry.h
   debug.cpp
   debug.h
-  DocumentDeleter.cpp
-  DocumentDeleter.h
-  DocumentVisitor.h
   errors.cpp
   errors.h
   ExpressionInterpreter.cpp
@@ -17,8 +14,6 @@ add_library(
   Generator.h
   HistogramBuffer.cpp
   HistogramBuffer.h
-  ManagedDocument.cpp
-  ManagedDocument.h
   PaletteColorMap.cpp
   PaletteColorMap.h
   Params.h
@@ -39,8 +34,6 @@ add_library(
   SystemProcessor.h
   ThreadLocalRng.cpp
   ThreadLocalRng.h
-  toSource.cpp
-  toSource.h
   TransformIndex.cpp
   TransformIndex.h
   TransformInterpreter.cpp
@@ -53,7 +46,8 @@ add_library(
   util.h)
 target_link_libraries(
   core
-  PUBLIC ast stdx randutils
+  # TODO: remove flame after interpreter migration
+  PUBLIC ast flame stdx randutils
   PRIVATE magic_enum xxHash::xxhash
   INTERFACE flame_structures)
 

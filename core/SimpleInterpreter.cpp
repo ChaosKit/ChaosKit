@@ -8,7 +8,7 @@
 #include "ThreadLocalRng.h"
 #include "ast/ast.h"
 #include "errors.h"
-#include "toSource.h"
+#include "flame/toSource.h"
 
 namespace chaoskit::core {
 

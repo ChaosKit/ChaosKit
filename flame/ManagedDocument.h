@@ -2,7 +2,7 @@
 #define CHAOSKIT_CORE_MANAGEDDOCUMENT_H
 
 #include <memory>
-#include "flame/Document.h"
+#include "Document.h"
 
 namespace chaoskit::core {
 

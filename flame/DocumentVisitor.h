@@ -1,7 +1,7 @@
 #ifndef CHAOSKIT_CORE_DOCUMENTVISITOR_H
 #define CHAOSKIT_CORE_DOCUMENTVISITOR_H
 
-#include "flame/Document.h"
+#include "Document.h"
 
 namespace chaoskit::core {
 

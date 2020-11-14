@@ -8,10 +8,10 @@
 #include <magic_enum.hpp>
 #include <sstream>
 #include "DocumentAdopter.h"
-#include "core/ManagedDocument.h"
-#include "core/toSource.h"
 #include "core/transforms.h"
 #include "core/util.h"
+#include "flame/ManagedDocument.h"
+#include "flame/toSource.h"
 #include "io/io.h"
 #include "library/util.h"
 #include "state/Id.h"

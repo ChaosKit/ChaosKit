@@ -4,10 +4,10 @@
 #include <ast/StaticAffineTransform.h>
 #include <ast/System.h>
 #include <ast/WeightedFormula.h>
-#include "flame/Blend.h"
-#include "flame/Formula.h"
-#include "flame/System.h"
-#include "flame/Transform.h"
+#include "Blend.h"
+#include "Formula.h"
+#include "System.h"
+#include "Transform.h"
 
 namespace chaoskit::core {
 

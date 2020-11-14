@@ -2,7 +2,7 @@
 #define CHAOSKIT_UI_DOCUMENTADOPTER_H
 
 #include "DocumentStore.h"
-#include "core/DocumentVisitor.h"
+#include "flame/DocumentVisitor.h"
 #include "state/Id.h"
 
 namespace chaoskit::ui {

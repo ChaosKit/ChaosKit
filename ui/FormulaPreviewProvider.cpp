@@ -11,10 +11,10 @@
 #include "ast/util.h"
 #include "core/Params.h"
 #include "core/SimpleInterpreter.h"
-#include "core/toSource.h"
 #include "flame/Blend.h"
 #include "flame/Formula.h"
 #include "flame/System.h"
+#include "flame/toSource.h"
 #include "library/FormulaType.h"
 
 namespace chaoskit::ui {

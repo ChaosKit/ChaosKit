@@ -2,8 +2,8 @@
 #define CHAOSKIT_IO_IO_H
 
 #include <stdexcept>
-#include "core/DocumentVisitor.h"
 #include "flame/Document.h"
+#include "flame/DocumentVisitor.h"
 
 namespace chaoskit::io {
 

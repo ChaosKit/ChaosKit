@@ -1,6 +1,6 @@
 #include "SimpleHistogramGenerator.h"
 #include "ThreadLocalRng.h"
-#include "toSource.h"
+#include "flame/toSource.h"
 
 namespace chaoskit::core {
 
