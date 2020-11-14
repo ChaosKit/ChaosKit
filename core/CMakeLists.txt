@@ -16,7 +16,6 @@ add_library(
   HistogramBuffer.h
   PaletteColorMap.cpp
   PaletteColorMap.h
-  Params.h
   Particle.h
   Point.h
   RainbowColorMap.cpp

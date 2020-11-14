@@ -8,13 +8,13 @@
 #include "flame/System.h"
 #include "flame/SystemIndex.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 class Params {
-  std::unordered_map<flame::SystemIndex, std::vector<float>> values_;
+  std::unordered_map<SystemIndex, std::vector<float>> values_;
 
  public:
-  static Params fromSystem(const flame::System &system) {
+  static Params fromSystem(const ::chaoskit::flame::System &system) {
     Params result;
 
     if (system.isolatedBlend) {
@@ -35,52 +35,44 @@ class Params {
     for (size_t j = 0; j < system.finalBlend->formulas.size(); ++j) {
       const auto &formula = system.finalBlend->formulas[j];
       if (!formula->params.empty()) {
-        result[flame::SystemIndex{flame::SystemIndex::FINAL_BLEND, j}] =
-            formula->params;
+        result[SystemIndex{SystemIndex::FINAL_BLEND, j}] = formula->params;
       }
     }
 
     if (!system.finalBlend->coloringMethod.params.empty()) {
-      result[flame::SystemIndex{flame::SystemIndex::FINAL_BLEND,
-                                flame::SystemIndex::COLORING_METHOD}] =
+      result[SystemIndex{SystemIndex::FINAL_BLEND,
+                         SystemIndex::COLORING_METHOD}] =
           system.finalBlend->coloringMethod.params;
     }
 
     return result;
   }
 
-  std::vector<float> &operator[](const flame::SystemIndex &index) {
+  std::vector<float> &operator[](const SystemIndex &index) {
     return values_[index];
   }
-  std::vector<float> &operator[](flame::SystemIndex &&index) {
-    return values_[index];
-  }
-  std::vector<float> &at(const flame::SystemIndex &index) {
-    return values_.at(index);
-  }
-  [[nodiscard]] const std::vector<float> &at(
-      const flame::SystemIndex &index) const {
+  std::vector<float> &operator[](SystemIndex &&index) { return values_[index]; }
+  std::vector<float> &at(const SystemIndex &index) { return values_.at(index); }
+  [[nodiscard]] const std::vector<float> &at(const SystemIndex &index) const {
     return values_.at(index);
   }
 
  private:
-  static void addBlend(const flame::Blend *blend, size_t blendIndex,
-                       Params &result) {
+  static void addBlend(const Blend *blend, size_t blendIndex, Params &result) {
     for (size_t j = 0; j < blend->formulas.size(); ++j) {
       const auto &formula = blend->formulas[j];
       if (!formula->params.empty()) {
-        result[flame::SystemIndex{blendIndex, j}] = formula->params;
+        result[SystemIndex{blendIndex, j}] = formula->params;
       }
     }
 
     if (!blend->coloringMethod.params.empty()) {
-      result[flame::SystemIndex{blendIndex,
-                                flame::SystemIndex::COLORING_METHOD}] =
+      result[SystemIndex{blendIndex, SystemIndex::COLORING_METHOD}] =
           blend->coloringMethod.params;
     }
   }
 };
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
 #endif  // CHAOSKIT_CORE_PARAMS_H

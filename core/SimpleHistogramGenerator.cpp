@@ -1,5 +1,6 @@
 #include "SimpleHistogramGenerator.h"
 #include "ThreadLocalRng.h"
+#include "flame/Params.h"
 #include "flame/toSource.h"
 
 namespace chaoskit::core {
@@ -21,7 +22,7 @@ SimpleHistogramGenerator::SimpleHistogramGenerator(const flame::System &system,
 
 void SimpleHistogramGenerator::setSystem(const flame::System &system) {
   interpreter_.setSystem(toSource(system));
-  interpreter_.setParams(Params::fromSystem(system));
+  interpreter_.setParams(flame::Params::fromSystem(system));
 }
 
 void SimpleHistogramGenerator::setSize(uint32_t width, uint32_t height) {

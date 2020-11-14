@@ -68,8 +68,8 @@ Point applyTransform(const flame::Transform &transform, const Point &point) {
 
 class BlendInterpreter {
  public:
-  BlendInterpreter(Particle input, const Params &params, size_t blend_index,
-                   std::shared_ptr<Rng> rng)
+  BlendInterpreter(Particle input, const flame::Params &params,
+                   size_t blend_index, std::shared_ptr<Rng> rng)
       : input_(input),
         output_(input),
         params_(params),
@@ -182,7 +182,7 @@ class BlendInterpreter {
  private:
   Particle input_, output_;
   flame::SystemIndex index_;
-  const Params &params_;
+  const flame::Params &params_;
   std::unordered_map<std::string, float> variableValues_;
   std::shared_ptr<Rng> rng_;
 
@@ -204,7 +204,7 @@ SimpleInterpreter::SimpleInterpreter()
       rng_(std::make_shared<ThreadLocalRng>()) {}
 
 SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, int skip,
-                                     Params params,
+                                     flame::Params params,
                                      flame::Transform initialTransform,
                                      std::shared_ptr<Rng> rng)
     : system_(std::move(system)),
@@ -217,7 +217,7 @@ SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, int skip,
 }
 
 SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, int skip,
-                                     Params params,
+                                     flame::Params params,
                                      flame::Transform initialTransform)
     : SimpleInterpreter(std::move(system), ttl, skip, std::move(params),
                         initialTransform, std::make_shared<ThreadLocalRng>()) {}
@@ -228,8 +228,8 @@ SimpleInterpreter::SimpleInterpreter(const flame::System &system)
 SimpleInterpreter::SimpleInterpreter(const flame::System &system,
                                      std::shared_ptr<Rng> rng)
     : SimpleInterpreter(toSource(system), system.ttl, system.skip,
-                        Params::fromSystem(system), system.initialTransform,
-                        std::move(rng)) {}
+                        flame::Params::fromSystem(system),
+                        system.initialTransform, std::move(rng)) {}
 
 void SimpleInterpreter::updateMaxLimit() {
   max_limit_ = system_.blends().empty() ? 0 : system_.blends().back().limit();
@@ -258,13 +258,13 @@ void SimpleInterpreter::setSystem(const ast::System &system) {
 
 void SimpleInterpreter::setSystem(const flame::System &system) {
   setSystem(toSource(system));
-  setParams(Params::fromSystem(system));
+  setParams(flame::Params::fromSystem(system));
   setTtl(system.ttl);
   setSkip(system.skip);
   setInitialTransform(system.initialTransform);
 }
 
-void SimpleInterpreter::setParams(Params params) {
+void SimpleInterpreter::setParams(flame::Params params) {
   params_ = std::move(params);
 }
 

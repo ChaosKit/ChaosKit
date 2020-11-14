@@ -2,9 +2,9 @@
 #define CHAOSKIT_CORE_SIMPLEINTERPRETER_H
 
 #include <ast/System.h>
-#include "Params.h"
 #include "Particle.h"
 #include "Rng.h"
+#include "flame/Params.h"
 #include "flame/System.h"
 #include "flame/Transform.h"
 
@@ -24,9 +24,10 @@ class SimpleInterpreter {
   SimpleInterpreter();
   explicit SimpleInterpreter(
       ast::System system, int ttl = Particle::IMMORTAL, int skip = 0,
-      Params params = Params{},
+      flame::Params params = flame::Params{},
       flame::Transform initialTransform = flame::Transform());
-  SimpleInterpreter(ast::System system, int ttl, int skip, Params params,
+  SimpleInterpreter(ast::System system, int ttl, int skip,
+                    chaoskit::flame::Params params,
                     flame::Transform initialTransform,
                     std::shared_ptr<Rng> rng);
   explicit SimpleInterpreter(const flame::System &system);
@@ -34,7 +35,7 @@ class SimpleInterpreter {
 
   void setSystem(const ast::System &system);
   void setSystem(const flame::System &system);
-  void setParams(Params params);
+  void setParams(flame::Params params);
   void setTtl(int ttl);
   void setSkip(int skip);
   void setInitialTransform(flame::Transform transform);
@@ -48,7 +49,7 @@ class SimpleInterpreter {
   ast::System system_;
   int ttl_;
   int skip_;
-  Params params_;
+  flame::Params params_;
   flame::Transform initialTransform_;
   float max_limit_;
   std::shared_ptr<Rng> rng_;

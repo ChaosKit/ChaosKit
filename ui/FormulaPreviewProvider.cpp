@@ -9,10 +9,10 @@
 #include <memory>
 #include <unordered_set>
 #include "ast/util.h"
-#include "core/Params.h"
 #include "core/SimpleInterpreter.h"
 #include "flame/Blend.h"
 #include "flame/Formula.h"
+#include "flame/Params.h"
 #include "flame/System.h"
 #include "flame/toSource.h"
 #include "library/FormulaType.h"
@@ -89,7 +89,7 @@ core::SimpleInterpreter createInterpreter(library::FormulaType type) {
 
   return core::SimpleInterpreter(flame::toSource(system),
                                  core::Particle::IMMORTAL, 0,
-                                 core::Params::fromSystem(system));
+                                 flame::Params::fromSystem(system));
 }
 
 QVector<QPointF> generateGrid(library::FormulaType type, int width,
