@@ -25,8 +25,11 @@ add_library(
   SystemIndex.h
   toAst.cpp
   toAst.h
+  toParams.cpp
+  toParams.h
   toSource.cpp
   toSource.h
+  toSystem.h
   transforms.cpp
   transforms.h
   util.cpp
