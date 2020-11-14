@@ -1,7 +1,7 @@
 #ifndef CHAOSKIT_CORE_TRANSFORMS_H
 #define CHAOSKIT_CORE_TRANSFORMS_H
 
-#include "core/structures/Transform.h"
+#include "flame/Transform.h"
 
 namespace chaoskit::core {
 

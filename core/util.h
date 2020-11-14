@@ -6,7 +6,7 @@
 #include <ast/System.h>
 #include <stdx/optional.h>
 #include "SystemIndex.h"
-#include "structures/System.h"
+#include "flame/System.h"
 
 namespace chaoskit::core {
 

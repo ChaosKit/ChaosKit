@@ -1,11 +1,11 @@
 #ifndef CHAOSKIT_UI_DOCUMENTSTORE_H
 #define CHAOSKIT_UI_DOCUMENTSTORE_H
 
-#include "core/structures/Blend.h"
-#include "core/structures/Document.h"
-#include "core/structures/Formula.h"
-#include "core/structures/System.h"
-#include "core/structures/hierarchy.h"
+#include "flame/Blend.h"
+#include "flame/Document.h"
+#include "flame/Formula.h"
+#include "flame/System.h"
+#include "flame/hierarchy.h"
 #include "state/HierarchicalStore.h"
 
 namespace chaoskit::ui {

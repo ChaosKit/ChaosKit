@@ -1,5 +1,3 @@
-add_subdirectory(structures)
-
 add_library(core
         BlackWhiteColorMap.h
         Color.h
@@ -37,7 +35,7 @@ add_library(core
 target_link_libraries(core
         PUBLIC ast stdx randutils
         PRIVATE magic_enum xxHash::xxhash
-        INTERFACE core_structures)
+        INTERFACE flame_structures)
 
 add_executable(core_test
         testing/MockRng.h

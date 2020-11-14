@@ -2,7 +2,7 @@
 #define CHAOSKIT_CORE_GENERATOR_H
 
 #include "Renderer.h"
-#include "core/structures/System.h"
+#include "flame/System.h"
 
 namespace chaoskit::core {
 

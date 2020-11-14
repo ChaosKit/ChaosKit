@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 #include "core/DocumentVisitor.h"
-#include "core/structures/Document.h"
+#include "flame/Document.h"
 
 namespace chaoskit::io {
 

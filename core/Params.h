@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "SystemIndex.h"
-#include "structures/System.h"
+#include "flame/System.h"
 
 namespace chaoskit::core {
 
