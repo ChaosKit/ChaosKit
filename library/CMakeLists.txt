@@ -1,18 +1,39 @@
-add_library(library
-        coloring_methods/Distance.h
-        coloring_methods/Noop.h
-        coloring_methods/SingleColor.h
-        formulas/DeJong.h
-        formulas/Drain.h
-        formulas/Linear.h
-        formulas/Quadratic.h
-        formulas/Sinusoidal.h
-        formulas/Spherical.h
-        formulas/Tinkerbell.h
-        formulas/Trigonometric.h
-        ColoringMethod.h
-        ColoringMethodType.h
-        Formula.h
-        FormulaType.h
-        util.cpp util.h formulas/Swirl.h formulas/Horseshoe.h formulas/Polar.h formulas/Handkerchief.h formulas/Heart.h formulas/Disc.h formulas/Spiral.h formulas/Hyperbolic.h formulas/Diamond.h formulas/Ex.h formulas/Fisheye.h formulas/Exponential.h formulas/Julia.h formulas/Bent.h formulas/Cosine.h formulas/Blob.h)
-target_link_libraries(library PUBLIC ast PRIVATE magic_enum)
+add_library(
+  library
+  coloring_methods/Distance.h
+  coloring_methods/Noop.h
+  coloring_methods/SingleColor.h
+  ColoringMethod.h
+  ColoringMethodType.h
+  Formula.h
+  formulas/Bent.h
+  formulas/Blob.h
+  formulas/Cosine.h
+  formulas/DeJong.h
+  formulas/Diamond.h
+  formulas/Disc.h
+  formulas/Drain.h
+  formulas/Ex.h
+  formulas/Exponential.h
+  formulas/Fisheye.h
+  formulas/Handkerchief.h
+  formulas/Heart.h
+  formulas/Horseshoe.h
+  formulas/Hyperbolic.h
+  formulas/Julia.h
+  formulas/Linear.h
+  formulas/Polar.h
+  formulas/Quadratic.h
+  formulas/Sinusoidal.h
+  formulas/Spherical.h
+  formulas/Spiral.h
+  formulas/Swirl.h
+  formulas/Tinkerbell.h
+  formulas/Trigonometric.h
+  FormulaType.h
+  util.cpp
+  util.h)
+target_link_libraries(
+  library
+  PUBLIC ast
+  PRIVATE magic_enum)
