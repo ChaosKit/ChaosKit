@@ -6,7 +6,7 @@
 
 namespace chaoskit::core {
 
-struct [[deprecated]] Document {
+struct Document {
   System* system;
 
   float gamma = 2.2f;
