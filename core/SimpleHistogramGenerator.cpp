@@ -4,7 +4,7 @@
 
 namespace chaoskit::core {
 
-SimpleHistogramGenerator::SimpleHistogramGenerator(const System &system,
+SimpleHistogramGenerator::SimpleHistogramGenerator(const flame::System &system,
                                                    uint32_t width,
                                                    uint32_t height,
                                                    std::shared_ptr<Rng> rng)
@@ -13,13 +13,13 @@ SimpleHistogramGenerator::SimpleHistogramGenerator(const System &system,
       interpreter_(system, std::move(rng)),
       color_map_(nullptr) {}
 
-SimpleHistogramGenerator::SimpleHistogramGenerator(const System &system,
+SimpleHistogramGenerator::SimpleHistogramGenerator(const flame::System &system,
                                                    uint32_t width,
                                                    uint32_t height)
     : SimpleHistogramGenerator(system, width, height,
                                std::make_shared<ThreadLocalRng>()) {}
 
-void SimpleHistogramGenerator::setSystem(const System &system) {
+void SimpleHistogramGenerator::setSystem(const flame::System &system) {
   interpreter_.setSystem(toSource(system));
   interpreter_.setParams(Params::fromSystem(system));
 }

@@ -54,7 +54,7 @@ void HistogramGenerator::setEnabled(bool enabled) {
   core::Generator::setEnabled(enabled);
 }
 
-void HistogramGenerator::setSystem(const core::System &system) {
+void HistogramGenerator::setSystem(const flame::System &system) {
   QMetaObject::invokeMethod(
       blenderTask_, [this, &system] { blenderTask_->setSystem(&system); });
   gathererTask_->clear();

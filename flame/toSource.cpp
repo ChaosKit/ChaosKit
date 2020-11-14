@@ -2,14 +2,17 @@
 
 #include <cmath>
 #include <vector>
+#include "Blend.h"
+#include "System.h"
+#include "Transform.h"
 #include "ast/Input.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 namespace {
 
 std::vector<ast::WeightedFormula> prepareWeightedFormulas(
-    const BlendBase &blend) {
+    const chaoskit::flame::BlendBase &blend) {
   std::vector<ast::WeightedFormula> weightedFormulas;
   weightedFormulas.reserve(blend.formulas.size());
 
@@ -54,7 +57,7 @@ ast::System toSource(const System &system) {
   if (system.isolatedBlend) {
     limitedBlends.emplace_back(toSource(*system.isolatedBlend), 0);
   } else {
-    for (const core::Blend *blend : system.blends) {
+    for (const Blend *blend : system.blends) {
       if (!blend->enabled) continue;
       currentLimit += blend->weight;
       limitedBlends.emplace_back(toSource(*blend), currentLimit);
@@ -68,4 +71,4 @@ ast::System toSource(const System &system) {
   }
 }
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame

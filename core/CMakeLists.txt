@@ -28,7 +28,6 @@ add_library(
   SimpleHistogramGenerator.h
   SimpleInterpreter.cpp
   SimpleInterpreter.h
-  SystemIndex.h
   SystemParticle.h
   SystemProcessor.cpp
   SystemProcessor.h
@@ -39,11 +38,7 @@ add_library(
   TransformInterpreter.cpp
   TransformInterpreter.h
   TransformParams.h
-  transforms.cpp
-  transforms.h
-  TransformSystem.h
-  util.cpp
-  util.h)
+  TransformSystem.h)
 target_link_libraries(
   core
   # TODO: remove flame after interpreter migration

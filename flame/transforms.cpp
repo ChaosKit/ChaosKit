@@ -1,6 +1,6 @@
 #include "transforms.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 Transform rotate(float angle) {
   float sin = sinf(angle);
@@ -8,4 +8,4 @@ Transform rotate(float angle) {
   return Transform({cos, -sin, 0, sin, cos, 0});
 }
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame

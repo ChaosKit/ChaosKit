@@ -60,7 +60,7 @@ const std::unordered_map<char, std::function<float(float, float)>>
         {BinaryFn::ATAN2, atan2f},
     };
 
-Point applyTransform(const Transform &transform, const Point &point) {
+Point applyTransform(const flame::Transform &transform, const Point &point) {
   auto &values = transform.values;
   return Point(values[0] * point.x() + values[1] * point.y() + values[2],
                values[3] * point.x() + values[4] * point.y() + values[5]);
@@ -174,14 +174,14 @@ class BlendInterpreter {
     }
 
     output_ = (*this)(blend.post());
-    index_.formula = SystemIndex::COLORING_METHOD;
+    index_.formula = flame::SystemIndex::COLORING_METHOD;
     output_.color = apply_visitor(*this, blend.coloringMethod());
     return output_;
   }
 
  private:
   Particle input_, output_;
-  SystemIndex index_;
+  flame::SystemIndex index_;
   const Params &params_;
   std::unordered_map<std::string, float> variableValues_;
   std::shared_ptr<Rng> rng_;
@@ -204,7 +204,8 @@ SimpleInterpreter::SimpleInterpreter()
       rng_(std::make_shared<ThreadLocalRng>()) {}
 
 SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, int skip,
-                                     Params params, Transform initialTransform,
+                                     Params params,
+                                     flame::Transform initialTransform,
                                      std::shared_ptr<Rng> rng)
     : system_(std::move(system)),
       ttl_(ttl),
@@ -216,14 +217,15 @@ SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, int skip,
 }
 
 SimpleInterpreter::SimpleInterpreter(ast::System system, int ttl, int skip,
-                                     Params params, Transform initialTransform)
+                                     Params params,
+                                     flame::Transform initialTransform)
     : SimpleInterpreter(std::move(system), ttl, skip, std::move(params),
                         initialTransform, std::make_shared<ThreadLocalRng>()) {}
 
-SimpleInterpreter::SimpleInterpreter(const core::System &system)
+SimpleInterpreter::SimpleInterpreter(const flame::System &system)
     : SimpleInterpreter(system, std::make_shared<ThreadLocalRng>()) {}
 
-SimpleInterpreter::SimpleInterpreter(const core::System &system,
+SimpleInterpreter::SimpleInterpreter(const flame::System &system,
                                      std::shared_ptr<Rng> rng)
     : SimpleInterpreter(toSource(system), system.ttl, system.skip,
                         Params::fromSystem(system), system.initialTransform,
@@ -254,7 +256,7 @@ void SimpleInterpreter::setSystem(const ast::System &system) {
   updateMaxLimit();
 }
 
-void SimpleInterpreter::setSystem(const core::System &system) {
+void SimpleInterpreter::setSystem(const flame::System &system) {
   setSystem(toSource(system));
   setParams(Params::fromSystem(system));
   setTtl(system.ttl);
@@ -269,7 +271,7 @@ void SimpleInterpreter::setParams(Params params) {
 void SimpleInterpreter::setTtl(int ttl) { ttl_ = ttl; }
 
 void SimpleInterpreter::setSkip(int skip) { skip_ = skip; }
-void SimpleInterpreter::setInitialTransform(Transform transform) {
+void SimpleInterpreter::setInitialTransform(flame::Transform transform) {
   initialTransform_ = transform;
 }
 Particle SimpleInterpreter::processBlends(Particle input) const {
@@ -310,7 +312,7 @@ Particle SimpleInterpreter::processBlends(Particle input) const {
 }
 
 Particle SimpleInterpreter::processFinalBlend(Particle input) const {
-  return BlendInterpreter(input, params_, SystemIndex::FINAL_BLEND,
+  return BlendInterpreter(input, params_, flame::SystemIndex::FINAL_BLEND,
                           rng_)(system_.final_blend());
 }
 

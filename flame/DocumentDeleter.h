@@ -1,9 +1,13 @@
 #ifndef CHAOSKIT_CORE_DOCUMENTDELETER_H
 #define CHAOSKIT_CORE_DOCUMENTDELETER_H
 
+#include <ast/System.h>
+#include "Blend.h"
+#include "Document.h"
 #include "DocumentVisitor.h"
+#include "System.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 class DocumentDeleter : public DocumentVisitor {
  public:
@@ -13,6 +17,6 @@ class DocumentDeleter : public DocumentVisitor {
   void visit(System& system) override;
 };
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
 #endif  // CHAOSKIT_CORE_DOCUMENTDELETER_H

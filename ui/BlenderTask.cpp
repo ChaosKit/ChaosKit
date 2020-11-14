@@ -8,8 +8,8 @@ using chaoskit::core::MissingParameterError;
 using chaoskit::core::Particle;
 using chaoskit::core::Point;
 using chaoskit::core::SimpleInterpreter;
-using chaoskit::core::toSource;
-using chaoskit::core::Transform;
+using chaoskit::flame::toSource;
+using chaoskit::flame::Transform;
 
 namespace chaoskit::ui {
 
@@ -23,7 +23,7 @@ float distance(const Point &a, const Point &b) {
 
 }  // namespace
 
-void BlenderTask::setSystem(const core::System *system) {
+void BlenderTask::setSystem(const flame::System *system) {
   interpreter_ = std::make_unique<SimpleInterpreter>(*system, rng_);
   particle_ = interpreter_->randomizeParticle();
 }

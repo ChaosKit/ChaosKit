@@ -1,5 +1,5 @@
-#ifndef CHAOSKIT_CORE_COLORINGMETHOD_H
-#define CHAOSKIT_CORE_COLORINGMETHOD_H
+#ifndef CHAOSKIT_FLAME_COLORINGMETHOD_H
+#define CHAOSKIT_FLAME_COLORINGMETHOD_H
 
 #include <algorithm>
 #include <vector>
@@ -8,7 +8,7 @@
 #include "library/ColoringMethodType.h"
 #include "library/util.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 struct ColoringMethod {
   ast::Expression source = ast::Input(ast::Input::Type::COLOR);
@@ -25,6 +25,6 @@ struct ColoringMethod {
   }
 };
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
 #endif  // CHAOSKIT_CORE_STRUCTURES_COLORINGMETHOD_H

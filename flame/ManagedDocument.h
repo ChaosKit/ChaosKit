@@ -1,16 +1,15 @@
-#ifndef CHAOSKIT_CORE_MANAGEDDOCUMENT_H
-#define CHAOSKIT_CORE_MANAGEDDOCUMENT_H
+#ifndef CHAOSKIT_FLAME_MANAGEDDOCUMENT_H
+#define CHAOSKIT_FLAME_MANAGEDDOCUMENT_H
 
 #include <memory>
 #include "Document.h"
 
-namespace chaoskit::core {
-
+namespace chaoskit::flame {
 namespace detail {
 
 class Deleter {
  public:
-  void operator()(core::Document* doc);
+  void operator()(Document* doc);
 };
 
 }  // namespace detail
@@ -18,6 +17,6 @@ class Deleter {
 using ManagedDocument = std::unique_ptr<Document, detail::Deleter>;
 ManagedDocument makeManagedDocument();
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
-#endif  // CHAOSKIT_CORE_MANAGEDDOCUMENT_H
+#endif  // CHAOSKIT_FLAME_MANAGEDDOCUMENT_H

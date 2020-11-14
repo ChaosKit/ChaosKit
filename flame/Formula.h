@@ -1,12 +1,12 @@
-#ifndef CHAOSKIT_CORE_FORMULA_H
-#define CHAOSKIT_CORE_FORMULA_H
+#ifndef CHAOSKIT_FLAME_FORMULA_H
+#define CHAOSKIT_FLAME_FORMULA_H
 
 #include <vector>
 #include "ast/Formula.h"
 #include "library/FormulaType.h"
 #include "library/util.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 struct Formula {
   struct Weight {
@@ -25,6 +25,6 @@ struct Formula {
   }
 };
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
-#endif  // CHAOSKIT_CORE_FORMULA_H
+#endif  // CHAOSKIT_FLAME_FORMULA_H

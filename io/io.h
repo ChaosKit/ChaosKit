@@ -13,8 +13,8 @@ class Error : public std::runtime_error {
   explicit Error(const std::string& what) : std::runtime_error(what) {}
 };
 
-void loadFromFile(const std::string& path, core::Document* document);
-void saveToFile(const std::string& path, const core::Document& document);
+void loadFromFile(const std::string& path, flame::Document* document);
+void saveToFile(const std::string& path, const flame::Document& document);
 
 }  // namespace chaoskit::io
 

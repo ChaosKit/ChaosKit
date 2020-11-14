@@ -1,9 +1,13 @@
-#ifndef CHAOSKIT_CORE_DOCUMENTVISITOR_H
-#define CHAOSKIT_CORE_DOCUMENTVISITOR_H
+#ifndef CHAOSKIT_FLAME_DOCUMENTVISITOR_H
+#define CHAOSKIT_FLAME_DOCUMENTVISITOR_H
 
+#include <ast/System.h>
+#include "Blend.h"
 #include "Document.h"
+#include "Formula.h"
+#include "System.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 class DocumentVisitor {
  public:
@@ -16,6 +20,6 @@ class DocumentVisitor {
   virtual void visit(System& system){};
 };
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
-#endif  // CHAOSKIT_CORE_DOCUMENTVISITOR_H
+#endif  // CHAOSKIT_FLAME_DOCUMENTVISITOR_H

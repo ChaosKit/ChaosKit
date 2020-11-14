@@ -3,24 +3,24 @@
 #include "core/Color.h"
 #include "core/ColorMapRegistry.h"
 #include "core/SimpleHistogramGenerator.h"
-#include "core/transforms.h"
 #include "flame/Blend.h"
 #include "flame/Formula.h"
 #include "flame/System.h"
 #include "flame/toSource.h"
+#include "flame/transforms.h"
 #include "library/coloring_methods/Distance.h"
 #include "library/formulas/DeJong.h"
 
-using chaoskit::core::Blend;
 using chaoskit::core::Color;
 using chaoskit::core::ColorMapRegistry;
-using chaoskit::core::FinalBlend;
-using chaoskit::core::Formula;
-using chaoskit::core::scale;
 using chaoskit::core::SimpleHistogramGenerator;
-using chaoskit::core::System;
-using chaoskit::core::toSource;
-using chaoskit::core::translate;
+using chaoskit::flame::Blend;
+using chaoskit::flame::FinalBlend;
+using chaoskit::flame::Formula;
+using chaoskit::flame::scale;
+using chaoskit::flame::System;
+using chaoskit::flame::toSource;
+using chaoskit::flame::translate;
 using chaoskit::library::DeJong;
 using chaoskit::library::coloring_methods::Distance;
 

@@ -1,16 +1,17 @@
 #include "ManagedDocument.h"
+#include "Document.h"
 #include "DocumentDeleter.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
-void detail::Deleter::operator()(core::Document* doc) {
+void detail::Deleter::operator()(Document* doc) {
   if (doc == nullptr) return;
-  DocumentDeleter().visit(*doc);
+  chaoskit::flame::DocumentDeleter().visit(*doc);
   delete doc;
 }
 
 ManagedDocument makeManagedDocument() {
-  return ManagedDocument(new core::Document(), detail::Deleter());
+  return ManagedDocument(new Document(), detail::Deleter());
 }
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame

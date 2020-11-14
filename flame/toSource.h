@@ -1,5 +1,5 @@
-#ifndef CHAOSKIT_CORE_TOSOURCE_H
-#define CHAOSKIT_CORE_TOSOURCE_H
+#ifndef CHAOSKIT_FLAME_TOSOURCE_H
+#define CHAOSKIT_FLAME_TOSOURCE_H
 
 #include <ast/StaticAffineTransform.h>
 #include <ast/System.h>
@@ -9,7 +9,7 @@
 #include "System.h"
 #include "Transform.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 ast::Blend toSource(const BlendBase &blend);
 ast::WeightedFormula toSource(const Formula &formula);
@@ -17,6 +17,6 @@ ast::Expression toSource(const ColoringMethod &coloringMethod);
 ast::StaticAffineTransform toSource(const Transform &transform);
 ast::System toSource(const System &system);
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
-#endif  // CHAOSKIT_CORE_TOSOURCE_H
+#endif  // CHAOSKIT_FLAME_TOSOURCE_H

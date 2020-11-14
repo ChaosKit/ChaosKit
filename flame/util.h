@@ -5,18 +5,18 @@
 #include <ast/Formula.h>
 #include <ast/System.h>
 #include <stdx/optional.h>
+#include "System.h"
 #include "SystemIndex.h"
-#include "flame/System.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 stdx::optional<size_t> formulaIndex(const ast::Formula &formula,
                                     const ast::Blend &blend);
 stdx::optional<SystemIndex> formulaIndex(const ast::Formula &formula,
                                          const ast::System &system);
 
-std::string debugString(const core::System &system);
+std::string debugString(const System &system);
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
 #endif  // CHAOSKIT_CORE_UTIL_H

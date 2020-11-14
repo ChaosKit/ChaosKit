@@ -2,9 +2,13 @@
 
 #include <magic_enum.hpp>
 #include <sstream>
+#include "Blend.h"
+#include "System.h"
+#include "SystemIndex.h"
+#include "Transform.h"
 #include "ast/ast.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 stdx::optional<size_t> formulaIndex(const ast::Formula &formula,
                                     const ast::Blend &blend) {
@@ -48,7 +52,7 @@ class DebugStringGenerator {
     stream_ << std::boolalpha;
   }
 
-  std::string generate(const System &system) {
+  std::string generate(const flame::System &system) {
     stream_ << "TTL: " << system.ttl << std::endl;
 
     stream_ << "Initial Transform: ";
@@ -58,7 +62,7 @@ class DebugStringGenerator {
     stream_ << "Blends (" << system.blends.size() << ")" << std::endl;
     indent();
     int index = 0;
-    for (const Blend *blend : system.blends) {
+    for (const flame::Blend *blend : system.blends) {
       indentation();
       stream_ << "Blend " << index;
 
@@ -83,7 +87,7 @@ class DebugStringGenerator {
   }
 
  private:
-  void generate(const BlendBase &blend) {
+  void generate(const flame::BlendBase &blend) {
     indentation();
     stream_ << "Enabled: " << blend.enabled << std::endl;
 
@@ -106,7 +110,7 @@ class DebugStringGenerator {
     stream_ << "Formulas (" << blend.formulas.size() << ")" << std::endl;
     indent();
     int index = 0;
-    for (const Formula *formula : blend.formulas) {
+    for (const flame::Formula *formula : blend.formulas) {
       indentation();
       stream_ << "Formula " << index << ":" << std::endl;
       indent();
@@ -116,7 +120,7 @@ class DebugStringGenerator {
     }
     outdent();
   }
-  void generate(const Blend &blend) {
+  void generate(const flame::Blend &blend) {
     indentation();
     stream_ << "Name: " << (blend.name.empty() ? "(empty)" : blend.name)
             << std::endl;
@@ -124,10 +128,10 @@ class DebugStringGenerator {
     indentation();
     stream_ << "Weight: " << blend.weight << std::endl;
 
-    generate(static_cast<const BlendBase &>(blend));
+    generate(static_cast<const flame::BlendBase &>(blend));
   }
 
-  void generate(const Formula &formula) {
+  void generate(const flame::Formula &formula) {
     indentation();
     stream_ << "Type: "
             << magic_enum::enum_name<library::FormulaType>(formula.type)
@@ -150,12 +154,12 @@ class DebugStringGenerator {
     outdent();
   }
 
-  void generate(const Transform &transform) {
+  void generate(const flame::Transform &transform) {
     for (auto value : transform.values) {
       stream_ << value << ' ';
     }
   }
-  void generate(const ColoringMethod &coloringMethod) {
+  void generate(const flame::ColoringMethod &coloringMethod) {
     stream_ << magic_enum::enum_name<library::ColoringMethodType>(
         coloringMethod.type);
     for (auto param : coloringMethod.params) {
@@ -181,4 +185,4 @@ std::string debugString(const System &system) {
   return DebugStringGenerator().generate(system);
 }
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame

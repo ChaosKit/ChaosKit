@@ -2,7 +2,7 @@
 #define CHAOSKIT_CORE_ERRORS_H
 
 #include <stdexcept>
-#include "SystemIndex.h"
+#include "flame/SystemIndex.h"
 
 namespace chaoskit::core {
 
@@ -14,7 +14,8 @@ class OutputNotAvailable : public std::invalid_argument {
 class MissingParameterError : public std::out_of_range {
  public:
   explicit MissingParameterError(size_t parameterIndex);
-  MissingParameterError(const SystemIndex& elementIndex, size_t parameterIndex);
+  MissingParameterError(const flame::SystemIndex& elementIndex,
+                        size_t parameterIndex);
 };
 
 class UndefinedVariableError : public std::out_of_range {

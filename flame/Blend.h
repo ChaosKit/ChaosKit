@@ -1,5 +1,5 @@
-#ifndef CHAOSKIT_CORE_BLEND_H
-#define CHAOSKIT_CORE_BLEND_H
+#ifndef CHAOSKIT_FLAME_BLEND_H
+#define CHAOSKIT_FLAME_BLEND_H
 
 #include <string>
 #include <vector>
@@ -7,7 +7,7 @@
 #include "Formula.h"
 #include "Transform.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 struct BlendBase {
   std::vector<Formula*> formulas;
@@ -24,6 +24,6 @@ struct Blend : public BlendBase {
 
 struct FinalBlend : public BlendBase {};
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
-#endif  // CHAOSKIT_CORE_BLEND_H
+#endif  // CHAOSKIT_FLAME_BLEND_H

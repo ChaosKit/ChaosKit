@@ -5,6 +5,8 @@
 #include "Params.h"
 #include "Particle.h"
 #include "Rng.h"
+#include "flame/System.h"
+#include "flame/Transform.h"
 
 namespace chaoskit::core {
 
@@ -20,20 +22,22 @@ class SimpleInterpreter {
   };
 
   SimpleInterpreter();
-  explicit SimpleInterpreter(ast::System system, int ttl = Particle::IMMORTAL,
-                             int skip = 0, Params params = Params{},
-                             Transform initialTransform = Transform());
+  explicit SimpleInterpreter(
+      ast::System system, int ttl = Particle::IMMORTAL, int skip = 0,
+      Params params = Params{},
+      flame::Transform initialTransform = flame::Transform());
   SimpleInterpreter(ast::System system, int ttl, int skip, Params params,
-                    Transform initialTransform, std::shared_ptr<Rng> rng);
-  explicit SimpleInterpreter(const core::System &system);
-  SimpleInterpreter(const core::System &system, std::shared_ptr<Rng> rng);
+                    flame::Transform initialTransform,
+                    std::shared_ptr<Rng> rng);
+  explicit SimpleInterpreter(const flame::System &system);
+  SimpleInterpreter(const flame::System &system, std::shared_ptr<Rng> rng);
 
   void setSystem(const ast::System &system);
-  void setSystem(const core::System &system);
+  void setSystem(const flame::System &system);
   void setParams(Params params);
   void setTtl(int ttl);
   void setSkip(int skip);
-  void setInitialTransform(Transform transform);
+  void setInitialTransform(flame::Transform transform);
   Particle randomizeParticle() const;
   Particle processBlends(Particle input) const;
   Particle processFinalBlend(Particle input) const;
@@ -45,7 +49,7 @@ class SimpleInterpreter {
   int ttl_;
   int skip_;
   Params params_;
-  Transform initialTransform_;
+  flame::Transform initialTransform_;
   float max_limit_;
   std::shared_ptr<Rng> rng_;
 

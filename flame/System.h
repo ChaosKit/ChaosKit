@@ -1,11 +1,11 @@
-#ifndef CHAOSKIT_CORE_SYSTEM_H
-#define CHAOSKIT_CORE_SYSTEM_H
+#ifndef CHAOSKIT_FLAME_SYSTEM_H
+#define CHAOSKIT_FLAME_SYSTEM_H
 
 #include <vector>
 #include "Blend.h"
 #include "Transform.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 struct System {
   std::vector<Blend*> blends;
@@ -26,6 +26,6 @@ struct System {
   Transform initialTransform{};
 };
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
-#endif  // CHAOSKIT_CORE_SYSTEM_H
+#endif  // CHAOSKIT_FLAME_SYSTEM_H

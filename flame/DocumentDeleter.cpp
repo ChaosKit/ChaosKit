@@ -1,6 +1,9 @@
 #include "DocumentDeleter.h"
+#include "Blend.h"
+#include "Document.h"
+#include "System.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 void DocumentDeleter::visit(Blend& blend) {
   for (auto* formula : blend.formulas) {
@@ -32,4 +35,4 @@ void DocumentDeleter::visit(System& system) {
   }
 }
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame

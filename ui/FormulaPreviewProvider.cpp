@@ -73,21 +73,21 @@ bool requiresScatterplot(library::FormulaType type) {
 }
 
 core::SimpleInterpreter createInterpreter(library::FormulaType type) {
-  auto formula = std::make_unique<core::Formula>();
+  auto formula = std::make_unique<flame::Formula>();
 
   auto libraryFormula = library::createFormula(type);
   formula->type = type;
   formula->source = libraryFormula->source();
   formula->params = libraryFormula->exampleParams();
 
-  auto blend = std::make_unique<core::Blend>();
-  blend->pre = core::Transform(libraryFormula->examplePreTransform().params());
+  auto blend = std::make_unique<flame::Blend>();
+  blend->pre = flame::Transform(libraryFormula->examplePreTransform().params());
   blend->formulas.push_back(formula.get());
 
-  core::System system{};
+  flame::System system{};
   system.blends.push_back(blend.get());
 
-  return core::SimpleInterpreter(core::toSource(system),
+  return core::SimpleInterpreter(flame::toSource(system),
                                  core::Particle::IMMORTAL, 0,
                                  core::Params::fromSystem(system));
 }

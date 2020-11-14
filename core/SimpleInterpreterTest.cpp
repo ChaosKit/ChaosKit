@@ -4,7 +4,7 @@
 #include "ast/helpers.h"
 #include "core/errors.h"
 #include "core/testing/StaticRng.h"
-#include "transforms.h"
+#include "flame/transforms.h"
 
 namespace chaoskit::core {
 
@@ -118,7 +118,7 @@ TEST_F(SimpleInterpreterTest, UsesOutput) {
 TEST_F(SimpleInterpreterTest, AppliesInitialTransform) {
   ast::System system{};
   std::shared_ptr<Rng> rng = std::make_shared<StaticRng>();
-  Transform initialTransform = translate(1, 1);
+  flame::Transform initialTransform = flame::translate(1, 1);
 
   SimpleInterpreter interpreter(system, Particle::IMMORTAL, 0, {},
                                 initialTransform, rng);

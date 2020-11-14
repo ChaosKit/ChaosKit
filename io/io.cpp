@@ -13,12 +13,12 @@ namespace chaoskit::io {
 
 namespace {
 
-void readTransform(const Transform& proto, core::Transform* transform) {
+void readTransform(const Transform& proto, flame::Transform* transform) {
   transform->values = {proto.m11(), proto.m21(), proto.m31(),
                        proto.m12(), proto.m22(), proto.m32()};
 }
 
-void readFormula(const Formula& proto, core::Formula* formula) {
+void readFormula(const Formula& proto, flame::Formula* formula) {
   auto formulaType = magic_enum::enum_cast<FormulaType>(proto.type());
   if (!formulaType) {
     throw Error("Unsupported formula type: " + proto.type());
@@ -33,7 +33,7 @@ void readFormula(const Formula& proto, core::Formula* formula) {
 }
 
 void readColoringMethod(const ColoringMethod& proto,
-                        core::ColoringMethod* coloringMethod) {
+                        flame::ColoringMethod* coloringMethod) {
   switch (proto.method_case()) {
     case ColoringMethod::METHOD_NOT_SET:
       coloringMethod->setType(ColoringMethodType::Noop);
@@ -49,9 +49,9 @@ void readColoringMethod(const ColoringMethod& proto,
   }
 }
 
-void readBlendBase(const Blend& proto, core::BlendBase* blend) {
+void readBlendBase(const Blend& proto, flame::BlendBase* blend) {
   for (const auto& formulaProto : proto.formulas()) {
-    auto* formula = new core::Formula;
+    auto* formula = new flame::Formula;
     readFormula(formulaProto, formula);
     blend->formulas.push_back(formula);
   }
@@ -61,20 +61,20 @@ void readBlendBase(const Blend& proto, core::BlendBase* blend) {
   blend->enabled = proto.enabled();
 }
 
-void readBlend(const Blend& proto, core::Blend* blend) {
+void readBlend(const Blend& proto, flame::Blend* blend) {
   readBlendBase(proto, blend);
   blend->name = proto.name();
   blend->weight = proto.weight();
 }
 
-void readSystem(const System& proto, core::System* system) {
+void readSystem(const System& proto, flame::System* system) {
   for (const auto& blendProto : proto.blends()) {
-    auto* blend = new core::Blend;
+    auto* blend = new flame::Blend;
     readBlend(blendProto, blend);
     system->blends.push_back(blend);
   }
 
-  system->finalBlend = new core::FinalBlend;
+  system->finalBlend = new flame::FinalBlend;
   readBlendBase(proto.final_blend(), system->finalBlend);
 
   if (proto.ttl() != 0) {
@@ -91,7 +91,7 @@ void readSystem(const System& proto, core::System* system) {
   }
 }
 
-void readDocument(const Document& proto, core::Document* document) {
+void readDocument(const Document& proto, flame::Document* document) {
   if (!proto.has_system()) {
     throw Error("System needs to be defined");
   }
@@ -111,11 +111,11 @@ void readDocument(const Document& proto, core::Document* document) {
   if (proto.has_color_map()) {
     document->colorMap = proto.color_map().name();
   }
-  document->system = new core::System;
+  document->system = new flame::System;
   readSystem(proto.system(), document->system);
 }
 
-void writeTransform(const core::Transform& transform, Transform* proto) {
+void writeTransform(const flame::Transform& transform, Transform* proto) {
   proto->set_m11(transform.values[0]);
   proto->set_m21(transform.values[1]);
   proto->set_m31(transform.values[2]);
@@ -124,7 +124,7 @@ void writeTransform(const core::Transform& transform, Transform* proto) {
   proto->set_m32(transform.values[5]);
 }
 
-void writeFormula(const core::Formula& formula, Formula* proto) {
+void writeFormula(const flame::Formula& formula, Formula* proto) {
   proto->set_type(
       std::string(magic_enum::enum_name<FormulaType>(formula.type)));
   for (float param : formula.params) {
@@ -134,7 +134,7 @@ void writeFormula(const core::Formula& formula, Formula* proto) {
   proto->mutable_weight()->set_y(formula.weight.x);
 }
 
-void writeColoringMethod(const core::ColoringMethod& coloringMethod,
+void writeColoringMethod(const flame::ColoringMethod& coloringMethod,
                          ColoringMethod* proto) {
   switch (coloringMethod.type) {
     case ColoringMethodType::Noop:
@@ -149,7 +149,7 @@ void writeColoringMethod(const core::ColoringMethod& coloringMethod,
   }
 }
 
-void writeBlendBase(const core::BlendBase& blend, Blend* proto) {
+void writeBlendBase(const flame::BlendBase& blend, Blend* proto) {
   for (const auto* formula : blend.formulas) {
     writeFormula(*formula, proto->add_formulas());
   }
@@ -159,13 +159,13 @@ void writeBlendBase(const core::BlendBase& blend, Blend* proto) {
   proto->set_enabled(blend.enabled);
 }
 
-void writeBlend(const core::Blend& blend, Blend* proto) {
+void writeBlend(const flame::Blend& blend, Blend* proto) {
   writeBlendBase(blend, proto);
   proto->set_name(blend.name);
   proto->set_weight(blend.weight);
 }
 
-void writeSystem(const core::System& system, System* proto) {
+void writeSystem(const flame::System& system, System* proto) {
   for (const auto* blend : system.blends) {
     writeBlend(*blend, proto->add_blends());
   }
@@ -186,7 +186,7 @@ void writeSystem(const core::System& system, System* proto) {
   }
 }
 
-void writeDocument(const core::Document& document, Document* proto) {
+void writeDocument(const flame::Document& document, Document* proto) {
   proto->set_gamma(document.gamma);
   proto->set_exposure(document.exposure);
   proto->set_vibrancy(document.vibrancy);
@@ -200,7 +200,7 @@ void writeDocument(const core::Document& document, Document* proto) {
 
 }  // namespace
 
-void loadFromFile(const std::string& path, core::Document* document) {
+void loadFromFile(const std::string& path, flame::Document* document) {
   std::ifstream stream(path, std::ios::in | std::ios::binary);
   if (stream.fail()) {
     throw Error("Could not read the file");
@@ -214,7 +214,7 @@ void loadFromFile(const std::string& path, core::Document* document) {
   readDocument(documentProto, document);
 }
 
-void saveToFile(const std::string& path, const core::Document& document) {
+void saveToFile(const std::string& path, const flame::Document& document) {
   std::ofstream stream(path,
                        std::ios::out | std::ios::binary | std::ios::trunc);
   if (stream.fail()) {

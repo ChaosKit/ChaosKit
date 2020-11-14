@@ -4,10 +4,10 @@ namespace chaoskit::ui {
 
 using chaoskit::state::Id;
 
-void DocumentAdopter::visit(core::Blend& blend) {
+void DocumentAdopter::visit(flame::Blend& blend) {
   Id systemId = idStack_.back();
-  Id blendId = store_.associateNewChildWith<core::System, core::Blend>(
-      systemId, [&blend](core::Blend* target) {
+  Id blendId = store_.associateNewChildWith<flame::System, flame::Blend>(
+      systemId, [&blend](flame::Blend* target) {
         target->enabled = blend.enabled;
         target->pre = blend.pre;
         target->post = blend.post;
@@ -23,9 +23,9 @@ void DocumentAdopter::visit(core::Blend& blend) {
   idStack_.pop_back();
 }
 
-void DocumentAdopter::visit(core::Document& document) {
+void DocumentAdopter::visit(flame::Document& document) {
   Id documentId =
-      store_.create<core::Document>([&document](core::Document* target) {
+      store_.create<flame::Document>([&document](flame::Document* target) {
         target->gamma = document.gamma;
         target->exposure = document.exposure;
         target->vibrancy = document.vibrancy;
@@ -39,10 +39,10 @@ void DocumentAdopter::visit(core::Document& document) {
   idStack_.pop_back();
 }
 
-void DocumentAdopter::visit(core::FinalBlend& blend) {
+void DocumentAdopter::visit(flame::FinalBlend& blend) {
   Id systemId = idStack_.back();
-  Id blendId = store_.associateNewChildWith<core::System, core::FinalBlend>(
-      systemId, [&blend](core::FinalBlend* target) {
+  Id blendId = store_.associateNewChildWith<flame::System, flame::FinalBlend>(
+      systemId, [&blend](flame::FinalBlend* target) {
         target->enabled = blend.enabled;
         target->pre = blend.pre;
         target->post = blend.post;
@@ -56,25 +56,25 @@ void DocumentAdopter::visit(core::FinalBlend& blend) {
   idStack_.pop_back();
 }
 
-void DocumentAdopter::visit(core::Formula& formula) {
+void DocumentAdopter::visit(flame::Formula& formula) {
   Id blendId = idStack_.back();
-  auto formulaUpdater = [&formula](core::Formula* target) {
+  auto formulaUpdater = [&formula](flame::Formula* target) {
     *target = std::move(formula);
   };
 
-  if (DocumentStore::matchesType<core::Blend>(blendId)) {
-    store_.associateNewChildWith<core::Blend, core::Formula>(blendId,
-                                                             formulaUpdater);
+  if (DocumentStore::matchesType<flame::Blend>(blendId)) {
+    store_.associateNewChildWith<flame::Blend, flame::Formula>(blendId,
+                                                               formulaUpdater);
   } else {
-    store_.associateNewChildWith<core::FinalBlend, core::Formula>(
+    store_.associateNewChildWith<flame::FinalBlend, flame::Formula>(
         blendId, formulaUpdater);
   }
 }
 
-void DocumentAdopter::visit(core::System& system) {
+void DocumentAdopter::visit(flame::System& system) {
   Id documentId = idStack_.back();
-  Id systemId = store_.associateNewChildWith<core::Document, core::System>(
-      documentId, [&system](core::System* target) {
+  Id systemId = store_.associateNewChildWith<flame::Document, flame::System>(
+      documentId, [&system](flame::System* target) {
         target->skip = system.skip;
         target->ttl = system.ttl;
         target->initialTransform = system.initialTransform;
@@ -85,7 +85,7 @@ void DocumentAdopter::visit(core::System& system) {
     visit(*blend);
 
     if (blend == system.isolatedBlend) {
-      store_.update<core::System>(systemId, [](core::System* target) {
+      store_.update<flame::System>(systemId, [](flame::System* target) {
         target->isolatedBlend = target->blends.back();
       });
     }

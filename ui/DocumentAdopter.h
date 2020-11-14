@@ -7,16 +7,16 @@
 
 namespace chaoskit::ui {
 
-class DocumentAdopter : public core::DocumentVisitor {
+class DocumentAdopter : public flame::DocumentVisitor {
  public:
   DocumentAdopter() = delete;
   explicit DocumentAdopter(DocumentStore& store) : store_(store), idStack_() {}
 
-  void visit(core::Blend& blend) override;
-  void visit(core::Document& document) override;
-  void visit(core::FinalBlend& blend) override;
-  void visit(core::Formula& formula) override;
-  void visit(core::System& system) override;
+  void visit(flame::Blend& blend) override;
+  void visit(flame::Document& document) override;
+  void visit(flame::FinalBlend& blend) override;
+  void visit(flame::Formula& formula) override;
+  void visit(flame::System& system) override;
 
  private:
   DocumentStore& store_;

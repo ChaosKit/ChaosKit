@@ -1,10 +1,10 @@
-#ifndef CHAOSKIT_CORE_STRUCTURES_DOCUMENT_H
-#define CHAOSKIT_CORE_STRUCTURES_DOCUMENT_H
+#ifndef CHAOSKIT_FLAME_DOCUMENT_H
+#define CHAOSKIT_FLAME_DOCUMENT_H
 
 #include <memory>
 #include "System.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 struct Document {
   System* system;
@@ -17,6 +17,6 @@ struct Document {
   uint32_t height;
 };
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
-#endif  // CHAOSKIT_CORE_STRUCTURES_DOCUMENT_H
+#endif  // CHAOSKIT_FLAME_DOCUMENT_H

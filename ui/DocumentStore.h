@@ -11,8 +11,8 @@
 namespace chaoskit::ui {
 
 using DocumentStore =
-    state::HierarchicalStore<core::Blend, core::Document, core::FinalBlend,
-                             core::Formula, core::System>;
+    state::HierarchicalStore<flame::Blend, flame::Document, flame::FinalBlend,
+                             flame::Formula, flame::System>;
 
 }
 

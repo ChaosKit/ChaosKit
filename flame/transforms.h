@@ -1,9 +1,9 @@
 #ifndef CHAOSKIT_CORE_TRANSFORMS_H
 #define CHAOSKIT_CORE_TRANSFORMS_H
 
-#include "flame/Transform.h"
+#include "Transform.h"
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 constexpr Transform identity() { return Transform({1, 0, 0, 0, 1, 0}); }
 constexpr Transform scale(float x, float y) {
@@ -13,8 +13,9 @@ constexpr Transform scale(float xy) { return scale(xy, xy); }
 constexpr Transform translate(float x, float y) {
   return Transform({1, 0, x, 0, 1, y});
 }
+
 Transform rotate(float angle);
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
 #endif  // CHAOSKIT_CORE_TRANSFORMS_H

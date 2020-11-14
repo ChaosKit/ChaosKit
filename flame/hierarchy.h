@@ -35,9 +35,9 @@
 // | Document +------->  System  |
 // +----------+       +----------+
 
-CHAOSKIT_DEFINE_SIMPLE_RELATION(::chaoskit::core::Document,
-                                ::chaoskit::core::System,
-                                &chaoskit::core::Document::system);
+CHAOSKIT_DEFINE_SIMPLE_RELATION(::chaoskit::flame::Document,
+                                ::chaoskit::flame::System,
+                                &chaoskit::flame::Document::system);
 
 //          1 +----------+ 1
 //      +-----+  System  +-----+
@@ -48,14 +48,16 @@ CHAOSKIT_DEFINE_SIMPLE_RELATION(::chaoskit::core::Document,
 // |  Blend  |         |  FinalBlend  |
 // +---------+         +--------------+
 
-CHAOSKIT_DEFINE_RELATION(::chaoskit::core::System, ::chaoskit::core::Blend,
-                         &::chaoskit::core::System::blends);
-CHAOSKIT_DEFINE_RELATION(::chaoskit::core::System, ::chaoskit::core::FinalBlend,
-                         &::chaoskit::core::System::finalBlend);
-CHAOSKIT_DEFINE_CHILDREN(::chaoskit::core::System, ::chaoskit::core::Blend,
-                         ::chaoskit::core::FinalBlend);
-CHAOSKIT_DEFINE_PARENTS(::chaoskit::core::Blend, ::chaoskit::core::System);
-CHAOSKIT_DEFINE_PARENTS(::chaoskit::core::FinalBlend, ::chaoskit::core::System);
+CHAOSKIT_DEFINE_RELATION(::chaoskit::flame::System, ::chaoskit::flame::Blend,
+                         &::chaoskit::flame::System::blends);
+CHAOSKIT_DEFINE_RELATION(::chaoskit::flame::System,
+                         ::chaoskit::flame::FinalBlend,
+                         &::chaoskit::flame::System::finalBlend);
+CHAOSKIT_DEFINE_CHILDREN(::chaoskit::flame::System, ::chaoskit::flame::Blend,
+                         ::chaoskit::flame::FinalBlend);
+CHAOSKIT_DEFINE_PARENTS(::chaoskit::flame::Blend, ::chaoskit::flame::System);
+CHAOSKIT_DEFINE_PARENTS(::chaoskit::flame::FinalBlend,
+                        ::chaoskit::flame::System);
 
 // +---------+         +--------------+
 // |  Blend  |         |  FinalBlend  |
@@ -66,16 +68,16 @@ CHAOSKIT_DEFINE_PARENTS(::chaoskit::core::FinalBlend, ::chaoskit::core::System);
 //      +----->  Formula  <----+
 //            +-----------+
 
-CHAOSKIT_DEFINE_RELATION(::chaoskit::core::Blend, ::chaoskit::core::Formula,
-                         &::chaoskit::core::Blend::formulas);
-CHAOSKIT_DEFINE_RELATION(::chaoskit::core::FinalBlend,
-                         ::chaoskit::core::Formula,
-                         &::chaoskit::core::FinalBlend::formulas);
+CHAOSKIT_DEFINE_RELATION(::chaoskit::flame::Blend, ::chaoskit::flame::Formula,
+                         &::chaoskit::flame::Blend::formulas)
+CHAOSKIT_DEFINE_RELATION(::chaoskit::flame::FinalBlend,
+                         ::chaoskit::flame::Formula,
+                         &::chaoskit::flame::FinalBlend::formulas);
 
-CHAOSKIT_DEFINE_CHILDREN(::chaoskit::core::Blend, ::chaoskit::core::Formula);
-CHAOSKIT_DEFINE_CHILDREN(::chaoskit::core::FinalBlend,
-                         ::chaoskit::core::Formula);
-CHAOSKIT_DEFINE_PARENTS(::chaoskit::core::Formula, ::chaoskit::core::Blend,
-                        ::chaoskit::core::FinalBlend);
+CHAOSKIT_DEFINE_CHILDREN(::chaoskit::flame::Blend, ::chaoskit::flame::Formula)
+CHAOSKIT_DEFINE_CHILDREN(::chaoskit::flame::FinalBlend,
+                         ::chaoskit::flame::Formula)
+CHAOSKIT_DEFINE_PARENTS(::chaoskit::flame::Formula, ::chaoskit::flame::Blend,
+                        ::chaoskit::flame::FinalBlend)
 
 #endif  // CHAOSKIT_CORE_STRUCTURES_HIERARCHY_H

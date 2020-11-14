@@ -1,10 +1,10 @@
-#ifndef CHAOSKIT_CORE_TRANSFORM_H
-#define CHAOSKIT_CORE_TRANSFORM_H
+#ifndef CHAOSKIT_FLAME_TRANSFORM_H
+#define CHAOSKIT_FLAME_TRANSFORM_H
 
 #include <array>
 #include <cmath>
 
-namespace chaoskit::core {
+namespace chaoskit::flame {
 
 struct Transform {
   std::array<float, 6> values;
@@ -33,6 +33,6 @@ struct Transform {
   }
 };
 
-}  // namespace chaoskit::core
+}  // namespace chaoskit::flame
 
-#endif  // CHAOSKIT_CORE_TRANSFORM_H
+#endif  // CHAOSKIT_FLAME_TRANSFORM_H

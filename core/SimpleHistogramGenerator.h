@@ -8,17 +8,18 @@
 #include "ColorMap.h"
 #include "Generator.h"
 #include "SimpleInterpreter.h"
+#include "flame/System.h"
 
 namespace chaoskit::core {
 
 class SimpleHistogramGenerator : public Generator {
  public:
-  SimpleHistogramGenerator(const System &system, uint32_t width,
+  SimpleHistogramGenerator(const flame::System &system, uint32_t width,
                            uint32_t height, std::shared_ptr<Rng> rng);
-  SimpleHistogramGenerator(const System &system, uint32_t width,
+  SimpleHistogramGenerator(const flame::System &system, uint32_t width,
                            uint32_t height);
 
-  void setSystem(const System &system) override;
+  void setSystem(const flame::System &system) override;
   void setSize(uint32_t width, uint32_t height);
   void setColorMap(const ColorMap *color_map);
   void setIterationCount(uint32_t count);

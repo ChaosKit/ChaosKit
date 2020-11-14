@@ -10,8 +10,8 @@ MissingParameterError::MissingParameterError(size_t parameterIndex)
     : std::out_of_range("Tried to access missing parameter " +
                         std::to_string(parameterIndex)) {}
 
-MissingParameterError::MissingParameterError(const SystemIndex& elementIndex,
-                                             size_t parameterIndex)
+MissingParameterError::MissingParameterError(
+    const flame::SystemIndex& elementIndex, size_t parameterIndex)
     : std::out_of_range("Tried to access missing parameter " +
                         std::to_string(parameterIndex) + " at formula " +
                         std::to_string(elementIndex.formula) + " in blend " +

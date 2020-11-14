@@ -136,7 +136,7 @@ class DocumentModel : public QAbstractItemModel {
   Q_INVOKABLE void moveFormulaToBlend(const QModelIndex& sourceFormula,
                                       const QModelIndex& destinationBlend);
 
-  void adoptDocument(core::Document* document);
+  void adoptDocument(flame::Document* document);
   Q_INVOKABLE bool loadFromFile(const QString& path);
   Q_INVOKABLE bool saveToFile(const QString& path);
 
@@ -146,8 +146,8 @@ class DocumentModel : public QAbstractItemModel {
   [[nodiscard]] QModelIndex systemIndex() const;
   [[nodiscard]] QModelIndex finalBlendIndex() const;
 
-  [[nodiscard]] const core::Document* document() const;
-  [[nodiscard]] const core::System* system() const;
+  [[nodiscard]] const flame::Document* document() const;
+  [[nodiscard]] const flame::System* system() const;
 
   [[nodiscard]] Q_INVOKABLE ModelEntry* entryAtIndex(const QModelIndex& index);
   [[nodiscard]] DocumentProxy* documentProxy();

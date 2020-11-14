@@ -25,7 +25,7 @@ class Generator {
   virtual void reset() = 0;
 
   /** Sets the system to be generated. */
-  virtual void setSystem(const System& system) = 0;
+  virtual void setSystem(const flame::System& system) = 0;
 
   /** Enables or disables the generator. */
   virtual void setEnabled(bool enabled) { enabled_ = enabled; }
