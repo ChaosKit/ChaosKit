@@ -22,16 +22,16 @@ add_library(
   ManagedDocument.cpp
   ManagedDocument.h
   SystemIndex.h
+  toAst.cpp
+  toAst.h
   toSource.cpp
   toSource.h
   transforms.cpp
   transforms.h
   util.cpp
-  util.h
-)
+  util.h)
 target_link_libraries(
   flame
   PUBLIC ast
   INTERFACE flame_structures
-  PRIVATE magic_enum
-)
+  PRIVATE magic_enum)

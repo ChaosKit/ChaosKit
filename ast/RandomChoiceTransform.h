@@ -10,6 +10,8 @@ class RandomChoiceTransform {
   RandomChoiceTransform() = default;
   RandomChoiceTransform(std::initializer_list<TransformWithWeight> transforms)
       : transforms_(transforms) {}
+  explicit RandomChoiceTransform(std::vector<TransformWithWeight> transforms)
+      : transforms_(std::move(transforms)) {}
 
   [[nodiscard]] const std::vector<TransformWithWeight>& transforms() const {
     return transforms_;

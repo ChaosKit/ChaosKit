@@ -10,6 +10,8 @@ class WeightedSumTransform {
   WeightedSumTransform() = default;
   WeightedSumTransform(std::initializer_list<TransformWithWeight> transforms)
       : transforms_(transforms) {}
+  explicit WeightedSumTransform(std::vector<TransformWithWeight> transforms)
+      : transforms_(std::move(transforms)) {}
 
   [[nodiscard]] const std::vector<TransformWithWeight>& transforms() const {
     return transforms_;
