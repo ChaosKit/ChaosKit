@@ -1,9 +1,6 @@
 add_library(
   core
   BlackWhiteColorMap.h
-  CameraSystem.h
-  Color.h
-  ColorMap.h
   ColorMapRegistry.cpp
   ColorMapRegistry.h
   debug.cpp
@@ -12,39 +9,50 @@ add_library(
   errors.h
   ExpressionInterpreter.cpp
   ExpressionInterpreter.h
-  Generator.h
   HistogramBuffer.cpp
   HistogramBuffer.h
   PaletteColorMap.cpp
   PaletteColorMap.h
-  Particle.h
-  Point.h
   RainbowColorMap.cpp
   RainbowColorMap.h
   random.h
-  Renderer.h
-  Rng.h
   SimpleHistogramGenerator.cpp
   SimpleHistogramGenerator.h
   SimpleInterpreter.cpp
   SimpleInterpreter.h
-  SystemParticle.h
   SystemProcessor.cpp
   SystemProcessor.h
   ThreadLocalRng.cpp
   ThreadLocalRng.h
-  TransformIndex.cpp
-  TransformIndex.h
   TransformInterpreter.cpp
-  TransformInterpreter.h
-  TransformParams.h
-  TransformSystem.h)
+  TransformInterpreter.h)
 target_link_libraries(
   core
   # TODO: remove flame after interpreter migration
   PUBLIC ast flame stdx randutils
-  PRIVATE magic_enum xxHash::xxhash
-  INTERFACE flame_structures)
+  PRIVATE magic_enum
+  INTERFACE core_interface flame_structures)
+
+add_library(
+  core_interface
+  CameraSystem.h
+  Color.h
+  ColorMap.h
+  Generator.h
+  Particle.h
+  Point.h
+  Renderer.h
+  Rng.h
+  SystemParticle.h
+  TransformIndex.cpp
+  TransformIndex.h
+  TransformParams.h
+  TransformSystem.h)
+# TODO: remove flame_structures after removing flame from Generator
+target_link_libraries(
+  core_interface
+  INTERFACE ast flame_structures
+  PRIVATE xxHash::xxhash)
 
 add_executable(
   core_test

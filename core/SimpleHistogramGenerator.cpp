@@ -2,6 +2,7 @@
 #include "ThreadLocalRng.h"
 #include "flame/Params.h"
 #include "flame/toSource.h"
+#include "flame/toSystem.h"
 
 namespace chaoskit::core {
 
@@ -11,8 +12,12 @@ SimpleHistogramGenerator::SimpleHistogramGenerator(const flame::System &system,
                                                    std::shared_ptr<Rng> rng)
     : buffer_(width, height),
       iteration_count_(stdx::nullopt),
-      interpreter_(system, std::move(rng)),
-      color_map_(nullptr) {}
+      system_processor_(flame::toTransformSystem(system), rng),
+      camera_interpreter_(std::move(rng)),
+      camera_system_(stdx::nullopt),
+      color_map_(nullptr) {
+  setCameraSystem(system);
+}
 
 SimpleHistogramGenerator::SimpleHistogramGenerator(const flame::System &system,
                                                    uint32_t width,
@@ -20,9 +25,19 @@ SimpleHistogramGenerator::SimpleHistogramGenerator(const flame::System &system,
     : SimpleHistogramGenerator(system, width, height,
                                std::make_shared<ThreadLocalRng>()) {}
 
+void SimpleHistogramGenerator::setCameraSystem(const flame::System &system) {
+  auto cameraTransform = flame::toCameraTransform(system);
+  if (cameraTransform) {
+    camera_system_ = {*std::move(cameraTransform),
+                      *flame::toCameraParams(system)};
+  } else {
+    camera_system_ = stdx::nullopt;
+  }
+}
+
 void SimpleHistogramGenerator::setSystem(const flame::System &system) {
-  interpreter_.setSystem(toSource(system));
-  interpreter_.setParams(flame::Params::fromSystem(system));
+  system_processor_.setSystem(flame::toTransformSystem(system));
+  setCameraSystem(system);
 }
 
 void SimpleHistogramGenerator::setSize(uint32_t width, uint32_t height) {
@@ -40,17 +55,23 @@ void SimpleHistogramGenerator::setColorMap(const ColorMap *color_map) {
 void SimpleHistogramGenerator::reset() { buffer_.clear(); }
 
 void SimpleHistogramGenerator::synchronizeResult(Renderer *renderer) {
-  auto particle = interpreter_.randomizeParticle();
+  auto particle = system_processor_.createParticle();
 
   for (size_t i = 0; !iteration_count_ || i < *iteration_count_; i++) {
     if (!enabled_) break;
-    auto [next_state, output] = interpreter_(particle);
-    particle = next_state;
-    add(output);
+    particle = system_processor_.process(particle);
+    if (camera_system_) {
+      auto output = camera_interpreter_.interpret(
+          particle.particle, camera_system_->transform, camera_system_->params);
+      add(output);
+    } else {
+      add(particle.particle);
+    }
   }
 
   renderer->updateHistogramBuffer(buffer_);
 }
+
 void SimpleHistogramGenerator::add(const Particle &particle) {
   float x = (particle.x() + 1.f) * (buffer_.width() * .5f);
   float y = (particle.y() + 1.f) * (buffer_.height() * .5f);

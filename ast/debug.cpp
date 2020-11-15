@@ -123,7 +123,7 @@ std::ostream &operator<<(std::ostream &stream,
 
   int i = 0;
   for (const auto &step : transform.transforms()) {
-    stream << nl << "[" << i << "]:" << indent << nl << transform << outdent;
+    stream << nl << "[" << i << "]:" << indent << nl << step << outdent;
     ++i;
   }
   return stream << outdent;

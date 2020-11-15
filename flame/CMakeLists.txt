@@ -36,6 +36,6 @@ add_library(
   util.h)
 target_link_libraries(
   flame
-  PUBLIC ast
+  PUBLIC ast core_interface
   INTERFACE flame_structures
   PRIVATE magic_enum)

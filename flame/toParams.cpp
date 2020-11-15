@@ -6,6 +6,8 @@ namespace {
 
 void addParamsForBlend(const BlendBase& blend, core::TransformIndex index,
                        core::TransformParams& params) {
+  params.insert({index, blend.coloringMethod.params});
+
   // We're always nesting.
   index = index.firstChild();
 

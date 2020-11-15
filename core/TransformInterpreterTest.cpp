@@ -78,6 +78,15 @@ TEST_F(TransformInterpreterTest, InterpretsRandomChoiceTransform) {
   ASSERT_EQ(expected, interpreter.interpret(input, transform));
 }
 
+TEST_F(TransformInterpreterTest, EmptyRandomChoiceReturnsInput) {
+  auto rng = std::make_shared<StaticRng>();
+  TransformInterpreter interpreter(rng);
+  Particle input = {Point{1, 1}, .5f};
+  ast::TransformVariant transform = ast::RandomChoiceTransform{};
+
+  ASSERT_EQ(input, interpreter.interpret(input, transform));
+}
+
 TEST_F(TransformInterpreterTest, InterpretsWeightedSumTransform) {
   using namespace ast::helpers;
 
@@ -96,6 +105,15 @@ TEST_F(TransformInterpreterTest, InterpretsWeightedSumTransform) {
 
   Particle expected{Point{2, 1.5}, .625f};
   ASSERT_EQ(expected, actual);
+}
+
+TEST_F(TransformInterpreterTest, EmptyWeightedSumReturnsInput) {
+  auto rng = std::make_shared<StaticRng>();
+  TransformInterpreter interpreter(rng);
+  Particle input = {Point{1, 1}, .5f};
+  ast::TransformVariant transform = ast::WeightedSumTransform{};
+
+  ASSERT_EQ(input, interpreter.interpret(input, transform));
 }
 
 }  // namespace chaoskit::core

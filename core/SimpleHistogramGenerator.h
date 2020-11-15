@@ -8,6 +8,7 @@
 #include "ColorMap.h"
 #include "Generator.h"
 #include "SimpleInterpreter.h"
+#include "SystemProcessor.h"
 #include "flame/System.h"
 
 namespace chaoskit::core {
@@ -32,8 +33,12 @@ class SimpleHistogramGenerator : public Generator {
  private:
   HistogramBuffer buffer_;
   stdx::optional<uint32_t> iteration_count_;
-  SimpleInterpreter interpreter_;
+  SystemProcessor system_processor_;
+  TransformInterpreter camera_interpreter_;
+  stdx::optional<TransformSystem> camera_system_;
   const ColorMap *color_map_;
+
+  void setCameraSystem(const flame::System &system);
 
   void add(const Particle &particle);
   void add(uint32_t x, uint32_t y, float factor = 1);

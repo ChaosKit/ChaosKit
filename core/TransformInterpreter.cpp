@@ -17,12 +17,9 @@ namespace {
 
 class TransformVisitor {
  public:
-  TransformVisitor(Particle input, TransformParams params,
+  TransformVisitor(Particle input, const TransformParams& params,
                    std::shared_ptr<Rng> rng)
-      : input_(input),
-        params_(std::move(params)),
-        rng_(std::move(rng)),
-        index_() {}
+      : input_(input), params_(params), rng_(std::move(rng)), index_() {}
 
   Particle operator()(const ast::AffineTransform&) const {
     const auto& params = params_.at(index_);
@@ -67,6 +64,10 @@ class TransformVisitor {
   }
 
   Particle operator()(const ast::RandomChoiceTransform& transform) {
+    if (transform.transforms().empty()) {
+      return input_;
+    }
+
     // Calculate the upper bound of weights.
     double max = 0;
     for (const auto& t : transform.transforms()) {
@@ -93,6 +94,10 @@ class TransformVisitor {
   }
 
   Particle operator()(const ast::WeightedSumTransform& transform) {
+    if (transform.transforms().empty()) {
+      return input_;
+    }
+
     // Calculate the upper bound of weights.
     double max = 0;
     for (const auto& t : transform.transforms()) {
@@ -132,7 +137,7 @@ class TransformVisitor {
 
  private:
   Particle input_;
-  TransformParams params_;
+  const TransformParams& params_;
   std::shared_ptr<Rng> rng_;
   TransformIndex index_;
 };
@@ -141,9 +146,8 @@ class TransformVisitor {
 
 Particle TransformInterpreter::interpret(Particle input,
                                          const ast::Transform& transform,
-                                         TransformParams params) const {
-  return TransformVisitor(input, std::move(params), rng_)
-      .applyTransform(transform);
+                                         const TransformParams& params) const {
+  return TransformVisitor(input, params, rng_).applyTransform(transform);
 }
 
 }  // namespace chaoskit::core

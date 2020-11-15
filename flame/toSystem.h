@@ -8,8 +8,12 @@
 
 namespace chaoskit::flame {
 
-core::CameraSystem toSystem(const System& system) {
-  core::CameraSystem result{{toTransform(system), toParams(system)}};
+core::TransformSystem toTransformSystem(const System& system) {
+  return {toTransform(system), toParams(system)};
+}
+
+core::CameraSystem toCameraSystem(const System& system) {
+  core::CameraSystem result{toTransformSystem(system)};
 
   auto cameraTransform = toCameraTransform(system);
   if (cameraTransform) {

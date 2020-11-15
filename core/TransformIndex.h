@@ -20,6 +20,9 @@ class TransformIndex {
 
   [[nodiscard]] unsigned long long hash() const noexcept;
 
+  friend std::ostream& operator<<(std::ostream& stream,
+                                  const TransformIndex& index);
+
  private:
   constexpr static uint16_t SENTINEL = 0xffff;
   using InternalIndex = std::array<uint16_t, 16>;
@@ -32,6 +35,11 @@ class TransformIndex {
 
   TransformIndex(std::array<uint16_t, 16> index, int depth)
       : index_(index), depth_(depth) {}
+};
+
+class InvalidTransformIndex : public std::out_of_range {
+ public:
+  InvalidTransformIndex(const char* message) : std::out_of_range(message) {}
 };
 
 }  // namespace chaoskit::core

@@ -1,7 +1,7 @@
 #include "TransformIndex.h"
 #include <xxhash.h>
 #include <algorithm>
-#include "errors.h"
+#include <ostream>
 
 namespace chaoskit::core {
 
@@ -55,6 +55,16 @@ bool TransformIndex::operator<(const TransformIndex& other) const {
   }
   // We checked all indices and they were all equal.
   return false;
+}
+
+std::ostream& operator<<(std::ostream& stream, const TransformIndex& index) {
+  stream << "[";
+  for (int i = 0; i < index.index_.size(); i++) {
+    if (index.index_[i] == TransformIndex::SENTINEL) break;
+    if (i > 0) stream << ":";
+    stream << index.index_[i];
+  }
+  return stream << "]";
 }
 
 TransformIndex TransformIndex::firstChild() const {

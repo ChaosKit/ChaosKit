@@ -23,7 +23,4 @@ UndefinedVariableError::UndefinedVariableError(const std::string& name)
 InvalidColorMap::InvalidColorMap(const std::string& name)
     : std::out_of_range("Color map '" + name + "' does not exist") {}
 
-InvalidTransformIndex::InvalidTransformIndex(const char* message)
-    : std::out_of_range(message) {}
-
 }  // namespace chaoskit::core

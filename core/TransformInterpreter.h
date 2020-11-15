@@ -19,7 +19,7 @@ class TransformInterpreter {
 
   [[nodiscard]] Particle interpret(Particle input,
                                    const ast::Transform& transform,
-                                   TransformParams params = {}) const;
+                                   const TransformParams& params = {}) const;
 
  private:
   std::shared_ptr<Rng> rng_;

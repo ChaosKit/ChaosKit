@@ -3,10 +3,11 @@
 #include "core/Color.h"
 #include "core/ColorMapRegistry.h"
 #include "core/SimpleHistogramGenerator.h"
+#include "core/debug.h"
 #include "flame/Blend.h"
 #include "flame/Formula.h"
 #include "flame/System.h"
-#include "flame/toSource.h"
+#include "flame/toSystem.h"
 #include "flame/transforms.h"
 #include "library/coloring_methods/Distance.h"
 #include "library/formulas/DeJong.h"
@@ -19,7 +20,7 @@ using chaoskit::flame::FinalBlend;
 using chaoskit::flame::Formula;
 using chaoskit::flame::scale;
 using chaoskit::flame::System;
-using chaoskit::flame::toSource;
+using chaoskit::flame::toCameraSystem;
 using chaoskit::flame::translate;
 using chaoskit::library::DeJong;
 using chaoskit::library::coloring_methods::Distance;
@@ -75,7 +76,7 @@ int main(int argc, char **argv) {
   auto system = std::make_unique<System>();
   system->blends.push_back(blend.get());
   system->finalBlend = finalBlend.get();
-  std::cout << toSource(*system) << std::endl;
+  std::cout << toCameraSystem(*system) << std::endl;
 
   ColorMapRegistry colorMaps;
   SimpleHistogramGenerator generator(*system, 512, 512);
