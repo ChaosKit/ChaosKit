@@ -29,12 +29,6 @@ core::TransformParams toParams(const System& system) {
   core::TransformParams params;
   core::TransformIndex index;
 
-  // If there's a final blend, there's a MultiStepTransform at the top.
-  bool isFinalBlend = system.finalBlend && system.finalBlend->enabled;
-  if (isFinalBlend) {
-    index = index.firstChild();
-  }
-
   if (system.isolatedBlend) {
     addParamsForBlend(*system.isolatedBlend, index, params);
   } else {
@@ -46,11 +40,17 @@ core::TransformParams toParams(const System& system) {
     }
   }
 
-  if (isFinalBlend) {
-    addParamsForBlend(*system.finalBlend, index.nextSibling(), params);
+  return params;
+}
+
+stdx::optional<core::TransformParams> toCameraParams(const System& system) {
+  if (system.finalBlend && system.finalBlend->enabled) {
+    core::TransformParams params;
+    addParamsForBlend(*system.finalBlend, core::TransformIndex(), params);
+    return params;
   }
 
-  return params;
+  return stdx::nullopt;
 }
 
 }  // namespace chaoskit::flame

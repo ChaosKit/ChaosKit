@@ -1,6 +1,7 @@
 add_library(
   core
   BlackWhiteColorMap.h
+  CameraSystem.h
   Color.h
   ColorMap.h
   ColorMapRegistry.cpp

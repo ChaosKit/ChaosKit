@@ -23,13 +23,13 @@ add_library(
   ManagedDocument.h
   Params.h
   SystemIndex.h
-  toAst.cpp
-  toAst.h
   toParams.cpp
   toParams.h
   toSource.cpp
   toSource.h
   toSystem.h
+  toTransform.cpp
+  toTransform.h
   transforms.cpp
   transforms.h
   util.cpp
