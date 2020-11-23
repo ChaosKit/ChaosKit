@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_CORE_COLORMAPREGISTRY_H
 #define CHAOSKIT_CORE_COLORMAPREGISTRY_H
 
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>

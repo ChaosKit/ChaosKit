@@ -21,7 +21,7 @@ void ColorMapRegistry::add(std::string name,
 const ColorMap* ColorMapRegistry::get(const std::string& name) const {
   try {
     return colorMaps_.at(name).get();
-  } catch (std::out_of_range& e) {
+  } catch (std::out_of_range&) {
     throw InvalidColorMap(name);
   }
 }

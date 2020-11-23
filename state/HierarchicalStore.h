@@ -41,6 +41,12 @@ class HierarchicalStore : public Store<Ts...> {
   std::unordered_map<Id, std::vector<std::vector<Id>>> childrenByType_;
   std::unordered_multimap<Id, Id> parents_;
 
+  /** Functor that dissociates all parents of a given Id, no matter its type. */
+  template <typename T>
+  class DissociateParents;
+  /** Functor that removes all children of a given Id, no matter its type. */
+  class RemoveChildren;
+
  public:
   template <typename P, typename C>
   void associateChildWith(Id parentId, Id childId) {
@@ -129,47 +135,11 @@ class HierarchicalStore : public Store<Ts...> {
     }
 
     if constexpr (isChild<T>()) {
-      ParentsOf<T>::List::forEach([this, id](auto type) {
-        using ParentType = std::remove_pointer_t<decltype(type)>;
-
-        if constexpr (Store<Ts...>::template containsType<ParentType>()) {
-          for (auto it = parents_.begin(); it != parents_.end();) {
-            if (it->first != id ||
-                !this->template matchesType<ParentType>(it->second)) {
-              ++it;
-              continue;
-            }
-
-            T* child = const_cast<T*>(this->template find<T>(id));
-            this->template update<ParentType>(it->second,
-                                              [child](ParentType* parent) {
-                                                dissociateChild(*parent, child);
-                                              });
-            it = cut(it->second, id, typeIndex<T>());
-          }
-        }
-      });
+      ParentsOf<T>::List::forEach(DissociateParents<T>(this, id));
     }
 
     if constexpr (isParent<T>()) {
-      ChildrenOf<T>::List::forEach([this, id](auto type) {
-        using ChildType = std::remove_pointer_t<decltype(type)>;
-
-        if constexpr (Store<Ts...>::template containsType<ChildType>()) {
-          auto it = childrenByType_.find(id);
-          if (it == childrenByType_.end()) {
-            return;
-          }
-
-          // The copy is necessary because the recursive call calls cut(), which
-          // alters the original vector. Iterators are going to be invalidated
-          // and the temporary copy prevents breakage caused by that.
-          auto childrenCopy = it->second.at(typeIndex<ChildType>());
-          for (const auto& childId : childrenCopy) {
-            removeWithType<ChildType>(childId);
-          }
-        }
-      });
+      ChildrenOf<T>::List::forEach(RemoveChildren(this, id));
     }
 
     Store<Ts...>::remove(id);
@@ -303,6 +273,65 @@ class HierarchicalStore : public Store<Ts...> {
     }
     return parents_.end();
   }
+
+  template <typename T>
+  class DissociateParents {
+   public:
+    DissociateParents(HierarchicalStore<Ts...>* store, Id id)
+        : store_(store), id_(id) {}
+
+    template <typename ParentType>
+    void operator()(ParentType*) {
+      if constexpr (Store<Ts...>::template containsType<ParentType>()) {
+        for (auto it = store_->parents_.begin();
+             it != store_->parents_.end();) {
+          if (it->first != id_ ||
+              !Store<Ts...>::template matchesType<ParentType>(it->second)) {
+            ++it;
+            continue;
+          }
+
+          T* child = const_cast<T*>(store_->template find<T>(id_));
+          store_->template update<ParentType>(
+              it->second,
+              [child](ParentType* parent) { dissociateChild(*parent, child); });
+          it = store_->cut(it->second, id_, typeIndex<T>());
+        }
+      }
+    }
+
+   private:
+    HierarchicalStore<Ts...>* store_;
+    Id id_;
+  };
+
+  class RemoveChildren {
+   public:
+    RemoveChildren(HierarchicalStore<Ts...>* store, Id id)
+        : store_(store), id_(id) {}
+
+    template <typename ChildType>
+    void operator()(ChildType*) {
+      if constexpr (Store<Ts...>::template containsType<ChildType>()) {
+        auto it = store_->childrenByType_.find(id_);
+        if (it == store_->childrenByType_.end()) {
+          return;
+        }
+
+        // The copy is necessary because the recursive call calls cut(), which
+        // alters the original vector. Iterators are going to be invalidated
+        // and the temporary copy prevents breakage caused by that.
+        auto childrenCopy = it->second.at(typeIndex<ChildType>());
+        for (const auto& childId : childrenCopy) {
+          store_->removeWithType<ChildType>(childId);
+        }
+      }
+    }
+
+   private:
+    HierarchicalStore<Ts...>* store_;
+    Id id_;
+  };
 };
 
 }  // namespace chaoskit::state

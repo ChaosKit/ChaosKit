@@ -5,7 +5,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-find_package(Qt5 COMPONENTS Core Gui)
+add_compile_definitions(_USE_MATH_DEFINES) # Needed for MSVC
 
 enable_testing()
 add_subdirectory(stdx)
@@ -17,5 +17,6 @@ add_subdirectory(library)
 add_subdirectory(io)
 add_subdirectory(ui)
 
+find_package(Qt5 COMPONENTS Core Gui)
 add_executable(lol lol.cpp)
 target_link_libraries(lol PRIVATE core library state Qt5::Gui)

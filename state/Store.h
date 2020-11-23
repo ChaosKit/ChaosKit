@@ -44,19 +44,9 @@ class Store {
     }
 
     void merge(Changes& other) {
-      // TODO: update to use unordered_{map,set}::merge() once Apple supports it
-
-      for (auto it = other.created.begin(); it != other.created.end(); ++it) {
-        created.insert(std::move(other.created.extract(it)));
-      }
-
-      for (auto it = other.updated.begin(); it != other.updated.end(); ++it) {
-        updated.insert(std::move(other.updated.extract(it)));
-      }
-
-      for (auto it = other.removed.begin(); it != other.removed.end(); ++it) {
-        removed.insert(std::move(other.removed.extract(it)));
-      }
+      created.merge(other.created);
+      updated.merge(other.updated);
+      removed.merge(other.removed);
     }
 
     void reset() {
@@ -201,7 +191,7 @@ class Store {
     bool success = true;
     try {
       runner();
-    } catch (std::logic_error& e) {
+    } catch (std::logic_error&) {
       {
         auto& removed = currentTransaction_->removed;
         entities_.insert(removed.begin(), removed.end());

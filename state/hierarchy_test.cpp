@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-err58-cpp"
-
 #include "hierarchy.h"
 
 #include <gmock/gmock.h>
@@ -277,5 +274,3 @@ TEST_F(HierarchyTest, ForEachWorksForManyParents) {
 
   Connections::forEach(fn);
 }
-
-#pragma clang diagnostic pop

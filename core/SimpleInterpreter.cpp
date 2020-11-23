@@ -102,7 +102,7 @@ class BlendInterpreter {
   float operator()(const ast::Parameter &param) const {
     try {
       return params_.at(index_).at(param.index());
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
       throw MissingParameterError(index_, param.index());
     }
   }
@@ -110,7 +110,7 @@ class BlendInterpreter {
   float operator()(const ast::VariableName &variableName) const {
     try {
       return variableValues_.at(variableName.name());
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
       throw UndefinedVariableError(variableName.name());
     }
   }

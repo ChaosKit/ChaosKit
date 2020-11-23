@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-err58-cpp"
-
 #include "Store.h"
 
 #include <gmock/gmock.h>
@@ -511,5 +508,3 @@ TEST_F(StoreChangeTrackingTest, ResetsChanges) {
                     Field("updated", &Changes::updated, ElementsAre()),
                     Field("removed", &Changes::removed, ElementsAre())));
 }
-
-#pragma clang diagnostic pop

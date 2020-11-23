@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-err58-cpp"
-
 #include "HierarchicalStore.h"
 
 #include <gmock/gmock.h>
@@ -294,5 +291,3 @@ TEST_F(HierarchicalStoreTest, RecursivelyRemovesChildren) {
 
   EXPECT_EQ(0, store.size());
 }
-
-#pragma clang diagnostic pop

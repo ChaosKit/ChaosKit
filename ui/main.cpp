@@ -6,6 +6,7 @@
 #include <QItemSelectionModel>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickStyle>
 #include <QRegularExpression>
 #include <QSurfaceFormat>
 #include <QtGui/QTransform>
@@ -99,7 +100,10 @@ QStringList createExportFormatList() {
 }
 
 int main(int argc, char* argv[]) {
-  resources::initialize();
+  resources::initialize();   
+
+  QQuickStyle::addStylePath(resources::importPath());
+  QQuickStyle::setStyle("ChaosKit");
 
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication app(argc, argv);

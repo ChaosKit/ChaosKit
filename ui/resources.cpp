@@ -28,13 +28,15 @@ QString importPath() { return QStringLiteral(":/"); }
 #else
 bool areStatic() { return false; }
 QString createPath(const QString& path) {
-  return QStringLiteral(STRINGIFY(CHAOSKIT_RESOURCE_DIR) "/").append(path);
+  return QDir(STRINGIFY(CHAOSKIT_RESOURCE_DIR))
+      .filePath(path);
 }
 QUrl createUrl(const QString& path) {
   return QUrl::fromLocalFile(createPath(path));
 }
 QString importPath() {
-  return QStringLiteral(STRINGIFY(CHAOSKIT_RESOURCE_DIR) "/");
+  return QDir::fromNativeSeparators(
+      QStringLiteral(STRINGIFY(CHAOSKIT_RESOURCE_DIR)));
 }
 #endif
 

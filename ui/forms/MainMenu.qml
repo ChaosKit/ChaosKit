@@ -37,7 +37,7 @@ MenuBar {
       }
     }
     MenuItem {
-      shortcut: StandardKey.SaveAs
+      // shortcut: StandardKey.SaveAs
       text: "Save as…"
 
       onTriggered: {
@@ -55,7 +55,7 @@ MenuBar {
       }
     }
     MenuItem {
-      shortcut: StandardKey.Quit
+      // shortcut: StandardKey.Quit
       role: MenuItem.QuitRole
       text: "&Quit"
 

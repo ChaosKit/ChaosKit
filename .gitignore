@@ -131,3 +131,6 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/

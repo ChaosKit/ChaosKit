@@ -49,6 +49,5 @@
         <file>forms/TransformEditor.qml</file>
         <file>forms/ToneMappingEditor.qml</file>
         <file>forms/WeightIndicator.qml</file>
-        <file>qtquickcontrols2.conf</file>
     </qresource>
 </RCC>
