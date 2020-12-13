@@ -2,6 +2,7 @@
 #define CHAOSKIT_CORE_TRANSFORMINTERPRETER_H
 
 #include <stdx/optional.h>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 #include "Particle.h"

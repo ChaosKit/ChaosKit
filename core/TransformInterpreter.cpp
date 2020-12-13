@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "ExpressionInterpreter.h"
+#include "Particle.h"
 #include "ast/AffineTransform.h"
 #include "ast/Formula.h"
 #include "ast/MultiStepTransform.h"
@@ -112,7 +113,7 @@ class TransformVisitor {
       Particle singleOutput = applyTransform(t.transform);
       output.point += {static_cast<float>(singleOutput.x() * weight),
                        static_cast<float>(singleOutput.y() * weight)};
-      output.color += {static_cast<float>(singleOutput.color * weight)};
+      output.color += static_cast<float>(singleOutput.color * weight);
       index_ = index_.nextSibling();
     }
     index_ = index_.parent();

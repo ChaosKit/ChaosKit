@@ -2,6 +2,7 @@
 #define CHAOSKIT_UI_RANDOMIZATIONSETTINGS_H
 
 #include <QVector>
+#include <memory>
 #include "library/ColoringMethodType.h"
 #include "library/FormulaType.h"
 

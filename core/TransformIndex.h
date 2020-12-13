@@ -2,6 +2,9 @@
 #define CHAOSKIT_CORE_TRANSFORMINDEX_H
 
 #include <array>
+#include <cstdint>
+#include <ostream>
+#include <stdexcept>
 
 namespace chaoskit::core {
 

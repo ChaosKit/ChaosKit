@@ -29,9 +29,9 @@ add_library(
 target_link_libraries(
   core
   # TODO: remove flame after interpreter migration
-  PUBLIC ast flame stdx randutils
+  PUBLIC ast core_interface flame stdx randutils
   PRIVATE magic_enum
-  INTERFACE core_interface flame_structures)
+  INTERFACE flame_structures)
 
 add_library(
   core_interface

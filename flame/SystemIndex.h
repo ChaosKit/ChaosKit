@@ -8,8 +8,8 @@
 namespace chaoskit::flame {
 
 struct SystemIndex {
-  static const size_t FINAL_BLEND = std::__1::numeric_limits<size_t>::max();
-  static const size_t COLORING_METHOD = std::__1::numeric_limits<size_t>::max();
+  static const size_t FINAL_BLEND = std::numeric_limits<size_t>::max();
+  static const size_t COLORING_METHOD = std::numeric_limits<size_t>::max();
 
   size_t blend = 0;
   size_t formula = 0;
