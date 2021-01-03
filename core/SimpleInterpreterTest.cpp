@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 
 #include "SimpleInterpreter.h"
-#include "ast/helpers.h"
+#include "ast/flame_helpers.h"
 #include "core/errors.h"
 #include "core/testing/StaticRng.h"
 #include "flame/transforms.h"

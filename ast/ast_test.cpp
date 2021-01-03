@@ -4,8 +4,9 @@
 
 #include <gmock/gmock.h>
 #include <magic_enum.hpp>
-#include "ast.h"
+#include "Node.h"
 #include "helpers.h"
+#include "util.h"
 
 namespace chaoskit::ast {
 

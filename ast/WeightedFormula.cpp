@@ -1,4 +1,5 @@
 #include "WeightedFormula.h"
+#include "formula_debug.h"
 #include "util.h"
 
 namespace chaoskit::ast {

@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 #include "ThreadLocalRng.h"
-#include "ast/ast.h"
+#include "ast/util.h"
 #include "errors.h"
 #include "flame/toSource.h"
 

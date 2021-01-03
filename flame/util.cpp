@@ -6,7 +6,6 @@
 #include "System.h"
 #include "SystemIndex.h"
 #include "Transform.h"
-#include "ast/ast.h"
 
 namespace chaoskit::flame {
 

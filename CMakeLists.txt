@@ -4,6 +4,11 @@ project(ChaosKit)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 
+# Allow executables to access DLL dependencies on Windows.
+if (WIN32)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+endif ()
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_compile_definitions(_USE_MATH_DEFINES) # Needed for MSVC
 

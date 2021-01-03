@@ -2,6 +2,7 @@
 #define CHAOSKIT_LIBRARY_FORMULA_H
 
 #include "ast/Formula.h"
+#include "ast/StaticAffineTransform.h"
 #include "ast/helpers.h"
 
 namespace chaoskit::library {

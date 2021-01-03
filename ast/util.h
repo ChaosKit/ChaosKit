@@ -5,7 +5,7 @@
 #include <mapbox/variant_cast.hpp>
 #include <ostream>
 #include <string>
-#include "debug.h"
+#include "expression_debug.h"
 
 namespace chaoskit::ast {
 

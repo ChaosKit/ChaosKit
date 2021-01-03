@@ -28,8 +28,8 @@ add_library(
   TransformInterpreter.h)
 target_link_libraries(
   core
-  # TODO: remove flame after interpreter migration
-  PUBLIC ast core_interface flame stdx randutils
+  # TODO: remove ast and flame after interpreter migration
+  PUBLIC ast ast_transform core_interface flame stdx randutils
   PRIVATE magic_enum
   INTERFACE flame_structures)
 

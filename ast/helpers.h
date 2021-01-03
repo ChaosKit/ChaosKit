@@ -6,7 +6,6 @@
 #include "Expression.h"
 #include "Input.h"
 #include "Parameter.h"
-#include "System.h"
 #include "UnaryFunction.h"
 
 namespace chaoskit::ast::helpers {
@@ -180,10 +179,6 @@ struct OutputHelper {
 struct ParameterHelper {
   Parameter operator[](size_t index) const { return Parameter(index); }
 };
-
-static System make_system(const Formula& f) {
-  return System{{LimitedBlend(Blend{{WeightedFormula(f)}}, 1.f)}};
-}
 
 struct Helper {
   InputHelper input;

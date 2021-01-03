@@ -1,5 +1,5 @@
 #include "debug.h"
-#include "ast/debug.h"
+#include "ast/transform_debug.h"
 
 namespace chaoskit::core {
 
