@@ -8,8 +8,9 @@
 #include <magic_enum.hpp>
 #include <sstream>
 #include "DocumentAdopter.h"
+#include "core/debug.h"
 #include "flame/ManagedDocument.h"
-#include "flame/toSource.h"
+#include "flame/toSystem.h"
 #include "flame/transforms.h"
 #include "flame/util.h"
 #include "io/io.h"
@@ -213,7 +214,7 @@ SystemProxy* DocumentModel::systemProxy() { return systemProxy_; }
 
 QString DocumentModel::astSource() const {
   std::stringstream stream;
-  stream << flame::toSource(*system());
+  stream << flame::toCameraSystem(*system());
   return QString::fromStdString(stream.str());
 }
 

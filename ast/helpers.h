@@ -174,6 +174,7 @@ struct InputHelper {
 struct OutputHelper {
   [[nodiscard]] Output x() const { return Output(Output::Type::X); }
   [[nodiscard]] Output y() const { return Output(Output::Type::Y); }
+  [[nodiscard]] Output color() const { return Output(Output::Type::COLOR); }
 };
 
 struct ParameterHelper {

@@ -1,9 +1,10 @@
 #ifndef CHAOSKIT_UI_BLENDERTASK_H
 #define CHAOSKIT_UI_BLENDERTASK_H
 
-#include <core/SimpleInterpreter.h>
 #include <QObject>
 #include "Particle.h"
+#include "core/CameraSystemProcessor.h"
+#include "flame/System.h"
 
 namespace chaoskit::ui {
 
@@ -11,7 +12,7 @@ class BlenderTask : public QObject {
   Q_OBJECT
  public:
   explicit BlenderTask(std::shared_ptr<core::Rng> rng)
-      : interpreter_(), particle_{}, rng_(std::move(rng)) {}
+      : processor_(), particle_{}, rng_(std::move(rng)) {}
 
  public slots:
   void setSystem(const chaoskit::flame::System *system);
@@ -27,8 +28,8 @@ class BlenderTask : public QObject {
   void calculate();
 
  private:
-  std::unique_ptr<core::SimpleInterpreter> interpreter_;
-  core::Particle particle_;
+  std::unique_ptr<core::CameraSystemProcessor> processor_;
+  core::SystemParticle particle_;
   bool running_ = false;
   std::shared_ptr<core::Rng> rng_;
 };

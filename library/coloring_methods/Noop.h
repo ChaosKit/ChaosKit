@@ -7,7 +7,7 @@ namespace chaoskit::library::coloring_methods {
 
 class Noop : public ColoringMethod {
  public:
-  ast::Expression source() override { return input.color(); }
+  ast::Expression source() override { return output.color(); }
 };
 
 }  // namespace chaoskit::library::coloring_methods

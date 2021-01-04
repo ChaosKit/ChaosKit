@@ -2,34 +2,27 @@
 #include <QDebug>
 #include <QTimer>
 #include "core/errors.h"
-#include "flame/toSource.h"
+#include "flame/toSystem.h"
 
+using chaoskit::core::CameraSystemProcessor;
 using chaoskit::core::MissingParameterError;
+using chaoskit::core::OutputNotAvailable;
 using chaoskit::core::Particle;
 using chaoskit::core::Point;
-using chaoskit::core::SimpleInterpreter;
-using chaoskit::flame::toSource;
+using chaoskit::core::UndefinedVariableError;
+using chaoskit::flame::toCameraSystem;
 using chaoskit::flame::Transform;
 
 namespace chaoskit::ui {
 
-namespace {
-
-float distance(const Point &a, const Point &b) {
-  float dx = a.x() - b.x();
-  float dy = a.y() - b.y();
-  return sqrtf(dx * dx + dy * dy);
-}
-
-}  // namespace
-
 void BlenderTask::setSystem(const flame::System *system) {
-  interpreter_ = std::make_unique<SimpleInterpreter>(*system, rng_);
-  particle_ = interpreter_->randomizeParticle();
+  processor_ =
+      std::make_unique<CameraSystemProcessor>(toCameraSystem(*system), rng_);
+  particle_ = processor_->createParticle();
 }
 
 void BlenderTask::start() {
-  if (!interpreter_ || running_) {
+  if (!processor_ || running_) {
     return;
   }
 
@@ -53,12 +46,18 @@ void BlenderTask::calculate() {
   }
 
   try {
-    auto [next_state, output] = (*interpreter_)(particle_);
-    particle_ = next_state;
-    emit stepCompleted(output.point, output.color);
+    particle_ = processor_->process(particle_);
+    auto output = processor_->processCamera(particle_);
+    emit stepCompleted(output.particle.point, output.particle.color);
 
     QTimer::singleShot(0, this, &BlenderTask::calculate);
   } catch (MissingParameterError &e) {
+    qCritical() << "In BlenderTask::calculate():" << e.what();
+    stop();
+  } catch (OutputNotAvailable &e) {
+    qCritical() << "In BlenderTask::calculate():" << e.what();
+    stop();
+  } catch (UndefinedVariableError &e) {
     qCritical() << "In BlenderTask::calculate():" << e.what();
     stop();
   }

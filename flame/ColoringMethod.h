@@ -11,7 +11,7 @@
 namespace chaoskit::flame {
 
 struct ColoringMethod {
-  ast::Expression source = ast::Input(ast::Input::Type::COLOR);
+  ast::Expression source = ast::Output(ast::Output::Type::COLOR);
   library::ColoringMethodType type = library::ColoringMethodType::Noop;
   std::vector<float> params = {};
 
