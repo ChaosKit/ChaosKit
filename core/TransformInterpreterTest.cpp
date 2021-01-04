@@ -116,4 +116,27 @@ TEST_F(TransformInterpreterTest, EmptyWeightedSumReturnsInput) {
   ASSERT_EQ(input, interpreter.interpret(input, transform));
 }
 
+TEST_F(TransformInterpreterTest, RestoresInputAfterMultiStep) {
+  using namespace ast::helpers;
+
+  // The actual multi-step actually doesn't matter.
+  ast::Transform first(ast::Formula{ast::Input(ast::Input::X) * 2,
+                                    ast::Input(ast::Input::Y) * 2},
+                       ast::Input(ast::Input::COLOR) + .25f);
+  ast::Transform second(ast::Formula{ast::Input(ast::Input::X) + 1,
+                                     ast::Input(ast::Input::Y) - 1},
+                        ast::Input(ast::Input::COLOR) + .25f);
+  ast::TransformVariant multiStep = ast::MultiStepTransform{first, second};
+  // This is the important step. The weighted sum reads the input color and
+  // sets it as its output color.
+  // If the multi-step modifies the input itself, the color would be 1.f.
+  ast::Transform transform{ast::WeightedSumTransform{{multiStep, 1}},
+                           ast::Input(ast::Input::COLOR)};
+
+  TransformInterpreter interpreter(std::make_shared<StaticRng>());
+  Particle input = {Point{1, 1}, .5f};
+
+  ASSERT_FLOAT_EQ(.5f, interpreter.interpret(input, transform).color);
+}
+
 }  // namespace chaoskit::core

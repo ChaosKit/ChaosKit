@@ -55,13 +55,17 @@ class TransformVisitor {
   }
 
   Particle operator()(const ast::MultiStepTransform& transform) {
+    Particle oldInput = input_;
     index_ = index_.firstChild();
     for (const ast::Transform& step : transform.transforms()) {
       input_ = applyTransform(step);
       index_ = index_.nextSibling();
     }
     index_ = index_.parent();
-    return input_;
+
+    // Restore the old input and return the "new input" as the output.
+    std::swap(input_, oldInput);
+    return oldInput;
   }
 
   Particle operator()(const ast::RandomChoiceTransform& transform) {
