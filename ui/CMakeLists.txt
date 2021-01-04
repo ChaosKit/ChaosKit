@@ -110,13 +110,15 @@ target_link_libraries(
 
 # run.sh — runs ChaosKit with correct environment variables
 
-add_custom_command(
-  TARGET ChaosKit
-  POST_BUILD
-  COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/make_run.sh" ARGS
-  $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}>
-  BYPRODUCTS run.sh
-  COMMENT "Generating run.sh")
+if (NOT WIN32)
+  add_custom_command(
+    TARGET ChaosKit
+    POST_BUILD
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/make_run.sh" ARGS
+    $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}>
+    BYPRODUCTS run.sh
+    COMMENT "Generating run.sh")
+endif ()
 
 # --- Various experimental testing executables ---
 
