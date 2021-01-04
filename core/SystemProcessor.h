@@ -28,9 +28,11 @@ class SystemProcessor {
   SystemParticle process() const;
   SystemParticle process(SystemParticle input) const;
 
+ protected:
+  TransformInterpreter interpreter_;
+
  private:
   TransformSystem system_;
-  TransformInterpreter interpreter_;
   std::shared_ptr<Rng> rng_;
   Bounds bounds_ = {-1, 1, -1, 1};
   int lifetime_ = Particle::IMMORTAL;

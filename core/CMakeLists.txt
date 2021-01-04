@@ -1,6 +1,8 @@
 add_library(
   core
   BlackWhiteColorMap.h
+  CameraSystemProcessor.cpp
+  CameraSystemProcessor.h
   ColorMapRegistry.cpp
   ColorMapRegistry.h
   debug.cpp
@@ -56,6 +58,7 @@ target_link_libraries(
 
 add_executable(
   core_test
+  CameraSystemProcessorTest.cpp
   ExpressionInterpreterTest.cpp
   SimpleInterpreterTest.cpp
   SystemProcessorTest.cpp

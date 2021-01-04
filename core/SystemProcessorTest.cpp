@@ -15,9 +15,13 @@ class SystemProcessorTest : public testing::Test {
       std::make_shared<NiceMock<MockRng>>();
 };
 
+namespace {
+
 SystemParticle createParticle(float x = 0.f, float y = 0.f, float color = 0.f) {
   return SystemParticle{{Point(x, y), color, Particle::IMMORTAL, 0}};
 }
+
+}  // namespace
 
 TEST_F(SystemProcessorTest, CreatesParticle) {
   // (output.x, output.y) = (1, 2)
