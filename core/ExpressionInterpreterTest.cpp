@@ -60,8 +60,9 @@ TEST_F(ExpressionInterpreterTest, ThrowsWhenOutputIsMissing) {
 
 TEST_F(ExpressionInterpreterTest, InterpretsParameter) {
   ExpressionInterpreter interpreter(std::make_shared<StaticRng>());
+  std::vector<float> params{1, 2};
   State state;
-  state.params = {1, 2};
+  state.params = &params;
 
   ASSERT_EQ(1.f, interpreter.interpret(Parameter(0), state));
   ASSERT_EQ(2.f, interpreter.interpret(Parameter(1), state));
@@ -69,8 +70,9 @@ TEST_F(ExpressionInterpreterTest, InterpretsParameter) {
 
 TEST_F(ExpressionInterpreterTest, ThrowsWhenParameterIsMissing) {
   ExpressionInterpreter interpreter(std::make_shared<StaticRng>());
+  std::vector<float> params{1, 2};
   State state;
-  state.params = {1, 2};
+  state.params = &params;
 
   ASSERT_THROW(interpreter.interpret(Parameter(2), state),
                MissingParameterError);

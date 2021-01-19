@@ -91,8 +91,11 @@ class InterpreterVisitor {
   }
 
   float operator()(const ast::Parameter& param) const {
+    if (state_.params == nullptr) {
+      throw MissingParameterError(param.index());
+    }
     try {
-      return state_.params.at(param.index());
+      return state_.params->at(param.index());
     } catch (std::out_of_range& e) {
       throw MissingParameterError(param.index());
     }

@@ -36,7 +36,7 @@ class TransformVisitor {
     ExpressionInterpreter::State state{input_};
     auto it = params_.find(index_);
     if (it != params_.end()) {
-      state.params = it->second;
+      state.params = &it->second;
     }
 
     // Evaluate variables first.
@@ -126,7 +126,7 @@ class TransformVisitor {
     ExpressionInterpreter::State colorState{input_, output};
     auto it = params_.find(index_);
     if (it != params_.end()) {
-      colorState.params = it->second;
+      colorState.params = &it->second;
     }
     output.color = interpreter.interpret(transform.color(), colorState);
 

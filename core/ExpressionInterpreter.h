@@ -16,7 +16,7 @@ class ExpressionInterpreter {
   struct State {
     Particle input;
     stdx::optional<Particle> output;
-    std::vector<float> params;
+    const std::vector<float>* params = nullptr;
     std::unordered_map<std::string, float> variables;
   };
 
