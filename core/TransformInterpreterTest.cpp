@@ -99,7 +99,7 @@ TEST_F(TransformInterpreterTest, InterpretsWeightedSumTransform) {
                                      ast::Input(ast::Input::Y) - 1},
                         ast::Input(ast::Input::COLOR) - .25f);
   ast::TransformVariant transform =
-      ast::WeightedSumTransform{{first, 3}, {second, 1}};
+      ast::WeightedSumTransform{{first, .75f}, {second, .25f}};
 
   Particle actual = interpreter.interpret(input, transform);
 

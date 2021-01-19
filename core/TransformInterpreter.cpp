@@ -103,21 +103,14 @@ class TransformVisitor {
       return input_;
     }
 
-    // Calculate the upper bound of weights.
-    double max = 0;
-    for (const auto& t : transform.transforms()) {
-      max += t.weight;
-    }
-
     // Add the outputs together.
     Particle output{Point{0, 0}, 0};
     index_ = index_.firstChild();
     for (const auto& t : transform.transforms()) {
-      double weight = t.weight / max;
       Particle singleOutput = applyTransform(t.transform);
-      output.point += {static_cast<float>(singleOutput.x() * weight),
-                       static_cast<float>(singleOutput.y() * weight)};
-      output.color += static_cast<float>(singleOutput.color * weight);
+      output.point += {static_cast<float>(singleOutput.x() * t.weight),
+                       static_cast<float>(singleOutput.y() * t.weight)};
+      output.color += static_cast<float>(singleOutput.color * t.weight);
       index_ = index_.nextSibling();
     }
     index_ = index_.parent();
