@@ -16,6 +16,18 @@ class SystemProcessor {
   };
 
   SystemProcessor() = delete;
+
+  SystemProcessor(ast::Transform transform, std::shared_ptr<Rng> rng)
+      : system_{std::move(transform), {}},
+        interpreter_(rng),
+        rng_(std::move(rng)) {}
+
+  SystemProcessor(ast::Transform transform, TransformParams params,
+                  std::shared_ptr<Rng> rng)
+      : system_{std::move(transform), std::move(params)},
+        interpreter_(rng),
+        rng_(std::move(rng)) {}
+
   SystemProcessor(TransformSystem system, std::shared_ptr<Rng> rng)
       : system_(std::move(system)), interpreter_(rng), rng_(std::move(rng)) {}
 

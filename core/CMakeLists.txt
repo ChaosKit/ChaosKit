@@ -20,8 +20,6 @@ add_library(
   random.h
   SimpleHistogramGenerator.cpp
   SimpleHistogramGenerator.h
-  SimpleInterpreter.cpp
-  SimpleInterpreter.h
   SystemProcessor.cpp
   SystemProcessor.h
   ThreadLocalRng.cpp
@@ -60,7 +58,6 @@ add_executable(
   core_test
   CameraSystemProcessorTest.cpp
   ExpressionInterpreterTest.cpp
-  SimpleInterpreterTest.cpp
   SystemProcessorTest.cpp
   testing/MockRng.h
   testing/StaticRng.h

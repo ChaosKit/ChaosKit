@@ -1,5 +1,6 @@
 #include "FormulaPreviewProvider.h"
 
+#include <core/SystemProcessor.h>
 #include <QImage>
 #include <QPainter>
 #include <QQuickImageResponse>
@@ -8,14 +9,11 @@
 #include <magic_enum.hpp>
 #include <memory>
 #include <unordered_set>
+#include "ast/transforms.h"
 #include "ast/util.h"
-#include "core/SimpleInterpreter.h"
-#include "flame/Blend.h"
-#include "flame/Formula.h"
-#include "flame/Params.h"
-#include "flame/System.h"
-#include "flame/toSource.h"
+#include "core/ThreadLocalRng.h"
 #include "library/FormulaType.h"
+#include "library/util.h"
 
 namespace chaoskit::ui {
 
@@ -72,45 +70,43 @@ bool requiresScatterplot(library::FormulaType type) {
          ast::apply_visitor(visitor, formula.y());
 }
 
-core::SimpleInterpreter createInterpreter(library::FormulaType type) {
-  auto formula = std::make_unique<flame::Formula>();
-
+core::SystemProcessor createProcessor(library::FormulaType type) {
   auto libraryFormula = library::createFormula(type);
-  formula->type = type;
-  formula->source = libraryFormula->source();
-  formula->params = libraryFormula->exampleParams();
 
-  auto blend = std::make_unique<flame::Blend>();
-  blend->pre = flame::Transform(libraryFormula->examplePreTransform().params());
-  blend->formulas.push_back(formula.get());
+  ast::MultiStepTransform transform{ast::AffineTransform{},
+                                    libraryFormula->source()};
 
-  flame::System system{};
-  system.blends.push_back(blend.get());
+  const auto& preParamsArray = libraryFormula->examplePreTransform().params();
+  core::TransformParams params{
+      {core::TransformIndex{0},
+       std::vector<float>(preParamsArray.begin(), preParamsArray.end())},
+      {core::TransformIndex{1}, libraryFormula->exampleParams()}};
 
-  return core::SimpleInterpreter(flame::toSource(system),
-                                 core::Particle::IMMORTAL, 0,
-                                 flame::Params::fromSystem(system));
+  return core::SystemProcessor(ast::Transform(std::move(transform)),
+                               std::move(params),
+                               std::make_shared<core::ThreadLocalRng>());
 }
 
 QVector<QPointF> generateGrid(library::FormulaType type, int width,
                               int height) {
-  core::SimpleInterpreter interpreter = createInterpreter(type);
+  auto processor = createProcessor(type);
   QVector<QPointF> points(width * height);
 
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       // Convert the point to be in [-1; 1]
-      core::Particle particle{{(float)(x * 2) / (float)(width - 1) - 1.f,
-                               (float)(y * 2) / (float)(height - 1) - 1.f},
-                              0.f,
-                              core::Particle::IMMORTAL};
+      core::SystemParticle particle{
+          {{(float)(x * 2) / (float)(width - 1) - 1.f,
+            (float)(y * 2) / (float)(height - 1) - 1.f},
+           0.f,
+           core::Particle::IMMORTAL}};
 
       int index = y * width + x;
       for (int i = 0; i < ITERATIONS; i++) {
-        particle = interpreter(particle).next_state;
+        particle = processor.process(particle);
       }
-      points[index].setX(particle.x());
-      points[index].setY(particle.y());
+      points[index].setX(particle.particle.x());
+      points[index].setY(particle.particle.y());
     }
   }
 

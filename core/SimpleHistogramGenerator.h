@@ -7,7 +7,6 @@
 #include "Color.h"
 #include "ColorMap.h"
 #include "Generator.h"
-#include "SimpleInterpreter.h"
 #include "SystemProcessor.h"
 #include "flame/System.h"
 
