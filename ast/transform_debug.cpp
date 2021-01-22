@@ -23,6 +23,25 @@ std::ostream &operator<<(std::ostream &stream,
   return stream << "Affine Transform";
 }
 
+std::ostream &operator<<(std::ostream &stream, const Formula &formula) {
+  stream << "Formula:" << indent << nl;
+
+  stream << "variables: ";
+  if (formula.variables().empty()) {
+    stream << "none";
+  } else {
+    stream << indent;
+    for (const auto &var : formula.variables()) {
+      stream << nl << var;
+    }
+    stream << outdent;
+  }
+
+  stream << nl << "x: " << formula.x();
+  stream << nl << "y: " << formula.y();
+  return stream << outdent;
+}
+
 std::ostream &operator<<(std::ostream &stream,
                          const MultiStepTransform &transform) {
   stream << "Multi Step (" << transform.transforms().size() << "):" << indent;

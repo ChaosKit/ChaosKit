@@ -8,7 +8,6 @@
 #include "Transform.h"
 #include "TransformVariant.h"
 #include "WeightedSumTransform.h"
-#include "formula_debug.h"
 
 namespace chaoskit::ast {
 
@@ -18,6 +17,7 @@ std::ostream& operator<<(std::ostream& stream, const Transform& transform);
 
 std::ostream& operator<<(std::ostream& stream,
                          const AffineTransform& transform);
+std::ostream& operator<<(std::ostream& stream, const Formula& formula);
 std::ostream& operator<<(std::ostream& stream,
                          const MultiStepTransform& transform);
 std::ostream& operator<<(std::ostream& stream,

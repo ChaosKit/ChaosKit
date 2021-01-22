@@ -1,7 +1,6 @@
 #ifndef CHAOSKIT_FLAME_DOCUMENTVISITOR_H
 #define CHAOSKIT_FLAME_DOCUMENTVISITOR_H
 
-#include <ast/System.h>
 #include "Blend.h"
 #include "Document.h"
 #include "Formula.h"

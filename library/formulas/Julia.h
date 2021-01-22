@@ -20,7 +20,7 @@ class Julia : public Formula {
     });
   }
 
-  ast::StaticAffineTransform examplePreTransform() override {
+  std::array<float, 6> examplePreTransform() override {
     return {0.84660766961652,  0, -0.5000978933354223, 0, 0.84660766961652,
             0.2566045370297865};
   }

@@ -130,7 +130,7 @@ std::vector<float> exampleParams(FormulaType type) {
   return createFormula(type)->exampleParams();
 }
 
-ast::StaticAffineTransform examplePreTransform(FormulaType type) {
+std::array<float, 6> examplePreTransform(FormulaType type) {
   if (type == FormulaType::Invalid) {
     return {};
   }

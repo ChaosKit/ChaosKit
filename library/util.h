@@ -35,9 +35,9 @@ std::vector<float> exampleParams() {
   return T().exampleParams();
 }
 
-ast::StaticAffineTransform examplePreTransform(FormulaType type);
+std::array<float, 6> examplePreTransform(FormulaType type);
 template <typename T>
-ast::StaticAffineTransform examplePreTransform() {
+std::array<float, 6> examplePreTransform() {
   return T().examplePreTransform();
 }
 

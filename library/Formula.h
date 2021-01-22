@@ -1,8 +1,8 @@
 #ifndef CHAOSKIT_LIBRARY_FORMULA_H
 #define CHAOSKIT_LIBRARY_FORMULA_H
 
+#include <array>
 #include "ast/Formula.h"
-#include "ast/StaticAffineTransform.h"
 #include "ast/helpers.h"
 
 namespace chaoskit::library {
@@ -15,8 +15,9 @@ class Formula {
   virtual std::vector<float> exampleParams() {
     return std::vector(paramCount(), 1.f);
   }
-  virtual ast::StaticAffineTransform examplePreTransform() {
-    return ast::StaticAffineTransform();
+  virtual std::array<float, 6> examplePreTransform() {
+    // Identity transform.
+    return {1, 0, 0, 0, 1, 0};
   }
 
  protected:

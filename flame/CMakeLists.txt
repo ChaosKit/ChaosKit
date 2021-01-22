@@ -21,12 +21,9 @@ add_library(
   DocumentVisitor.h
   ManagedDocument.cpp
   ManagedDocument.h
-  Params.h
   SystemIndex.h
   toParams.cpp
   toParams.h
-  toSource.cpp
-  toSource.h
   toSystem.h
   toTransform.cpp
   toTransform.h

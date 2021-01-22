@@ -76,7 +76,7 @@ core::SystemProcessor createProcessor(library::FormulaType type) {
   ast::MultiStepTransform transform{ast::AffineTransform{},
                                     libraryFormula->source()};
 
-  const auto& preParamsArray = libraryFormula->examplePreTransform().params();
+  auto preParamsArray = libraryFormula->examplePreTransform();
   core::TransformParams params{
       {core::TransformIndex{0},
        std::vector<float>(preParamsArray.begin(), preParamsArray.end())},

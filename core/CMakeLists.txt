@@ -28,7 +28,7 @@ add_library(
   TransformInterpreter.h)
 target_link_libraries(
   core
-  PUBLIC ast_transform core_interface stdx randutils
+  PUBLIC ast core_interface stdx randutils
   PRIVATE magic_enum
   INTERFACE flame_structures)
 
@@ -49,7 +49,7 @@ add_library(
   TransformSystem.h)
 target_link_libraries(
   core_interface
-  INTERFACE ast_transform
+  INTERFACE ast
   PRIVATE xxHash::xxhash)
 
 add_executable(
@@ -62,5 +62,5 @@ add_executable(
   TransformIndexTest.cpp
   TransformInterpreterTest.cpp)
 
-target_link_libraries(core_test PRIVATE gmock gmock_main ast_transform core)
+target_link_libraries(core_test PRIVATE gmock gmock_main ast core)
 add_test(NAME core_test COMMAND core_test)

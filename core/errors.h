@@ -2,7 +2,6 @@
 #define CHAOSKIT_CORE_ERRORS_H
 
 #include <stdexcept>
-#include "flame/SystemIndex.h"
 
 namespace chaoskit::core {
 
