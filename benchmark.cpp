@@ -3,13 +3,10 @@
 #include <iostream>
 #include <memory>
 #include "ast/helpers.h"
-#include "core/SimpleInterpreter.h"
 #include "core/SystemParticle.h"
 #include "core/SystemProcessor.h"
 #include "core/ThreadLocalRng.h"
 #include "core/TransformSystem.h"
-#include "flame/ManagedDocument.h"
-#include "flame/transforms.h"
 
 void handwritten(int iterations) {
   using namespace chaoskit::core;
@@ -79,49 +76,6 @@ void interpreted(int iterations) {
   }
 }
 
-void oldFlame(int iterations) {
-  using namespace chaoskit;
-  using namespace chaoskit::ast::helpers;
-  InputHelper input;
-  OutputHelper output;
-  ParameterHelper params;
-
-  auto formula = new flame::Formula();
-  formula->source =
-      ast::Formula{sin(params[0] * input.y()) - cos(params[1] * input.x()),
-                   sin(params[2] * input.x()) - cos(params[3] * input.y())};
-  formula->params = {9.379666578024626e-01f, 1.938709271140397e+00f,
-                     -1.580897020176053e-01f, -1.430070123635232e+00f};
-
-  auto blend = new flame::Blend();
-  blend->formulas.push_back(formula);
-  blend->coloringMethod =
-      ([&input, &output, &params]() -> flame::ColoringMethod {
-        flame::ColoringMethod coloringMethod;
-        auto dx = input.x() - output.x();
-        auto dy = input.y() - output.y();
-        auto distance = sqrt(dx * dx + dy * dy);
-        coloringMethod.source = frac(distance * params[0]);
-        coloringMethod.params = {.2f};
-        return coloringMethod;
-      })();
-
-  auto system = new flame::System();
-  system->blends.push_back(blend);
-  system->ttl = 30;
-  system->initialTransform = flame::scale(0.5);
-
-  core::SimpleInterpreter interpreter(*system);
-  auto particle = interpreter.randomizeParticle();
-  while (iterations--) {
-    particle = interpreter.processBlends(particle);
-  }
-
-  delete system;
-  delete blend;
-  delete formula;
-}
-
 std::chrono::milliseconds measure(void (*fn)(int), int iterations) {
   auto start = std::chrono::high_resolution_clock::now();
   fn(iterations);
@@ -135,9 +89,6 @@ int main(int argc, char** argv) {
 
   std::cout << "Handwritten implementation: "
             << measure(handwritten, iterations).count() << "ms" << std::endl;
-
-  std::cout << "Using the old flame-centric code: "
-            << measure(oldFlame, iterations).count() << "ms" << std::endl;
 
   std::cout << "Using the interpreter: "
             << measure(interpreted, iterations).count() << "ms" << std::endl;

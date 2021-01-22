@@ -24,7 +24,7 @@ add_subdirectory(io)
 add_subdirectory(ui)
 
 add_executable(benchmark benchmark.cpp)
-target_link_libraries(benchmark PRIVATE ast core flame library randutils)
+target_link_libraries(benchmark PRIVATE ast core randutils)
 
 find_package(Qt5 COMPONENTS Core Gui)
 add_executable(lol lol.cpp)
