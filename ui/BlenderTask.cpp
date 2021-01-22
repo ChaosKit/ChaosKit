@@ -15,9 +15,8 @@ using chaoskit::flame::Transform;
 
 namespace chaoskit::ui {
 
-void BlenderTask::setSystem(const flame::System *system) {
-  processor_ =
-      std::make_unique<CameraSystemProcessor>(toCameraSystem(*system), rng_);
+void BlenderTask::setSystem(const core::CameraSystem *system) {
+  processor_ = std::make_unique<CameraSystemProcessor>(*system, rng_);
   particle_ = processor_->createParticle();
 }
 

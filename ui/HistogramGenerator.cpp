@@ -54,9 +54,12 @@ void HistogramGenerator::setEnabled(bool enabled) {
   core::Generator::setEnabled(enabled);
 }
 
-void HistogramGenerator::setSystem(const flame::System &system) {
+void HistogramGenerator::setSystem(const core::CameraSystem &system) {
   QMetaObject::invokeMethod(
-      blenderTask_, [this, &system] { blenderTask_->setSystem(&system); });
+      // We capture by value here because if we pass a temporary as the system,
+      // the memory might get inaccessible. Capturing by value ensures that a
+      // copy gets made.
+      blenderTask_, [this, system] { blenderTask_->setSystem(&system); });
   gathererTask_->clear();
 }
 

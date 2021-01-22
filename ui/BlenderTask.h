@@ -15,7 +15,7 @@ class BlenderTask : public QObject {
       : processor_(), particle_{}, rng_(std::move(rng)) {}
 
  public slots:
-  void setSystem(const chaoskit::flame::System *system);
+  void setSystem(const chaoskit::core::CameraSystem *system);
   void start();
   void stop();
 

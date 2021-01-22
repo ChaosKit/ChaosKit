@@ -7,7 +7,6 @@
 #include "GathererTask.h"
 #include "HistogramBuffer.h"
 #include "core/Generator.h"
-#include "flame/System.h"
 
 namespace chaoskit::ui {
 
@@ -19,7 +18,7 @@ class HistogramGenerator : public QObject, public core::Generator {
 
   void synchronizeResult(core::Renderer *renderer) override;
   void setEnabled(bool enabled) override;
-  void setSystem(const flame::System &system) override;
+  void setSystem(const core::CameraSystem &system) override;
 
  public slots:
   void setColorMap(const chaoskit::core::ColorMap *colorMap);

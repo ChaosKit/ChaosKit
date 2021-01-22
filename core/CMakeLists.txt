@@ -28,8 +28,7 @@ add_library(
   TransformInterpreter.h)
 target_link_libraries(
   core
-  # TODO: remove ast and flame after interpreter migration
-  PUBLIC ast ast_transform core_interface flame stdx randutils
+  PUBLIC ast_transform core_interface stdx randutils
   PRIVATE magic_enum
   INTERFACE flame_structures)
 
@@ -48,10 +47,9 @@ add_library(
   TransformIndex.h
   TransformParams.h
   TransformSystem.h)
-# TODO: remove flame_structures after removing flame from Generator
 target_link_libraries(
   core_interface
-  INTERFACE ast flame_structures
+  INTERFACE ast_transform
   PRIVATE xxHash::xxhash)
 
 add_executable(
@@ -64,5 +62,5 @@ add_executable(
   TransformIndexTest.cpp
   TransformInterpreterTest.cpp)
 
-target_link_libraries(core_test PRIVATE gmock gmock_main ast core)
+target_link_libraries(core_test PRIVATE gmock gmock_main ast_transform core)
 add_test(NAME core_test COMMAND core_test)

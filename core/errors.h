@@ -14,8 +14,6 @@ class OutputNotAvailable : public std::invalid_argument {
 class MissingParameterError : public std::out_of_range {
  public:
   explicit MissingParameterError(size_t parameterIndex);
-  MissingParameterError(const flame::SystemIndex& elementIndex,
-                        size_t parameterIndex);
 };
 
 class UndefinedVariableError : public std::out_of_range {

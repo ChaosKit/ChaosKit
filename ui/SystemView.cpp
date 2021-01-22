@@ -4,6 +4,7 @@
 #include <QQuickWindow>
 #include "GLToneMapper.h"
 #include "core/Renderer.h"
+#include "flame/toSystem.h"
 
 using chaoskit::core::HistogramBuffer;
 
@@ -87,7 +88,7 @@ void SystemView::setModel(DocumentModel *documentModel) {
 }
 
 void SystemView::updateSystem() {
-  generator_->setSystem(*model_->system());
+  generator_->setSystem(flame::toCameraSystem(*model_->system()));
   update();
 }
 
