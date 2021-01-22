@@ -36,25 +36,29 @@ std::ostream &operator<<(std::ostream &stream,
 }
 
 std::ostream &operator<<(std::ostream &stream,
-                         const RandomChoiceTransform &transform) {
-  stream << "Random Choice (" << transform.transforms().size()
+                         const RandomChoiceTransform &randomChoiceTransform) {
+  stream << "Random Choice (" << randomChoiceTransform.transforms().size()
          << "):" << indent;
 
-  int i = 0;
-  for (const auto &[transform, weight] : transform.transforms()) {
+  for (int i = 0; i < randomChoiceTransform.size(); ++i) {
+    const auto &transform = randomChoiceTransform.transforms()[i];
+    const auto &weight = randomChoiceTransform.weights()[i];
+
     stream << nl << "[" << i << "] weight " << weight << ":" << indent << nl;
     stream << transform << outdent;
-    ++i;
   }
   return stream << outdent;
 }
 
 std::ostream &operator<<(std::ostream &stream,
-                         const WeightedSumTransform &transform) {
-  stream << "Weighted Sum (" << transform.transforms().size() << "):" << indent;
+                         const WeightedSumTransform &weightedSumTransform) {
+  stream << "Weighted Sum (" << weightedSumTransform.transforms().size()
+         << "):" << indent;
 
-  int i = 0;
-  for (const auto &[transform, weight] : transform.transforms()) {
+  for (int i = 0; i < weightedSumTransform.size(); ++i) {
+    const auto &transform = weightedSumTransform.transforms()[i];
+    const auto &weight = weightedSumTransform.weights()[i];
+
     stream << nl << "[" << i << "] weight " << weight << ":" << indent << nl;
     stream << transform << outdent;
     ++i;

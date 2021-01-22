@@ -69,15 +69,14 @@ class TransformVisitor {
   }
 
   Particle operator()(const ast::RandomChoiceTransform& transform) {
-    if (transform.transforms().empty()) {
+    if (transform.empty()) {
       return input_;
     }
 
-    // Calculate the upper bound of weights.
-    double max = 0;
-    for (const auto& t : transform.transforms()) {
-      max += t.weight;
-    }
+    // Calculate the upper bound of weights. std::reduce uses + as the default
+    // operation.
+    double max = std::reduce(transform.weights().begin(),
+                             transform.weights().end(), 0.0);
 
     // Choose a number smaller between the bounds.
     double choice = rng_->randomDouble(0, max);
@@ -85,10 +84,10 @@ class TransformVisitor {
     // Find the right transform and apply it.
     double sum = 0.f;
     index_ = index_.firstChild();
-    for (const auto& t : transform.transforms()) {
-      sum += t.weight;
+    for (int i = 0; i < transform.size(); ++i) {
+      sum += transform.weights()[i];
       if (choice <= sum) {
-        Particle output = applyTransform(t.transform);
+        Particle output = applyTransform(transform.transforms()[i]);
         index_ = index_.parent();
         return output;
       }
@@ -99,18 +98,19 @@ class TransformVisitor {
   }
 
   Particle operator()(const ast::WeightedSumTransform& transform) {
-    if (transform.transforms().empty()) {
+    if (transform.empty()) {
       return input_;
     }
 
     // Add the outputs together.
     Particle output{Point{0, 0}, 0};
     index_ = index_.firstChild();
-    for (const auto& t : transform.transforms()) {
-      Particle singleOutput = applyTransform(t.transform);
-      output.point += {static_cast<float>(singleOutput.x() * t.weight),
-                       static_cast<float>(singleOutput.y() * t.weight)};
-      output.color += static_cast<float>(singleOutput.color * t.weight);
+    for (int i = 0; i < transform.size(); ++i) {
+      Particle singleOutput = applyTransform(transform.transforms()[i]);
+      double weight = transform.weights()[i];
+      output.point += {static_cast<float>(singleOutput.x() * weight),
+                       static_cast<float>(singleOutput.y() * weight)};
+      output.color += static_cast<float>(singleOutput.color * weight);
       index_ = index_.nextSibling();
     }
     index_ = index_.parent();

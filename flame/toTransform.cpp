@@ -7,16 +7,19 @@
 namespace chaoskit::flame {
 
 ast::Transform toTransform(const BlendBase& blend) {
-  std::vector<ast::TransformWithWeight> formulas;
+  std::vector<ast::Transform> transforms;
+  std::vector<double> weights;
+
   for (const auto* formula : blend.formulas) {
-    formulas.emplace_back(ast::Transform(formula->source), formula->weight.x);
+    transforms.emplace_back(formula->source);
+    weights.push_back(formula->weight.x);
   }
 
   return ast::Transform(
       ast::MultiStepTransform{
-          ast::Transform(ast::AffineTransform{}),  // pre
-          ast::Transform(ast::WeightedSumTransform(std::move(formulas))),
-          ast::Transform(ast::AffineTransform{})},  // post
+          ast::AffineTransform{},  // pre
+          ast::WeightedSumTransform(std::move(transforms), std::move(weights)),
+          ast::AffineTransform{}},  // post
       blend.coloringMethod.source);
 }
 
@@ -25,12 +28,15 @@ ast::Transform toTransform(const System& system) {
     return toTransform(*system.isolatedBlend);
   }
 
-  std::vector<ast::TransformWithWeight> blends;
+  std::vector<ast::Transform> transforms;
+  std::vector<double> weights;
   for (const Blend* blend : system.blends) {
     if (!blend->enabled) continue;
-    blends.emplace_back(toTransform(*blend), blend->weight);
+    transforms.emplace_back(toTransform(*blend));
+    weights.push_back(blend->weight);
   }
-  return ast::Transform(ast::RandomChoiceTransform(blends));
+  return ast::Transform(
+      ast::RandomChoiceTransform(std::move(transforms), std::move(weights)));
 }
 
 stdx::optional<ast::Transform> toCameraTransform(const System& system) {

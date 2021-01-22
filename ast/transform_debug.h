@@ -21,9 +21,9 @@ std::ostream& operator<<(std::ostream& stream,
 std::ostream& operator<<(std::ostream& stream,
                          const MultiStepTransform& transform);
 std::ostream& operator<<(std::ostream& stream,
-                         const RandomChoiceTransform& transform);
+                         const RandomChoiceTransform& randomChoiceTransform);
 std::ostream& operator<<(std::ostream& stream,
-                         const WeightedSumTransform& transform);
+                         const WeightedSumTransform& weightedSumTransform);
 
 }  // namespace chaoskit::ast
 

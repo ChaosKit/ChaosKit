@@ -47,6 +47,7 @@ target_link_libraries(ast PUBLIC ast_expression variant)
 add_library(
   ast_transform
   AffineTransform.h
+  BaseMultiTransform.h
   Formula.h # used in both flame and transform ASTs
   formula_debug.cpp
   formula_debug.h
