@@ -2,6 +2,8 @@
 
 ChaosKit is a set of libraries and tools to generate pictures with [iterated function systems](https://en.wikipedia.org/wiki/Iterated_function_system). In particular, ChaosKit is inspired by [Fractal Flames](https://en.wikipedia.org/wiki/Fractal_flame) and supports generating a superset of them.
 
+![Screenshot of the ChaosKit UI](screenshot.png)
+
 ## How to build
 
 To build ChaosKit, you need the following:
