@@ -1,3 +1,9 @@
+# VSCode workspace settings
+.vscode/
+
+# Build directory
+build/
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Qt template
 # C++ objects and libs
