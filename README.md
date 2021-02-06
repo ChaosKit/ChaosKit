@@ -23,6 +23,7 @@ Once you have the above installed, you can run the following commands to downloa
 git clone --recursive https://github.com/ChaosKit/ChaosKit.git
 cd ChaosKit
 mkdir build
+cd build
 # Replace Release with Debug for a debug build.
 cmake -DCMAKE_BUILD_TYPE=Release ..  
 make
