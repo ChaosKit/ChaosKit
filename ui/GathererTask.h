@@ -30,6 +30,7 @@ class GathererTask : public QObject {
   QTransform imageSpaceTransform_;
   QMutex mutex_;
   core::HistogramBuffer buffer_;
+  bool isDirty_ = true;
   const core::ColorMap *colorMap_ = nullptr;
 
   void updateImageSpaceTransform(const QSizeF &size);

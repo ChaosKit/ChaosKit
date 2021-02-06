@@ -88,7 +88,9 @@ void SystemView::setModel(DocumentModel *documentModel) {
 }
 
 void SystemView::updateSystem() {
-  generator_->setSystem(flame::toCameraSystem(*model_->system()));
+  const flame::System *flameSystem = model_->system();
+  generator_->setSystem(flame::toCameraSystem(*flameSystem));
+  generator_->setLifetimeRange(flameSystem->skip, flameSystem->ttl);
   update();
 }
 

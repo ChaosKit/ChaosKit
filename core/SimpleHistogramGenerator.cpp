@@ -36,6 +36,11 @@ void SimpleHistogramGenerator::setColorMap(const ColorMap *color_map) {
   color_map_ = color_map;
 }
 
+void SimpleHistogramGenerator::setLifetimeRange(int32_t min, int32_t max) {
+  system_processor_.setSkip(min);
+  system_processor_.setParticleLifetime(max);
+}
+
 void SimpleHistogramGenerator::reset() { buffer_.clear(); }
 
 void SimpleHistogramGenerator::synchronizeResult(Renderer *renderer) {
@@ -61,7 +66,6 @@ void SimpleHistogramGenerator::add(const Particle &particle) {
 
   add(static_cast<uint32_t>(x), static_cast<uint32_t>(y), particle.color);
 }
-
 void SimpleHistogramGenerator::add(uint32_t x, uint32_t y, float factor) {
   Color *color = buffer_(x, y);
 

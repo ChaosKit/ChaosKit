@@ -19,7 +19,7 @@ class HistogramGenerator : public QObject, public core::Generator {
   void synchronizeResult(core::Renderer *renderer) override;
   void setEnabled(bool enabled) override;
   void setSystem(const core::CameraSystem &system) override;
-
+  void setLifetimeRange(int32_t min, int32_t max) override;
  public slots:
   void setColorMap(const chaoskit::core::ColorMap *colorMap);
   void setSize(quint32 width, quint32 height);

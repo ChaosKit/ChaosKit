@@ -24,6 +24,7 @@ void GathererTask::addPoint(const Point &point, float color) {
     }
 
     mutex_.lock();
+    isDirty_ = true;
     *entry += mappedColor;
     mutex_.unlock();
   }
@@ -36,20 +37,26 @@ void GathererTask::synchronizeResult(core::Renderer *renderer) {
 
 void GathererTask::setSize(const QSize &size) {
   QMutexLocker locker(&mutex_);
+  isDirty_ = true;
   buffer_.resize(static_cast<size_t>(size.width()),
                  static_cast<size_t>(size.height()));
   updateImageSpaceTransform(size);
 }
 
 void GathererTask::setColorMap(const chaoskit::core::ColorMap *colorMap) {
-  QMutexLocker locker(&mutex_);
-  colorMap_ = colorMap;
-  buffer_.clear();
+  {
+    QMutexLocker locker(&mutex_);
+    colorMap_ = colorMap;
+  }
+  clear();
 }
 
 void GathererTask::clear() {
   QMutexLocker locker(&mutex_);
-  buffer_.clear();
+  if (isDirty_) {
+    buffer_.clear();
+    isDirty_ = false;
+  }
 }
 
 void GathererTask::updateImageSpaceTransform(const QSizeF &size) {

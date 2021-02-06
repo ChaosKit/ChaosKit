@@ -63,12 +63,18 @@ void HistogramGenerator::setSystem(const core::CameraSystem &system) {
   gathererTask_->clear();
 }
 
+void HistogramGenerator::setLifetimeRange(int32_t min, int32_t max) {
+  QMetaObject::invokeMethod(blenderTask_, [this, min, max] {
+    blenderTask_->setLifetimeRange(min, max);
+  });
+  gathererTask_->clear();
+}
+
 void HistogramGenerator::setColorMap(const chaoskit::core::ColorMap *colorMap) {
   QMetaObject::invokeMethod(gathererTask_, [colorMap, this] {
     gathererTask_->setColorMap(colorMap);
   });
 }
-
 void HistogramGenerator::setSize(quint32 width, quint32 height) {
   QMetaObject::invokeMethod(
       blenderTask_, [=] { gathererTask_->setSize(QSize(width, height)); });

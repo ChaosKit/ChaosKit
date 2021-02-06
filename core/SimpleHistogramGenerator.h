@@ -22,6 +22,7 @@ class SimpleHistogramGenerator : public Generator {
   void setSystem(const CameraSystem &system) override;
   void setSize(uint32_t width, uint32_t height);
   void setColorMap(const ColorMap *color_map);
+  void setLifetimeRange(int32_t min, int32_t max) override;
   void setIterationCount(uint32_t count);
 
   void synchronizeResult(Renderer *renderer) override;
