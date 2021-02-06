@@ -869,6 +869,7 @@ QVector<int> setSystemData(flame::System* system, const QVariant& value,
         system->ttl = ttl;
         return {role};
       }
+      break;
     }
     case DocumentModel::SkipRole: {
       int skip = value.toInt();
@@ -876,6 +877,7 @@ QVector<int> setSystemData(flame::System* system, const QVariant& value,
         system->skip = skip;
         return {role};
       }
+      break;
     }
     default:;
   }
