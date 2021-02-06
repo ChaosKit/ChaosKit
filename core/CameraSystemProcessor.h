@@ -22,7 +22,7 @@ class CameraSystemProcessor : public SystemProcessor {
   }
   void setCameraSystem(const CameraSystem& cameraSystem);
 
-  SystemParticle processCamera(SystemParticle input) const;
+  [[nodiscard]] SystemParticle processCamera(SystemParticle input) const;
 
  private:
   stdx::optional<TransformSystem> camera_;

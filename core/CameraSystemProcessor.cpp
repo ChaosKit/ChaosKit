@@ -12,8 +12,8 @@ SystemParticle CameraSystemProcessor::processCamera(
   if (!camera_) return input;
 
   SystemParticle output;
-  output.particle = interpreter_.interpret(input.particle, camera_->transform,
-                                           camera_->params);
+  output.applyParticle(interpreter_.interpret(
+      input.asParticle(), camera_->transform, camera_->params));
   return output;
 }
 

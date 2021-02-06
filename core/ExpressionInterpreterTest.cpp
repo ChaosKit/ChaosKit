@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include "ExpressionInterpreter.h"
+#include "SystemParticle.h"
 #include "errors.h"
 #include "testing/StaticRng.h"
 
@@ -14,8 +15,8 @@ namespace chaoskit::core {
 using namespace ast;
 using State = ExpressionInterpreter::State;
 
-Particle makeImmortalParticle(Point point, float color = 0.5f) {
-  return {point, color, Particle::IMMORTAL};
+Particle makeParticle(Point point, float color = 0.5f) {
+  return Particle(point, color);
 }
 
 class ExpressionInterpreterTest : public testing::Test {};
@@ -24,15 +25,14 @@ TEST_F(ExpressionInterpreterTest, InterpretsConstant) {
   ExpressionInterpreter interpreter(std::make_shared<StaticRng>());
   Expression expression = 42.f;
 
-  float actual =
-      interpreter.interpret(expression, State{makeImmortalParticle({})});
+  float actual = interpreter.interpret(expression, State{makeParticle({})});
 
   ASSERT_EQ(42.f, actual);
 }
 
 TEST_F(ExpressionInterpreterTest, InterpretsInput) {
   ExpressionInterpreter interpreter(std::make_shared<StaticRng>());
-  Particle input = makeImmortalParticle({1.f, 2.f}, 0.25f);
+  Particle input = makeParticle({1.f, 2.f}, 0.25f);
 
   ASSERT_EQ(1.f, interpreter.interpret(Input(Input::X), State{input}));
   ASSERT_EQ(2.f, interpreter.interpret(Input(Input::Y), State{input}));
@@ -41,8 +41,8 @@ TEST_F(ExpressionInterpreterTest, InterpretsInput) {
 
 TEST_F(ExpressionInterpreterTest, InterpretsOutput) {
   ExpressionInterpreter interpreter(std::make_shared<StaticRng>());
-  Particle input = makeImmortalParticle({});
-  Particle output = makeImmortalParticle({1.f, 2.f}, 0.25f);
+  Particle input = makeParticle({});
+  Particle output = makeParticle({1.f, 2.f}, 0.25f);
 
   ASSERT_EQ(1.f,
             interpreter.interpret(Output(Output::X), State{input, output}));
@@ -52,7 +52,7 @@ TEST_F(ExpressionInterpreterTest, InterpretsOutput) {
 
 TEST_F(ExpressionInterpreterTest, ThrowsWhenOutputIsMissing) {
   ExpressionInterpreter interpreter(std::make_shared<StaticRng>());
-  Particle input = makeImmortalParticle({});
+  Particle input = makeParticle({});
 
   ASSERT_THROW(interpreter.interpret(Output(Output::X), State{input}),
                OutputNotAvailable);

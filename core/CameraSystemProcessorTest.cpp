@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 #include "CameraSystemProcessor.h"
+#include "SystemParticle.h"
 #include "testing/MockRng.h"
 
 namespace chaoskit::core {
@@ -15,7 +16,7 @@ class CameraSystemProcessorTest : public Test {
 namespace {
 
 SystemParticle createParticle(float x = 0.f, float y = 0.f, float color = 0.f) {
-  return SystemParticle{{Point(x, y), color, Particle::IMMORTAL, 0}};
+  return SystemParticle{Point(x, y), color, SystemParticle::IMMORTAL, 0};
 }
 
 }  // namespace

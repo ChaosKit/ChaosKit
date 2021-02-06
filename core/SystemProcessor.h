@@ -36,9 +36,9 @@ class SystemProcessor {
   void setParticleLifetime(int lifetime) { lifetime_ = lifetime; }
   void setSkip(int skip) { skip_ = skip; }
 
-  SystemParticle createParticle() const;
-  SystemParticle process() const;
-  SystemParticle process(SystemParticle input) const;
+  [[nodiscard]] SystemParticle createParticle() const;
+  [[nodiscard]] SystemParticle process() const;
+  [[nodiscard]] SystemParticle process(SystemParticle input) const;
 
  protected:
   TransformInterpreter interpreter_;
@@ -47,7 +47,7 @@ class SystemProcessor {
   TransformSystem system_;
   std::shared_ptr<Rng> rng_;
   Bounds bounds_ = {-1, 1, -1, 1};
-  int lifetime_ = Particle::IMMORTAL;
+  int lifetime_ = SystemParticle::IMMORTAL;
   int skip_ = 0;
 
   void reviveParticle(Particle &particle) const;

@@ -18,7 +18,7 @@ class SystemProcessorTest : public testing::Test {
 namespace {
 
 SystemParticle createParticle(float x = 0.f, float y = 0.f, float color = 0.f) {
-  return SystemParticle{{Point(x, y), color, Particle::IMMORTAL, 0}};
+  return SystemParticle{Point(x, y), color, SystemParticle::IMMORTAL, 0};
 }
 
 }  // namespace
@@ -46,7 +46,7 @@ TEST_F(SystemProcessorTest, CreatesParticleWithRandomLifetime) {
   SystemParticle actual = processor.createParticle();
 
   SystemParticle expected = createParticle(.5f, .5f, .5f);
-  expected.particle.ttl = 15;
+  expected.ttl = 15;
   ASSERT_EQ(expected, actual);
 }
 
@@ -60,7 +60,7 @@ TEST_F(SystemProcessorTest, CreatesParticleWithSkipping) {
   SystemParticle actual = processor.createParticle();
 
   SystemParticle expected = createParticle(.5f, .5f, .5f);
-  expected.particle.skip = 42;
+  expected.skip = 42;
   ASSERT_EQ(expected, actual);
 }
 
@@ -95,14 +95,14 @@ TEST_F(SystemProcessorTest, RevivesDeadParticle) {
       ast::Formula{ast::Input(ast::Input::X), ast::Input(ast::Input::Y)})};
   EXPECT_CALL(*rng, randomFloat(_, _)).Times(3).WillRepeatedly(Return(.5f));
   SystemParticle input = createParticle();
-  input.particle.ttl = 0;
+  input.ttl = 0;
 
   SystemProcessor processor(system, rng);
   processor.setParticleLifetime(30);
   SystemParticle actual = processor.process(input);
 
   SystemParticle expected = createParticle(.5f, .5f, .5f);
-  expected.particle.ttl = 29;
+  expected.ttl = 29;
   ASSERT_EQ(expected, actual);
 }
 
@@ -114,7 +114,7 @@ TEST_F(SystemProcessorTest, SkipsSteps) {
                    ast::BinaryFunction(ast::BinaryFunction::ADD,
                                        ast::Input(ast::Input::Y), 1.f)})};
   SystemParticle input = createParticle();
-  input.particle.skip = 2;
+  input.skip = 2;
 
   SystemProcessor processor(system, rng);
   processor.setSkip(2);
@@ -132,8 +132,8 @@ TEST_F(SystemProcessorTest, SkipDoesNotExceedLifetime) {
                    ast::BinaryFunction(ast::BinaryFunction::ADD,
                                        ast::Input(ast::Input::Y), 1.f)})};
   SystemParticle input = createParticle();
-  input.particle.ttl = 2;
-  input.particle.skip = 4;
+  input.ttl = 2;
+  input.skip = 4;
 
   SystemProcessor processor(system, rng);
   processor.setParticleLifetime(2);
@@ -141,8 +141,8 @@ TEST_F(SystemProcessorTest, SkipDoesNotExceedLifetime) {
   SystemParticle actual = processor.process(input);
 
   SystemParticle expected = createParticle(2, 2);
-  expected.particle.ttl = 0;
-  expected.particle.skip = 0;
+  expected.ttl = 0;
+  expected.skip = 0;
   ASSERT_EQ(expected, actual);
 }
 

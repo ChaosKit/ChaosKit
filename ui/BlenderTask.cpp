@@ -7,8 +7,6 @@
 using chaoskit::core::CameraSystemProcessor;
 using chaoskit::core::MissingParameterError;
 using chaoskit::core::OutputNotAvailable;
-using chaoskit::core::Particle;
-using chaoskit::core::Point;
 using chaoskit::core::UndefinedVariableError;
 using chaoskit::flame::toCameraSystem;
 using chaoskit::flame::Transform;
@@ -47,7 +45,7 @@ void BlenderTask::calculate() {
   try {
     particle_ = processor_->process(particle_);
     auto output = processor_->processCamera(particle_);
-    emit stepCompleted(output.particle.point, output.particle.color);
+    emit stepCompleted(output.point, output.color);
 
     QTimer::singleShot(0, this, &BlenderTask::calculate);
   } catch (MissingParameterError &e) {

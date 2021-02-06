@@ -44,7 +44,7 @@ void SimpleHistogramGenerator::synchronizeResult(Renderer *renderer) {
   for (size_t i = 0; !iteration_count_ || i < *iteration_count_; i++) {
     if (!enabled_) break;
     particle = system_processor_.process(particle);
-    add(system_processor_.processCamera(particle).particle);
+    add(system_processor_.processCamera(particle));
   }
 
   renderer->updateHistogramBuffer(buffer_);

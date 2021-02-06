@@ -1,6 +1,5 @@
 #include "FormulaPreviewProvider.h"
 
-#include <core/SystemProcessor.h>
 #include <QImage>
 #include <QPainter>
 #include <QQuickImageResponse>
@@ -11,6 +10,8 @@
 #include <unordered_set>
 #include "ast/transforms.h"
 #include "ast/util.h"
+#include "core/SystemParticle.h"
+#include "core/SystemProcessor.h"
 #include "core/ThreadLocalRng.h"
 #include "library/FormulaType.h"
 #include "library/util.h"
@@ -95,18 +96,16 @@ QVector<QPointF> generateGrid(library::FormulaType type, int width,
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       // Convert the point to be in [-1; 1]
-      core::SystemParticle particle{
-          {{(float)(x * 2) / (float)(width - 1) - 1.f,
-            (float)(y * 2) / (float)(height - 1) - 1.f},
-           0.f,
-           core::Particle::IMMORTAL}};
+      core::SystemParticle particle((float)(x * 2) / (float)(width - 1) - 1.f,
+                                    (float)(y * 2) / (float)(height - 1) - 1.f,
+                                    0.f, core::SystemParticle::IMMORTAL);
 
       int index = y * width + x;
       for (int i = 0; i < ITERATIONS; i++) {
         particle = processor.process(particle);
       }
-      points[index].setX(particle.particle.x());
-      points[index].setY(particle.particle.y());
+      points[index].setX(particle.x());
+      points[index].setY(particle.y());
     }
   }
 

@@ -13,32 +13,30 @@ void handwritten(int iterations) {
   ThreadLocalRng rng;
 
   SystemParticle particle;
-  particle.particle.point =
-      Point(rng.randomFloat(-2, 2), rng.randomFloat(-2, 2));
-  particle.particle.color = rng.randomFloat(0, 1);
-  particle.particle.skip = 0;
-  particle.particle.ttl = rng.randomInt(1, 30);
+  particle.point = Point(rng.randomFloat(-2, 2), rng.randomFloat(-2, 2));
+  particle.color = rng.randomFloat(0, 1);
+  particle.skip = 0;
+  particle.ttl = rng.randomInt(1, 30);
 
   while (iterations--) {
-    if (particle.particle.ttl == 0) {
-      particle.particle.point =
-          Point(rng.randomFloat(-2, 2), rng.randomFloat(-2, 2));
-      particle.particle.color = rng.randomFloat(0, 1);
-      particle.particle.skip = 0;
-      particle.particle.ttl = 30;
+    if (particle.ttl == 0) {
+      particle.point = Point(rng.randomFloat(-2, 2), rng.randomFloat(-2, 2));
+      particle.color = rng.randomFloat(0, 1);
+      particle.skip = 0;
+      particle.ttl = 30;
     }
 
-    Point output{sinf(9.379666578024626e-01f * particle.particle.y()) -
-                     cosf(1.938709271140397e+00f * particle.particle.x()),
-                 sinf(-1.580897020176053e-01f * particle.particle.x()) -
-                     cosf(-1.430070123635232e+00f * particle.particle.y())};
+    Point output{sinf(9.379666578024626e-01f * particle.y()) -
+                     cosf(1.938709271140397e+00f * particle.x()),
+                 sinf(-1.580897020176053e-01f * particle.x()) -
+                     cosf(-1.430070123635232e+00f * particle.y())};
 
-    auto dx = particle.particle.x() - output.x();
-    auto dy = particle.particle.y() - output.y();
+    auto dx = particle.x() - output.x();
+    auto dy = particle.y() - output.y();
     auto distance = sqrtf(dx * dx + dy * dy);
-    particle.particle.point = output;
-    particle.particle.color = modff(distance * .2f, &dx);
-    --particle.particle.ttl;
+    particle.point = output;
+    particle.color = modff(distance * .2f, &dx);
+    --particle.ttl;
   }
 }
 

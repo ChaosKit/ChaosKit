@@ -1,14 +1,15 @@
 #include "SystemProcessor.h"
+#include "SystemParticle.h"
 
 namespace chaoskit::core {
 
 SystemParticle SystemProcessor::createParticle() const {
   SystemParticle particle;
-  reviveParticle(particle.particle);
-  particle.particle.ttl = (lifetime_ == Particle::IMMORTAL)
-                              ? Particle::IMMORTAL
-                              : rng_->randomInt(1, lifetime_);
-  particle.particle.skip = skip_;
+  reviveParticle(particle);
+  particle.ttl = (lifetime_ == SystemParticle::IMMORTAL)
+                     ? SystemParticle::IMMORTAL
+                     : rng_->randomInt(1, lifetime_);
+  particle.skip = skip_;
   return particle;
 }
 
@@ -19,26 +20,26 @@ SystemParticle SystemProcessor::process() const {
 SystemParticle SystemProcessor::process(SystemParticle input) const {
   SystemParticle output = input;
 
-  if (output.particle.ttl == 0) {
-    reviveParticle(output.particle);
-    output.particle.ttl = lifetime_;
-    output.particle.skip = skip_;
+  if (output.ttl == 0) {
+    reviveParticle(output);
+    output.ttl = lifetime_;
+    output.skip = skip_;
   }
 
-  for (; output.particle.skip >= 0; --output.particle.skip) {
-    output.particle = interpreter_.interpret(output.particle, system_.transform,
-                                             system_.params);
+  for (; output.skip >= 0; --output.skip) {
+    output.applyParticle(interpreter_.interpret(
+        output.asParticle(), system_.transform, system_.params));
 
-    if (output.particle.ttl != Particle::IMMORTAL) {
-      --output.particle.ttl;
+    if (output.ttl != SystemParticle::IMMORTAL) {
+      --output.ttl;
     }
 
-    if (output.particle.ttl == 0) {
+    if (output.ttl == 0) {
       break;
     }
   }
   // Fix the skip state after the for loop.
-  output.particle.skip = 0;
+  output.skip = 0;
 
   return output;
 }
