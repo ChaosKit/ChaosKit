@@ -1,7 +1,8 @@
 #include "TestWindow.h"
-#include <library/FormulaType.h>
 #include <QTimer>
 #include "DocumentModel.h"
+#include "flame/toSystem.h"
+#include "library/FormulaType.h"
 
 using chaoskit::core::HistogramBuffer;
 using chaoskit::library::FormulaType;
@@ -32,7 +33,9 @@ TestWindow::TestWindow() {
 
   histogramGenerator_ = new HistogramGenerator(this);
   histogramGenerator_->setSize(512, 512);
-  histogramGenerator_->setSystem(*model->document()->system);
+  flame::System *flameSystem = model->document()->system;
+  histogramGenerator_->setSystem(flame::toCameraSystem(*flameSystem));
+  histogramGenerator_->setLifetimeRange(flameSystem->skip, flameSystem->ttl);
   histogramGenerator_->setColorMap(
       colorMapRegistry->get(std::string("Rainbow")));
   toneMapper_ = new GLToneMapper(this);

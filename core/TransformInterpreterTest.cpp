@@ -11,7 +11,7 @@ class TransformInterpreterTest : public testing::Test {};
 
 TEST_F(TransformInterpreterTest, InterpretsAffineTransform) {
   TransformInterpreter interpreter(std::make_shared<StaticRng>());
-  Particle input = {Point{1, 1}};
+  Particle input{Point{1, 1}};
   // Scale 2x, then translate by (1, -1)
   TransformParams params;
   params[TransformIndex()] = {2, 0, 1, 0, 2, -1};
@@ -25,7 +25,7 @@ TEST_F(TransformInterpreterTest, InterpretsFormula) {
   using namespace ast::helpers;
 
   TransformInterpreter interpreter(std::make_shared<StaticRng>());
-  Particle input = {Point{1, 1}};
+  Particle input{Point{1, 1}};
   ast::TransformVariant transform = ast::Formula{
       ast::Input(ast::Input::X) * 2 + 1,
       ast::Input(ast::Input::Y) * 2 - 1,
@@ -39,7 +39,7 @@ TEST_F(TransformInterpreterTest, InterpretsMultiStepTransform) {
   using namespace ast::helpers;
 
   TransformInterpreter interpreter(std::make_shared<StaticRng>());
-  Particle input = {Point{1, 1}, .5f};
+  Particle input{Point{1, 1}, .5f};
   ast::Transform first(ast::Formula{ast::Input(ast::Input::X) * 2,
                                     ast::Input(ast::Input::Y) * 2},
                        ast::Input(ast::Input::COLOR) + .25f);
@@ -57,7 +57,7 @@ TEST_F(TransformInterpreterTest, InterpretsRandomChoiceTransform) {
 
   auto rng = std::make_shared<StaticRng>();
   TransformInterpreter interpreter(rng);
-  Particle input = {Point{1, 1}, .5f};
+  Particle input{Point{1, 1}, .5f};
   ast::Transform first(ast::Formula{ast::Input(ast::Input::X) * 2,
                                     ast::Input(ast::Input::Y) * 2},
                        ast::Input(ast::Input::COLOR) + .25f);
@@ -70,18 +70,18 @@ TEST_F(TransformInterpreterTest, InterpretsRandomChoiceTransform) {
   Particle expected;
   // First transform
   rng->setDouble(.2);
-  expected = {Point{2, 2}, .75f};
+  expected = Particle(2, 2, .75f);
   ASSERT_EQ(expected, interpreter.interpret(input, transform));
   // Second transform
   rng->setDouble(.7);
-  expected = {Point{2, 0}, .25f};
+  expected = Particle(2, 0, .25f);
   ASSERT_EQ(expected, interpreter.interpret(input, transform));
 }
 
 TEST_F(TransformInterpreterTest, EmptyRandomChoiceReturnsInput) {
   auto rng = std::make_shared<StaticRng>();
   TransformInterpreter interpreter(rng);
-  Particle input = {Point{1, 1}, .5f};
+  Particle input{Point{1, 1}, .5f};
   ast::TransformVariant transform = ast::RandomChoiceTransform{};
 
   ASSERT_EQ(input, interpreter.interpret(input, transform));
@@ -91,7 +91,7 @@ TEST_F(TransformInterpreterTest, InterpretsWeightedSumTransform) {
   using namespace ast::helpers;
 
   TransformInterpreter interpreter(std::make_shared<StaticRng>());
-  Particle input = {Point{1, 1}, .5f};
+  Particle input{Point{1, 1}, .5f};
   ast::Transform first(ast::Formula{ast::Input(ast::Input::X) * 2,
                                     ast::Input(ast::Input::Y) * 2},
                        ast::Input(ast::Input::COLOR) + .25f);
@@ -110,7 +110,7 @@ TEST_F(TransformInterpreterTest, InterpretsWeightedSumTransform) {
 TEST_F(TransformInterpreterTest, EmptyWeightedSumReturnsInput) {
   auto rng = std::make_shared<StaticRng>();
   TransformInterpreter interpreter(rng);
-  Particle input = {Point{1, 1}, .5f};
+  Particle input{Point{1, 1}, .5f};
   ast::TransformVariant transform = ast::WeightedSumTransform{};
 
   ASSERT_EQ(input, interpreter.interpret(input, transform));
@@ -134,7 +134,7 @@ TEST_F(TransformInterpreterTest, RestoresInputAfterMultiStep) {
                            ast::Input(ast::Input::COLOR)};
 
   TransformInterpreter interpreter(std::make_shared<StaticRng>());
-  Particle input = {Point{1, 1}, .5f};
+  Particle input{Point{1, 1}, .5f};
 
   ASSERT_FLOAT_EQ(.5f, interpreter.interpret(input, transform).color);
 }

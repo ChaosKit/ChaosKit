@@ -127,6 +127,7 @@ set_target_properties(TestWindow PROPERTIES AUTOMOC ON)
 target_link_libraries(
   TestWindow
   PRIVATE core
+          flame
           library
           ui_core
           ui_state
