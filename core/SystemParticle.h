@@ -35,14 +35,6 @@ struct SystemParticle : public Particle {
     Particle::operator=(particle);
     return *this;
   }
-
-  /** Copies everything from another SystemParticle. */
-  SystemParticle& operator=(const SystemParticle& other) {
-    Particle::operator=(other);
-    ttl = other.ttl;
-    skip = other.ttl;
-    return *this;
-  }
 };
 
 }  // namespace chaoskit::core
