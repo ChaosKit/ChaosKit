@@ -28,4 +28,4 @@ target_link_libraries(benchmark PRIVATE ast core randutils)
 
 find_package(Qt5 COMPONENTS Core Gui)
 add_executable(lol lol.cpp)
-target_link_libraries(lol PRIVATE core library state Qt5::Gui)
+target_link_libraries(lol PRIVATE core flame library state Qt5::Gui)

@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
   std::cout << toCameraSystem(*system) << std::endl;
 
   ColorMapRegistry colorMaps;
-  SimpleHistogramGenerator generator(*system, 512, 512);
+  SimpleHistogramGenerator generator(toCameraSystem(*system), 512, 512);
   generator.setColorMap(colorMaps.get("Rainbow"));
   generator.setIterationCount(1000000);
   generator.setEnabled(true);
