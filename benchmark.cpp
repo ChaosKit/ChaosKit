@@ -8,6 +8,22 @@
 #include "core/ThreadLocalRng.h"
 #include "core/TransformSystem.h"
 
+class Implementation {
+ public:
+  virtual void setUp() {}
+  virtual void tearDown() {}
+  virtual void run(int iterations) = 0;
+};
+
+class LambdaImplementation : public Implementation {
+  void (*fn_)(int);
+
+ public:
+  explicit LambdaImplementation(void (*fn)(int)) : fn_(fn) {}
+
+  void run(int iterations) override { fn_(iterations); }
+};
+
 void handwritten(int iterations) {
   using namespace chaoskit::core;
   ThreadLocalRng rng;
@@ -74,12 +90,19 @@ void interpreted(int iterations) {
   }
 }
 
-std::chrono::milliseconds measure(void (*fn)(int), int iterations) {
+std::chrono::milliseconds measure(Implementation* impl, int iterations) {
+  impl->setUp();
   auto start = std::chrono::high_resolution_clock::now();
-  fn(iterations);
+  impl->run(iterations);
   auto end = std::chrono::high_resolution_clock::now();
+  impl->tearDown();
 
   return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+}
+
+std::chrono::milliseconds measure(void (*fn)(int), int iterations) {
+  LambdaImplementation impl(fn);
+  return measure(&impl, iterations);
 }
 
 int main(int argc, char** argv) {
