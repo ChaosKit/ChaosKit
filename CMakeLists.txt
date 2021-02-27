@@ -19,7 +19,6 @@ add_subdirectory(core)
 add_subdirectory(flame)
 add_subdirectory(state)
 add_subdirectory(library)
-add_subdirectory(io)
 add_subdirectory(ui)
 
 add_executable(benchmark benchmark.cpp)

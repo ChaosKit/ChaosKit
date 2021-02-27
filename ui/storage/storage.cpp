@@ -1,4 +1,4 @@
-#include "io.h"
+#include "storage.h"
 #include <algorithm>
 #include <fstream>
 #include <magic_enum.hpp>
@@ -9,7 +9,7 @@
 using chaoskit::library::ColoringMethodType;
 using chaoskit::library::FormulaType;
 
-namespace chaoskit::io {
+namespace chaoskit::ui {
 
 namespace {
 
@@ -21,7 +21,7 @@ void readTransform(const Transform& proto, flame::Transform* transform) {
 void readFormula(const Formula& proto, flame::Formula* formula) {
   auto formulaType = magic_enum::enum_cast<FormulaType>(proto.type());
   if (!formulaType) {
-    throw Error("Unsupported formula type: " + proto.type());
+    throw StorageError("Unsupported formula type: " + proto.type());
   }
 
   formula->setType(*formulaType);
@@ -93,13 +93,13 @@ void readSystem(const System& proto, flame::System* system) {
 
 void readDocument(const Document& proto, flame::Document* document) {
   if (!proto.has_system()) {
-    throw Error("System needs to be defined");
+    throw StorageError("System needs to be defined");
   }
   if (proto.width() == 0) {
-    throw Error("Document width must be greater than 0");
+    throw StorageError("Document width must be greater than 0");
   }
   if (proto.height() == 0) {
-    throw Error("Document height must be greater than 0");
+    throw StorageError("Document height must be greater than 0");
   }
 
   document->gamma = proto.gamma() == 0.f ? 2.2f : proto.gamma();
@@ -203,12 +203,12 @@ void writeDocument(const flame::Document& document, Document* proto) {
 void loadFromFile(const std::string& path, flame::Document* document) {
   std::ifstream stream(path, std::ios::in | std::ios::binary);
   if (stream.fail()) {
-    throw Error("Could not read the file");
+    throw StorageError("Could not read the file");
   }
 
   Document documentProto;
   if (!documentProto.ParseFromIstream(&stream)) {
-    throw Error("Could not parse the file");
+    throw StorageError("Could not parse the file");
   }
 
   readDocument(documentProto, document);
@@ -218,14 +218,14 @@ void saveToFile(const std::string& path, const flame::Document& document) {
   std::ofstream stream(path,
                        std::ios::out | std::ios::binary | std::ios::trunc);
   if (stream.fail()) {
-    throw Error("Could not open the file for writing");
+    throw StorageError("Could not open the file for writing");
   }
 
   Document documentProto;
   writeDocument(document, &documentProto);
   if (!documentProto.SerializeToOstream(&stream)) {
-    throw Error("Could not write the file");
+    throw StorageError("Could not write the file");
   }
 }
 
-}  // namespace chaoskit::io
+}  // namespace chaoskit::ui

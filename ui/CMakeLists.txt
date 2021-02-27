@@ -3,6 +3,8 @@ find_package(
   COMPONENTS Core Gui Qml Quick QuickControls2
   OPTIONAL_COMPONENTS Widgets)
 
+add_subdirectory(storage)
+
 # Library that deals with interfacing with the core.
 add_library(
   ui_core
@@ -50,7 +52,7 @@ target_link_libraries(
          Qt5::Core
          Qt5::Gui
          Qt5::Qml
-  PRIVATE magic_enum io)
+  PRIVATE magic_enum ui_storage)
 
 # --- Static resource management ---
 

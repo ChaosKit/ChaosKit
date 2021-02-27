@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package chaoskit.io;
+package chaoskit;
 
 message Document {
   System system = 1;
