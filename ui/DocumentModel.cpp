@@ -13,9 +13,9 @@
 #include "flame/toSystem.h"
 #include "flame/transforms.h"
 #include "flame/util.h"
-#include "io/io.h"
 #include "library/util.h"
 #include "state/Id.h"
+#include "ui/storage/storage.h"
 
 using chaoskit::state::Id;
 
@@ -236,8 +236,8 @@ bool DocumentModel::loadFromFile(const QString& path) {
   auto doc = flame::makeManagedDocument();
 
   try {
-    io::loadFromFile(path.toStdString(), doc.get());
-  } catch (io::Error& e) {
+    ui::loadFromFile(path.toStdString(), doc.get());
+  } catch (StorageError& e) {
     emit ioFailed(QString::fromUtf8(e.what()));
     return false;
   }
@@ -252,8 +252,8 @@ bool DocumentModel::loadFromFile(const QString& path) {
 
 bool DocumentModel::saveToFile(const QString& path) {
   try {
-    io::saveToFile(path.toStdString(), *document());
-  } catch (io::Error& e) {
+    ui::saveToFile(path.toStdString(), *document());
+  } catch (StorageError& e) {
     emit ioFailed(QString::fromUtf8(e.what()));
     return false;
   }
