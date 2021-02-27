@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package chaoskit;
 
-message Document {
+message Project {
   System system = 1;
 
   float gamma = 2;

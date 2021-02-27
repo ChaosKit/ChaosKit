@@ -91,7 +91,7 @@ void readSystem(const System& proto, flame::System* system) {
   }
 }
 
-void readDocument(const Document& proto, flame::Document* document) {
+void readDocument(const Project& proto, flame::Document* document) {
   if (!proto.has_system()) {
     throw StorageError("System needs to be defined");
   }
@@ -186,7 +186,7 @@ void writeSystem(const flame::System& system, System* proto) {
   }
 }
 
-void writeDocument(const flame::Document& document, Document* proto) {
+void writeProject(const flame::Document& document, Project* proto) {
   proto->set_gamma(document.gamma);
   proto->set_exposure(document.exposure);
   proto->set_vibrancy(document.vibrancy);
@@ -206,12 +206,12 @@ void loadFromFile(const std::string& path, flame::Document* document) {
     throw StorageError("Could not read the file");
   }
 
-  Document documentProto;
-  if (!documentProto.ParseFromIstream(&stream)) {
+  Project projectProto;
+  if (!projectProto.ParseFromIstream(&stream)) {
     throw StorageError("Could not parse the file");
   }
 
-  readDocument(documentProto, document);
+  readDocument(projectProto, document);
 }
 
 void saveToFile(const std::string& path, const flame::Document& document) {
@@ -221,9 +221,9 @@ void saveToFile(const std::string& path, const flame::Document& document) {
     throw StorageError("Could not open the file for writing");
   }
 
-  Document documentProto;
-  writeDocument(document, &documentProto);
-  if (!documentProto.SerializeToOstream(&stream)) {
+  Project projectProto;
+  writeProject(document, &projectProto);
+  if (!projectProto.SerializeToOstream(&stream)) {
     throw StorageError("Could not write the file");
   }
 }
