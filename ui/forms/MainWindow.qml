@@ -2,6 +2,7 @@ import Qt.labs.platform 1.1
 import QtQml 2.12
 import QtQuick 2.12
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.11
 import ChaosKit 1.0
 
 ApplicationWindow {
@@ -153,17 +154,37 @@ ApplicationWindow {
     }
   }
 
-  Fab {
-    anchors.right: parent.right
+  RowLayout {
+    id: actionButtons
+
+    anchors.right: documentEditor.left
     anchors.bottom: parent.bottom
     anchors.margins: Theme.units(4)
-    enabled: true
-    iconName: "random-big"
-    ToolTip.text: "Randomize the image"
-    ToolTip.visible: hovered
+    spacing: Theme.units(4)
 
-    onClicked: {
-      documentModel.randomizeSystem();
+    Fab {
+      id: runButton
+      enabled: true
+      property bool isRunning: true
+      iconName: isRunning?"play":"pause"
+      ToolTip.text: "Run/Pause"
+      ToolTip.visible: hovered
+
+      onClicked: {
+        isRunning = !isRunning;
+        console.log("Set value to", isRunning);
+      }
+    }
+    Fab {
+      id: randomizeButton
+      enabled: true
+      iconName: "random-big"
+      ToolTip.text: "Randomize the image"
+      ToolTip.visible: hovered
+
+      onClicked: {
+        documentModel.randomizeSystem();
+      }
     }
   }
 }
