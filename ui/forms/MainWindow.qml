@@ -128,63 +128,59 @@ ApplicationWindow {
     text: `Zoom: ${(systemPreview.zoom * 100).toFixed(0)}%`
   }
 
-  Button {
+  RowLayout {
     anchors.bottom: zoomLabel.top
     anchors.left: zoomLabel.left
     anchors.bottomMargin: Theme.padding
-    text: "Debug Source"
-    outlined: true
 
-    onClicked: {
-      astInspectorLoader.active = true;
+    spacing: Theme.units(4)
+
+    Button {  
+      text: "Debug Source"
+      // outlined: true
+
+      onClicked: {
+        astInspectorLoader.active = true;
+      }
+
+      Loader {
+        id: astInspectorLoader
+        active: false
+        sourceComponent: AstInspector {
+          anchors.centerIn: Overlay.overlay
+          modelSource: documentModel.debugSource
+          astSource: documentModel.astSource
+
+          onClosed: {
+            astInspectorLoader.active = false;
+          }
+        }
+      }
     }
 
-    Loader {
-      id: astInspectorLoader
-      active: false
-      sourceComponent: AstInspector {
-        anchors.centerIn: Overlay.overlay
-        modelSource: documentModel.debugSource
-        astSource: documentModel.astSource
+    Button {
+      text: systemPreview.running ? "Pause" : "Run"
+      icon.source: systemPreview.running ? "qrc:/icons/pause.svg" : "qrc:/icons/play.svg"
 
-        onClosed: {
-          astInspectorLoader.active = false;
-        }
+      onClicked: {
+        systemPreview.running = !systemPreview.running
       }
     }
   }
 
-  RowLayout {
-    id: actionButtons
+  Fab {
+    id: randomizeButton
+    enabled: true
+    iconName: "random-big"
+    ToolTip.text: "Randomize the image"
+    ToolTip.visible: hovered
 
     anchors.right: documentEditor.left
     anchors.bottom: parent.bottom
     anchors.margins: Theme.units(4)
-    spacing: Theme.units(4)
 
-    Fab {
-      id: runButton
-      enabled: true
-      iconName: systemPreview.running ? "play" : "pause"
-      ToolTip.text: "Run/Pause"
-      ToolTip.visible: hovered
-
-      onClicked: {
-        systemPreview.running = !systemPreview.running;
-        console.log("Set value to", isRunning);
-      }
-    }
-
-    Fab {
-      id: randomizeButton
-      enabled: true
-      iconName: "random-big"
-      ToolTip.text: "Randomize the image"
-      ToolTip.visible: hovered
-
-      onClicked: {
-        documentModel.randomizeSystem();
-      }
+    onClicked: {
+      documentModel.randomizeSystem();
     }
   }
 }
