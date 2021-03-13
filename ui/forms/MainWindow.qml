@@ -169,15 +169,13 @@ ApplicationWindow {
   }
 
   Fab {
-    id: randomizeButton
+    anchors.right: documentEditor.left
+    anchors.bottom: parent.bottom
+    anchors.margins: Theme.units(4)
     enabled: true
     iconName: "random-big"
     ToolTip.text: "Randomize the image"
     ToolTip.visible: hovered
-
-    anchors.right: documentEditor.left
-    anchors.bottom: parent.bottom
-    anchors.margins: Theme.units(4)
 
     onClicked: {
       documentModel.randomizeSystem();
