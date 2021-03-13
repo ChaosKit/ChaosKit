@@ -165,16 +165,16 @@ ApplicationWindow {
     Fab {
       id: runButton
       enabled: true
-      property bool isRunning: true
-      iconName: isRunning?"play":"pause"
+      iconName: systemPreview.running ? "play" : "pause"
       ToolTip.text: "Run/Pause"
       ToolTip.visible: hovered
 
       onClicked: {
-        isRunning = !isRunning;
+        systemPreview.running = !systemPreview.running;
         console.log("Set value to", isRunning);
       }
     }
+
     Fab {
       id: randomizeButton
       enabled: true
