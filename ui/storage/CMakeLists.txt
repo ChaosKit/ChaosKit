@@ -6,8 +6,12 @@ target_include_directories(ui_storage_proto PUBLIC ${Protobuf_INCLUDE_DIR}
                                                    ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(ui_storage_proto PUBLIC ${Protobuf_LIBRARIES})
 
-add_library(ui_storage storage.cpp storage.h)
+add_library(ui_storage conversions.cpp conversions.h storage.cpp storage.h)
 target_link_libraries(
   ui_storage
-  PRIVATE ui_storage_proto library magic_enum
-  PUBLIC flame)
+  PRIVATE library magic_enum
+  PUBLIC core_interface flame ui_storage_proto)
+
+add_executable(ui_storage_test conversions_test.cpp)
+target_link_libraries(ui_storage_test PRIVATE gmock gmock_main core ui_storage)
+add_test(NAME ui_storage_test COMMAND ui_storage_test)
