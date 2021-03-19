@@ -19,13 +19,13 @@ class RandomChoiceTransform : public BaseMultiTransform {
   RandomChoiceTransform(const std::vector<Transform>& transforms,
                         std::vector<double> weights)
       : BaseMultiTransform(transforms), weights_(std::move(weights)) {
-    assert(transforms.size() == weights.size());
+    assert(transforms_.size() == weights_.size());
   }
 
   RandomChoiceTransform(std::vector<Transform>&& transforms,
                         std::vector<double>&& weights)
       : BaseMultiTransform(transforms), weights_(weights) {
-    assert(transforms.size() == weights.size());
+    assert(transforms_.size() == weights_.size());
   }
 
   explicit RandomChoiceTransform(

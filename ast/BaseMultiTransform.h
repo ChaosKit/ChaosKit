@@ -11,8 +11,6 @@ class BaseMultiTransform {
 
   explicit BaseMultiTransform(std::vector<Transform> transforms)
       : transforms_(std::move(transforms)) {}
-  explicit BaseMultiTransform(std::vector<Transform>&& transforms)
-      : transforms_(transforms) {}
   explicit BaseMultiTransform(const std::vector<TransformVariant>& variants) {
     for (const auto& variant : variants) {
       transforms_.emplace_back(variant);
