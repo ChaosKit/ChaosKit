@@ -12,6 +12,11 @@ namespace chaoskit::core {
 struct TransformSystem {
   ast::Transform transform;
   TransformParams params;
+
+  bool operator==(const TransformSystem& rhs) const {
+    return transform == rhs.transform && params == rhs.params;
+  }
+  bool operator!=(const TransformSystem& rhs) const { return !(rhs == *this); }
 };
 
 }  // namespace chaoskit::core
