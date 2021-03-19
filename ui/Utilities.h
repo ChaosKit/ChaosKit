@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_UI_UTILITIES_H
 #define CHAOSKIT_UI_UTILITIES_H
 
+#include <QModelIndex>
 #include <QObject>
 
 namespace chaoskit::ui {
