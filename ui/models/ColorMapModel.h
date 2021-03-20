@@ -4,6 +4,7 @@
 #include <QObject>
 #include <optional>
 #include "BaseModel.h"
+#include "ColorMapRegistry.h"
 #include "chaoskit.pb.h"
 
 namespace chaoskit::ui {
@@ -16,16 +17,25 @@ class ColorMapModel : public QObject, public BaseModel<ColorMap> {
   ColorMapModel(QObject* parent = nullptr)
       : QObject(parent), BaseModel<ColorMap>() {}
 
-  [[nodiscard]] const QString& name();
+  void setProto(ColorMap* proto) override;
+  void setColorMapRegistry(ColorMapRegistry* registry);
+
+  [[nodiscard]] const QString& name() const { return *nameCache_; }
   void setName(const QString& name);
 
- public slots:
+  [[nodiscard]] const core::ColorMap* coreColorMap() const { return colorMap_; }
+
+ signals:
   void nameChanged();
+  void invalidNamePicked();
 
  private:
   std::optional<QString> nameCache_ = std::nullopt;
+  ColorMapRegistry* colorMapRegistry_ = nullptr;
+  const core::ColorMap* colorMap_ = nullptr;
 
-  void ensureNameCacheIsFilled();
+  void updateNameCache();
+  void updateColorMap();
 };
 
 }  // namespace chaoskit::ui

@@ -4,13 +4,17 @@
 #include <QObject>
 #include "BaseModel.h"
 #include "ColorMapModel.h"
+#include "SystemModel.h"
 #include "chaoskit.pb.h"
 
 namespace chaoskit::ui {
 
 class ProjectModel : public QObject, public BaseModel<Project> {
   Q_OBJECT
-  Q_PROPERTY(ColorMapModel* colorMap READ colorMap);
+  Q_PROPERTY(chaoskit::ui::ColorMapModel* colorMap READ colorMap NOTIFY
+                 colorMapChanged);
+  Q_PROPERTY(
+      chaoskit::ui::SystemModel* system READ system NOTIFY systemChanged);
   Q_PROPERTY(float gamma READ gamma WRITE setGamma NOTIFY gammaChanged);
   Q_PROPERTY(
       float exposure READ exposure WRITE setExposure NOTIFY exposureChanged);
@@ -20,10 +24,12 @@ class ProjectModel : public QObject, public BaseModel<Project> {
   Q_PROPERTY(uint height READ height WRITE setHeight NOTIFY heightChanged);
 
  public:
-  ProjectModel(QObject* parent = nullptr)
-      : QObject(parent), BaseModel<Project>() {}
+  ProjectModel(QObject* parent = nullptr);
 
-  ColorMapModel* colorMap();
+  void setProto(Project* proto) override;
+
+  [[nodiscard]] ColorMapModel* colorMap() const { return colorMapModel_; }
+  [[nodiscard]] SystemModel* system() const { return systemModel_; }
 
   [[nodiscard]] float gamma() const { return proto_->gamma(); }
   void setGamma(float gamma);
@@ -46,9 +52,12 @@ class ProjectModel : public QObject, public BaseModel<Project> {
   void vibrancyChanged();
   void widthChanged();
   void heightChanged();
+  void colorMapChanged();
+  void systemChanged();
 
  private:
-  ColorMapModel* colorMapModel_ = nullptr;
+  ColorMapModel* colorMapModel_;
+  SystemModel* systemModel_;
 };
 
 }  // namespace chaoskit::ui

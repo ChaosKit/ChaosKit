@@ -2,15 +2,20 @@
 
 namespace chaoskit::ui {
 
-ColorMapModel* ProjectModel::colorMap() {
-  if (!proto_->has_color_map()) return nullptr;
+ProjectModel::ProjectModel(QObject* parent)
+    : QObject(parent), BaseModel<Project>() {
+  colorMapModel_ = new ColorMapModel(this);
+  systemModel_ = new SystemModel(this);
+}
 
-  if (colorMapModel_ == nullptr) {
-    colorMapModel_ = new ColorMapModel(this);
-    colorMapModel_->setProto(proto_->mutable_color_map());
-  }
+void ProjectModel::setProto(Project* proto) {
+  BaseModel::setProto(proto);
 
-  return colorMapModel_;
+  colorMapModel_->setProto(proto_->mutable_color_map());
+  emit colorMapChanged();
+
+  systemModel_->setProto(proto_->mutable_system());
+  emit systemChanged();
 }
 
 void ProjectModel::setGamma(float gamma) {

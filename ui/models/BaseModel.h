@@ -6,7 +6,8 @@ namespace chaoskit::ui {
 template <class Proto>
 class BaseModel {
  public:
-  void setProto(Proto* proto) { proto_ = proto; }
+  [[nodiscard]] const Proto* proto() const { return proto_; }
+  virtual void setProto(Proto* proto) { proto_ = proto; }
 
  protected:
   Proto* proto_ = nullptr;
