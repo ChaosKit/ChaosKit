@@ -12,10 +12,8 @@ SystemView {
   property real translationX: 0
   property real translationY: 0
 
-  colorMap: documentModel.documentProxy.colorMap
-  colorMapRegistry: globalColorMapRegistry
-  height: documentModel.documentProxy.height
-  model: documentModel
+  height: projectModel.height
+  model: projectModel
   scale: 1.0 / Screen.devicePixelRatio
   transform: [
     Scale {
@@ -29,7 +27,7 @@ SystemView {
       y: translationY
     }
   ]
-  width: documentModel.documentProxy.width
+  width: projectModel.width
 
   Timer {
     interval: parent.refreshInterval

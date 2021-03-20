@@ -1,14 +1,18 @@
 #include "SystemView.h"
+#include <QDebug>
+#include <QLoggingCategory>
 #include <QOpenGLFramebufferObjectFormat>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include "GLToneMapper.h"
 #include "core/Renderer.h"
-#include "flame/toSystem.h"
+#include "ui/storage/conversions.h"
 
 using chaoskit::core::HistogramBuffer;
 
 namespace chaoskit::ui {
+
+Q_LOGGING_CATEGORY(systemViewLog, "SystemView");
 
 namespace {
 
@@ -29,9 +33,10 @@ class HistogramRenderer : public QQuickFramebufferObject::Renderer,
     systemView_->synchronizeResult(this);
 
     systemView_ = qobject_cast<const SystemView *>(object);
-    toneMapper_.setGamma(systemView_->gamma());
-    toneMapper_.setExposure(systemView_->exposure());
-    toneMapper_.setVibrancy(systemView_->vibrancy());
+    const auto *model = systemView_->model();
+    toneMapper_.setGamma(model->gamma());
+    toneMapper_.setExposure(model->exposure());
+    toneMapper_.setVibrancy(model->vibrancy());
   }
 
   void render() override {
@@ -71,87 +76,49 @@ void SystemView::setRunning(bool running) {
   emit runningChanged();
 }
 
-void SystemView::setModel(DocumentModel *documentModel) {
-  if (documentModel == model_) {
+void SystemView::setModel(ProjectModel *projectModel) {
+  if (projectModel == model_) {
     return;
   }
   if (model_ != nullptr) {
     model_->disconnect(this);
   }
 
-  model_ = documentModel;
-  updateSystem();
-  emit modelChanged();
+  model_ = projectModel;
+  connect(projectModel, &ProjectModel::gammaChanged, this, &QQuickItem::update);
+  connect(projectModel, &ProjectModel::exposureChanged, this,
+          &QQuickItem::update);
+  connect(projectModel, &ProjectModel::vibrancyChanged, this,
+          &QQuickItem::update);
+  connect(projectModel->colorMap(), &ColorMapModel::nameChanged, this,
+          &SystemView::updateColorMap);
 
-  connect(documentModel, &DocumentModel::structureChanged, this,
-          &SystemView::updateSystem);
+  updateSystem();
+  updateColorMap();
+  emit modelChanged();
 }
 
 void SystemView::updateSystem() {
-  const flame::System *flameSystem = model_->system();
-  generator_->setSystem(flame::toCameraSystem(*flameSystem));
-  generator_->setLifetimeRange(flameSystem->skip, flameSystem->ttl);
-  update();
-}
+  const System &systemProto = model_->proto()->system();
 
-void SystemView::setGamma(float gamma) {
-  if (qFuzzyCompare(gamma_, gamma)) {
-    return;
+  if (systemProto.skip() < 0) {
+    qCWarning(systemViewLog, "Particle skip is less than 0 (%d)",
+              systemProto.skip());
+  }
+  if (systemProto.ttl() < 1 &&
+      systemProto.ttl() != core::SystemParticle::IMMORTAL) {
+    qCWarning(systemViewLog, "Particle lifetime is 0 or less (%d)",
+              systemProto.ttl());
   }
 
-  gamma_ = gamma;
+  generator_->setSystem(toCameraSystem(systemProto));
+  generator_->setLifetimeRange(systemProto.skip(), systemProto.ttl());
   update();
-  emit gammaChanged();
-}
-
-void SystemView::setExposure(float exposure) {
-  if (qFuzzyCompare(exposure_, exposure)) {
-    return;
-  }
-
-  exposure_ = exposure;
-  update();
-  emit exposureChanged();
-}
-
-void SystemView::setVibrancy(float vibrancy) {
-  if (qFuzzyCompare(vibrancy_, vibrancy)) {
-    return;
-  }
-
-  vibrancy_ = vibrancy;
-  update();
-  emit vibrancyChanged();
-}
-
-void SystemView::setColorMapRegistry(ColorMapRegistry *colorMapRegistry) {
-  if (colorMapRegistry_ == colorMapRegistry) {
-    return;
-  }
-
-  colorMapRegistry_ = colorMapRegistry;
-  updateColorMap();
-  update();
-  emit colorMapRegistryChanged();
-}
-
-void SystemView::setColorMap(const QString &name) {
-  if (colorMap_ == name) {
-    return;
-  }
-
-  colorMap_ = name;
-  updateColorMap();
-  update();
-  emit colorMapChanged();
 }
 
 void SystemView::updateColorMap() {
-  if (!colorMapRegistry_ || colorMap_.isEmpty()) {
-    return;
-  }
-
-  generator_->setColorMap(colorMapRegistry_->get(colorMap_));
+  generator_->setColorMap(model_->colorMap()->coreColorMap());
+  update();
 }
 
 void SystemView::updateBufferSize() {
