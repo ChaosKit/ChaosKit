@@ -6,7 +6,8 @@ import ChaosKit 1.0
 
 ApplicationWindow {
   height: 768
-  title: `${documentModel.modified ? '*' : ''}${documentModel.name} — ChaosKit`
+  //  title: `${documentModel.modified ? '*' : ''}${documentModel.name} — ChaosKit`
+  title: 'ChaosKit'
   visible: true
   width: 1024
 
@@ -19,16 +20,16 @@ ApplicationWindow {
     snackbar.open();
   }
 
-  Connections {
-    target: documentModel
-
-    function onIoFailed(error) {
-      openSnackbar(error);
-    }
-    function onModelAboutToBeReset() {
-      selectionModel.clearCurrentIndex();
-    }
-  }
+//  Connections {
+//    target: documentModel
+//
+//    function onIoFailed(error) {
+//      openSnackbar(error);
+//    }
+//    function onModelAboutToBeReset() {
+//      selectionModel.clearCurrentIndex();
+//    }
+//  }
 
   FileDialog {
     id: openDialog
@@ -76,17 +77,17 @@ ApplicationWindow {
 
   MainMenu {
     onNewTriggered: {
-      documentModel.resetDocument();
+//      documentModel.resetDocument();
     }
     onOpen: {
       openDialog.open()
     }
     onSave: {
-      if (documentModel.filePath === '') {
-        saveDialog.open();
-      } else if (documentModel.saveToFile(documentModel.filePath)) {
-        openSnackbar("File saved");
-      }
+//      if (documentModel.filePath === '') {
+//        saveDialog.open();
+//      } else if (documentModel.saveToFile(documentModel.filePath)) {
+//        openSnackbar("File saved");
+//      }
     }
     onSaveAs: {
       saveDialog.open()
@@ -181,7 +182,7 @@ ApplicationWindow {
     ToolTip.visible: hovered
 
     onClicked: {
-      documentModel.randomizeSystem();
+//      documentModel.randomizeSystem();
     }
   }
 }

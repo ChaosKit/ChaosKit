@@ -8,5 +8,5 @@ ColumnLayout {
 
   ImageSizeEditor {}
   ToneMappingEditor {}
-  ColorMapEditor {}
+//  ColorMapEditor {}
 }
