@@ -13,8 +13,6 @@
 #include <magic_enum.hpp>
 #include "ColorMap.h"
 #include "ColorMapPreviewProvider.h"
-#include "DocumentModel.h"
-#include "DocumentProxy.h"
 #include "EngineManager.h"
 #include "FormulaPreviewProvider.h"
 #include "HistogramBuffer.h"
@@ -22,9 +20,11 @@
 #include "Point.h"
 #include "SystemView.h"
 #include "Utilities.h"
+#include "chaoskit.pb.h"
 #include "core/PaletteColorMap.h"
 #include "library/FormulaType.h"
 #include "models/ColorMapRegistry.h"
+#include "models/ProjectModel.h"
 #include "resources.h"
 
 using chaoskit::core::Color;
@@ -34,12 +34,10 @@ using chaoskit::core::Point;
 using chaoskit::library::FormulaType;
 using chaoskit::ui::ColorMapPreviewProvider;
 using chaoskit::ui::ColorMapRegistry;
-using chaoskit::ui::DocumentEntryType;
-using chaoskit::ui::DocumentModel;
-using chaoskit::ui::DocumentProxy;
 using chaoskit::ui::EngineManager;
 using chaoskit::ui::FormulaPreviewProvider;
 using chaoskit::ui::ModelEntry;
+using chaoskit::ui::ProjectModel;
 using chaoskit::ui::SystemView;
 using chaoskit::ui::Utilities;
 namespace resources = chaoskit::resources;
@@ -128,31 +126,46 @@ int main(int argc, char* argv[]) {
           Color{1.f, 0.f, 0.f},
       }));
 
-  // Set up models
+  // Set up the project
+  chaoskit::Project project;
+  project.set_gamma(2.2f);
+  project.set_exposure(0.f);
+  project.set_vibrancy(0.f);
+  project.set_width(1024);
+  project.set_height(1024);
+  project.mutable_color_map()->set_name("BGR");
 
-  auto* documentModel = new DocumentModel();
-  documentModel->setColorMapRegistry(colorMapRegistry);
-  documentModel->setItemData(documentModel->documentIndex(),
-                             {{DocumentModel::ColorMapRole, "BGR"},
-                              {DocumentModel::WidthRole, 1024},
-                              {DocumentModel::HeightRole, 1024}});
-  QModelIndex blendIndex = documentModel->addBlend(FormulaType::DeJong);
-  documentModel->setData(blendIndex, QVariant("Distance"),
-                         DocumentModel::ColoringMethodTypeRole);
-  documentModel->setData(blendIndex, .2f,
-                         DocumentModel::ColoringMethodParamRole);
-  QModelIndex formulaIndex = documentModel->formulaAt(0, blendIndex);
-  documentModel->setData(formulaIndex,
-                         QVariant::fromValue(std::vector<float>{
-                             9.379666578024626e-01f, 1.938709271140397e+00f,
-                             -1.580897020176053e-01f, -1.430070123635232e+00f}),
-                         DocumentModel::ParamsRole);
-  documentModel->setData(
-      documentModel->finalBlendIndex(),
-      QVariant::fromValue(QTransform::fromScale(.5, 1).translate(.5, .5)),
-      DocumentModel::PostTransformRole);
+  auto* system = project.mutable_system();
+  system->set_ttl(30);
+  system->set_skip(0);
 
-  auto* selectionModel = new QItemSelectionModel(documentModel);
+  auto* blend = system->add_blends();
+  blend->set_enabled(true);
+  blend->mutable_coloring_method()->set_distance(.2f);
+
+  auto* formula = blend->add_formulas();
+  formula->set_type("DeJong");
+  formula->mutable_weight()->set_x(1.f);
+  formula->add_params(9.379666578024626e-01f);
+  formula->add_params(1.938709271140397e+00f);
+  formula->add_params(-1.580897020176053e-01f);
+  formula->add_params(-1.430070123635232e+00f);
+
+  system->mutable_final_blend()->set_enabled(true);
+  auto* camera = system->mutable_final_blend()->mutable_post();
+  {
+    auto cameraTransform = QTransform::fromScale(.5, 1).translate(.5, .5);
+    camera->set_m11(cameraTransform.m11());
+    camera->set_m21(cameraTransform.m21());
+    camera->set_m31(cameraTransform.m31());
+    camera->set_m12(cameraTransform.m12());
+    camera->set_m22(cameraTransform.m22());
+    camera->set_m32(cameraTransform.m32());
+  }
+
+  auto* projectModel = new ProjectModel();
+  projectModel->colorMap()->setColorMapRegistry(colorMapRegistry);
+  projectModel->setProto(&project);
 
   // Set up fonts
   {
@@ -170,19 +183,13 @@ int main(int argc, char* argv[]) {
   QObject::connect(engineManager, &EngineManager::engineAboutToBeCreated, [] {
     QQuickStyle::setStyle("ChaosKit");
 
-    qmlRegisterAnonymousType<DocumentProxy>("ChaosKit", 1);
-    qmlRegisterUncreatableType<DocumentEntryType>(
-        "ChaosKit", 1, 0, "DocumentEntryType",
-        "Not creatable because it's an enum");
-    // TODO: figure out a non-deprecated way to make ModelEntry work
-    qmlRegisterInterface<ModelEntry>("ModelEntry");
     qmlRegisterType<SystemView>("ChaosKit", 1, 0, "SystemView");
     qmlRegisterSingletonType<Utilities>(
         "ChaosKit", 1, 0, "Utilities",
         [](QQmlEngine*, QJSEngine*) -> QObject* { return new Utilities(); });
   });
 
-  auto onEngineCreated = [documentModel, selectionModel, engineManager,
+  auto onEngineCreated = [projectModel,
                           colorMapRegistry](QQmlApplicationEngine* engine) {
     engine->addImportPath(resources::importPath());
     engine->addImageProvider("formula", new FormulaPreviewProvider);
@@ -198,13 +205,11 @@ int main(int argc, char* argv[]) {
 
     QQmlContext* rootContext = engine->rootContext();
     rootContext->setContextProperty("defaultExportFormat", defaultExportFormat);
-    rootContext->setContextProperty("documentModel", documentModel);
     rootContext->setContextProperty("exportFormats", exportFormats);
     rootContext->setContextProperty("formulaList", createFormulaList());
-    rootContext->setContextProperty("globalColorMapRegistry", colorMapRegistry);
     rootContext->setContextProperty(
         "monospaceFont", QFontDatabase::systemFont(QFontDatabase::FixedFont));
-    rootContext->setContextProperty("selectionModel", selectionModel);
+    rootContext->setContextProperty("projectModel", projectModel);
   };
   QObject::connect(engineManager, &EngineManager::engineCreated,
                    onEngineCreated);

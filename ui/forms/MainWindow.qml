@@ -101,10 +101,6 @@ ApplicationWindow {
     id: systemPreview
     anchors.centerIn: parent
 
-    gamma: documentModel.documentProxy.gamma
-    exposure: documentModel.documentProxy.exposure
-    vibrancy: documentModel.documentProxy.vibrancy
-
     Component.onCompleted: {
       running = true;
     }
@@ -146,8 +142,8 @@ ApplicationWindow {
       active: false
       sourceComponent: AstInspector {
         anchors.centerIn: Overlay.overlay
-        modelSource: documentModel.debugSource
-        astSource: documentModel.astSource
+        modelSource: projectModel.system.modelSource
+        astSource: projectModel.system.astSource
 
         onClosed: {
           astInspectorLoader.active = false;
