@@ -13,7 +13,6 @@
 #include <magic_enum.hpp>
 #include "ColorMap.h"
 #include "ColorMapPreviewProvider.h"
-#include "ColorMapRegistry.h"
 #include "DocumentModel.h"
 #include "DocumentProxy.h"
 #include "EngineManager.h"
@@ -25,6 +24,7 @@
 #include "Utilities.h"
 #include "core/PaletteColorMap.h"
 #include "library/FormulaType.h"
+#include "models/ColorMapRegistry.h"
 #include "resources.h"
 
 using chaoskit::core::Color;

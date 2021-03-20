@@ -3,7 +3,6 @@
 
 #include <QAbstractItemModel>
 #include <QColor>
-#include "ColorMapRegistry.h"
 #include "DocumentProxy.h"
 #include "DocumentStore.h"
 #include "ModelEntry.h"
@@ -14,6 +13,7 @@
 #include "flame/Formula.h"
 #include "flame/System.h"
 #include "library/FormulaType.h"
+#include "models/ColorMapRegistry.h"
 #include "state/HierarchicalStore.h"
 
 namespace chaoskit::ui {

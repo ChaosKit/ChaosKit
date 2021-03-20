@@ -2,8 +2,8 @@
 #define CHAOSKIT_UI_COLORMAPREGISTRY_H
 
 #include <QObject>
-#include "ColorMap.h"
 #include "core/ColorMapRegistry.h"
+#include "ui/ColorMap.h"
 
 namespace chaoskit::ui {
 
