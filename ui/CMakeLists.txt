@@ -3,6 +3,7 @@ find_package(
   COMPONENTS Core Gui Qml Quick QuickControls2
   OPTIONAL_COMPONENTS Widgets)
 
+add_subdirectory(models)
 add_subdirectory(storage)
 
 # Library that deals with interfacing with the core.
@@ -25,9 +26,6 @@ target_link_libraries(ui_core PUBLIC core flame Qt5::Core Qt5::Gui)
 # The Qt Model interface to chaoskit::state.
 add_library(
   ui_state
-  ColorMap.h
-  ColorMapRegistry.cpp
-  ColorMapRegistry.h
   DocumentAdopter.cpp
   DocumentAdopter.h
   DocumentModel.cpp
@@ -49,6 +47,7 @@ target_link_libraries(
          flame_hierarchy
          library
          state
+         ui_colormapregistry
          Qt5::Core
          Qt5::Gui
          Qt5::Qml
@@ -75,6 +74,7 @@ target_compile_definitions(
 
 set(ChaosKit_SOURCES
     main.cpp
+    ColorMap.h
     ColorMapPreviewProvider.cpp
     ColorMapPreviewProvider.h
     EngineManager.cpp

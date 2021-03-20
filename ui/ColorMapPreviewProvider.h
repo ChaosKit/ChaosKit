@@ -3,7 +3,7 @@
 
 #include <QQuickAsyncImageProvider>
 #include <QThreadPool>
-#include "ColorMapRegistry.h"
+#include "models/ColorMapRegistry.h"
 
 namespace chaoskit::ui {
 

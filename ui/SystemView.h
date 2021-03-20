@@ -2,9 +2,9 @@
 #define CHAOSKIT_UI_SYSTEMVIEW_H
 
 #include <QQuickFramebufferObject>
-#include "ColorMapRegistry.h"
 #include "DocumentModel.h"
 #include "HistogramGenerator.h"
+#include "models/ColorMapRegistry.h"
 
 namespace chaoskit::ui {
 
