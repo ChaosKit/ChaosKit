@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import ChaosKit 1.0
 
 GridLayout {
-  readonly property var document: documentModel.documentProxy
+//  readonly property var document: documentModel.documentProxy
 
   columns: 3
   columnSpacing: Theme.padding
@@ -23,9 +23,9 @@ GridLayout {
     size: Theme.smallIconSize
 
     onClicked: {
-      document.gamma = 2.2;
-      document.exposure = 0.0;
-      document.vibrancy = 0.0;
+//      document.gamma = 2.2;
+//      document.exposure = 0.0;
+//      document.vibrancy = 0.0;
     }
   }
 
@@ -39,7 +39,7 @@ GridLayout {
     Layout.alignment: Qt.AlignRight
     Layout.fillWidth: true
     horizontalAlignment: Text.AlignRight
-    text: document.gamma.toFixed(2)
+//    text: document.gamma.toFixed(2)
   }
   IconButton {
     Layout.rightMargin: Theme.padding
@@ -47,7 +47,7 @@ GridLayout {
     size: Theme.smallIconSize
 
     onClicked: {
-      document.gamma = 2.2;
+//      document.gamma = 2.2;
     }
   }
   Slider {
@@ -59,10 +59,10 @@ GridLayout {
     leftPadding: Theme.padding
     rightPadding: Theme.padding
     to: 10
-    value: document.gamma
+//    value: document.gamma
 
     onMoved: {
-      document.gamma = value;
+//      document.gamma = value;
     }
   }
 
@@ -76,7 +76,7 @@ GridLayout {
     Layout.alignment: Qt.AlignRight
     Layout.fillWidth: true
     horizontalAlignment: Text.AlignRight
-    text: document.exposure.toFixed(2)
+//    text: document.exposure.toFixed(2)
   }
   IconButton {
     Layout.rightMargin: Theme.padding
@@ -84,7 +84,7 @@ GridLayout {
     size: Theme.smallIconSize
 
     onClicked: {
-      document.exposure = 0.0;
+//      document.exposure = 0.0;
     }
   }
   Slider {
@@ -97,10 +97,10 @@ GridLayout {
     leftPadding: Theme.padding
     rightPadding: Theme.padding
     to: 2
-    value: document.exposure
+//    value: document.exposure
 
     onMoved: {
-      document.exposure = value;
+//      document.exposure = value;
     }
   }
 
@@ -114,7 +114,7 @@ GridLayout {
     Layout.alignment: Qt.AlignRight
     Layout.fillWidth: true
     horizontalAlignment: Text.AlignRight
-    text: document.vibrancy.toFixed(2)
+//    text: document.vibrancy.toFixed(2)
   }
   IconButton {
     Layout.rightMargin: Theme.padding
@@ -122,7 +122,7 @@ GridLayout {
     size: Theme.smallIconSize
 
     onClicked: {
-      document.vibrancy = 0.0;
+//      document.vibrancy = 0.0;
     }
   }
   Slider {
@@ -135,10 +135,10 @@ GridLayout {
     leftPadding: Theme.padding
     rightPadding: Theme.padding
     to: 1
-    value: document.vibrancy
+//    value: document.vibrancy
 
     onMoved: {
-      document.vibrancy = value;
+//      document.vibrancy = value;
     }
   }
 }
