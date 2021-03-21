@@ -24,7 +24,12 @@ class ProjectModel : public QObject, public BaseModel<Project> {
   Q_PROPERTY(uint height READ height WRITE setHeight NOTIFY heightChanged);
 
  public:
-  ProjectModel(QObject* parent = nullptr);
+  struct Dependencies {
+    ColorMapModel* colorMapModel;
+    SystemModel* systemModel;
+  };
+
+  ProjectModel(QObject* parent = nullptr, Dependencies deps = {});
 
   void setProto(Project* proto) override;
 
