@@ -127,44 +127,49 @@ ApplicationWindow {
     font.weight: Font.DemiBold
     text: `Zoom: ${(systemPreview.zoom * 100).toFixed(0)}%`
   }
+  
+  Button {
+    id: debugSourceButton
 
-  RowLayout {
     anchors.bottom: zoomLabel.top
     anchors.left: zoomLabel.left
     anchors.bottomMargin: Theme.padding
 
-    spacing: Theme.units(4)
+    text: "Debug Source"
+    // outlined: true
 
-    Button {  
-      text: "Debug Source"
-      // outlined: true
+    onClicked: {
+      astInspectorLoader.active = true;
+    }
 
-      onClicked: {
-        astInspectorLoader.active = true;
-      }
+    Loader {
+      id: astInspectorLoader
+      active: false
+      sourceComponent: AstInspector {
+        anchors.centerIn: Overlay.overlay
+        modelSource: documentModel.debugSource
+        astSource: documentModel.astSource
 
-      Loader {
-        id: astInspectorLoader
-        active: false
-        sourceComponent: AstInspector {
-          anchors.centerIn: Overlay.overlay
-          modelSource: documentModel.debugSource
-          astSource: documentModel.astSource
-
-          onClosed: {
-            astInspectorLoader.active = false;
-          }
+        onClosed: {
+          astInspectorLoader.active = false;
         }
       }
     }
+  }
 
-    Button {
-      text: systemPreview.running ? "Pause" : "Run"
-      icon.source: systemPreview.running ? "qrc:/icons/pause.svg" : "qrc:/icons/play.svg"
+  Button {
+    id: pauseButton
 
-      onClicked: {
-        systemPreview.running = !systemPreview.running
-      }
+    anchors.bottom: zoomLabel.top
+    anchors.left: debugSourceButton.right
+    anchors.bottomMargin: Theme.padding
+    anchors.leftMargin: Theme.padding
+
+    text: systemPreview.running ? "Pause" : "Run"
+    icon.source: systemPreview.running ? "qrc:/icons/pause.svg" : "qrc:/icons/play.svg"
+
+    onClicked: {
+      systemPreview.running = !systemPreview.running
     }
   }
 
