@@ -4,21 +4,9 @@ import QtQuick.Layouts 1.12
 import ChaosKit 1.0
 
 GridLayout {
-  readonly property var document: documentModel.documentProxy
-
-  property string currentColorMap
-  Binding on currentColorMap {
-    value: document.colorMap
-  }
-
   columns: 2
   columnSpacing: Theme.padding
   rowSpacing: Theme.smallPadding
-
-  onCurrentColorMapChanged: {
-    colorMapPicker.currentIndex =
-        colorMapPicker.model.indexOf(document.colorMap);
-  }
 
   Heading {
     Layout.columnSpan: 2
@@ -37,7 +25,8 @@ GridLayout {
     Layout.fillWidth: true
     Layout.rightMargin: Theme.padding
 
-    model: globalColorMapRegistry.names
+    currentIndex: projectModel.colorMap.index
+    model: projectModel.colorMap.registry.names
     delegate: ItemDelegate {
       id: itemDelegate
       contentItem: Label {
@@ -49,7 +38,7 @@ GridLayout {
       background: Image {
         width: colorMapPicker.implicitWidth
         height: colorMapPicker.implicitHeight + Theme.units(1)
-        source: `image://colormap/${modelData}`
+        source: 'image://colormap/' + modelData
 
         Rectangle {
           anchors.fill: parent
@@ -60,7 +49,7 @@ GridLayout {
     }
 
     onActivated: {
-      document.colorMap = currentText;
+      projectModel.colorMap.name = currentText;
     }
   }
 
@@ -70,6 +59,6 @@ GridLayout {
     Layout.preferredHeight: Theme.units(1)
     Layout.leftMargin: Theme.padding
     Layout.rightMargin: Theme.padding
-    source: `image://colormap/${document.colorMap}`
+    source: 'image://colormap/' + projectModel.colorMap.name
   }
 }

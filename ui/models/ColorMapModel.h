@@ -12,21 +12,29 @@ namespace chaoskit::ui {
 class ColorMapModel : public QObject, public BaseModel<ColorMap> {
   Q_OBJECT
   Q_PROPERTY(const QString& name READ name WRITE setName NOTIFY nameChanged);
+  Q_PROPERTY(int index READ index NOTIFY indexChanged STORED false);
+  Q_PROPERTY(ColorMapRegistry* registry READ registry WRITE setColorMapRegistry
+                 NOTIFY registryChanged);
 
  public:
-  ColorMapModel(QObject* parent = nullptr)
-      : QObject(parent), BaseModel<ColorMap>() {}
+  ColorMapModel(QObject* parent = nullptr);
 
   void setProto(ColorMap* proto) override;
+
+  [[nodiscard]] ColorMapRegistry* registry() const { return colorMapRegistry_; }
   void setColorMapRegistry(ColorMapRegistry* registry);
 
   [[nodiscard]] const QString& name() const { return *nameCache_; }
   void setName(const QString& name);
 
+  [[nodiscard]] int index() const;
+
   [[nodiscard]] const core::ColorMap* coreColorMap() const { return colorMap_; }
 
  signals:
   void nameChanged();
+  void indexChanged();
+  void registryChanged();
   void invalidNamePicked();
 
  private:
