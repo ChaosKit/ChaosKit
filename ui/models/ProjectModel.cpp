@@ -2,10 +2,12 @@
 
 namespace chaoskit::ui {
 
-ProjectModel::ProjectModel(QObject* parent)
+ProjectModel::ProjectModel(QObject* parent, ProjectModel::Dependencies deps)
     : QObject(parent), BaseModel<Project>() {
-  colorMapModel_ = new ColorMapModel(this);
-  systemModel_ = new SystemModel(this);
+  colorMapModel_ = deps.colorMapModel == nullptr ? new ColorMapModel(this)
+                                                 : deps.colorMapModel;
+  systemModel_ =
+      deps.systemModel == nullptr ? new SystemModel(this) : deps.systemModel;
 }
 
 void ProjectModel::setProto(Project* proto) {
