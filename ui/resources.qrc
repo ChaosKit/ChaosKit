@@ -25,6 +25,7 @@
         <file>ChaosKit/TextField.qml</file>
         <file>ChaosKit/Theme.qml</file>
         <file>ChaosKit/ToolTip.qml</file>
+        <file>ChaosKit/OutlinedButton.qml</file>
         <file>forms/AstInspector.qml</file>
         <file>forms/BlendEditor.qml</file>
         <file>forms/BlendListItem.qml</file>

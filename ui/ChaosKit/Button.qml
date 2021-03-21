@@ -7,9 +7,6 @@ import ChaosKit 1.0
 T.Button {
   id: control
 
-  property bool outlined: false
-  flat: outlined
-
   implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                           implicitContentWidth + leftPadding + rightPadding)
   implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
@@ -29,9 +26,7 @@ T.Button {
   icon.height: Theme.smallIconSize
   icon.color: !control.enabled
       ? Theme.onSurfaceDisabled
-      : control.flat
-          ? Theme.primaryColor
-          : Theme.onPrimaryHigh
+      : Theme.onPrimaryHigh
 
   contentItem: IconLabel {
     spacing: control.spacing
@@ -43,18 +38,13 @@ T.Button {
     font: control.font
     color: !control.enabled
         ? Theme.onSurfaceDisabled
-        : control.flat
-            ? Theme.primaryColor
-            : Theme.onPrimaryHigh
+        : Theme.onPrimaryHigh
   }
 
   background: Rectangle {
     implicitWidth: Theme.units(14)
     implicitHeight: Theme.units(6)
-    visible: !control.flat || control.outlined || control.hovered || control.down
     radius: Theme.borderRadius
     color: Theme.buttonColor(control)
-    border.color: Qt.rgba(255, 255, 255, 0.12)
-    border.width: control.outlined ? 1 : 0
   }
 }

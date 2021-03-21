@@ -2,7 +2,6 @@ import Qt.labs.platform 1.1
 import QtQml 2.12
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.11
 import ChaosKit 1.0
 
 ApplicationWindow {
@@ -128,7 +127,7 @@ ApplicationWindow {
     text: `Zoom: ${(systemPreview.zoom * 100).toFixed(0)}%`
   }
   
-  Button {
+  OutlinedButton {
     id: debugSourceButton
 
     anchors.bottom: zoomLabel.top
@@ -136,7 +135,6 @@ ApplicationWindow {
     anchors.bottomMargin: Theme.padding
 
     text: "Debug Source"
-    // outlined: true
 
     onClicked: {
       astInspectorLoader.active = true;
@@ -157,7 +155,7 @@ ApplicationWindow {
     }
   }
 
-  Button {
+  OutlinedButton {
     id: pauseButton
 
     anchors.bottom: zoomLabel.top

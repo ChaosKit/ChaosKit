@@ -8,3 +8,4 @@ Icon 1.0 Icon.qml
 IconButton 1.0 IconButton.qml
 Separator 1.0 Separator.qml
 Snackbar 1.0 Snackbar.qml
+OutlinedButton 1.0 OutlinedButton.qml
