@@ -25,8 +25,10 @@ T.Button {
   icon.width: Theme.smallIconSize
   icon.height: Theme.smallIconSize
   icon.color: !control.enabled
-      ? Theme.onSurfaceDisabled
-      : Theme.onPrimaryHigh
+    ? Theme.onSurfaceDisabled
+    : control.flat
+        ? Theme.primaryColor
+        : Theme.onPrimaryHigh
 
   contentItem: IconLabel {
     spacing: control.spacing
@@ -37,7 +39,9 @@ T.Button {
     text: control.text
     font: control.font
     color: !control.enabled
-        ? Theme.onSurfaceDisabled
+      ? Theme.onSurfaceDisabled
+      : control.flat
+        ? Theme.primaryColor
         : Theme.onPrimaryHigh
   }
 
