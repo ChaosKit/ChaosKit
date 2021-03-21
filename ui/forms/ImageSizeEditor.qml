@@ -4,8 +4,6 @@ import QtQuick.Layouts 1.12
 import ChaosKit 1.0
 
 GridLayout {
-//  readonly property var document: documentModel.documentProxy
-
   columns: 3
   columnSpacing: Theme.padding
   rowSpacing: Theme.smallPadding
@@ -22,12 +20,13 @@ GridLayout {
     Layout.fillWidth: true
     Layout.leftMargin: Theme.padding
 
+    inputMethodHints: Qt.ImhDigitsOnly
     validator: IntValidator { bottom: 0 }
     onEditingFinished: {
-//      document.width = parseInt(text, 10);
+      projectModel.width = parseInt(text, 10);
     }
     Component.onCompleted: {
-//      text = `${document.width}`;
+      text = String(projectModel.width);
     }
   }
   Label {
@@ -37,12 +36,13 @@ GridLayout {
     Layout.fillWidth: true
     Layout.rightMargin: Theme.padding
 
+    inputMethodHints: Qt.ImhDigitsOnly
     validator: IntValidator { bottom: 0 }
     onEditingFinished: {
-//      document.height = parseInt(text, 10);
+      projectModel.height = parseInt(text, 10);
     }
     Component.onCompleted: {
-//      text = `${document.height}`;
+      text = String(projectModel.height);
     }
   }
 }

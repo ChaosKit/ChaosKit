@@ -2,6 +2,13 @@
 
 namespace chaoskit::ui {
 
+ColorMapModel::ColorMapModel(QObject* parent)
+    : QObject(parent), BaseModel<ColorMap>() {
+  // Emit indexChanged every time the name changes.
+  connect(this, &ColorMapModel::nameChanged, this,
+          &ColorMapModel::indexChanged);
+}
+
 void ColorMapModel::setProto(ColorMap* proto) {
   BaseModel::setProto(proto);
   updateNameCache();
@@ -10,6 +17,18 @@ void ColorMapModel::setProto(ColorMap* proto) {
 void ColorMapModel::setName(const QString& name) {
   if (*nameCache_ == name) return;
 
+  // Change the color map itself. If the desired map doesn't exist, fail
+  // gracefully and reject the change.
+  //
+  // You could ask why this doesn't reuse updateNameCache(). This would be
+  // perfectly appropriate if we were updating the proto directly and propagate
+  // down to derived fields (nameCache and colorMap).
+  //
+  // However, while normally the proto would be the source of truth, here we're
+  // really replacing nameCache and propagate the change up to the proto because
+  // it allows us to avoid a back-and-forth conversion between QString and
+  // std::string. Also, a separate code path allows us to better react to errors
+  // with signals.
   Q_ASSERT(colorMapRegistry_ != nullptr);
   if (!colorMapRegistry_->names().contains(name)) {
     emit invalidNamePicked();
@@ -17,6 +36,7 @@ void ColorMapModel::setName(const QString& name) {
   }
   colorMap_ = colorMapRegistry_->get(name);
 
+  // Update nameCache and the proto.
   *nameCache_ = name;
   proto_->set_name(name.toStdString());
   emit nameChanged();
@@ -27,11 +47,23 @@ void ColorMapModel::setColorMapRegistry(ColorMapRegistry* registry) {
 
   colorMapRegistry_ = registry;
   updateColorMap();
+  emit registryChanged();
+}
+
+int ColorMapModel::index() const {
+  if (nameCache_ && colorMapRegistry_ != nullptr) {
+    return colorMapRegistry_->names().indexOf(*nameCache_);
+  }
+  return -1;
 }
 
 void ColorMapModel::updateNameCache() {
-  nameCache_ = QString::fromStdString(proto_->name());
+  QString nameCache = QString::fromStdString(proto_->name());
+  if (nameCache_ == nameCache) return;
+
+  nameCache_ = nameCache;
   updateColorMap();
+  emit nameChanged();
 }
 
 void ColorMapModel::updateColorMap() {
