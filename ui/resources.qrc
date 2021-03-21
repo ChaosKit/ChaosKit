@@ -12,6 +12,7 @@
         <file>ChaosKit/IconButton.qml</file>
         <file>ChaosKit/ItemDelegate.qml</file>
         <file>ChaosKit/Label.qml</file>
+        <file>ChaosKit/OutlinedButton.qml</file>
         <file>ChaosKit/Popup.qml</file>
         <file>ChaosKit/qmldir</file>
         <file>ChaosKit/RadioButton.qml</file>

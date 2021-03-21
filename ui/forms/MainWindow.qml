@@ -126,13 +126,15 @@ ApplicationWindow {
     font.weight: Font.DemiBold
     text: `Zoom: ${(systemPreview.zoom * 100).toFixed(0)}%`
   }
+  
+  OutlinedButton {
+    id: debugSourceButton
 
-  Button {
     anchors.bottom: zoomLabel.top
     anchors.left: zoomLabel.left
     anchors.bottomMargin: Theme.padding
+
     text: "Debug Source"
-    outlined: true
 
     onClicked: {
       astInspectorLoader.active = true;
@@ -153,8 +155,24 @@ ApplicationWindow {
     }
   }
 
+  OutlinedButton {
+    id: pauseButton
+
+    anchors.bottom: zoomLabel.top
+    anchors.left: debugSourceButton.right
+    anchors.bottomMargin: Theme.padding
+    anchors.leftMargin: Theme.padding
+
+    text: systemPreview.running ? "Pause" : "Run"
+    icon.source: systemPreview.running ? "qrc:/icons/pause.svg" : "qrc:/icons/play.svg"
+
+    onClicked: {
+      systemPreview.running = !systemPreview.running
+    }
+  }
+
   Fab {
-    anchors.right: parent.right
+    anchors.right: documentEditor.left
     anchors.bottom: parent.bottom
     anchors.margins: Theme.units(4)
     enabled: true

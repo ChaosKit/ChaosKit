@@ -21,5 +21,7 @@
         <file alias="solar-system.svg">icons/kstars_solarsystem.svg</file>
         <file alias="trash.svg">icons/edit-delete-16.svg</file>
         <file alias="undo.svg">icons/edit-undo.svg</file>
+        <file alias="play.svg">icons/media-playback-start.svg</file>
+        <file alias="pause.svg">icons/media-playback-pause.svg</file>
     </qresource>
 </RCC>
