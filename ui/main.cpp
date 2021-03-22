@@ -127,15 +127,15 @@ int main(int argc, char* argv[]) {
       }));
 
   // Set up the project
-  chaoskit::Project project;
-  project.set_gamma(2.2f);
-  project.set_exposure(0.f);
-  project.set_vibrancy(0.f);
-  project.set_width(1024);
-  project.set_height(1024);
-  project.mutable_color_map()->set_name("BGR");
+  auto* project = new chaoskit::Project();
+  project->set_gamma(2.2f);
+  project->set_exposure(0.f);
+  project->set_vibrancy(0.f);
+  project->set_width(1024);
+  project->set_height(1024);
+  project->mutable_color_map()->set_name("BGR");
 
-  auto* system = project.mutable_system();
+  auto* system = project->mutable_system();
   system->set_ttl(30);
   system->set_skip(0);
 
@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
 
   auto* projectModel = new ProjectModel();
   projectModel->colorMap()->setColorMapRegistry(colorMapRegistry);
-  projectModel->setProto(&project);
+  projectModel->setProto(project);
 
   // Set up fonts
   {

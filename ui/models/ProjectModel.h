@@ -2,6 +2,7 @@
 #define CHAOSKIT_UI_MODELS_PROJECTMODEL_H
 
 #include <QObject>
+#include <QUrl>
 #include "BaseModel.h"
 #include "ColorMapModel.h"
 #include "SystemModel.h"
@@ -22,6 +23,9 @@ class ProjectModel : public QObject, public BaseModel<Project> {
       float vibrancy READ vibrancy WRITE setVibrancy NOTIFY vibrancyChanged);
   Q_PROPERTY(uint width READ width WRITE setWidth NOTIFY widthChanged);
   Q_PROPERTY(uint height READ height WRITE setHeight NOTIFY heightChanged);
+  Q_PROPERTY(bool modified READ modified NOTIFY modifiedChanged);
+  Q_PROPERTY(const QString& name READ name NOTIFY nameChanged);
+  Q_PROPERTY(const QUrl& fileUrl READ fileUrl NOTIFY fileUrlChanged);
 
  public:
   struct Dependencies {
@@ -51,7 +55,17 @@ class ProjectModel : public QObject, public BaseModel<Project> {
   [[nodiscard]] uint height() const { return proto_->height(); }
   void setHeight(uint height);
 
+  // File-related methods
+
+  [[nodiscard]] const QString& name() const { return name_; }
+  [[nodiscard]] const QUrl& fileUrl() const { return fileUrl_; }
+  [[nodiscard]] bool modified() const { return modified_; }
+
+  Q_INVOKABLE bool loadFromUrl(const QUrl& url);
+  Q_INVOKABLE bool saveToUrl(const QUrl& url);
+
  signals:
+  void projectChanged();
   void gammaChanged();
   void exposureChanged();
   void vibrancyChanged();
@@ -59,10 +73,22 @@ class ProjectModel : public QObject, public BaseModel<Project> {
   void heightChanged();
   void colorMapChanged();
   void systemChanged();
+  void modifiedChanged();
+  void nameChanged();
+  void fileUrlChanged();
+  void fileIoFailed(const QString& error);
 
  private:
   ColorMapModel* colorMapModel_;
   SystemModel* systemModel_;
+  bool modified_ = true;
+  QString name_ = "Untitled";
+  QUrl fileUrl_;
+
+ private slots:
+  void setFileUrl(const QUrl& url);
+  void markAsModified();
+  void markAsUnmodified();
 };
 
 }  // namespace chaoskit::ui

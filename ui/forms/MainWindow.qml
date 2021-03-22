@@ -6,8 +6,7 @@ import ChaosKit 1.0
 
 ApplicationWindow {
   height: 768
-  //  title: `${documentModel.modified ? '*' : ''}${documentModel.name} — ChaosKit`
-  title: 'ChaosKit'
+  title: `${projectModel.modified ? '*' : ''}${projectModel.name} — ChaosKit`
   visible: true
   width: 1024
 
@@ -20,16 +19,13 @@ ApplicationWindow {
     snackbar.open();
   }
 
-//  Connections {
-//    target: documentModel
-//
-//    function onIoFailed(error) {
-//      openSnackbar(error);
-//    }
-//    function onModelAboutToBeReset() {
-//      selectionModel.clearCurrentIndex();
-//    }
-//  }
+  Connections {
+    target: projectModel
+
+    function onFileIoFailed(error) {
+      openSnackbar(error);
+    }
+  }
 
   FileDialog {
     id: openDialog
@@ -40,8 +36,7 @@ ApplicationWindow {
     options: FileDialog.ReadOnly
 
     onAccepted: {
-      const fileName = Utilities.urlToLocalPath(file);
-      documentModel.loadFromFile(fileName);
+      projectModel.loadFromUrl(file);
     }
   }
   FileDialog {
@@ -53,8 +48,7 @@ ApplicationWindow {
     nameFilters: ["ChaosKit files (*.ck)"]
 
     onAccepted: {
-      const fileName = Utilities.urlToLocalPath(file);
-      if (documentModel.saveToFile(fileName)) {
+      if (projectModel.saveToUrl(file)) {
         openSnackbar("File saved");
       }
     }
@@ -77,17 +71,17 @@ ApplicationWindow {
 
   MainMenu {
     onNewTriggered: {
-//      documentModel.resetDocument();
+      openSnackbar("Not implemented yet");
     }
     onOpen: {
       openDialog.open()
     }
     onSave: {
-//      if (documentModel.filePath === '') {
-//        saveDialog.open();
-//      } else if (documentModel.saveToFile(documentModel.filePath)) {
-//        openSnackbar("File saved");
-//      }
+      if (projectModel.fileUrl == "") {
+        saveDialog.open();
+      } else if (projectModel.saveToUrl(projectModel.fileUrl)) {
+        openSnackbar("File saved");
+      }
     }
     onSaveAs: {
       saveDialog.open()
@@ -178,7 +172,7 @@ ApplicationWindow {
     ToolTip.visible: hovered
 
     onClicked: {
-//      documentModel.randomizeSystem();
+      openSnackbar("Not implemented yet");
     }
   }
 }
