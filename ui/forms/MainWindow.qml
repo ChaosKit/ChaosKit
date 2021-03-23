@@ -100,8 +100,8 @@ ApplicationWindow {
     }
   }
 
-  DocumentEditor {
-    id: documentEditor
+  ProjectEditor {
+    id: projectEditor
     anchors.top: parent.top
     anchors.right: parent.right
     anchors.bottom: parent.bottom
@@ -163,7 +163,7 @@ ApplicationWindow {
   }
 
   Fab {
-    anchors.right: documentEditor.left
+    anchors.right: projectEditor.left
     anchors.bottom: parent.bottom
     anchors.margins: Theme.units(4)
     enabled: true
