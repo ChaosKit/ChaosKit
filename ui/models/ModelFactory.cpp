@@ -3,6 +3,7 @@
 #include "ColorMapModel.h"
 #include "ProjectModel.h"
 #include "SystemModel.h"
+#include "TransformModel.h"
 
 namespace chaoskit::ui {
 
@@ -14,6 +15,9 @@ ColorMapModel* ModelFactory::createColorMapModel(QObject* parent) {
 }
 SystemModel* ModelFactory::createSystemModel(QObject* parent) {
   return new SystemModel(parent);
+}
+TransformModel* ModelFactory::createTransformModel(QObject* parent) {
+  return new TransformModel(parent);
 }
 
 }  // namespace chaoskit::ui

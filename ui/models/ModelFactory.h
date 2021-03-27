@@ -8,12 +8,14 @@ namespace chaoskit::ui {
 class ColorMapModel;
 class ProjectModel;
 class SystemModel;
+class TransformModel;
 
 class ModelFactory {
  public:
   virtual ProjectModel* createProjectModel(QObject* parent);
   virtual ColorMapModel* createColorMapModel(QObject* parent);
   virtual SystemModel* createSystemModel(QObject* parent);
+  virtual TransformModel* createTransformModel(QObject* parent);
 };
 
 }  // namespace chaoskit::ui
