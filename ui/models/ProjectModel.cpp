@@ -12,12 +12,10 @@ Q_LOGGING_CATEGORY(modelLog, "ProjectModel");
 
 }
 
-ProjectModel::ProjectModel(QObject* parent, ProjectModel::Dependencies deps)
+ProjectModel::ProjectModel(ModelFactory* modelFactory, QObject* parent)
     : QObject(parent), BaseModel<Project>() {
-  colorMapModel_ = deps.colorMapModel == nullptr ? new ColorMapModel(this)
-                                                 : deps.colorMapModel;
-  systemModel_ =
-      deps.systemModel == nullptr ? new SystemModel(this) : deps.systemModel;
+  colorMapModel_ = modelFactory->createColorMapModel(this);
+  systemModel_ = modelFactory->createSystemModel(this);
 
   // Emit "changed" signals for all properties when the project itself changes.
   connect(this, &ProjectModel::projectChanged, this,

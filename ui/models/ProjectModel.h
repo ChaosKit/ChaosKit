@@ -5,6 +5,7 @@
 #include <QUrl>
 #include "BaseModel.h"
 #include "ColorMapModel.h"
+#include "ModelFactory.h"
 #include "SystemModel.h"
 #include "chaoskit.pb.h"
 
@@ -28,12 +29,7 @@ class ProjectModel : public QObject, public BaseModel<Project> {
   Q_PROPERTY(const QUrl& fileUrl READ fileUrl NOTIFY fileUrlChanged);
 
  public:
-  struct Dependencies {
-    ColorMapModel* colorMapModel;
-    SystemModel* systemModel;
-  };
-
-  ProjectModel(QObject* parent = nullptr, Dependencies deps = {});
+  explicit ProjectModel(ModelFactory* modelFactory, QObject* parent = nullptr);
 
   void setProto(Project* proto) override;
 
