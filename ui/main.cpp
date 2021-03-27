@@ -24,7 +24,7 @@
 #include "core/PaletteColorMap.h"
 #include "library/FormulaType.h"
 #include "models/ColorMapRegistry.h"
-#include "models/ProjectModel.h"
+#include "models/ModelFactory.h"
 #include "resources.h"
 
 using chaoskit::core::Color;
@@ -37,7 +37,7 @@ using chaoskit::ui::ColorMapRegistry;
 using chaoskit::ui::EngineManager;
 using chaoskit::ui::FormulaPreviewProvider;
 using chaoskit::ui::ModelEntry;
-using chaoskit::ui::ProjectModel;
+using chaoskit::ui::ModelFactory;
 using chaoskit::ui::SystemView;
 using chaoskit::ui::Utilities;
 namespace resources = chaoskit::resources;
@@ -163,7 +163,9 @@ int main(int argc, char* argv[]) {
     camera->set_m32(cameraTransform.m32());
   }
 
-  auto* projectModel = new ProjectModel();
+  // Setup the model layer
+  auto* modelFactory = new ModelFactory();
+  auto* projectModel = modelFactory->createProjectModel(nullptr);
   projectModel->colorMap()->setColorMapRegistry(colorMapRegistry);
   projectModel->setProto(project);
 
