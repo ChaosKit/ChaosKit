@@ -12,7 +12,11 @@ add_library(
   ProjectModel.cpp
   ProjectModel.h
   SystemModel.cpp
-  SystemModel.h)
+  SystemModel.h
+  TransformModel.cpp
+  TransformModel.h)
 set_target_properties(ui_models PROPERTIES AUTOMOC ON)
-target_link_libraries(ui_models PUBLIC core ui_colormapregistry ui_storage
-                                       Qt5::Core)
+target_link_libraries(
+  ui_models
+  PUBLIC core ui_colormapregistry ui_storage Qt5::Core
+  PRIVATE Qt5::Gui)
