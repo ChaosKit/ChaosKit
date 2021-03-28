@@ -86,6 +86,9 @@ CMakeLists.txt.user*
 .idea/**/tasks.xml
 .idea/dictionaries
 
+# VCS Shelf
+.idea/shelf/
+
 # Sensitive or high-churn files:
 .idea/**/dataSources/
 .idea/**/dataSources.ids
