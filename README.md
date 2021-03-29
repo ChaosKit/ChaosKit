@@ -19,8 +19,7 @@ To build the UI, you need additionally the following:
 Once you have the above installed, you can run the following commands to download and build ChaosKit:
 
 ```
-# We use Git submodules for third party dependencies.
-git clone --recursive https://github.com/ChaosKit/ChaosKit.git
+git clone https://github.com/ChaosKit/ChaosKit.git
 cd ChaosKit
 mkdir build
 cd build
@@ -40,7 +39,6 @@ The project is organized like a [monorepo](https://en.wikipedia.org/wiki/Monorep
 - `library` — definitions of various formulas (non-linear transformations) and coloring methods expressed in the AST
 - `state` — a standalone UI state management library, loosely inspired by [Redux](https://redux.js.org/), but turned out nothing like it. Supports compile-time validation of has-one and has-many relationships between structures.
 - `stdx` — exports `std::optional` for older Apple Clang compilers.
-- `thirdparty` — third-party libraries
 - `ui` — QML-based GUI to edit and render Fractal Flames
 
 ## License
@@ -49,4 +47,4 @@ I need to formalize this one day, but this is the intent:
 
 Code under the `ui` directory is licensed under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html).
 
-All other code (outside of `thirdparty`) is licensed under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
+All other code is licensed under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
