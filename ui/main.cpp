@@ -1,3 +1,4 @@
+#include <QtQmlTricksPlugin_SmartDataModels.h>
 #include <QDir>
 #include <QDirIterator>
 #include <QFontDatabase>
@@ -189,6 +190,9 @@ int main(int argc, char* argv[]) {
     qmlRegisterSingletonType<Utilities>(
         "ChaosKit", 1, 0, "Utilities",
         [](QQmlEngine*, QJSEngine*) -> QObject* { return new Utilities(); });
+
+    // The implementation only registers types and doesn't use the argument.
+    registerQtQmlTricksSmartDataModel(nullptr);
   });
 
   auto onEngineCreated = [projectModel,

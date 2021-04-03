@@ -107,6 +107,7 @@ target_link_libraries(
   ui_state
   ui_storage
   magic_enum
+  qt_qml_models
   Qt5::Core
   Qt5::Gui
   Qt5::Qml
