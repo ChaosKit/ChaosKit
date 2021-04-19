@@ -70,6 +70,31 @@ void TransformModel::setTranslationY(float dy) {
   emit translationYChanged();
 }
 
+void TransformModel::reset() {
+  proto_->set_m11(1);
+  proto_->set_m21(0);
+  proto_->set_m31(0);
+  proto_->set_m21(0);
+  proto_->set_m22(1);
+  proto_->set_m32(0);
+
+  // Trigger an update of all properties.
+  setProto(proto_);
+}
+
+void TransformModel::resetProto(Transform *proto) {
+  // Set all fields to defaults.
+  proto->set_m11(1);
+  proto->set_m21(0);
+  proto->set_m31(0);
+  proto->set_m21(0);
+  proto->set_m22(1);
+  proto->set_m32(0);
+
+  // Set the proto.
+  setProto(proto);
+}
+
 void TransformModel::updateMatrix() {
   auto transform = QTransform::fromTranslate(translationX_, translationY_)
                        .rotateRadians(rotation_)
