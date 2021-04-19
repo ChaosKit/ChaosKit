@@ -100,10 +100,9 @@ QStringList createExportFormatList() {
 }
 
 int main(int argc, char* argv[]) {
-  resources::initialize();   
+  resources::initialize();
 
   QQuickStyle::addStylePath(resources::importPath());
-  QQuickStyle::setStyle("ChaosKit");
 
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication app(argc, argv);
@@ -169,6 +168,8 @@ int main(int argc, char* argv[]) {
   engineManager->setLoadUrl(resources::createUrl("forms/MainWindow.qml"));
 
   QObject::connect(engineManager, &EngineManager::engineAboutToBeCreated, [] {
+    QQuickStyle::setStyle("ChaosKit");
+
     qmlRegisterAnonymousType<DocumentProxy>("ChaosKit", 1);
     qmlRegisterUncreatableType<DocumentEntryType>(
         "ChaosKit", 1, 0, "DocumentEntryType",
