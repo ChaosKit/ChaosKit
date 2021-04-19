@@ -24,6 +24,7 @@ add_library(
   SystemIndex.h
   toParams.cpp
   toParams.h
+  toSystem.cpp
   toSystem.h
   toTransform.cpp
   toTransform.h
