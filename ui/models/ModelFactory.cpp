@@ -7,6 +7,9 @@
 
 namespace chaoskit::ui {
 
+BlendModel* ModelFactory::createBlendModel(QObject* parent) {
+  return new BlendModel(this, parent);
+}
 ProjectModel* ModelFactory::createProjectModel(QObject* parent) {
   return new ProjectModel(this, parent);
 }
@@ -14,7 +17,7 @@ ColorMapModel* ModelFactory::createColorMapModel(QObject* parent) {
   return new ColorMapModel(parent);
 }
 SystemModel* ModelFactory::createSystemModel(QObject* parent) {
-  return new SystemModel(parent);
+  return new SystemModel(this, parent);
 }
 TransformModel* ModelFactory::createTransformModel(QObject* parent) {
   return new TransformModel(parent);

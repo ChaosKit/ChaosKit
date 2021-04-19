@@ -34,6 +34,9 @@ class TransformModel : public QObject, public BaseModel<Transform> {
   [[nodiscard]] float translationY() const { return translationY_; }
   void setTranslationY(float dy);
 
+  void reset();
+  void resetProto(Transform* proto);
+
  signals:
   void transformChanged();
   void rotationChanged();

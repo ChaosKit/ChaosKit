@@ -5,6 +5,8 @@ target_link_libraries(ui_colormapregistry PUBLIC core Qt5::Core)
 add_library(
   ui_models
   BaseModel.h
+  BlendModel.cpp
+  BlendModel.h
   ColorMapModel.cpp
   ColorMapModel.h
   ModelFactory.cpp
@@ -18,5 +20,5 @@ add_library(
 set_target_properties(ui_models PROPERTIES AUTOMOC ON)
 target_link_libraries(
   ui_models
-  PUBLIC core ui_colormapregistry ui_storage Qt5::Core
+  PUBLIC core ui_colormapregistry ui_storage Qt5::Core qt_qml_models
   PRIVATE Qt5::Gui)
