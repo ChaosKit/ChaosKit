@@ -16,12 +16,10 @@ Column {
     }
   }
 
-  Button {
-    flat: true
-    icon.source: Theme.iconUrl('plus')
-    icon.width: Theme.smallIconSize
-    icon.height: Theme.smallIconSize
+  ItemPlaceholder {
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.margins: Theme.smallPadding
     text: 'Add blend'
-    width: parent.width
   }
 }
