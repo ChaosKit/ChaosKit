@@ -2,7 +2,7 @@ import QtQuick.Controls.impl 2.15
 
 IconLabel {
   property string name
-  property color tint
+  property color tint: Theme.onSurfaceHigh
   property int size: Theme.smallIconSize
 
   icon.color: tint
