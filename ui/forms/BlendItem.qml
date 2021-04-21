@@ -6,6 +6,8 @@ import ChaosKit 1.0
 Item {
   id: root
 
+  property var blend
+  property string name
   property bool open: false
 
   implicitHeight: header.height + (open ? contents.height : 0)
@@ -46,7 +48,7 @@ Item {
       Label {
         Layout.fillWidth: true
         Layout.rightMargin: Theme.smallPadding
-        text: name || 'Untitled Blend'
+        text: name || blend.name || 'Untitled Blend'
       }
     }
   }

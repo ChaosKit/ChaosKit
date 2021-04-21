@@ -13,6 +13,7 @@ namespace chaoskit::ui {
 class SystemModel : public QObject, public BaseModel<System> {
   Q_OBJECT
   Q_PROPERTY(QQmlObjectListModelBase* blends READ blends CONSTANT);
+  Q_PROPERTY(BlendModel* cameraBlend READ cameraBlend CONSTANT);
   Q_PROPERTY(const QString& astSource READ astSource NOTIFY somethingChanged);
   Q_PROPERTY(
       const QString& modelSource READ modelSource NOTIFY somethingChanged);
@@ -25,6 +26,9 @@ class SystemModel : public QObject, public BaseModel<System> {
   [[nodiscard]] QQmlObjectListModel<BlendModel>* blends() const {
     return blends_;
   }
+  [[nodiscard]] BlendModel* cameraBlend() const {
+    return cameraBlend_;
+  }
 
   [[nodiscard]] QString astSource() const;
   [[nodiscard]] QString modelSource() const;
@@ -35,6 +39,7 @@ class SystemModel : public QObject, public BaseModel<System> {
  private:
   ModelFactory* modelFactory_;
   QQmlObjectListModel<BlendModel>* blends_;
+  BlendModel* cameraBlend_;
 };
 
 }  // namespace chaoskit::ui

@@ -9,6 +9,7 @@ namespace chaoskit::ui {
 SystemModel::SystemModel(ModelFactory* modelFactory, QObject* parent)
     : QObject(parent), BaseModel<System>(), modelFactory_(modelFactory) {
   blends_ = new QQmlObjectListModel<BlendModel>(this);
+  cameraBlend_ = modelFactory_->createBlendModel(this);
 }
 
 void SystemModel::setProto(System* proto) {
@@ -25,6 +26,9 @@ void SystemModel::setProto(System* proto) {
     newModels.append(model);
   }
   blends_->append(newModels);
+
+  // Populate the camera blend
+  cameraBlend_->setProto(proto_->mutable_final_blend());
 }
 
 QString SystemModel::astSource() const {
