@@ -66,6 +66,15 @@ QtObject {
     );
   }
 
+  function controlColor(hovered, pressed, focused) {
+    const value =
+      focused ? 0.12 :
+      pressed ? 0.1 :
+      hovered ? 0.04 :
+      0.0;
+    return Qt.rgba(255, 255, 255, value);
+  }
+
   function buttonColor(control) {
     if (!control.enabled) return Theme.disabledColor;
 
