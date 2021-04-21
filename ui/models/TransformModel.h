@@ -7,7 +7,7 @@
 
 namespace chaoskit::ui {
 
-class TransformModel : public QObject, public BaseModel<Transform> {
+class TransformModel : public BaseModel<Transform> {
   Q_OBJECT
   Q_PROPERTY(float scaleX READ scaleX WRITE setScaleX NOTIFY scaleXChanged);
   Q_PROPERTY(float scaleY READ scaleY WRITE setScaleY NOTIFY scaleYChanged);

@@ -2,8 +2,7 @@
 
 namespace chaoskit::ui {
 
-ColorMapModel::ColorMapModel(QObject* parent)
-    : QObject(parent), BaseModel<ColorMap>() {
+ColorMapModel::ColorMapModel(QObject* parent) : BaseModel<ColorMap>(parent) {
   // Emit indexChanged every time the name changes.
   connect(this, &ColorMapModel::nameChanged, this,
           &ColorMapModel::indexChanged);
@@ -11,7 +10,10 @@ ColorMapModel::ColorMapModel(QObject* parent)
 
 void ColorMapModel::setProto(ColorMap* proto) {
   BaseModel::setProto(proto);
+
   updateNameCache();
+
+  emit protoChanged();
 }
 
 void ColorMapModel::setName(const QString& name) {

@@ -11,7 +11,7 @@
 
 namespace chaoskit::ui {
 
-class ProjectModel : public QObject, public BaseModel<Project> {
+class ProjectModel : public BaseModel<Project> {
   Q_OBJECT
   Q_PROPERTY(chaoskit::ui::ColorMapModel* colorMap READ colorMap NOTIFY
                  colorMapChanged);

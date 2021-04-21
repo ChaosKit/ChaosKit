@@ -5,8 +5,7 @@
 
 namespace chaoskit::ui {
 
-TransformModel::TransformModel(QObject *parent)
-    : QObject(parent), BaseModel<Transform>() {
+TransformModel::TransformModel(QObject *parent) : BaseModel<Transform>(parent) {
   // Emit changed signals on all properties when transformChanged emits.
   connect(this, &TransformModel::transformChanged, this,
           &TransformModel::scaleXChanged);
@@ -33,6 +32,7 @@ void TransformModel::setProto(Transform *proto) {
   rotation_ = std::atan2(proto->m21() / scaleY_, proto->m11() / scaleX_);
 
   emit transformChanged();
+  emit protoChanged();
 }
 
 void TransformModel::setScaleX(float sx) {

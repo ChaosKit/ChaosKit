@@ -10,7 +10,7 @@
 
 namespace chaoskit::ui {
 
-class SystemModel : public QObject, public BaseModel<System> {
+class SystemModel : public BaseModel<System> {
   Q_OBJECT
   Q_PROPERTY(QQmlObjectListModelBase* blends READ blends CONSTANT);
   Q_PROPERTY(BlendModel* cameraBlend READ cameraBlend CONSTANT);
