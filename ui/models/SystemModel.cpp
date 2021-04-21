@@ -31,6 +31,13 @@ void SystemModel::setProto(System* proto) {
   cameraBlend_->setProto(proto_->mutable_final_blend());
 }
 
+void SystemModel::addBlend() {
+  // TODO: populate signals correctly to update sources
+  auto* model = modelFactory_->createBlendModel(blends_);
+  model->setProto(proto_->add_blends());
+  blends_->append(model);
+}
+
 QString SystemModel::astSource() const {
   std::stringstream stream;
   const core::CameraSystem& cameraSystem = toCameraSystem(*proto_);
