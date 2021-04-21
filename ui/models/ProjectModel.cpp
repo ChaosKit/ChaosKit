@@ -13,7 +13,7 @@ Q_LOGGING_CATEGORY(modelLog, "ProjectModel");
 }
 
 ProjectModel::ProjectModel(ModelFactory* modelFactory, QObject* parent)
-    : QObject(parent), BaseModel<Project>() {
+    : BaseModel<Project>(parent) {
   colorMapModel_ = modelFactory->createColorMapModel(this);
   systemModel_ = modelFactory->createSystemModel(this);
 
@@ -52,6 +52,8 @@ void ProjectModel::setProto(Project* proto) {
 
   // Will emit signals for all properties.
   emit projectChanged();
+
+  emit protoChanged();
 }
 
 void ProjectModel::setGamma(float gamma) {

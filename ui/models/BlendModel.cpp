@@ -3,7 +3,7 @@
 namespace chaoskit::ui {
 
 BlendModel::BlendModel(ModelFactory *modelFactory, QObject *parent)
-    : QObject(parent), BaseModel<Blend>(), modelFactory_(modelFactory) {}
+    : BaseModel<Blend>(parent), modelFactory_(modelFactory) {}
 
 void BlendModel::setProto(Blend *proto) {
   BaseModel::setProto(proto);
@@ -11,6 +11,8 @@ void BlendModel::setProto(Blend *proto) {
   updateNameCache();
   updatePre();
   updatePost();
+
+  emit protoChanged();
 }
 
 void BlendModel::setEnabled(bool enabled) {

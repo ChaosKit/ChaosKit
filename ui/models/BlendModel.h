@@ -9,7 +9,7 @@
 
 namespace chaoskit::ui {
 
-class BlendModel : public QObject, public BaseModel<Blend> {
+class BlendModel : public BaseModel<Blend> {
   Q_OBJECT
   Q_PROPERTY(BlendModel* self READ self CONSTANT FINAL);
   Q_PROPERTY(const QString& name READ name WRITE setName NOTIFY nameChanged);

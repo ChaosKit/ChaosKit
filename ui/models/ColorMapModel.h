@@ -9,7 +9,7 @@
 
 namespace chaoskit::ui {
 
-class ColorMapModel : public QObject, public BaseModel<ColorMap> {
+class ColorMapModel : public BaseModel<ColorMap> {
   Q_OBJECT
   Q_PROPERTY(const QString& name READ name WRITE setName NOTIFY nameChanged);
   Q_PROPERTY(int index READ index NOTIFY indexChanged STORED false);
