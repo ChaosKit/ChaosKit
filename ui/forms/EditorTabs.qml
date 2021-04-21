@@ -20,10 +20,10 @@ Rectangle {
 
     ListModel {
       id: tabs
-//      ListElement {
-//        icon: 'solar-system'
-//        text: 'System'
-//      }
+      ListElement {
+        icon: 'solar-system'
+        text: 'System'
+      }
       ListElement {
         icon: 'image'
         text: 'Image'

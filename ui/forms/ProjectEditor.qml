@@ -23,7 +23,7 @@ RowLayout {
       anchors.fill: parent
       currentIndex: tabs.currentIndex
 
-//      SystemEditor {}
+      SystemEditor {}
       ImageEditor {}
     }
   }
