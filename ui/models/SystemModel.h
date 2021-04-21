@@ -26,12 +26,13 @@ class SystemModel : public QObject, public BaseModel<System> {
   [[nodiscard]] QQmlObjectListModel<BlendModel>* blends() const {
     return blends_;
   }
-  [[nodiscard]] BlendModel* cameraBlend() const {
-    return cameraBlend_;
-  }
+  [[nodiscard]] BlendModel* cameraBlend() const { return cameraBlend_; }
 
   [[nodiscard]] QString astSource() const;
   [[nodiscard]] QString modelSource() const;
+
+ public slots:
+  void addBlend();
 
  signals:
   void somethingChanged();

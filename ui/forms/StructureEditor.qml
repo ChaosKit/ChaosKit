@@ -28,5 +28,9 @@ Column {
     anchors.right: parent.right
     anchors.margins: Theme.smallPadding
     text: 'Add blend'
+
+    onClicked: {
+      projectModel.system.addBlend();
+    }
   }
 }
