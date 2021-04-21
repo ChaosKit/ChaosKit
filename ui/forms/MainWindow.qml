@@ -96,7 +96,7 @@ ApplicationWindow {
     anchors.centerIn: parent
 
     Component.onCompleted: {
-     running = true;
+    //  running = true;
     }
   }
 

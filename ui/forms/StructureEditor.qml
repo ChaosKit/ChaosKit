@@ -12,8 +12,15 @@ Column {
   Repeater {
     model: projectModel.system.blends
     delegate: BlendItem {
+      blend: model
       width: parent.width
     }
+  }
+
+  BlendItem {
+    blend: projectModel.system.cameraBlend
+    name: 'Camera'
+    width: parent.width
   }
 
   ItemPlaceholder {
