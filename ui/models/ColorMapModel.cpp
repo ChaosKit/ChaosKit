@@ -41,6 +41,7 @@ void ColorMapModel::setName(const QString& name) {
   // Update nameCache and the proto.
   *nameCache_ = name;
   proto_->set_name(name.toStdString());
+  emit protoChanged();
   emit nameChanged();
 }
 
