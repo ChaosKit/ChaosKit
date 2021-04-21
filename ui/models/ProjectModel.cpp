@@ -31,6 +31,12 @@ ProjectModel::ProjectModel(ModelFactory* modelFactory, QObject* parent)
   connect(this, &ProjectModel::projectChanged, this,
           &ProjectModel::systemChanged);
 
+  // Listen to proto changes in children and emit protoChanged.
+  connect(colorMapModel_, &AbstractBaseModel::protoChanged, this,
+          &AbstractBaseModel::protoChanged);
+  connect(systemModel_, &AbstractBaseModel::protoChanged, this,
+          &AbstractBaseModel::protoChanged);
+
   // Mark the model as modified if dependencies change.
   connect(colorMapModel_, &ColorMapModel::nameChanged, this,
           &ProjectModel::markAsModified);
@@ -61,6 +67,7 @@ void ProjectModel::setGamma(float gamma) {
 
   proto_->set_gamma(gamma);
   emit gammaChanged();
+  emit protoChanged();
   markAsModified();
 }
 
@@ -69,6 +76,7 @@ void ProjectModel::setExposure(float exposure) {
 
   proto_->set_exposure(exposure);
   emit exposureChanged();
+  emit protoChanged();
   markAsModified();
 }
 
@@ -77,6 +85,7 @@ void ProjectModel::setVibrancy(float vibrancy) {
 
   proto_->set_vibrancy(vibrancy);
   emit vibrancyChanged();
+  emit protoChanged();
   markAsModified();
 }
 
@@ -85,6 +94,7 @@ void ProjectModel::setWidth(uint width) {
 
   proto_->set_width(width);
   emit widthChanged();
+  emit protoChanged();
   markAsModified();
 }
 
@@ -93,6 +103,7 @@ void ProjectModel::setHeight(uint height) {
 
   proto_->set_height(height);
   emit heightChanged();
+  emit protoChanged();
   markAsModified();
 }
 

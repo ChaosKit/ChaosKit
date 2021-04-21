@@ -18,12 +18,14 @@ void BlendModel::setProto(Blend *proto) {
 void BlendModel::setEnabled(bool enabled) {
   if (proto_->enabled() == enabled) return;
   proto_->set_enabled(enabled);
+  emit protoChanged();
   emit enabledChanged();
 }
 
 void BlendModel::setWeight(float weight) {
   if (qFuzzyCompare(proto_->weight(), weight)) return;
   proto_->set_weight(weight);
+  emit protoChanged();
   emit weightChanged();
 }
 
@@ -32,6 +34,7 @@ void BlendModel::setName(const QString &name) {
 
   nameCache_ = name;
   proto_->set_name(name.toStdString());
+  emit protoChanged();
   emit nameChanged();
 }
 
@@ -39,6 +42,8 @@ void BlendModel::addPre() {
   if (pre_ != nullptr) return;
 
   pre_ = modelFactory_->createTransformModel(this);
+  connect(pre_, &AbstractBaseModel::protoChanged, this,
+          &AbstractBaseModel::protoChanged);
   if (proto_->has_pre()) {
     pre_->setProto(proto_->mutable_pre());
   } else {
@@ -52,6 +57,7 @@ void BlendModel::removePre() {
 
   delete pre_;
   proto_->clear_pre();
+  emit protoChanged();
   emit preChanged();
 }
 
@@ -59,6 +65,8 @@ void BlendModel::addPost() {
   if (post_ != nullptr) return;
 
   post_ = modelFactory_->createTransformModel(this);
+  connect(post_, &AbstractBaseModel::protoChanged, this,
+          &AbstractBaseModel::protoChanged);
   if (proto_->has_post()) {
     post_->setProto(proto_->mutable_post());
   } else {
@@ -72,6 +80,7 @@ void BlendModel::removePost() {
 
   delete post_;
   proto_->clear_post();
+  emit protoChanged();
   emit postChanged();
 }
 

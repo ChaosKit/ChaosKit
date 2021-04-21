@@ -14,9 +14,8 @@ class SystemModel : public BaseModel<System> {
   Q_OBJECT
   Q_PROPERTY(QQmlObjectListModelBase* blends READ blends CONSTANT);
   Q_PROPERTY(BlendModel* cameraBlend READ cameraBlend CONSTANT);
-  Q_PROPERTY(const QString& astSource READ astSource NOTIFY somethingChanged);
-  Q_PROPERTY(
-      const QString& modelSource READ modelSource NOTIFY somethingChanged);
+  Q_PROPERTY(const QString& astSource READ astSource NOTIFY protoChanged);
+  Q_PROPERTY(const QString& modelSource READ modelSource NOTIFY protoChanged);
 
  public:
   SystemModel(ModelFactory* modelFactory, QObject* parent = nullptr);
@@ -33,9 +32,6 @@ class SystemModel : public BaseModel<System> {
 
  public slots:
   void addBlend();
-
- signals:
-  void somethingChanged();
 
  private:
   ModelFactory* modelFactory_;
