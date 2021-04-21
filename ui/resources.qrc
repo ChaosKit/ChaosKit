@@ -11,6 +11,7 @@
         <file>ChaosKit/Icon.qml</file>
         <file>ChaosKit/IconButton.qml</file>
         <file>ChaosKit/ItemDelegate.qml</file>
+        <file>ChaosKit/ItemPlaceholder.qml</file>
         <file>ChaosKit/Label.qml</file>
         <file>ChaosKit/OutlinedButton.qml</file>
         <file>ChaosKit/Popup.qml</file>
@@ -27,6 +28,7 @@
         <file>ChaosKit/Theme.qml</file>
         <file>ChaosKit/ToolTip.qml</file>
         <file>forms/AstInspector.qml</file>
+        <file>forms/BlendContents.qml</file>
         <file>forms/BlendItem.qml</file>
         <file>forms/ColorMapEditor.qml</file>
         <file>forms/ColumnRail.qml</file>

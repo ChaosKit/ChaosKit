@@ -13,6 +13,7 @@ QtObject {
   readonly property int smallIconSize: 16
   readonly property int padding: units(2)
   readonly property int smallPadding: units(1)
+  readonly property int tinyPadding: unit / 2
   readonly property int windowPadding: units(8)
   readonly property int chipHeight: units(4)
 
@@ -66,29 +67,31 @@ QtObject {
     );
   }
 
-  function controlColor(hovered, pressed, focused) {
-    const value =
-      focused ? 0.12 :
+  function controlColorValue(hovered, pressed, focused) {
+    return focused ? 0.12 :
       pressed ? 0.1 :
       hovered ? 0.04 :
       0.0;
-    return Qt.rgba(255, 255, 255, value);
+  }
+
+  function controlColor(hovered, pressed, focused) {  
+    return Qt.rgba(255, 255, 255, controlColorValue(hovered, pressed, focused));
   }
 
   function buttonColor(control) {
     if (!control.enabled) return Theme.disabledColor;
 
-    const value =
-      control.visualFocus ? 0.12 :
-      control.down ? 0.1 :
-      control.hovered ? 0.04 :
-      0.0;
+    const value = controlColorValue(control.hovered, control.down, control.visualFocus);
 
     if (control.flat) {
       return Qt.rgba(255, 255, 255, value);
     } else {
       return Theme.blend(Theme.primaryColor, Theme.white, value);
     }
+  }
+
+  function elevateOpaque(value) {
+    return Theme.blend(Theme.surfaceColor, Theme.white, value);
   }
 
   readonly property color primary900: "#F8791C"
@@ -112,6 +115,16 @@ QtObject {
   readonly property color secondary200: "#EEE7D8"
   readonly property color secondary100: "#F8F0E2"
   readonly property color secondary050: "#FFF8E9"
+
+  readonly property real elevation01: 0.05
+  readonly property real elevation02: 0.07
+  readonly property real elevation03: 0.08
+  readonly property real elevation04: 0.09
+  readonly property real elevation06: 0.11
+  readonly property real elevation08: 0.12
+  readonly property real elevation12: 0.14
+  readonly property real elevation16: 0.15
+  readonly property real elevation24: 0.16
 
   readonly property color surfaceColor: "#121212"
   readonly property color backgroundColor: surfaceColor
