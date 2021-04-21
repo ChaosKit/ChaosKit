@@ -58,6 +58,7 @@ Item {
     anchors.top: header.bottom
     anchors.left: parent.left
     anchors.right: parent.right
+    blend: root.blend
     offset: Theme.smallIconSize + Theme.smallPadding
     visible: open
   }
