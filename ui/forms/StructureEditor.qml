@@ -12,7 +12,7 @@ Column {
   Repeater {
     model: projectModel.system.blends
     delegate: BlendItem {
-      blend: model
+      blend: model.self
       width: parent.width
     }
   }

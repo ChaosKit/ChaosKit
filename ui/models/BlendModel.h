@@ -11,6 +11,7 @@ namespace chaoskit::ui {
 
 class BlendModel : public QObject, public BaseModel<Blend> {
   Q_OBJECT
+  Q_PROPERTY(BlendModel* self READ self CONSTANT FINAL);
   Q_PROPERTY(const QString& name READ name WRITE setName NOTIFY nameChanged);
   Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged);
   Q_PROPERTY(float weight READ weight WRITE setWeight NOTIFY weightChanged);
@@ -33,6 +34,9 @@ class BlendModel : public QObject, public BaseModel<Blend> {
 
   [[nodiscard]] TransformModel* pre() const { return pre_; }
   [[nodiscard]] TransformModel* post() const { return post_; }
+
+  // Necessary to be able to access the model from QML's delegate models.
+  [[nodiscard]] BlendModel* self() { return this; }
 
  public slots:
   void addPre();
