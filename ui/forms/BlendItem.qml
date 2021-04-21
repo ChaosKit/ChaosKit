@@ -38,11 +38,9 @@ Item {
 
       Icon {
         Layout.leftMargin: Theme.smallPadding
-        icon.color: Theme.onSurfaceHigh
-        iconName: 'arrow-down'
+        tint: Theme.onSurfaceHigh
+        name: 'arrow-down'
         rotation: open ? 0 : -90
-
-        onClicked: toggleOpen()
       }
 
       Label {
@@ -53,14 +51,11 @@ Item {
     }
   }
 
-  Rectangle {
+  BlendContents {
     id: contents
     anchors.top: header.bottom
     anchors.left: parent.left
     anchors.right: parent.right
-    height: 70
     visible: open
   }
-
-  
 }
