@@ -25,9 +25,10 @@ Rectangle {
 
   RowLayout {
     id: layout
-    anchors.verticalCenter: parent.verticalCenter
+    anchors.fill: parent
+    anchors.leftMargin: Theme.smallPadding
+    anchors.rightMargin: Theme.smallPadding
     spacing: Theme.smallPadding
-    x: Theme.smallPadding
 
     Icon {
       name: 'plus'
@@ -35,6 +36,7 @@ Rectangle {
     }
     Label {
       id: label
+      Layout.fillWidth: true
       color: Theme.onSurfaceMedium
     }
   }

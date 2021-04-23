@@ -24,14 +24,20 @@ Column {
     width: parent.width
   }
 
-  ItemPlaceholder {
+  Item {
     anchors.left: parent.left
     anchors.right: parent.right
-    anchors.margins: Theme.smallPadding
-    text: 'Add blend'
+    height: addBlend.implicitHeight + Theme.smallPadding * 2
 
-    onClicked: {
-      projectModel.system.addBlend();
+    ItemPlaceholder {
+      id: addBlend
+      anchors.fill: parent
+      anchors.margins: Theme.smallPadding
+      text: 'Add blend'
+
+      onClicked: {
+        projectModel.system.addBlend();
+      }
     }
   }
 }
