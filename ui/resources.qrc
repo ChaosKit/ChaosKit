@@ -32,7 +32,6 @@
         <file>forms/BlendItem.qml</file>
         <file>forms/ColorMapEditor.qml</file>
         <file>forms/ColumnRail.qml</file>
-        <file>forms/DocumentEditor.qml</file>
         <file>forms/EditorTabButton.qml</file>
         <file>forms/EditorTabs.qml</file>
         <file>forms/ExportImageDialog.qml</file>
@@ -45,10 +44,12 @@
         <file>forms/LifetimeEditor.qml</file>
         <file>forms/MainMenu.qml</file>
         <file>forms/MainWindow.qml</file>
+        <file>forms/ProjectEditor.qml</file>
         <file>forms/StructureEditor.qml</file>
         <file>forms/SystemEditor.qml</file>
         <file>forms/SystemPreview.qml</file>
         <file>forms/TransformEditor.qml</file>
+        <file>forms/TransformItem.qml</file>
         <file>forms/ToneMappingEditor.qml</file>
         <file>forms/WeightIndicator.qml</file>
     </qresource>
