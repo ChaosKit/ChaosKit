@@ -19,6 +19,7 @@ Column {
 
   BlendItem {
     blend: projectModel.system.cameraBlend
+    icon: 'camera-video'
     name: 'Camera'
     width: parent.width
   }

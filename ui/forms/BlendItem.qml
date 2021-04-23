@@ -8,6 +8,7 @@ Item {
 
   property var blend
   property string name
+  property string icon: 'blend'
   property bool open: false
 
   implicitHeight: header.height + (open ? contents.height : 0)
@@ -40,9 +41,12 @@ Item {
 
       Icon {
         Layout.leftMargin: Theme.smallPadding
-        tint: Theme.onSurfaceHigh
         name: 'arrow-down'
         rotation: open ? 0 : -90
+      }
+
+      Icon {
+        name: root.icon
       }
 
       Label {
