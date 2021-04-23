@@ -9,8 +9,11 @@ Rectangle {
   property string name
   property int offset: 0
   property var transformModel
+  property bool selected: false
 
-  color: Theme.controlColor(hoverHandler.hovered, tapHandler.pressed)
+  signal clicked()
+
+  color: Theme.controlColor(hoverHandler.hovered, tapHandler.pressed, selected)
   implicitWidth: 150
   implicitHeight: Theme.smallIconSize + Theme.smallPadding * 2
 
@@ -19,6 +22,7 @@ Rectangle {
   }
   TapHandler {
     id: tapHandler
+    onTapped: root.clicked()
   }
 
   RowLayout {

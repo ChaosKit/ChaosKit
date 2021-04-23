@@ -10,9 +10,10 @@ Item {
   property string name
   property string icon: 'blend'
   property bool open: false
-  property bool selected: false
+  property alias selectedItem: contents.selectedItem
 
   signal clicked()
+  signal childClicked(var child)
 
   implicitHeight: header.height + (open ? contents.height : 0)
 
@@ -21,7 +22,8 @@ Item {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    color: Theme.controlColor(hoverHandler.hovered, tapHandler.pressed, selected)
+    color: Theme.controlColor(
+        hoverHandler.hovered, tapHandler.pressed, selectedItem === blend.self)
     height: layout.implicitHeight + Theme.smallPadding * 2
 
     HoverHandler {
@@ -70,5 +72,9 @@ Item {
     blend: root.blend
     offset: Theme.smallIconSize + Theme.smallPadding
     visible: open
+
+    onChildClicked: {
+      root.childClicked(child);
+    }
   }
 }

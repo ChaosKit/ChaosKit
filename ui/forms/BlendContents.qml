@@ -8,6 +8,9 @@ ColumnLayout {
 
   property var blend
   property int offset: 0
+  property var selectedItem
+
+  signal childClicked(var child)
 
   spacing: 0
 
@@ -16,7 +19,12 @@ ColumnLayout {
     TransformItem {
       name: 'Pre transform'
       offset: root.offset
+      selected: selectedItem === blend.pre
       transformModel: blend.pre
+
+      onClicked: {
+        root.childClicked(blend.pre);
+      }
     }
   }
   Loader {
@@ -46,6 +54,11 @@ ColumnLayout {
     Layout.fillWidth: true
     formulas: blend.formulas
     offset: root.offset
+    selected: selectedItem === blend.formulas
+
+    onClicked: {
+      root.childClicked(blend.formulas);
+    }
   }
 
   Component {
@@ -53,7 +66,12 @@ ColumnLayout {
     TransformItem {
       name: 'Post transform'
       offset: root.offset
+      selected: selectedItem === blend.post
       transformModel: blend.post
+
+      onClicked: {
+        root.childClicked(blend.post);
+      }
     }
   }
   Loader {

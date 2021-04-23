@@ -15,11 +15,14 @@ Column {
     model: projectModel.system.blends
     delegate: BlendItem {
       blend: model.self
-      selected: model.self === selectedItem
+      selectedItem: column.selectedItem
       width: parent.width
 
       onClicked: {
-        selectedItem = model.self
+        column.selectedItem = model.self;
+      }
+      onChildClicked: {
+        column.selectedItem = child;
       }
     }
   }
@@ -28,11 +31,14 @@ Column {
     blend: projectModel.system.cameraBlend
     icon: 'camera-video'
     name: 'Camera'
-    selected: selectedItem === projectModel.system.cameraBlend
+    selectedItem: column.selectedItem
     width: parent.width
 
     onClicked: {
-      selectedItem = projectModel.system.cameraBlend
+      column.selectedItem = projectModel.system.cameraBlend;
+    }
+    onChildClicked: {
+      column.selectedItem = child;
     }
   }
 
