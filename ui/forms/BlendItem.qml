@@ -10,19 +10,18 @@ Item {
   property string name
   property string icon: 'blend'
   property bool open: false
+  property bool selected: false
+
+  signal clicked()
 
   implicitHeight: header.height + (open ? contents.height : 0)
-
-  function toggleOpen() {
-    open = !open;
-  }
 
   Rectangle {
     id: header
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    color: Theme.controlColor(hoverHandler.hovered, tapHandler.pressed)
+    color: Theme.controlColor(hoverHandler.hovered, tapHandler.pressed, selected)
     height: layout.implicitHeight + Theme.smallPadding * 2
 
     HoverHandler {
@@ -30,7 +29,7 @@ Item {
     }
     TapHandler {
       id: tapHandler
-      onTapped: toggleOpen()
+      onTapped: root.clicked()
     }
 
     RowLayout {
@@ -39,10 +38,16 @@ Item {
       spacing: Theme.smallPadding
       y: Theme.smallPadding
 
-      Icon {
+      IconButton {
         Layout.leftMargin: Theme.smallPadding
-        name: 'arrow-down'
+        icon.color: Theme.onSurfaceHigh
+        iconName: 'arrow-down'
+        innerOffset: 0
         rotation: open ? 0 : -90
+
+        onClicked: {
+          open = !open;
+        }
       }
 
       Icon {

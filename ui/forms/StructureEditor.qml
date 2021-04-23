@@ -9,11 +9,18 @@ Column {
   id: column
   width: parent.width
 
+  property var selectedItem
+
   Repeater {
     model: projectModel.system.blends
     delegate: BlendItem {
       blend: model.self
+      selected: model.self === selectedItem
       width: parent.width
+
+      onClicked: {
+        selectedItem = model.self
+      }
     }
   }
 
@@ -21,7 +28,12 @@ Column {
     blend: projectModel.system.cameraBlend
     icon: 'camera-video'
     name: 'Camera'
+    selected: selectedItem === projectModel.system.cameraBlend
     width: parent.width
+
+    onClicked: {
+      selectedItem = projectModel.system.cameraBlend
+    }
   }
 
   Item {
