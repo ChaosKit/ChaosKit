@@ -11,6 +11,7 @@ namespace chaoskit::ui {
 
 class FormulaModel : public BaseModel<Formula> {
   Q_OBJECT
+  Q_PROPERTY(FormulaModel* self READ self CONSTANT FINAL);
   Q_PROPERTY(const QString& type READ type WRITE setType NOTIFY typeChanged);
   Q_PROPERTY(const QVariantList& params READ params NOTIFY paramsChanged);
   Q_PROPERTY(float weight READ weight WRITE setWeight NOTIFY weightChanged);
@@ -28,6 +29,9 @@ class FormulaModel : public BaseModel<Formula> {
 
   [[nodiscard]] float weight() const { return proto_->weight().x(); }
   void setWeight(float weight);
+
+  // Necessary to be able to access the model from QML's delegate models.
+  [[nodiscard]] FormulaModel* self() { return this; }
 
  signals:
   void typeChanged();

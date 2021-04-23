@@ -44,6 +44,8 @@ void SystemModel::setProto(System* proto) {
 
 void SystemModel::addBlend() {
   auto* model = modelFactory_->createBlendModel(blends_);
+  connect(model, &AbstractBaseModel::protoChanged, this,
+          &AbstractBaseModel::protoChanged);
 
   Blend* blend = proto_->add_blends();
   blend->set_enabled(true);

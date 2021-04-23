@@ -1,8 +1,10 @@
 #ifndef CHAOSKIT_UI_MODELS_BLENDMODEL_H
 #define CHAOSKIT_UI_MODELS_BLENDMODEL_H
 
+#include <QQmlObjectListModel.h>
 #include <QObject>
 #include "BaseModel.h"
+#include "FormulaModel.h"
 #include "ModelFactory.h"
 #include "TransformModel.h"
 #include "chaoskit.pb.h"
@@ -17,6 +19,7 @@ class BlendModel : public BaseModel<Blend> {
   Q_PROPERTY(float weight READ weight WRITE setWeight NOTIFY weightChanged);
   Q_PROPERTY(TransformModel* pre READ pre NOTIFY preChanged);
   Q_PROPERTY(TransformModel* post READ post NOTIFY postChanged);
+  Q_PROPERTY(QQmlObjectListModelBase* formulas READ formulas CONSTANT);
 
  public:
   explicit BlendModel(ModelFactory* modelFactory, QObject* parent = nullptr);
@@ -35,6 +38,10 @@ class BlendModel : public BaseModel<Blend> {
   [[nodiscard]] TransformModel* pre() const { return pre_; }
   [[nodiscard]] TransformModel* post() const { return post_; }
 
+  [[nodiscard]] QQmlObjectListModel<FormulaModel>* formulas() const {
+    return formulas_;
+  }
+
   // Necessary to be able to access the model from QML's delegate models.
   [[nodiscard]] BlendModel* self() { return this; }
 
@@ -43,6 +50,7 @@ class BlendModel : public BaseModel<Blend> {
   void removePre();
   void addPost();
   void removePost();
+  void addFormula(const QString& type);
 
  signals:
   void enabledChanged();
@@ -56,6 +64,7 @@ class BlendModel : public BaseModel<Blend> {
   QString nameCache_;
   TransformModel* pre_ = nullptr;
   TransformModel* post_ = nullptr;
+  QQmlObjectListModel<FormulaModel>* formulas_;
 
   void updatePre();
   void updatePost();
