@@ -8,8 +8,11 @@ Rectangle {
 
   property var formulas
   property int offset: 0
+  property bool selected: false
 
-  color: Theme.controlColor(hoverHandler.hovered, tapHandler.pressed)
+  signal clicked()
+
+  color: Theme.controlColor(hoverHandler.hovered, tapHandler.pressed, selected)
   implicitWidth: 150
   implicitHeight: layout.implicitHeight + Theme.smallPadding * 2
 
@@ -18,6 +21,7 @@ Rectangle {
   }
   TapHandler {
     id: tapHandler
+    onTapped: root.clicked()
   }
 
   RowLayout {
