@@ -42,13 +42,10 @@ ColumnLayout {
     }
   }
 
-  ItemPlaceholder {
-    Layout.bottomMargin: Theme.tinyPadding
+  FormulaGroupItem {
     Layout.fillWidth: true
-    Layout.leftMargin: offset
-    Layout.rightMargin: Theme.smallPadding
-    Layout.topMargin: Theme.tinyPadding
-    text: 'Add formula'
+    formulas: blend.formulas
+    offset: root.offset
   }
 
   Component {

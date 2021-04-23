@@ -37,7 +37,7 @@
         <file>forms/EditorTabs.qml</file>
         <file>forms/ExportImageDialog.qml</file>
         <file>forms/FormulaGallery.qml</file>
-        <file>forms/FormulaListItem.qml</file>
+        <file>forms/FormulaGroupItem.qml</file>
         <file>forms/FormulaPopup.qml</file>
         <file>forms/FinalBlendIndicator.qml</file>
         <file>forms/ImageEditor.qml</file>
