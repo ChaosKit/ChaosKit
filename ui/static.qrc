@@ -21,6 +21,7 @@
         <file alias="rotate.svg">icons/transform-rotate-16.svg</file>
         <file alias="scale.svg">icons/transform-scale-16.svg</file>
         <file alias="solar-system.svg">icons/kstars_solarsystem.svg</file>
+        <file alias="transform.svg">icons/node-transform-16.svg</file>
         <file alias="trash.svg">icons/edit-delete-16.svg</file>
         <file alias="undo.svg">icons/edit-undo.svg</file>
         <file alias="play.svg">icons/media-playback-start.svg</file>
