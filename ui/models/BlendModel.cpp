@@ -3,7 +3,9 @@
 namespace chaoskit::ui {
 
 BlendModel::BlendModel(ModelFactory *modelFactory, QObject *parent)
-    : BaseModel<Blend>(parent), modelFactory_(modelFactory) {}
+    : BaseModel<Blend>(parent), modelFactory_(modelFactory) {
+  formulas_ = new QQmlObjectListModel<FormulaModel>(this);
+}
 
 void BlendModel::setProto(Blend *proto) {
   BaseModel::setProto(proto);
@@ -11,6 +13,23 @@ void BlendModel::setProto(Blend *proto) {
   updateNameCache();
   updatePre();
   updatePost();
+
+  // Clear old formulas
+  for (auto *formula : *formulas_) {
+    formula->disconnect(this);
+  }
+  formulas_->clear();
+
+  // Create new formula models
+  QList<FormulaModel *> newModels;
+  for (auto &formula : *proto_->mutable_formulas()) {
+    auto *model = modelFactory_->createFormulaModel(formulas_);
+    model->setProto(&formula);
+    connect(model, &AbstractBaseModel::protoChanged, this,
+            &AbstractBaseModel::protoChanged);
+    newModels.append(model);
+  }
+  formulas_->append(newModels);
 
   emit protoChanged();
 }
@@ -84,6 +103,22 @@ void BlendModel::removePost() {
   emit postChanged();
 }
 
+void BlendModel::addFormula(const QString &type) {
+  auto *model = modelFactory_->createFormulaModel(formulas_);
+  connect(model, &AbstractBaseModel::protoChanged, this,
+          &AbstractBaseModel::protoChanged);
+
+  Formula *formula = proto_->add_formulas();
+  formula->set_type(type.toStdString());
+  auto *w = formula->mutable_weight();
+  w->set_x(1.f);
+  w->set_y(1.f);
+  model->setProto(formula);
+
+  formulas_->append(model);
+  emit protoChanged();
+}
+
 void BlendModel::updatePre() {
   if (proto_->has_pre()) {
     if (pre_ == nullptr) {
@@ -109,7 +144,6 @@ void BlendModel::updatePost() {
     removePost();
   }
 }
-
 void BlendModel::updateNameCache() {
   QString nameCache = QString::fromStdString(proto_->name());
   if (nameCache_ == nameCache) return;
