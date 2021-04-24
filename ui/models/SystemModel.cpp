@@ -91,6 +91,7 @@ void SystemModel::addBlend() {
 
   Blend* blend = proto_->add_blends();
   blend->set_enabled(true);
+  blend->set_weight(1.f);
   model->setProto(blend);
 
   blends_->append(model);
