@@ -21,7 +21,8 @@ T.TextField {
   color: Theme.onSurfaceHigh
   placeholderTextColor: Theme.onSurfaceMedium
   selectionColor: Theme.primaryColor
-  selectedTextColor: Theme.onPrimaryHigh
+  selectedTextColor:
+      control.enabled ? Theme.onPrimaryHigh : Theme.onPrimaryDisabled
   verticalAlignment: TextInput.AlignVCenter
 
   PlaceholderText {
