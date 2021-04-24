@@ -5,7 +5,7 @@ import ChaosKit 1.0
 
 Item {
   id: root
-  property var selectedItem: null
+  property var selectedItem: projectModel.system
 
   ScrollView {
     anchors.bottom: separator.top
