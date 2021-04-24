@@ -138,6 +138,7 @@ QtObject {
 
   readonly property real hoverRatio: 0.04
   readonly property real focusRatio: 0.12
+  readonly property real borderRatio: 0.12
 
   readonly property color black: "black"
   readonly property color white: "white"
