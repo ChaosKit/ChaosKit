@@ -38,7 +38,7 @@ Rectangle {
       name: 'formula'
     }
 
-    Label {
+    TextLabel {
       Layout.fillWidth: true
       Layout.rightMargin: Theme.smallPadding
       color: Theme.onSurfaceMedium

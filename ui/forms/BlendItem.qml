@@ -56,7 +56,7 @@ Item {
         name: root.icon
       }
 
-      Label {
+      TextLabel {
         Layout.fillWidth: true
         Layout.rightMargin: Theme.smallPadding
         text: name || blend.name || 'Untitled Blend'

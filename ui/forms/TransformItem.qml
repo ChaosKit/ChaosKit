@@ -37,7 +37,7 @@ Rectangle {
       name: 'transform'
     }
 
-    Label {
+    TextLabel {
       Layout.fillWidth: true
       Layout.rightMargin: Theme.smallPadding
       text: root.name
