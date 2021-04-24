@@ -1,90 +1,99 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQml 2.15
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 import ChaosKit 1.0
 
 GridLayout {
-  readonly property var system: documentModel.systemProxy
+  id: root
 
-  columns: 2
+  required property var system
+  // Remember the last max lifetime for when you switch it to infinite.
+  property int localMaxLifetime: 20
+
+  columns: 3
   columnSpacing: Theme.smallPadding
-  rowSpacing: 0
+  rowSpacing: Theme.smallPadding
 
-  CollapsibleHeading {
-    id: heading
-    text: "Lifetime"
-    Layout.columnSpan: 2
+  function updateLocalState() {
+    if (!system.isImmortal) {
+      localMaxLifetime = system.maxLifetime;
+    }
   }
 
+  // These two keep localMaxLifetime in sync with the system.
+  Component.onCompleted: {
+    updateLocalState();
+  }
+  Connections {
+    target: system
+    function onMaxLifetimeChanged() {
+      updateLocalState();
+    }
+  }
+
+  Subheading {
+    Layout.columnSpan: 3
+    text: 'Lifetime'
+  }
+
+  TextLabel {
+    Layout.rightMargin: Theme.smallPadding
+    text: 'Min'
+  }
+  TextField {
+    Layout.columnSpan: 2
+    Layout.fillWidth: true
+    text: system.minLifetime
+    validator: IntValidator {
+      bottom: 0
+      top: system.isImmortal ? 2147483647 : system.maxLifetime
+    }
+
+    onEditingFinished: {
+      system.minLifetime = parseInt(text, 10);
+    }
+  }
+
+  TextLabel {
+    Layout.rightMargin: Theme.smallPadding
+    text: 'Max'
+  }
   ButtonGroup {
     buttons: [finiteRadio, infiniteRadio]
   }
-
   RadioButton {
     id: finiteRadio
-    checked: system.ttl >= 0
-    visible: heading.opened
-
-    Layout.leftMargin: Theme.padding
+    checked: !system.isImmortal
 
     onClicked: {
-      system.ttl = parseInt(ttlField.text, 10);
+      system.maxLifetime = localMaxLifetime;
     }
   }
   TextField {
-    id: ttlField
-    text: system.ttl < 0 ? '20' : `${system.ttl}`;
-    validator: IntValidator { bottom: 1 }
-    visible: heading.opened
+    id: maxLifetimeField
 
     Layout.fillWidth: true
-    Layout.rightMargin: Theme.padding
+    text: `${localMaxLifetime}`;
+    validator: IntValidator { bottom: system.minLifetime }
 
     onEditingFinished: {
-      finiteRadio.checked = true;
-      system.ttl = parseInt(text, 10);
+      system.maxLifetime = parseInt(text, 10);
     }
   }
 
   RadioButton {
     id: infiniteRadio
-    checked: system.ttl < 0
-    text: 'Infinite'
-    visible: heading.opened
 
-    Layout.bottomMargin: Theme.padding
+    Layout.column: 1
     Layout.columnSpan: 2
-    Layout.leftMargin: Theme.padding + 2  // pixel-pushing
-    Layout.topMargin: Theme.padding
+    Layout.leftMargin: 2
+    Layout.row: 3
+    checked: system.isImmortal
+    text: 'Infinite'
 
     onClicked: {
-      system.ttl = -1;
-    }
-  }
-
-  RowLayout {
-    spacing: Theme.padding
-    visible: heading.opened
-    Layout.columnSpan: 2
-    Layout.fillWidth: true
-    Layout.leftMargin: Theme.padding
-    Layout.rightMargin: Theme.padding
-    Layout.bottomMargin: Theme.padding
-
-    Label {
-      text: 'Skip first'
-    }
-    TextField {
-      text: system.skip
-      validator: IntValidator {
-        bottom: 0
-        top: system.ttl < 0 ? 2147483647 : system.ttl
-      }
-      Layout.fillWidth: true
-
-      onEditingFinished: {
-        system.skip = Number(text);
-      }
+      system.isImmortal = true;
     }
   }
 }

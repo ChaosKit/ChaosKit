@@ -34,11 +34,24 @@ Item {
     y: 200
   }
 
-  Item {
+  Component {
+    id: systemSettings
+    SystemSettings {
+      system: projectModel.system
+    }
+  }
+
+  function getSourceComponent() {
+    return systemSettings;
+  }
+
+  Loader {
+    id: settings
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: separator.bottom
+    sourceComponent: { getSourceComponent() }
   }
 }
 
