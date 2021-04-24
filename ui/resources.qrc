@@ -23,6 +23,7 @@
         <file>ChaosKit/Slider.qml</file>
         <file>ChaosKit/Snackbar.qml</file>
         <file>ChaosKit/Subheading.qml</file>
+        <file>ChaosKit/Switch.qml</file>
         <file>ChaosKit/TabBar.qml</file>
         <file>ChaosKit/TabButton.qml</file>
         <file>ChaosKit/TextArea.qml</file>
