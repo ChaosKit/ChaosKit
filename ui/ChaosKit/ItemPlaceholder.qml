@@ -34,7 +34,7 @@ Rectangle {
       name: 'plus'
       tint: Theme.onSurfaceMedium
     }
-    Label {
+    TextLabel {
       id: label
       Layout.fillWidth: true
       color: Theme.onSurfaceMedium

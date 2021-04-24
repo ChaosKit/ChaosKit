@@ -10,10 +10,9 @@ Rectangle {
   implicitWidth: label.implicitWidth
   radius: Theme.borderRadius
 
-  Label {
+  TextLabel {
     id: label
-    font.pointSize: Theme.captionFontSize
-    font.letterSpacing: Theme.letterSpacing(Theme.captionFontSize)
+    fontSize: Theme.captionFontSize
     leftPadding: Theme.smallPadding
     height: Theme.chipHeight
     rightPadding: Theme.smallPadding
