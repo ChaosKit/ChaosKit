@@ -142,6 +142,7 @@ int main(int argc, char* argv[]) {
 
   auto* blend = system->add_blends();
   blend->set_enabled(true);
+  blend->set_weight(1.f);
   blend->mutable_coloring_method()->set_distance(.2f);
 
   auto* formula = blend->add_formulas();
