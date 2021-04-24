@@ -50,6 +50,7 @@
         <file>forms/StructureEditor.qml</file>
         <file>forms/SystemEditor.qml</file>
         <file>forms/SystemPreview.qml</file>
+        <file>forms/SystemSettings.qml</file>
         <file>forms/TransformEditor.qml</file>
         <file>forms/TransformItem.qml</file>
         <file>forms/ToneMappingEditor.qml</file>

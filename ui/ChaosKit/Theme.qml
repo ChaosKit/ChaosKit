@@ -11,6 +11,7 @@ QtObject {
   }
   readonly property int iconSize: 22
   readonly property int smallIconSize: 16
+  readonly property int largePadding: units(4)
   readonly property int padding: units(2)
   readonly property int smallPadding: units(1)
   readonly property int tinyPadding: unit / 2
