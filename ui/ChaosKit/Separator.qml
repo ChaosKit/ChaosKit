@@ -16,9 +16,11 @@ Rectangle {
   readonly property bool isHorizontal:
       direction === Separator.Direction.Horizontal
 
-  color: Theme.elevateOpaque(
-      Theme.borderRatio +
-      Theme.controlColorValue(hoverHandler.hovered, dragHandler.active))
+  color: {
+    Theme.elevateOpaque(
+        Theme.borderRatio +
+        Theme.controlColorValue(hoverHandler.hovered, dragHandler.active))
+  }
   implicitHeight: isHorizontal ? 1 : parent.height
   implicitWidth: isHorizontal ? parent.width : 1
 

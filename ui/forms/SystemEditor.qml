@@ -1,16 +1,34 @@
 import QtQml.Models 2.15
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 import ChaosKit 1.0
 
-ScrollView {
-  ColumnLayout {
-    spacing: 0
-    width: parent.width
+Item {
+  ScrollView {
+    anchors.bottom: separator.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: parent.top
 
     StructureEditor {
-      Layout.fillWidth: true
+      width: parent.width
     }
   }
+
+  Separator {
+    id: separator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    draggable: true
+    minPosition: 100
+    y: 200
+  }
+
+  Item {
+    anchors.bottom: parent.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: separator.bottom
+  }
 }
+
