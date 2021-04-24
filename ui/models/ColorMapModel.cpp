@@ -3,6 +3,7 @@
 namespace chaoskit::ui {
 
 ColorMapModel::ColorMapModel(QObject* parent) : BaseModel<ColorMap>(parent) {
+  setObjectName("colorMap");
   // Emit indexChanged every time the name changes.
   connect(this, &ColorMapModel::nameChanged, this,
           &ColorMapModel::indexChanged);

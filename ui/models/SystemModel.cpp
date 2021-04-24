@@ -8,6 +8,8 @@ namespace chaoskit::ui {
 
 SystemModel::SystemModel(ModelFactory* modelFactory, QObject* parent)
     : BaseModel<System>(parent), modelFactory_(modelFactory) {
+  setObjectName("system");
+
   blends_ = new QQmlObjectListModel<BlendModel>(this);
   cameraBlend_ = modelFactory_->createBlendModel(this);
 

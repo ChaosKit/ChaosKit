@@ -14,6 +14,8 @@ Q_LOGGING_CATEGORY(modelLog, "ProjectModel");
 
 ProjectModel::ProjectModel(ModelFactory* modelFactory, QObject* parent)
     : BaseModel<Project>(parent) {
+  setObjectName("project");
+
   colorMapModel_ = modelFactory->createColorMapModel(this);
   systemModel_ = modelFactory->createSystemModel(this);
 
