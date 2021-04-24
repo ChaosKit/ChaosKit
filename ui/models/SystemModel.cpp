@@ -1,10 +1,14 @@
 #include "SystemModel.h"
 #include <google/protobuf/text_format.h>
+#include <QDebug>
+#include <QLoggingCategory>
 #include <sstream>
 #include "core/debug.h"
 #include "ui/storage/conversions.h"
 
 namespace chaoskit::ui {
+
+Q_LOGGING_CATEGORY(systemModelLog, "SystemModel");
 
 SystemModel::SystemModel(ModelFactory* modelFactory, QObject* parent)
     : BaseModel<System>(parent), modelFactory_(modelFactory) {
@@ -16,6 +20,14 @@ SystemModel::SystemModel(ModelFactory* modelFactory, QObject* parent)
   // Listen to proto changes in children and emit protoChanged.
   connect(cameraBlend_, &AbstractBaseModel::protoChanged, this,
           &AbstractBaseModel::protoChanged);
+
+  // Debug logging
+  connect(this, &SystemModel::minLifetimeChanged, [this]() {
+    qCDebug(systemModelLog(), "Min lifetime => %d", minLifetime());
+  });
+  connect(this, &SystemModel::maxLifetimeChanged, [this]() {
+    qCDebug(systemModelLog(), "Max lifetime => %d", maxLifetime());
+  });
 }
 
 void SystemModel::setProto(System* proto) {
@@ -44,6 +56,34 @@ void SystemModel::setProto(System* proto) {
   emit protoChanged();
 }
 
+void SystemModel::setMinLifetime(int min) {
+  if (min == proto_->skip()) return;
+
+  proto_->set_skip(min);
+  emit protoChanged();
+  emit minLifetimeChanged();
+}
+
+void SystemModel::setMaxLifetime(int max) {
+  if (max == proto_->ttl()) return;
+
+  auto immortalChanged = (max == -1) != (proto_->ttl() == -1);
+
+  proto_->set_ttl(max);
+  emit protoChanged();
+  emit maxLifetimeChanged();
+
+  if (immortalChanged) {
+    emit isImmortalChanged();
+  }
+}
+
+void SystemModel::setImmortal(bool immortal) {
+  if (immortal == isImmortal()) return;
+
+  setMaxLifetime(immortal ? -1 : 20);
+}
+
 void SystemModel::addBlend() {
   auto* model = modelFactory_->createBlendModel(blends_);
   connect(model, &AbstractBaseModel::protoChanged, this,
@@ -56,7 +96,6 @@ void SystemModel::addBlend() {
   blends_->append(model);
   emit protoChanged();
 }
-
 QString SystemModel::astSource() const {
   std::stringstream stream;
   const core::CameraSystem& cameraSystem = toCameraSystem(*proto_);
