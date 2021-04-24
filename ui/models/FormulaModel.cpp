@@ -5,7 +5,9 @@
 
 namespace chaoskit::ui {
 
-FormulaModel::FormulaModel(QObject *parent) : BaseModel(parent) {}
+FormulaModel::FormulaModel(QObject *parent) : BaseModel(parent) {
+  setObjectName("formula");
+}
 
 void FormulaModel::setProto(Formula *proto) {
   BaseModel::setProto(proto);

@@ -4,7 +4,9 @@ namespace chaoskit::ui {
 
 BlendModel::BlendModel(ModelFactory *modelFactory, QObject *parent)
     : BaseModel<Blend>(parent), modelFactory_(modelFactory) {
+  setObjectName(QStringLiteral("blend"));
   formulas_ = new QQmlObjectListModel<FormulaModel>(this);
+  formulas_->setObjectName("formulas");
 }
 
 void BlendModel::setProto(Blend *proto) {

@@ -6,6 +6,8 @@
 namespace chaoskit::ui {
 
 TransformModel::TransformModel(QObject *parent) : BaseModel<Transform>(parent) {
+  setObjectName("transform");
+
   // Emit changed signals on all properties when transformChanged emits.
   connect(this, &TransformModel::transformChanged, this,
           &TransformModel::scaleXChanged);
