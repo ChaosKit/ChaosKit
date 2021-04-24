@@ -6,7 +6,7 @@ import ChaosKit 1.0
 Item {
   id: root
 
-  property var blend
+  required property var blend
   property string name
   property string icon: 'blend'
   property bool open: false
