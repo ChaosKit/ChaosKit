@@ -41,7 +41,22 @@ Item {
     }
   }
 
+  Component {
+    id: blendSettings
+    BlendSettings {
+      blend: selectedItem
+      isCamera: selectedItem === projectModel.system.cameraBlend
+    }
+  }
+
   function getSourceComponent() {
+    if (selectedItem != null) {
+      switch (selectedItem.objectName) {
+        case 'blend':
+          return blendSettings;
+      }
+    }
+
     return systemSettings;
   }
 
