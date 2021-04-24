@@ -3,6 +3,6 @@ import QtQuick.Templates 2.15 as T
 import ChaosKit 1.0
 
 T.Label {
-  color: Theme.onSurfaceHigh
+  color: enabled ? Theme.onSurfaceHigh : Theme.onSurfaceDisabled
   font.pointSize: Theme.body1FontSize
 }
