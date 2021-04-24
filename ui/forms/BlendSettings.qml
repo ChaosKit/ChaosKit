@@ -29,8 +29,22 @@ ScrollView {
       Layout.rightMargin: Theme.padding
       Layout.topMargin: Theme.largePadding
       columns: 2
-      columnSpacing: Theme.smallPadding
-      rowSpacing: Theme.smallPadding
+      columnSpacing: Theme.padding
+      rowSpacing: Theme.padding
+
+      TextLabel {
+        text: 'Enabled'
+        visible: !root.isCamera
+      }
+      Switch {
+        Layout.alignment: Qt.AlignRight
+        checked: blend.enabled
+        visible: !root.isCamera
+
+        onToggled: {
+          blend.enabled = checked;
+        }
+      }
 
       TextLabel {
         text: 'Weight'
