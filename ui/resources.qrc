@@ -25,6 +25,7 @@
         <file>ChaosKit/TabButton.qml</file>
         <file>ChaosKit/TextArea.qml</file>
         <file>ChaosKit/TextField.qml</file>
+        <file>ChaosKit/TextLabel.qml</file>
         <file>ChaosKit/Theme.qml</file>
         <file>ChaosKit/ToolTip.qml</file>
         <file>forms/AstInspector.qml</file>
