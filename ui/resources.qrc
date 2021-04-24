@@ -3,6 +3,7 @@
     <qresource>
         <file>ChaosKit/ApplicationWindow.qml</file>
         <file>ChaosKit/Button.qml</file>
+        <file>ChaosKit/CheckBox.qml</file>
         <file>ChaosKit/Chip.qml</file>
         <file>ChaosKit/CollapsibleHeading.qml</file>
         <file>ChaosKit/ComboBox.qml</file>

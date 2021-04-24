@@ -11,6 +11,7 @@
         <file alias="arrow-up.svg">icons/go-up.svg</file>
         <file alias="blend.svg">icons/blend-16.svg</file>
         <file alias="camera-video.svg">icons/camera-video-16.svg</file>
+        <file alias="checkbox.svg">icons/checkbox-12.svg</file>
         <file alias="close.svg">icons/window-close.svg</file>
         <file alias="formula.svg">icons/gnumeric-formulaguru-16.svg</file>
         <file alias="image.svg">icons/image-x-generic.svg</file>
