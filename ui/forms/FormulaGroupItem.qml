@@ -6,7 +6,7 @@ import ChaosKit 1.0
 Rectangle {
   id: root
 
-  property var formulas
+  required property var formulas
   property int offset: 0
   property bool selected: false
 

@@ -6,39 +6,45 @@ import QtQuick.Layouts 1.12
 import ChaosKit 1.0
 
 Column {
-  id: column
+  id: root
+
+  required property var system
+  property var selectedItem
+  
+  signal selectionChanged(var item)
+
   width: parent.width
 
-  property var selectedItem
-
   Repeater {
-    model: projectModel.system.blends
+    model: system.blends
     delegate: BlendItem {
+      required property var model
+
       blend: model.self
-      selectedItem: column.selectedItem
+      selectedItem: root.selectedItem
       width: parent.width
 
       onClicked: {
-        column.selectedItem = model.self;
+        root.selectionChanged(model.self);
       }
       onChildClicked: {
-        column.selectedItem = child;
+        root.selectionChanged(child);
       }
     }
   }
 
   BlendItem {
-    blend: projectModel.system.cameraBlend
+    blend: system.cameraBlend
     icon: 'camera-video'
     name: 'Camera'
-    selectedItem: column.selectedItem
+    selectedItem: root.selectedItem
     width: parent.width
 
     onClicked: {
-      column.selectedItem = projectModel.system.cameraBlend;
+      root.selectionChanged(system.cameraBlend);
     }
     onChildClicked: {
-      column.selectedItem = child;
+      root.selectionChanged(child);
     }
   }
 
@@ -54,7 +60,7 @@ Column {
       text: 'Add blend'
 
       onClicked: {
-        projectModel.system.addBlend();
+        system.addBlend();
       }
     }
   }

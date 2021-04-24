@@ -6,9 +6,9 @@ import ChaosKit 1.0
 Rectangle {
   id: root
 
-  property string name
+  property string name: 'Transform'
   property int offset: 0
-  property var transformModel
+  required property var transformModel
   property bool selected: false
 
   signal clicked()

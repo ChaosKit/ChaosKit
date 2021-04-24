@@ -4,14 +4,24 @@ import QtQuick.Controls 2.15
 import ChaosKit 1.0
 
 Item {
+  id: root
+  property var selectedItem: null
+
   ScrollView {
     anchors.bottom: separator.top
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: parent.top
+    clip: true
 
     StructureEditor {
+      selectedItem: root.selectedItem
+      system: projectModel.system
       width: parent.width
+
+      onSelectionChanged: {
+        root.selectedItem = item;
+      }
     }
   }
 
