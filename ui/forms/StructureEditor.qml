@@ -15,6 +15,40 @@ Column {
 
   width: parent.width
 
+  Rectangle {
+    id: header
+    anchors.left: parent.left
+    anchors.right: parent.right
+    color: Theme.controlColor(
+        hoverHandler.hovered, tapHandler.pressed, selectedItem === system)
+    height: layout.implicitHeight + Theme.smallPadding * 2
+
+    HoverHandler {
+      id: hoverHandler
+    }
+    TapHandler {
+      id: tapHandler
+      onTapped: root.selectionChanged(system)
+    }
+
+    RowLayout {
+      id: layout
+      width: parent.width
+      spacing: Theme.smallPadding
+      y: Theme.smallPadding
+
+      Icon {
+        Layout.leftMargin: Theme.smallPadding
+        name: 'solar-system'
+      }
+
+      TextLabel {
+        Layout.fillWidth: true
+        text: 'System'
+      }
+    }
+  }
+
   Repeater {
     model: system.blends
     delegate: BlendItem {
