@@ -8,14 +8,16 @@ ScrollView {
 
   required property var system
 
+  clip: true
+  contentWidth: availableWidth
+
   ColumnLayout {
-    anchors.top: parent.top
-    anchors.topMargin: Theme.padding
     spacing: 0
-    width: root.availableWidth
+    width: parent.width
 
     Heading {
       Layout.leftMargin: Theme.padding
+      Layout.topMargin: Theme.padding
       text: 'System Settings'
     }
 

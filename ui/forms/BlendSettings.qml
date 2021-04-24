@@ -9,6 +9,9 @@ ScrollView {
   required property var blend
   property bool isCamera: false
 
+  clip: true
+  contentWidth: availableWidth
+
   ColumnLayout {
     anchors.top: parent.top
     anchors.topMargin: Theme.padding
