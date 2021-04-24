@@ -10,4 +10,5 @@ ItemPlaceholder 1.0 ItemPlaceholder.qml
 OutlinedButton 1.0 OutlinedButton.qml
 Separator 1.0 Separator.qml
 Snackbar 1.0 Snackbar.qml
+Subheading 1.0 Subheading.qml
 TextLabel 1.0 TextLabel.qml
