@@ -38,6 +38,9 @@ ProjectModel::ProjectModel(ModelFactory* modelFactory, QObject* parent)
           &AbstractBaseModel::protoChanged);
   connect(systemModel_, &AbstractBaseModel::protoChanged, this,
           &AbstractBaseModel::protoChanged);
+  // Also emit systemChanged if the system proto changes.
+  connect(systemModel_, &AbstractBaseModel::protoChanged, this,
+          &ProjectModel::systemChanged);
 
   // Mark the model as modified if dependencies change.
   connect(colorMapModel_, &ColorMapModel::nameChanged, this,
