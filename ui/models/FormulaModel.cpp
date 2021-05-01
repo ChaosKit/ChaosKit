@@ -81,7 +81,8 @@ void FormulaModel::updateTypeCache() {
 }
 
 void FormulaModel::updateParamsCache() {
-  if (std::equal(paramsCache_.begin(), paramsCache_.end(),
+  if (proto_->params_size() == paramsCache_.size() &&
+      std::equal(paramsCache_.begin(), paramsCache_.end(),
                  proto_->params().begin(), [](const QVariant &a, float b) {
                    return qFuzzyCompare(a.toFloat(), b);
                  })) {
