@@ -22,6 +22,7 @@
         <file>ChaosKit/Separator.qml</file>
         <file>ChaosKit/Slider.qml</file>
         <file>ChaosKit/Snackbar.qml</file>
+        <file>ChaosKit/SpinBox.qml</file>
         <file>ChaosKit/Subheading.qml</file>
         <file>ChaosKit/Switch.qml</file>
         <file>ChaosKit/TabBar.qml</file>
