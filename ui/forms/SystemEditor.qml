@@ -49,11 +49,20 @@ Item {
     }
   }
 
+  Component {
+    id: transformSettings
+    TransformSettings {
+      transformModel: selectedItem
+    }
+  }
+
   function getSourceComponent() {
     if (selectedItem != null) {
       switch (selectedItem.objectName) {
         case 'blend':
           return blendSettings;
+        case 'transform':
+          return transformSettings;
       }
     }
 
