@@ -60,6 +60,13 @@ Item {
     }
   }
 
+  Component {
+    id: formulaSettings
+    FormulaSettings {
+      blend: selectedPath[1]
+    }
+  }
+
   function getSourceComponent() {
     if (getSelectedLeaf() != null) {
       switch (getSelectedLeaf().objectName) {
@@ -67,6 +74,8 @@ Item {
           return blendSettings;
         case 'transform':
           return transformSettings;
+        case 'formulas':
+          return formulaSettings;
       }
     }
 
