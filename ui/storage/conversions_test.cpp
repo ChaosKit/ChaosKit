@@ -93,7 +93,7 @@ TEST_F(ConversionsTest, ConvertsPreToAffineTransform) {
   // A single blend with just a 2x scale pre transform.
   Blend* blend = input.add_blends();
   blend->set_enabled(true);
-  setTransform(blend->mutable_pre(), {2.f, 0.f, 0.f, 0.f, 2.f, 0.f});
+  setTransform(blend->mutable_pre(), {1.f, 2.f, 3.f, 4.f, 5.f, 6.f});
 
   core::CameraSystem actualSystem = toCameraSystem(input);
   const auto& actualRootTransform =
@@ -102,7 +102,7 @@ TEST_F(ConversionsTest, ConvertsPreToAffineTransform) {
   ast::Transform expectedStep{ast::AffineTransform()};
   ast::Transform expectedTransform{ast::MultiStepTransform{{expectedStep}}};
   core::TransformParams expectedParams;
-  expectedParams[core::TransformIndex{0, 0}] = {2.f, 0.f, 0.f, 0.f, 2.f, 0.f};
+  expectedParams[core::TransformIndex{0, 0}] = {1.f, 2.f, 3.f, 4.f, 5.f, 6.f};
   EXPECT_THAT(actualRootTransform.transforms(), ElementsAre(expectedTransform));
   EXPECT_THAT(actualSystem.system.params, ContainerEq(expectedParams));
 }
