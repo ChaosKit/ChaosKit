@@ -14,6 +14,7 @@
         <file>ChaosKit/ItemDelegate.qml</file>
         <file>ChaosKit/ItemPlaceholder.qml</file>
         <file>ChaosKit/Label.qml</file>
+        <file>ChaosKit/NumberField.qml</file>
         <file>ChaosKit/OutlinedButton.qml</file>
         <file>ChaosKit/Popup.qml</file>
         <file>ChaosKit/qmldir</file>
