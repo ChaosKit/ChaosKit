@@ -9,18 +9,22 @@ Column {
   id: root
 
   required property var system
-  property var selectedItem
+  property var selectedPath
   
-  signal selectionChanged(var item)
+  signal selectionChanged(var path)
 
   width: parent.width
+
+  function getSelectedLeaf() {
+    return root.selectedPath[root.selectedPath.length - 1];
+  }
 
   Rectangle {
     id: header
     anchors.left: parent.left
     anchors.right: parent.right
     color: Theme.controlColor(
-        hoverHandler.hovered, tapHandler.pressed, selectedItem === system)
+        hoverHandler.hovered, tapHandler.pressed, getSelectedLeaf() === system)
     height: layout.implicitHeight + Theme.smallPadding * 2
 
     HoverHandler {
@@ -28,7 +32,7 @@ Column {
     }
     TapHandler {
       id: tapHandler
-      onTapped: root.selectionChanged(system)
+      onTapped: root.selectionChanged([system])
     }
 
     RowLayout {
@@ -55,14 +59,14 @@ Column {
       required property var model
 
       blend: model.self
-      selectedItem: root.selectedItem
+      selectedItem: getSelectedLeaf()
       width: parent.width
 
       onClicked: {
-        root.selectionChanged(model.self);
+        root.selectionChanged([system, model.self]);
       }
       onChildClicked: {
-        root.selectionChanged(child);
+        root.selectionChanged([system, model.self, child]);
       }
     }
   }
@@ -71,14 +75,14 @@ Column {
     blend: system.cameraBlend
     icon: 'camera-video'
     name: 'Camera'
-    selectedItem: root.selectedItem
+    selectedItem: getSelectedLeaf()
     width: parent.width
 
     onClicked: {
-      root.selectionChanged(system.cameraBlend);
+      root.selectionChanged([system, system.cameraBlend]);
     }
     onChildClicked: {
-      root.selectionChanged(child);
+      root.selectionChanged([system, system.cameraBlend, child]);
     }
   }
 
