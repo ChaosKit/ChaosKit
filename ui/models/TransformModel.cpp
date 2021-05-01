@@ -31,7 +31,8 @@ void TransformModel::setProto(Transform *proto) {
       std::sqrt(proto->m11() * proto->m11() + proto->m12() * proto->m12());
   scaleY_ =
       std::sqrt(proto->m21() * proto->m21() + proto->m22() * proto->m22());
-  rotation_ = std::atan2(proto->m21() / scaleY_, proto->m11() / scaleX_);
+  rotation_ =
+      std::atan2(proto->m21() / scaleY_, proto->m11() / scaleX_) * 180 / M_PI;
 
   emit transformChanged();
   emit protoChanged();
@@ -99,7 +100,7 @@ void TransformModel::resetProto(Transform *proto) {
 
 void TransformModel::updateMatrix() {
   auto transform = QTransform::fromTranslate(translationX_, translationY_)
-                       .rotateRadians(rotation_)
+                       .rotate(rotation_)
                        .scale(scaleX_, scaleY_);
   proto_->set_m11(transform.m11());
   proto_->set_m21(transform.m21());
