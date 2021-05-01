@@ -3,6 +3,7 @@
 #include "TransformInterpreter.h"
 #include "ast/helpers.h"
 #include "ast/transforms.h"
+#include "core/debug.h"  // Debug formatters, keep.
 #include "testing/StaticRng.h"
 
 namespace chaoskit::core {
@@ -18,6 +19,22 @@ TEST_F(TransformInterpreterTest, InterpretsAffineTransform) {
   ast::TransformVariant transform = ast::AffineTransform();
 
   Particle expected{Point{3, 1}};
+  ASSERT_EQ(expected, interpreter.interpret(input, transform, params));
+}
+
+TEST_F(TransformInterpreterTest, InterpretsRotationsCorrectly) {
+  TransformInterpreter interpreter(std::make_shared<StaticRng>());
+  Particle input{Point{1, 1}};
+  // Rotate by 45 degrees counterclockwise.
+  constexpr float COS_45DEG = 0.7071067811865476;
+  constexpr float SIN_45DEG = 0.7071067811865476;
+  TransformParams params;
+
+  params[TransformIndex()] = {COS_45DEG, -SIN_45DEG, 0,
+                              SIN_45DEG, COS_45DEG,  0};
+  ast::TransformVariant transform = ast::AffineTransform();
+
+  Particle expected{Point{0, M_SQRT2}};
   ASSERT_EQ(expected, interpreter.interpret(input, transform, params));
 }
 

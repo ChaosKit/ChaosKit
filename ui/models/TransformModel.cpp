@@ -105,9 +105,10 @@ void TransformModel::updateMatrix() {
   proto_->set_m11(transform.m11());
   proto_->set_m21(transform.m21());
   proto_->set_m31(transform.m31());
-  proto_->set_m21(transform.m21());
+  proto_->set_m12(transform.m12());
   proto_->set_m22(transform.m22());
   proto_->set_m32(transform.m32());
+  emit protoChanged();
 }
 
 }  // namespace chaoskit::ui

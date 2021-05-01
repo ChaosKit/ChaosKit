@@ -54,7 +54,7 @@ ast::Transform toTransform(const Blend& blendProto) {
 void populateTransformParams(std::vector<float>& params,
                              const Transform& transformProto) {
   params = {transformProto.m11(), transformProto.m21(), transformProto.m31(),
-            transformProto.m21(), transformProto.m22(), transformProto.m32()};
+            transformProto.m12(), transformProto.m22(), transformProto.m32()};
 }
 
 void populateParams(core::TransformParams& params, const Blend& blendProto,
