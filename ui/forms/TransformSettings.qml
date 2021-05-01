@@ -124,8 +124,9 @@ ScrollView {
         from: 0
         precision: 0
         stepSize: 1
-        to: 360
+        to: 359
         value: transformModel.rotation
+        wrap: true
 
         onValueModified: {
           transformModel.rotation = realValue;
