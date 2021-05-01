@@ -59,6 +59,9 @@ void SystemModel::setProto(System* proto) {
 void SystemModel::setMinLifetime(int min) {
   if (min == proto_->skip()) return;
 
+  // Min lifetime can't be larger that max lifetime.
+  if (min > proto_->ttl()) return;
+
   proto_->set_skip(min);
   emit protoChanged();
   emit minLifetimeChanged();
@@ -68,6 +71,12 @@ void SystemModel::setMaxLifetime(int max) {
   if (max == proto_->ttl()) return;
 
   auto immortalChanged = (max == -1) != (proto_->ttl() == -1);
+
+  // Adjust min lifetime if it would be larger due to this update.
+  if (max != -1 && proto_->skip() > max) {
+    proto_->set_skip(max);
+    emit minLifetimeChanged();
+  }
 
   proto_->set_ttl(max);
   emit protoChanged();

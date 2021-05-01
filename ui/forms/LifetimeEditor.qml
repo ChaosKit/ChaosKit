@@ -41,17 +41,16 @@ GridLayout {
     Layout.rightMargin: Theme.smallPadding
     text: 'Min'
   }
-  TextField {
+  SpinBox {
     Layout.columnSpan: 2
     Layout.fillWidth: true
-    text: system.minLifetime
-    validator: IntValidator {
-      bottom: 0
-      top: system.isImmortal ? 2147483647 : system.maxLifetime
-    }
+    editable: true
+    from: 0
+    to: system.isImmortal ? 2147483647 : localMaxLifetime
+    value: system.minLifetime
 
-    onEditingFinished: {
-      system.minLifetime = parseInt(text, 10);
+    onValueModified: {
+      system.minLifetime = value;
     }
   }
 
@@ -70,15 +69,17 @@ GridLayout {
       system.maxLifetime = localMaxLifetime;
     }
   }
-  TextField {
+  SpinBox {
     id: maxLifetimeField
 
     Layout.fillWidth: true
-    text: `${localMaxLifetime}`;
-    validator: IntValidator { bottom: system.minLifetime }
+    editable: true
+    from: system.isImmortal ? 0 : system.minLifetime
+    to: 2147483647
+    value: localMaxLifetime
 
-    onEditingFinished: {
-      system.maxLifetime = parseInt(text, 10);
+    onValueModified: {
+      system.maxLifetime = value;
     }
   }
 
