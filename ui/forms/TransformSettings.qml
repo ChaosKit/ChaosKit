@@ -33,18 +33,6 @@ ScrollView {
       columnSpacing: 0
       rowSpacing: Theme.padding
 
-      component NumberField : TextField {
-        property real value
-        property int precision: 2
-
-        readonly property real factor: Math.pow(10, precision)
-
-        text: Math.round(value * factor) / factor
-        validator: DoubleValidator {
-          locale: 'en_US'
-        }
-      }
-
       // Translation
       Icon {
         Layout.rightMargin: Theme.padding
@@ -55,19 +43,25 @@ ScrollView {
         Layout.columnSpan: 3
         Layout.fillWidth: true
         Layout.rightMargin: Theme.padding
-        value: transformModel.translationX
+        from: -100 * factor | 0
+        stepSize: 0.1 * factor | 0
+        to: 100 * factor | 0
+        value: transformModel.translationX * factor
 
-        onEditingFinished: {
-          transformModel.translationX = Number(text);
+        onValueModified: {
+          transformModel.translationX = realValue;
         }
       }
       NumberField {
         Layout.columnSpan: 3
         Layout.fillWidth: true
-        value: transformModel.translationY
+        from: -100 * factor | 0
+        stepSize: 0.1 * factor | 0
+        to: 100 * factor | 0
+        value: transformModel.translationY * factor
 
-        onEditingFinished: {
-          transformModel.translationY = Number(text);
+        onValueModified: {
+          transformModel.translationY = realValue;
         }
       }
 
@@ -80,14 +74,17 @@ ScrollView {
       NumberField {
         Layout.columnSpan: 2
         Layout.fillWidth: true
-        value: transformModel.scaleX
+        from: -100 * factor | 0
+        stepSize: 0.1 * factor | 0
+        to: 100 * factor | 0
+        value: transformModel.scaleX * factor
 
-        onEditingFinished: {
+        onValueModified: {
           if (root.scaleLocked) {
             const aspectRatio = transformModel.scaleY / transformModel.scaleX;
-            transformModel.scaleY = Number(text) * aspectRatio;
+            transformModel.scaleY = realValue * aspectRatio;
           }
-          transformModel.scaleX = Number(text);
+          transformModel.scaleX = realValue;
         }
       }
       IconButton {
@@ -101,14 +98,17 @@ ScrollView {
       NumberField {
         Layout.columnSpan: 2
         Layout.fillWidth: true
-        value: transformModel.scaleY
+        from: -100 * factor | 0
+        stepSize: 0.1 * factor | 0
+        to: 100 * factor | 0
+        value: transformModel.scaleY * factor
 
-        onEditingFinished: {
+        onValueModified: {
           if (root.scaleLocked) {
             const aspectRatio = transformModel.scaleX / transformModel.scaleY;
-            transformModel.scaleX = Number(text) * aspectRatio;
+            transformModel.scaleX = realValue * aspectRatio;
           }
-          transformModel.scaleY = Number(text);
+          transformModel.scaleY = realValue;
         }
       }
 
@@ -121,11 +121,14 @@ ScrollView {
       NumberField {
         Layout.columnSpan: 6
         Layout.fillWidth: true
-        precision: 4
+        from: 0
+        precision: 0
+        stepSize: 1
+        to: 360
         value: transformModel.rotation
 
-        onEditingFinished: {
-          transformModel.rotation = Number(text);
+        onValueModified: {
+          transformModel.rotation = realValue;
         }
       }
     }
