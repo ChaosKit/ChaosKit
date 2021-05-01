@@ -15,6 +15,7 @@
         <file alias="close.svg">icons/window-close.svg</file>
         <file alias="formula.svg">icons/gnumeric-formulaguru-16.svg</file>
         <file alias="image.svg">icons/image-x-generic.svg</file>
+        <file alias="lock.svg">icons/lock-16.svg</file>
         <file alias="move.svg">icons/transform-move-16.svg</file>
         <file alias="plus.svg">icons/list-add-16.svg</file>
         <file alias="random.svg">icons/media-playlist-shuffle-16.svg</file>
@@ -26,6 +27,7 @@
         <file alias="transform.svg">icons/node-transform-16.svg</file>
         <file alias="trash.svg">icons/edit-delete-16.svg</file>
         <file alias="undo.svg">icons/edit-undo.svg</file>
+        <file alias="unlock.svg">icons/unlock-16.svg</file>
         <file alias="play.svg">icons/media-playback-start.svg</file>
         <file alias="pause.svg">icons/media-playback-pause.svg</file>
     </qresource>

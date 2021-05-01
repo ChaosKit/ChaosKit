@@ -54,8 +54,8 @@
         <file>forms/SystemEditor.qml</file>
         <file>forms/SystemPreview.qml</file>
         <file>forms/SystemSettings.qml</file>
-        <file>forms/TransformEditor.qml</file>
         <file>forms/TransformItem.qml</file>
+        <file>forms/TransformSettings.qml</file>
         <file>forms/ToneMappingEditor.qml</file>
         <file>forms/WeightIndicator.qml</file>
     </qresource>
