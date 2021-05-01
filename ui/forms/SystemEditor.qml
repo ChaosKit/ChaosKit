@@ -5,7 +5,11 @@ import ChaosKit 1.0
 
 Item {
   id: root
-  property var selectedItem: projectModel.system
+  property var selectedPath: [projectModel.system]
+
+  function getSelectedLeaf() {
+    return root.selectedPath[root.selectedPath.length - 1];
+  }
 
   ScrollView {
     anchors.bottom: separator.top
@@ -15,12 +19,12 @@ Item {
     clip: true
 
     StructureEditor {
-      selectedItem: root.selectedItem
+      selectedPath: root.selectedPath
       system: projectModel.system
       width: parent.width
 
       onSelectionChanged: {
-        root.selectedItem = item;
+        root.selectedPath = path;
       }
     }
   }
@@ -44,21 +48,21 @@ Item {
   Component {
     id: blendSettings
     BlendSettings {
-      blend: selectedItem
-      isCamera: selectedItem === projectModel.system.cameraBlend
+      blend: getSelectedLeaf()
+      isCamera: getSelectedLeaf() === projectModel.system.cameraBlend
     }
   }
 
   Component {
     id: transformSettings
     TransformSettings {
-      transformModel: selectedItem
+      transformModel: getSelectedLeaf()
     }
   }
 
   function getSourceComponent() {
-    if (selectedItem != null) {
-      switch (selectedItem.objectName) {
+    if (getSelectedLeaf() != null) {
+      switch (getSelectedLeaf().objectName) {
         case 'blend':
           return blendSettings;
         case 'transform':
