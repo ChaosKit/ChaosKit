@@ -1,4 +1,5 @@
 #include "FormulaModel.h"
+#include <QRandomGenerator64>
 #include <algorithm>
 #include <magic_enum.hpp>
 #include "library/util.h"
@@ -13,6 +14,7 @@ void FormulaModel::setProto(Formula *proto) {
   BaseModel::setProto(proto);
 
   updateTypeCache();
+  ensureParamCount();
   updateParamsCache();
 
   emit protoChanged();
@@ -29,24 +31,17 @@ void FormulaModel::setType(const QString &type) {
     return;
   }
 
-  // Resize the params.
-  int newParamCount = static_cast<int>(library::paramCount(*typeEnum));
-  int countDiff = newParamCount - paramsCache_.size();
-  bool resized = countDiff != 0;
-  proto_->mutable_params()->Resize(newParamCount, 0.f);
-  if (countDiff > 0) {
-    while (countDiff--) paramsCache_.append(0.f);
-  } else if (countDiff < 0) {
-    while (countDiff++) paramsCache_.removeLast();
-  }
-  if (resized) {
-    emit paramsChanged();
-  }
-
   // Set the type.
   type_ = *typeEnum;
   typeCache_ = type;
   proto_->set_type(std::move(typeStr));
+
+  // Resize the params.
+  bool paramsModified = ensureParamCount();
+  if (paramsModified) {
+    updateParamsCache();
+  }
+
   emit protoChanged();
   emit typeChanged();
 }
@@ -55,7 +50,23 @@ void FormulaModel::setParam(int i, float value) {
   if (qFuzzyCompare(paramsCache_[i].toFloat(), value)) return;
 
   paramsCache_[i] = value;
-  proto_->mutable_params()->Set(i, value);
+  proto_->set_params(i, value);
+  emit protoChanged();
+  emit paramsChanged();
+}
+
+void FormulaModel::randomizeParams() {
+  auto rng = QRandomGenerator64::securelySeeded();
+  std::uniform_real_distribution<float> distribution(-1, 1);
+
+  int i = 0;
+  for (auto &param : paramsCache_) {
+    float value = distribution(rng);
+    param.setValue(value);
+    proto_->set_params(i, value);
+    i++;
+  }
+
   emit protoChanged();
   emit paramsChanged();
 }
@@ -78,6 +89,30 @@ void FormulaModel::updateTypeCache() {
   type_ = type;
   typeCache_ = QString::fromStdString(proto_->type());
   emit typeChanged();
+}
+
+bool FormulaModel::ensureParamCount() {
+  int desiredParamCount = static_cast<int>(library::paramCount(type_));
+  int actualParamsCount = proto_->params_size();
+  if (actualParamsCount == desiredParamCount) return false;
+
+  auto rng = QRandomGenerator64::securelySeeded();
+  std::uniform_real_distribution<float> distribution(-1, 1);
+
+  if (actualParamsCount < desiredParamCount) {
+    int difference = desiredParamCount - actualParamsCount;
+    while (difference--) {
+      proto_->add_params(distribution(rng));
+    }
+  } else {
+    int difference = actualParamsCount - desiredParamCount;
+    while (difference--) {
+      proto_->mutable_params()->RemoveLast();
+    }
+  }
+
+  // Remember to emit protoChanged after this returns true!
+  return true;
 }
 
 void FormulaModel::updateParamsCache() {

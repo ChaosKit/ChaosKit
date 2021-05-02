@@ -33,6 +33,9 @@ class FormulaModel : public BaseModel<Formula> {
   // Necessary to be able to access the model from QML's delegate models.
   [[nodiscard]] FormulaModel* self() { return this; }
 
+ public slots:
+  void randomizeParams();
+
  signals:
   void typeChanged();
   void paramsChanged();
@@ -46,6 +49,7 @@ class FormulaModel : public BaseModel<Formula> {
 
   void updateTypeCache();
   void updateParamsCache();
+  bool ensureParamCount();
 };
 
 }  // namespace chaoskit::ui
