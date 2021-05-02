@@ -77,6 +77,7 @@ void BlendModel::removePre() {
   if (pre_ == nullptr) return;
 
   delete pre_;
+  pre_ = nullptr;
   proto_->clear_pre();
   emit protoChanged();
   emit preChanged();
@@ -100,6 +101,7 @@ void BlendModel::removePost() {
   if (post_ == nullptr) return;
 
   delete post_;
+  post_ = nullptr;
   proto_->clear_post();
   emit protoChanged();
   emit postChanged();

@@ -64,13 +64,13 @@ Column {
       selectedItem: getSelectedLeaf()
       width: parent.width
 
-      onClicked: {
+      onSelected: {
         root.selectionChanged([system, model.self]);
       }
-      onChildClicked: {
+      onChildSelected: {
         root.selectionChanged([system, model.self, child]);
       }
-      onDeleteClicked: {
+      onDeleteRequested: {
         system.deleteBlendAt(index);
       }
     }
@@ -83,10 +83,10 @@ Column {
     selectedItem: getSelectedLeaf()
     width: parent.width
 
-    onClicked: {
+    onSelected: {
       root.selectionChanged([system, system.cameraBlend]);
     }
-    onChildClicked: {
+    onChildSelected: {
       root.selectionChanged([system, system.cameraBlend, child]);
     }
   }

@@ -13,9 +13,9 @@ Item {
   property bool allowDelete: false
   property alias selectedItem: contents.selectedItem
 
-  signal clicked()
-  signal childClicked(var child)
-  signal deleteClicked()
+  signal selected()
+  signal childSelected(var child)
+  signal deleteRequested()
 
   implicitHeight: header.height + (open ? contents.height : 0)
 
@@ -33,7 +33,7 @@ Item {
     }
     TapHandler {
       id: tapHandler
-      onTapped: root.clicked()
+      onTapped: root.selected()
     }
 
     RowLayout {
@@ -71,7 +71,7 @@ Item {
             (hoverHandler.hovered || selectedItem === blend.self)
 
         onClicked: {
-          root.deleteClicked();
+          root.deleteRequested();
         }
       }
     }
@@ -87,7 +87,18 @@ Item {
     visible: open
 
     onChildClicked: {
-      root.childClicked(child);
+      root.childSelected(child);
+    }
+    onDeleteRequested: {
+      if (root.selectedItem === transform) {
+        root.selected();
+      }
+
+      if (transform === blend.pre) {
+        blend.removePre();
+      } else if (transform === blend.post) {
+        blend.removePost();
+      }
     }
   }
 }

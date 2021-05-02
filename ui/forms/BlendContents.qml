@@ -11,6 +11,7 @@ ColumnLayout {
   property var selectedItem
 
   signal childClicked(var child)
+  signal deleteRequested(var transform)
 
   spacing: 0
 
@@ -24,6 +25,9 @@ ColumnLayout {
 
       onClicked: {
         root.childClicked(blend.pre);
+      }
+      onDeleteClicked: {
+        root.deleteRequested(blend.pre);
       }
     }
   }
@@ -71,6 +75,9 @@ ColumnLayout {
 
       onClicked: {
         root.childClicked(blend.post);
+      }
+      onDeleteClicked: {
+        root.deleteRequested(blend.post);
       }
     }
   }

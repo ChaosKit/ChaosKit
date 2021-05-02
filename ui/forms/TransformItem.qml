@@ -12,6 +12,7 @@ Rectangle {
   property bool selected: false
 
   signal clicked()
+  signal deleteClicked()
 
   color: Theme.controlColor(hoverHandler.hovered, tapHandler.pressed, selected)
   implicitWidth: 150
@@ -29,18 +30,27 @@ Rectangle {
     id: layout
     anchors.fill: parent
     anchors.leftMargin: offset
+    anchors.margins: Theme.smallPadding
     spacing: Theme.smallPadding
-    y: Theme.smallPadding
 
     Icon {
-      Layout.leftMargin: Theme.smallPadding
       name: 'transform'
     }
 
     TextLabel {
       Layout.fillWidth: true
-      Layout.rightMargin: Theme.smallPadding
       text: root.name
+    }
+
+    IconButton {
+      id: deleteButton
+      iconName: 'trash'
+      innerOffset: 0
+      visible: hoverHandler.hovered || root.selected
+
+      onClicked: {
+        root.deleteClicked();
+      }
     }
   }
 }
