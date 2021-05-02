@@ -138,6 +138,10 @@ class FormulaPreviewResponse : public QQuickImageResponse, public QRunnable {
   void run() override {
     QSize imageSize(192, 192);
 
+    if (requestedSize_.isValid()) {
+      imageSize = requestedSize_;
+    }
+
     image_ = QImage(imageSize, QImage::Format_RGBA64);
     image_.fill(QColor(0, 0, 0, 0));
 
@@ -162,16 +166,10 @@ class FormulaPreviewResponse : public QQuickImageResponse, public QRunnable {
               .translate(-bounds.left(), -bounds.top());
 
       if (requiresScatterplot(*formulaType)) {
-        painter.setBrush(primary);
-        QSize pointSize(imageSize.width() / (8 * GRID_WIDTH),
-                        imageSize.height() / (8 * GRID_HEIGHT));
-        QPoint offset(-pointSize.width() / 2, -pointSize.height() / 2);
-
         for (int y = 0; y < GRID_HEIGHT; y++) {
           for (int x = 0; x < GRID_WIDTH; x++) {
             int index = y * GRID_WIDTH + x;
-            painter.drawRect(QRectF(transform.map(grid[index]), pointSize)
-                                 .translated(offset));
+            painter.drawPoint(transform.map(grid[index]));
           }
         }
       } else {
@@ -192,10 +190,6 @@ class FormulaPreviewResponse : public QQuickImageResponse, public QRunnable {
           }
         }
       }
-    }
-
-    if (requestedSize_.isValid()) {
-      image_ = image_.scaled(requestedSize_);
     }
 
     emit finished();
