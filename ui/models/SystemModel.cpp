@@ -106,6 +106,15 @@ void SystemModel::addBlend() {
   blends_->append(model);
   emit protoChanged();
 }
+
+void SystemModel::deleteBlendAt(int index) {
+  if (index < 0 || index >= blends_->size()) return;
+
+  blends_->remove(index);
+  proto_->mutable_blends()->DeleteSubrange(index, 1);
+  emit protoChanged();
+}
+
 QString SystemModel::astSource() const {
   std::stringstream stream;
   const core::CameraSystem& cameraSystem = toCameraSystem(*proto_);

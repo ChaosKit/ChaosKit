@@ -57,7 +57,9 @@ Column {
     model: system.blends
     delegate: BlendItem {
       required property var model
+      required property int index
 
+      allowDelete: true
       blend: model.self
       selectedItem: getSelectedLeaf()
       width: parent.width
@@ -67,6 +69,9 @@ Column {
       }
       onChildClicked: {
         root.selectionChanged([system, model.self, child]);
+      }
+      onDeleteClicked: {
+        system.deleteBlendAt(index);
       }
     }
   }

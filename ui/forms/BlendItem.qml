@@ -10,10 +10,12 @@ Item {
   property string name
   property string icon: 'blend'
   property bool open: false
+  property bool allowDelete: false
   property alias selectedItem: contents.selectedItem
 
   signal clicked()
   signal childClicked(var child)
+  signal deleteClicked()
 
   implicitHeight: header.height + (open ? contents.height : 0)
 
@@ -36,12 +38,13 @@ Item {
 
     RowLayout {
       id: layout
-      width: parent.width
+      anchors.left: parent.left
+      anchors.right: parent.right
+      anchors.top: parent.top
+      anchors.margins: Theme.smallPadding
       spacing: Theme.smallPadding
-      y: Theme.smallPadding
 
       IconButton {
-        Layout.leftMargin: Theme.smallPadding
         icon.color: Theme.onSurfaceHigh
         iconName: 'arrow-down'
         innerOffset: 0
@@ -58,8 +61,18 @@ Item {
 
       TextLabel {
         Layout.fillWidth: true
-        Layout.rightMargin: Theme.smallPadding
         text: name || blend.name || 'Untitled Blend'
+      }
+
+      IconButton {
+        iconName: 'trash'
+        innerOffset: 0
+        visible: allowDelete &&
+            (hoverHandler.hovered || selectedItem === blend.self)
+
+        onClicked: {
+          root.deleteClicked();
+        }
       }
     }
   }

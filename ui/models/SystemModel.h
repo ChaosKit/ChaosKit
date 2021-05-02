@@ -47,6 +47,7 @@ class SystemModel : public BaseModel<System> {
 
  public slots:
   void addBlend();
+  void deleteBlendAt(int index);
 
  signals:
   void minLifetimeChanged();
