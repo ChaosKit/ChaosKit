@@ -14,9 +14,14 @@ Column {
 
     delegate: FormulaItem {
       required property var model
+      required property int index
 
       formula: model.self
       width: parent.width
+
+      onDeleteClicked: {
+        blend.deleteFormulaAt(index);
+      }
     }
   }
 

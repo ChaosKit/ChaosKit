@@ -51,6 +51,7 @@ class BlendModel : public BaseModel<Blend> {
   void addPost();
   void removePost();
   void addFormula(const QString& type);
+  void deleteFormulaAt(int index);
 
  signals:
   void enabledChanged();

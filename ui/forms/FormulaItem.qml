@@ -9,6 +9,8 @@ Item {
   required property var formula
   property bool open: false
 
+  signal deleteClicked()
+
   implicitWidth: 150
   implicitHeight: layout.implicitHeight + Theme.smallPadding * 2 + (open ? params.height + Theme.padding : 0)
 
@@ -51,6 +53,10 @@ Item {
 
     IconButton {
       iconName: 'trash'
+
+      onClicked: {
+        root.deleteClicked();
+      }
     }
   }
 

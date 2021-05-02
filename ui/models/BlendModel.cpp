@@ -121,6 +121,14 @@ void BlendModel::addFormula(const QString &type) {
   emit protoChanged();
 }
 
+void BlendModel::deleteFormulaAt(int index) {
+  if (index < 0 || index >= formulas_->size()) return;
+
+  formulas_->remove(index);
+  proto_->mutable_formulas()->DeleteSubrange(index, 1);
+  emit protoChanged();
+}
+
 void BlendModel::updatePre() {
   if (proto_->has_pre()) {
     if (pre_ == nullptr) {
