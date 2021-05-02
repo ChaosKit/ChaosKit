@@ -16,11 +16,16 @@ Popup {
     id: scrollView
     anchors.fill: parent
     clip: true
+    contentWidth: availableWidth
+    ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
     GridView {
       id: grid
       cellWidth: 48 + Theme.smallPadding * 2
       cellHeight: 48 + Theme.smallPadding * 2
+      model: formulaList
+      width: parent.width
+
       delegate: Rectangle {
         id: formula
 
@@ -50,13 +55,13 @@ Popup {
           anchors.fill: parent
           anchors.margins: Theme.smallPadding
           source: 'image://formula/' + modelData
+          sourceSize.width: grid.cellWidth
+          sourceSize.height: grid.cellHeight
 
           ToolTip.text: modelData
-          ToolTip.visible: hovered && !formula.Drag.active
+          ToolTip.visible: hovered
         }
       }
-      model: formulaList
-      width: scrollView.width
     }
   }
 }

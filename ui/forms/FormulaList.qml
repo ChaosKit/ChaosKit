@@ -37,7 +37,15 @@ Column {
       text: 'Add formula'
 
       onClicked: {
-        blend.addFormula('Linear');
+        formulaPopup.open();
+      }
+
+      FormulaPopup {
+        id: formulaPopup
+
+        onFormulaPicked: {
+          blend.addFormula(formulaType);
+        }
       }
     }
   }
