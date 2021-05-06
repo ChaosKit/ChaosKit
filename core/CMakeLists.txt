@@ -17,7 +17,6 @@ add_library(
   PaletteColorMap.h
   RainbowColorMap.cpp
   RainbowColorMap.h
-  random.h
   SimpleHistogramGenerator.cpp
   SimpleHistogramGenerator.h
   SystemProcessor.cpp
@@ -28,8 +27,8 @@ add_library(
   TransformInterpreter.h)
 target_link_libraries(
   core
-  PUBLIC ast core_interface stdx randutils
-  PRIVATE magic_enum
+  PUBLIC ast core_interface stdx
+  PRIVATE magic_enum pcg_random
   INTERFACE flame_structures)
 
 add_library(
