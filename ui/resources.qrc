@@ -45,6 +45,7 @@
         <file>forms/FormulaGallery.qml</file>
         <file>forms/FormulaGroupItem.qml</file>
         <file>forms/FormulaItem.qml</file>
+        <file>forms/FormulaList.qml</file>
         <file>forms/FormulaParams.qml</file>
         <file>forms/FormulaPopup.qml</file>
         <file>forms/FormulaSettings.qml</file>
