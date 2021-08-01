@@ -101,7 +101,6 @@ QStringList createExportFormatList() {
 int main(int argc, char* argv[]) {
   resources::initialize();
 
-  QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication app(argc, argv);
 
   QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
