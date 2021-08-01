@@ -13,8 +13,19 @@ ScrollView {
   // and synced periodically with the model for performance.
   property real colorParameter: 0
 
+  // Syncs the parameter value from the model.
+  function syncParameterFromBlend() {
+    if (root.colorParameter != blend.coloringMethod.parameter) {
+      root.colorParameter = blend.coloringMethod.parameter;
+    }
+  }
+
   clip: true
   contentWidth: availableWidth
+
+  onBlendChanged: {
+    syncParameterFromBlend();
+  }
 
   Component.onCompleted: {
     // Initial sync from the model.
@@ -25,11 +36,7 @@ ScrollView {
     target: blend.coloringMethod
 
     function onParameterChanged() {
-      // Sync the value from the model (e.g. if it changes because the coloring
-      // method has changed).
-      if (root.colorParameter != blend.coloringMethod.parameter) {
-        root.colorParameter = blend.coloringMethod.parameter;
-      }
+      syncParameterFromBlend();
     }
   }
 
