@@ -9,8 +9,39 @@ ScrollView {
   required property var blend
   property bool isCamera: false
 
+  // The parameter of the coloring method. Updated in real time from the slider
+  // and synced periodically with the model for performance.
+  property real colorParameter: 0
+
   clip: true
   contentWidth: availableWidth
+
+  Component.onCompleted: {
+    // Initial sync from the model.
+    colorParameter = blend.coloringMethod.parameter;
+  }
+
+  Connections {
+    target: blend.coloringMethod
+
+    function onParameterChanged() {
+      // Sync the value from the model (e.g. if it changes because the coloring
+      // method has changed).
+      if (root.colorParameter != blend.coloringMethod.parameter) {
+        root.colorParameter = blend.coloringMethod.parameter;
+      }
+    }
+  }
+
+  Timer {
+    id: parameterUpdateDebouncer
+    interval: 200
+
+    onTriggered: {
+      // Store the local value in the model.
+      blend.coloringMethod.parameter = root.colorParameter;
+    }
+  }
 
   ColumnLayout {
     anchors.top: parent.top
@@ -60,6 +91,51 @@ ScrollView {
 
         onEditingFinished: {
           blend.weight = parseFloat(text);
+        }
+      }
+
+      TextLabel {
+        text: 'Coloring method'
+      }
+      ComboBox {
+        Layout.fillWidth: true
+        currentIndex: blend.coloringMethod.typeIndex
+        model: blend.coloringMethod.types
+
+        onActivated: {
+          blend.coloringMethod.typeIndex = index;
+        }
+      }
+
+      Item {
+        Layout.fillWidth: true
+        height: colorLabel.height
+
+        visible: blend.coloringMethod.typeIndex > 0
+
+        TextLabel {
+          id: colorLabel
+          text: blend.coloringMethod.typeIndex === 1 ? 'Color' : 'Scale'
+        }
+
+        Rectangle {
+          anchors.top: colorLabel.top
+          anchors.bottom: colorLabel.bottom
+          anchors.right: parent.right
+          // Using the local parameter here for instant updates
+          color: projectModel.colorMap.colorAt(root.colorParameter)
+          width: height
+          visible: blend.coloringMethod.typeIndex === 1
+        }
+      }
+      Slider {
+        Layout.fillWidth: true
+        value: root.colorParameter
+        visible: blend.coloringMethod.typeIndex > 0
+
+        onMoved: {
+          root.colorParameter = value;
+          parameterUpdateDebouncer.restart();
         }
       }
     }
