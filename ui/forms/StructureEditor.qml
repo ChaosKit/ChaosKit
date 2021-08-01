@@ -71,6 +71,7 @@ Column {
         root.selectionChanged([system, model.self, child]);
       }
       onDeleteRequested: {
+        root.selectionChanged([system]);
         system.deleteBlendAt(index);
       }
     }
