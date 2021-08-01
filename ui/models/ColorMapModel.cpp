@@ -63,6 +63,9 @@ int ColorMapModel::index() const {
 
 void ColorMapModel::updateNameCache() {
   QString nameCache = QString::fromStdString(proto_->name());
+  if (nameCache.isEmpty() && colorMapRegistry_ != nullptr) {
+    nameCache = colorMapRegistry_->defaultName();
+  }
   if (nameCache_ == nameCache) return;
 
   nameCache_ = nameCache;
