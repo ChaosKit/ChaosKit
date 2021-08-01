@@ -1,7 +1,7 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Window 2.12
-import ChaosKit 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Window
+import ChaosKit
 
 Popup {
   id: popup

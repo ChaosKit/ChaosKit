@@ -1,7 +1,7 @@
-import QtQml 2.12
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import ChaosKit 1.0
+import QtQml
+import QtQuick
+import QtQuick.Window
+import ChaosKit
 
 SystemView {
   id: systemView

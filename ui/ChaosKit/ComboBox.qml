@@ -1,9 +1,9 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Controls.impl 2.12
-import QtQuick.Templates 2.12 as T
-import ChaosKit 1.0
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick.Controls.impl
+import QtQuick.Templates as T
+import ChaosKit
 
 T.ComboBox {
   id: control

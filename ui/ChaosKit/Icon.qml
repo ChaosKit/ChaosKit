@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Controls.impl 2.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.impl
 
 IconLabel {
   property string name

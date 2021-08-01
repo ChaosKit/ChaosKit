@@ -1,9 +1,9 @@
-import QtQml 2.12
-import QtQml.Models 2.12
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
-import ChaosKit 1.0
+import QtQml
+import QtQml.Models
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import ChaosKit
 
 Column {
   id: root

@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import ChaosKit 1.0
+import QtQuick
+import ChaosKit
 
 // An item that, if positioned in a column, forms a rail of connected inner
 // items
