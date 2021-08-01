@@ -85,6 +85,21 @@ ScrollView {
       }
 
       TextLabel {
+        text: 'Name'
+        visible: !root.isCamera
+      }
+      TextField {
+        Layout.fillWidth: true
+        text: blend.name
+        placeholderText: 'Untitled Blend'
+        visible: !root.isCamera
+
+        onTextEdited: {
+          blend.name = text;
+        }
+      }
+
+      TextLabel {
         text: 'Weight'
         visible: !root.isCamera
       }
