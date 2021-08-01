@@ -17,7 +17,6 @@
 #include "EngineManager.h"
 #include "FormulaPreviewProvider.h"
 #include "HistogramBuffer.h"
-#include "ModelEntry.h"
 #include "Point.h"
 #include "SystemView.h"
 #include "Utilities.h"
@@ -37,7 +36,6 @@ using chaoskit::ui::ColorMapPreviewProvider;
 using chaoskit::ui::ColorMapRegistry;
 using chaoskit::ui::EngineManager;
 using chaoskit::ui::FormulaPreviewProvider;
-using chaoskit::ui::ModelEntry;
 using chaoskit::ui::ModelFactory;
 using chaoskit::ui::SystemView;
 using chaoskit::ui::Utilities;

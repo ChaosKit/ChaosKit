@@ -23,36 +23,6 @@ add_library(
 set_target_properties(ui_core PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_core PUBLIC core flame Qt5::Core Qt5::Gui)
 
-# The Qt Model interface to chaoskit::state.
-add_library(
-  ui_state
-  DocumentAdopter.cpp
-  DocumentAdopter.h
-  DocumentModel.cpp
-  DocumentModel.h
-  DocumentProxy.cpp
-  DocumentProxy.h
-  DocumentStore.h
-  ModelEntry.cpp
-  ModelEntry.h
-  RandomizationSettings.cpp
-  RandomizationSettings.h
-  SystemProxy.cpp
-  SystemProxy.h)
-set_target_properties(ui_state PROPERTIES AUTOMOC ON)
-target_link_libraries(
-  ui_state
-  PUBLIC core
-  flame
-  flame_hierarchy
-  library
-  state
-  ui_colormapregistry
-  Qt5::Core
-  Qt5::Gui
-  Qt5::Qml
-  PRIVATE magic_enum ui_storage)
-
 # --- Static resource management ---
 
 # Except for fonts, we only want to compile resources with QRC in release build.
@@ -104,7 +74,6 @@ target_link_libraries(
   ui_colormapregistry
   ui_models
   ui_resources
-  ui_state
   ui_storage
   magic_enum
   qt_qml_models
@@ -113,30 +82,3 @@ target_link_libraries(
   Qt5::Qml
   Qt5::Quick
   Qt5::QuickControls2)
-
-# run.sh — runs ChaosKit with correct environment variables
-
-if (NOT WIN32)
-  add_custom_command(
-    TARGET ChaosKit
-    POST_BUILD
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/make_run.sh" ARGS
-    $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}>
-    BYPRODUCTS run.sh
-    COMMENT "Generating run.sh")
-endif ()
-
-# --- Various experimental testing executables ---
-
-add_executable(TestWindow WIN32 test.cpp TestWindow.cpp TestWindow.h)
-set_target_properties(TestWindow PROPERTIES AUTOMOC ON)
-target_link_libraries(
-  TestWindow
-  PRIVATE core
-  flame
-  library
-  ui_core
-  ui_state
-  Qt5::Core
-  Qt5::Gui
-  Qt5::Widgets)
