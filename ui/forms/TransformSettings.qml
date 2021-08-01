@@ -18,10 +18,25 @@ ScrollView {
     spacing: 0
     width: parent.width
 
-    Heading {
+    RowLayout {
+      Layout.fillWidth: true
       Layout.leftMargin: Theme.padding
+      Layout.rightMargin: Theme.padding
       Layout.topMargin: Theme.padding
-      text: 'Transform Settings'
+
+      Heading {
+        Layout.fillWidth: true
+        text: 'Transform Settings'
+      }
+
+      IconButton {
+        Layout.columnSpan: 2
+        iconName: 'undo'
+
+        onClicked: {
+          transformModel.reset();
+        }
+      }
     }
 
     GridLayout {

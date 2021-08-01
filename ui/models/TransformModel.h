@@ -34,7 +34,7 @@ class TransformModel : public BaseModel<Transform> {
   [[nodiscard]] float translationY() const { return translationY_; }
   void setTranslationY(float dy);
 
-  void reset();
+  Q_INVOKABLE void reset();
   void resetProto(Transform* proto);
 
  signals:
