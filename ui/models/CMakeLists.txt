@@ -24,5 +24,5 @@ add_library(
 set_target_properties(ui_models PROPERTIES AUTOMOC ON)
 target_link_libraries(
   ui_models
-  PUBLIC core library ui_colormapregistry ui_storage Qt5::Core qt_qml_models
-  PRIVATE magic_enum Qt5::Gui)
+  PUBLIC core library ui_colormapregistry ui_storage Qt5::Core Qt5::Gui qt_qml_models
+  PRIVATE magic_enum)

@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_UI_MODELS_COLORMAPMODEL_H
 #define CHAOSKIT_UI_MODELS_COLORMAPMODEL_H
 
+#include <QColor>
 #include <QObject>
 #include <optional>
 #include "BaseModel.h"
@@ -30,6 +31,8 @@ class ColorMapModel : public BaseModel<ColorMap> {
   [[nodiscard]] int index() const;
 
   [[nodiscard]] const core::ColorMap* coreColorMap() const { return colorMap_; }
+
+  [[nodiscard]] Q_INVOKABLE QColor colorAt(float position) const;
 
  signals:
   void nameChanged();

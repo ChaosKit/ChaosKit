@@ -79,4 +79,12 @@ void ColorMapModel::updateColorMap() {
   }
 }
 
+QColor ColorMapModel::colorAt(float position) const {
+  if (colorMap_ == nullptr) {
+    return QColor(Qt::white);
+  }
+  core::Color color = colorMap_->map(std::clamp(position, 0.f, 1.f));
+  return QColor::fromRgbF(color.r, color.g, color.b, color.a);
+}
+
 }  // namespace chaoskit::ui
