@@ -76,21 +76,6 @@ Column {
     }
   }
 
-  BlendItem {
-    blend: system.cameraBlend
-    icon: 'camera-video'
-    name: 'Camera'
-    selectedItem: getSelectedLeaf()
-    width: parent.width
-
-    onSelected: {
-      root.selectionChanged([system, system.cameraBlend]);
-    }
-    onChildSelected: {
-      root.selectionChanged([system, system.cameraBlend, child]);
-    }
-  }
-
   Item {
     anchors.left: parent.left
     anchors.right: parent.right
@@ -105,6 +90,21 @@ Column {
       onClicked: {
         system.addBlend();
       }
+    }
+  }
+
+  BlendItem {
+    blend: system.cameraBlend
+    icon: 'camera-video'
+    name: 'Camera'
+    selectedItem: getSelectedLeaf()
+    width: parent.width
+
+    onSelected: {
+      root.selectionChanged([system, system.cameraBlend]);
+    }
+    onChildSelected: {
+      root.selectionChanged([system, system.cameraBlend, child]);
     }
   }
 }
