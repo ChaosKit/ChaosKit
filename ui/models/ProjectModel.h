@@ -51,6 +51,8 @@ class ProjectModel : public BaseModel<Project> {
   [[nodiscard]] uint height() const { return proto_->height(); }
   void setHeight(uint height);
 
+  Q_INVOKABLE void reset();
+
   // File-related methods
 
   [[nodiscard]] const QString& name() const { return name_; }
@@ -83,6 +85,7 @@ class ProjectModel : public BaseModel<Project> {
 
  private slots:
   void setFileUrl(const QUrl& url);
+  void clearFileUrl();
   void markAsModified();
   void markAsUnmodified();
 };

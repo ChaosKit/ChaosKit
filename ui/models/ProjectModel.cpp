@@ -53,13 +53,16 @@ ProjectModel::ProjectModel(ModelFactory* modelFactory, QObject* parent)
 }
 
 void ProjectModel::setProto(Project* proto) {
-  // Because Project is the root proto, release the old one before setting a new
-  // one. Deleting a null pointer is a no-op, so no if is necessary.
-  delete proto_;
+  auto* oldProto = proto_;
   BaseModel::setProto(proto);
 
-  colorMapModel_->setProto(proto_->mutable_color_map());
-  systemModel_->setProto(proto_->mutable_system());
+  colorMapModel_->setProto(proto->mutable_color_map());
+  systemModel_->setProto(proto->mutable_system());
+
+  // Because Project is the root proto, release the old one once all child
+  // models are updated with the new one. Deleting a null pointer is a no-op,
+  // so no if is necessary.
+  delete oldProto;
 
   // Will emit signals for all properties.
   emit projectChanged();
@@ -112,12 +115,45 @@ void ProjectModel::setHeight(uint height) {
   markAsModified();
 }
 
+void ProjectModel::reset() {
+  auto* project = new Project();
+
+  // Set some sensible defaults.
+  project->set_gamma(2.2f);
+  project->set_exposure(0.f);
+  project->set_vibrancy(0.f);
+  project->set_width(1024);
+  project->set_height(1024);
+
+  auto* system = project->mutable_system();
+  system->set_ttl(30);
+  system->set_skip(0);
+  system->mutable_final_blend()->set_enabled(true);
+
+  auto* blend = system->add_blends();
+  blend->set_enabled(true);
+  blend->set_weight(1.f);
+  blend->mutable_coloring_method()->set_single_color(.5f);
+
+  setProto(project);
+  clearFileUrl();
+  markAsModified();
+}
+
 // File-related methods
 
 void ProjectModel::setFileUrl(const QUrl& url) {
   if (fileUrl_ == url) return;
   name_ = url.fileName();
   fileUrl_ = url;
+  emit nameChanged();
+  emit fileUrlChanged();
+}
+
+void ProjectModel::clearFileUrl() {
+  if (fileUrl_.isEmpty()) return;
+  name_ = "Untitled";
+  fileUrl_.clear();
   emit nameChanged();
   emit fileUrlChanged();
 }

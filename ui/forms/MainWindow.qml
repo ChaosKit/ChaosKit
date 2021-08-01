@@ -71,7 +71,7 @@ ApplicationWindow {
 
   MainMenu {
     onNewTriggered: {
-      openSnackbar("Not implemented yet");
+      projectModel.reset();
     }
     onOpen: {
       openDialog.open()
@@ -159,20 +159,6 @@ ApplicationWindow {
 
     onClicked: {
       systemPreview.running = !systemPreview.running
-    }
-  }
-
-  Fab {
-    anchors.right: projectEditor.left
-    anchors.bottom: parent.bottom
-    anchors.margins: Theme.units(4)
-    enabled: true
-    iconName: "random-big"
-    ToolTip.text: "Randomize the image"
-    ToolTip.visible: hovered
-
-    onClicked: {
-      openSnackbar("Not implemented yet");
     }
   }
 }

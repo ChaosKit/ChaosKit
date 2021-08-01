@@ -11,6 +11,15 @@ Item {
     return root.selectedPath[root.selectedPath.length - 1];
   }
 
+  Connections {
+    target: projectModel
+
+    // Reset the selection when we reset the project.
+    function onProjectChanged() {
+      root.selectedPath = [projectModel.system];
+    }
+  }
+
   ScrollView {
     anchors.bottom: separator.top
     anchors.left: parent.left
