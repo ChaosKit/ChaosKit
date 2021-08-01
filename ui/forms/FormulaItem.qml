@@ -12,7 +12,7 @@ Item {
   signal deleteClicked()
 
   implicitWidth: 150
-  implicitHeight: layout.implicitHeight + Theme.smallPadding * 2 + (open ? params.height + Theme.padding : 0)
+  implicitHeight: {layout.implicitHeight + Theme.smallPadding * 2 + (open ? params.height + Theme.padding : 0)}
 
   RowLayout {
     id: layout
@@ -42,7 +42,7 @@ Item {
     NumberField {
       Layout.preferredWidth: 90
       from: 0
-      stepSize: 1 * factor
+      stepSize: 0.1 * factor
       to: 2147483647
       value: formula.weight * factor
 
