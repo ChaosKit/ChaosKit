@@ -1,6 +1,6 @@
 add_library(ui_colormapregistry ColorMapRegistry.cpp ColorMapRegistry.h)
 set_target_properties(ui_colormapregistry PROPERTIES AUTOMOC ON)
-target_link_libraries(ui_colormapregistry PUBLIC core Qt5::Core)
+target_link_libraries(ui_colormapregistry PUBLIC core Qt::Core)
 
 add_library(
   ui_models
@@ -24,5 +24,5 @@ add_library(
 set_target_properties(ui_models PROPERTIES AUTOMOC ON)
 target_link_libraries(
   ui_models
-  PUBLIC core library ui_colormapregistry ui_storage Qt5::Core Qt5::Gui qt_qml_models
+  PUBLIC core library ui_colormapregistry ui_storage Qt::Core Qt::Gui qt_qml_models
   PRIVATE magic_enum)

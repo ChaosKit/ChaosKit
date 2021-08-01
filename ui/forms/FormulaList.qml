@@ -19,7 +19,7 @@ Column {
       formula: model.self
       width: parent.width
 
-      onDeleteClicked: {
+      onDeleteClicked: () => {
         blend.deleteFormulaAt(index);
       }
     }
@@ -43,7 +43,7 @@ Column {
       FormulaPopup {
         id: formulaPopup
 
-        onFormulaPicked: {
+        onFormulaPicked: (formulaType) => {
           blend.addFormula(formulaType);
         }
       }

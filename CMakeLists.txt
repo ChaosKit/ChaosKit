@@ -24,9 +24,9 @@ add_subdirectory(ui)
 add_executable(benchmark benchmark.cpp)
 target_link_libraries(benchmark PRIVATE ast core pcg_random)
 
-find_package(Qt5 COMPONENTS Core Gui)
+find_package(Qt6 COMPONENTS Core Gui)
 add_executable(lol lol.cpp)
-target_link_libraries(lol PRIVATE core flame library Qt5::Gui)
+target_link_libraries(lol PRIVATE core flame library Qt::Gui)
 
 # #################################################### Third party dependencies
 
@@ -128,5 +128,5 @@ if(NOT qt_qml_models_POPULATED)
     ${qt_qml_models_SOURCE_DIR}/QQmlVariantListModel.h)
   target_include_directories(qt_qml_models PUBLIC ${qt_qml_models_SOURCE_DIR})
   set_target_properties(qt_qml_models PROPERTIES AUTOMOC ON)
-  target_link_libraries(qt_qml_models PUBLIC Qt5::Core)
+  target_link_libraries(qt_qml_models PUBLIC Qt::Core)
 endif()

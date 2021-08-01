@@ -32,7 +32,7 @@ Item {
       system: projectModel.system
       width: parent.width
 
-      onSelectionChanged: {
+      onSelectionChanged: (path) => {
         root.selectedPath = path;
       }
     }

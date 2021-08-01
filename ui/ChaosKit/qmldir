@@ -13,3 +13,20 @@ Separator 1.0 Separator.qml
 Snackbar 1.0 Snackbar.qml
 Subheading 1.0 Subheading.qml
 TextLabel 1.0 TextLabel.qml
+
+ApplicationWindow 1.0 ApplicationWindow.qml
+Button 1.0 Button.qml
+CheckBox 1.0 CheckBox.qml
+ComboBox 1.0 ComboBox.qml
+Label 1.0 Label.qml
+Popup 1.0 Popup.qml
+RadioButton 1.0 RadioButton.qml
+RoundButton 1.0 RoundButton.qml
+Slider 1.0 Slider.qml
+SpinBox 1.0 SpinBox.qml
+Switch 1.0 Switch.qml
+TabBar 1.0 TabBar.qml
+TabButton 1.0 TabButton.qml
+TextArea 1.0 TextArea.qml
+TextField 1.0 TextField.qml
+ToolTip 1.0 ToolTip.qml

@@ -21,11 +21,15 @@ class HistogramRenderer : public QQuickFramebufferObject::Renderer,
  public:
   explicit HistogramRenderer(const SystemView *view)
       : toneMapper_(), systemView_(view) {
+    systemView_->window()->beginExternalCommands();
     toneMapper_.initializeGL();
+    systemView_->window()->endExternalCommands();
   };
 
   void updateHistogramBuffer(const HistogramBuffer &buffer) override {
+    systemView_->window()->beginExternalCommands();
     toneMapper_.syncBuffer(buffer);
+    systemView_->window()->endExternalCommands();
   }
 
  protected:
@@ -40,10 +44,10 @@ class HistogramRenderer : public QQuickFramebufferObject::Renderer,
   }
 
   void render() override {
+    systemView_->window()->beginExternalCommands();
     toneMapper_.map();
+    systemView_->window()->endExternalCommands();
     update();
-
-    systemView_->window()->resetOpenGLState();
   }
 
  private:

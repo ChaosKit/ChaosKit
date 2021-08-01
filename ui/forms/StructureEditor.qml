@@ -32,7 +32,7 @@ Column {
     }
     TapHandler {
       id: tapHandler
-      onTapped: root.selectionChanged([system])
+      onTapped: () => root.selectionChanged([system])
     }
 
     RowLayout {
@@ -64,13 +64,13 @@ Column {
       selectedItem: getSelectedLeaf()
       width: parent.width
 
-      onSelected: {
+      onSelected: () => {
         root.selectionChanged([system, model.self]);
       }
-      onChildSelected: {
+      onChildSelected: (child) => {
         root.selectionChanged([system, model.self, child]);
       }
-      onDeleteRequested: {
+      onDeleteRequested: () => {
         root.selectionChanged([system]);
         system.deleteBlendAt(index);
       }
@@ -88,7 +88,7 @@ Column {
       anchors.margins: Theme.smallPadding
       text: 'Add blend'
 
-      onClicked: {
+      onClicked: () => {
         system.addBlend();
       }
     }
@@ -101,10 +101,10 @@ Column {
     selectedItem: getSelectedLeaf()
     width: parent.width
 
-    onSelected: {
+    onSelected: () => {
       root.selectionChanged([system, system.cameraBlend]);
     }
-    onChildSelected: {
+    onChildSelected: (child) => {
       root.selectionChanged([system, system.cameraBlend, child]);
     }
   }

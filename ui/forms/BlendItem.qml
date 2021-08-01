@@ -50,7 +50,7 @@ Item {
         innerOffset: 0
         rotation: open ? 0 : -90
 
-        onClicked: {
+        onClicked: () => {
           open = !open;
         }
       }
@@ -70,7 +70,7 @@ Item {
         visible: allowDelete &&
             (hoverHandler.hovered || selectedItem === blend.self)
 
-        onClicked: {
+        onClicked: () => {
           root.deleteRequested();
         }
       }
@@ -86,10 +86,10 @@ Item {
     offset: Theme.smallIconSize + Theme.smallPadding
     visible: open
 
-    onChildClicked: {
+    onChildClicked: (child) => {
       root.childSelected(child);
     }
-    onDeleteRequested: {
+    onDeleteRequested: (transform) => {
       if (root.selectedItem === transform) {
         root.selected();
       }
