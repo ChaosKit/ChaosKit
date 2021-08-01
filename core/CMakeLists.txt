@@ -28,8 +28,7 @@ add_library(
 target_link_libraries(
   core
   PUBLIC ast core_interface stdx
-  PRIVATE magic_enum pcg_random
-  INTERFACE flame_structures)
+  PRIVATE magic_enum pcg_random)
 
 add_library(
   core_interface

@@ -5,9 +5,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 17)
 
 # Allow executables to access DLL dependencies on Windows.
-if (WIN32)
+if(WIN32)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-endif ()
+endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_compile_definitions(_USE_MATH_DEFINES) # Needed for MSVC
@@ -26,7 +26,7 @@ target_link_libraries(benchmark PRIVATE ast core pcg_random)
 
 find_package(Qt5 COMPONENTS Core Gui)
 add_executable(lol lol.cpp)
-target_link_libraries(lol PRIVATE core flame library state Qt5::Gui)
+target_link_libraries(lol PRIVATE core flame library Qt5::Gui)
 
 # #################################################### Third party dependencies
 
@@ -113,13 +113,14 @@ endif()
 # (http://gitlab.unique-conception.org/qt-qml-tricks/qt-qml-models)
 FetchContent_Declare(
   qt_qml_models
-  GIT_REPOSITORY http://gitlab.unique-conception.org:81/qt-qml-tricks/qt-qml-models.git
-  GIT_TAG abd8617e7b7bae09be81e65da058e76b64b22a4d
-)
+  GIT_REPOSITORY
+    http://gitlab.unique-conception.org:81/qt-qml-tricks/qt-qml-models.git
+  GIT_TAG abd8617e7b7bae09be81e65da058e76b64b22a4d)
 FetchContent_GetProperties(qt_qml_models)
-if (NOT qt_qml_models_POPULATED)
+if(NOT qt_qml_models_POPULATED)
   FetchContent_Populate(qt_qml_models)
-  add_library(qt_qml_models
+  add_library(
+    qt_qml_models
     ${qt_qml_models_SOURCE_DIR}/QtQmlTricksPlugin_SmartDataModels.h
     ${qt_qml_models_SOURCE_DIR}/QQmlObjectListModel.cpp
     ${qt_qml_models_SOURCE_DIR}/QQmlObjectListModel.h
@@ -128,4 +129,4 @@ if (NOT qt_qml_models_POPULATED)
   target_include_directories(qt_qml_models PUBLIC ${qt_qml_models_SOURCE_DIR})
   set_target_properties(qt_qml_models PROPERTIES AUTOMOC ON)
   target_link_libraries(qt_qml_models PUBLIC Qt5::Core)
-endif ()
+endif()
