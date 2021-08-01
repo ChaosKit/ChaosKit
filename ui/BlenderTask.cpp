@@ -2,14 +2,11 @@
 #include <QDebug>
 #include <QTimer>
 #include "core/errors.h"
-#include "flame/toSystem.h"
 
 using chaoskit::core::CameraSystemProcessor;
 using chaoskit::core::MissingParameterError;
 using chaoskit::core::OutputNotAvailable;
 using chaoskit::core::UndefinedVariableError;
-using chaoskit::flame::toCameraSystem;
-using chaoskit::flame::Transform;
 
 namespace chaoskit::ui {
 

@@ -4,7 +4,6 @@
 #include <QObject>
 #include "Particle.h"
 #include "core/CameraSystemProcessor.h"
-#include "flame/System.h"
 
 namespace chaoskit::ui {
 

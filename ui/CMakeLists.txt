@@ -21,7 +21,7 @@ add_library(
   Particle.h
   Point.h)
 set_target_properties(ui_core PROPERTIES AUTOMOC ON)
-target_link_libraries(ui_core PUBLIC core flame Qt5::Core Qt5::Gui)
+target_link_libraries(ui_core PUBLIC core Qt5::Core Qt5::Gui)
 
 # --- Static resource management ---
 
