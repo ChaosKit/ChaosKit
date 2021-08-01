@@ -90,7 +90,7 @@ void SystemView::setModel(ProjectModel *projectModel) {
           &QQuickItem::update);
   connect(projectModel, &ProjectModel::vibrancyChanged, this,
           &QQuickItem::update);
-  connect(projectModel, &ProjectModel::systemChanged, this,
+  connect(projectModel->system(), &SystemModel::visuallyChanged, this,
           &SystemView::updateSystem);
   connect(projectModel->colorMap(), &ColorMapModel::nameChanged, this,
           &SystemView::updateColorMap);

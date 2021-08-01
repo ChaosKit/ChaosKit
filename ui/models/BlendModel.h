@@ -65,6 +65,7 @@ class BlendModel : public BaseModel<Blend> {
   void nameChanged();
   void preChanged();
   void postChanged();
+  void visuallyChanged();
 
  private:
   ModelFactory* modelFactory_;

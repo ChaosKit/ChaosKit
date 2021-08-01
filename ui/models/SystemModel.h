@@ -20,7 +20,7 @@ class SystemModel : public BaseModel<System> {
                  maxLifetimeChanged);
   Q_PROPERTY(bool isImmortal READ isImmortal WRITE setImmortal NOTIFY
                  isImmortalChanged STORED false);
-  Q_PROPERTY(const QString& astSource READ astSource NOTIFY protoChanged);
+  Q_PROPERTY(const QString& astSource READ astSource NOTIFY visuallyChanged);
   Q_PROPERTY(const QString& modelSource READ modelSource NOTIFY protoChanged);
 
  public:
@@ -53,6 +53,7 @@ class SystemModel : public BaseModel<System> {
   void minLifetimeChanged();
   void maxLifetimeChanged();
   void isImmortalChanged();
+  void visuallyChanged();
 
  private:
   ModelFactory* modelFactory_;

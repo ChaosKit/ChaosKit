@@ -20,6 +20,9 @@ SystemModel::SystemModel(ModelFactory* modelFactory, QObject* parent)
   // Listen to proto changes in children and emit protoChanged.
   connect(cameraBlend_, &AbstractBaseModel::protoChanged, this,
           &AbstractBaseModel::protoChanged);
+  // Listen to structure changes in children and emit visuallyChanged.
+  connect(cameraBlend_, &BlendModel::visuallyChanged, this,
+          &SystemModel::visuallyChanged);
 
   // Debug logging
   connect(this, &SystemModel::minLifetimeChanged, [this]() {
@@ -46,6 +49,8 @@ void SystemModel::setProto(System* proto) {
     model->setProto(&blend);
     connect(model, &AbstractBaseModel::protoChanged, this,
             &AbstractBaseModel::protoChanged);
+    connect(model, &BlendModel::visuallyChanged, this,
+            &SystemModel::visuallyChanged);
     newModels.append(model);
   }
   blends_->append(newModels);
@@ -64,6 +69,7 @@ void SystemModel::setMinLifetime(int min) {
 
   proto_->set_skip(min);
   emit protoChanged();
+  emit visuallyChanged();
   emit minLifetimeChanged();
 }
 
@@ -80,6 +86,7 @@ void SystemModel::setMaxLifetime(int max) {
 
   proto_->set_ttl(max);
   emit protoChanged();
+  emit visuallyChanged();
   emit maxLifetimeChanged();
 
   if (immortalChanged) {
@@ -97,6 +104,8 @@ void SystemModel::addBlend() {
   auto* model = modelFactory_->createBlendModel(blends_);
   connect(model, &AbstractBaseModel::protoChanged, this,
           &AbstractBaseModel::protoChanged);
+  connect(model, &BlendModel::visuallyChanged, this,
+          &SystemModel::visuallyChanged);
 
   Blend* blend = proto_->add_blends();
   blend->set_enabled(true);
@@ -112,6 +121,7 @@ void SystemModel::deleteBlendAt(int index) {
 
   blends_->remove(index);
   proto_->mutable_blends()->DeleteSubrange(index, 1);
+  emit visuallyChanged();
   emit protoChanged();
 }
 
