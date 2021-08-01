@@ -4,6 +4,7 @@
 #include <QQmlObjectListModel.h>
 #include <QObject>
 #include "BaseModel.h"
+#include "ColoringMethodModel.h"
 #include "FormulaModel.h"
 #include "ModelFactory.h"
 #include "TransformModel.h"
@@ -19,6 +20,7 @@ class BlendModel : public BaseModel<Blend> {
   Q_PROPERTY(float weight READ weight WRITE setWeight NOTIFY weightChanged);
   Q_PROPERTY(TransformModel* pre READ pre NOTIFY preChanged);
   Q_PROPERTY(TransformModel* post READ post NOTIFY postChanged);
+  Q_PROPERTY(ColoringMethodModel* coloringMethod READ coloringMethod CONSTANT);
   Q_PROPERTY(QQmlObjectListModelBase* formulas READ formulas CONSTANT);
 
  public:
@@ -37,6 +39,10 @@ class BlendModel : public BaseModel<Blend> {
 
   [[nodiscard]] TransformModel* pre() const { return pre_; }
   [[nodiscard]] TransformModel* post() const { return post_; }
+
+  [[nodiscard]] ColoringMethodModel* coloringMethod() const {
+    return coloringMethod_;
+  }
 
   [[nodiscard]] QQmlObjectListModel<FormulaModel>* formulas() const {
     return formulas_;
@@ -65,6 +71,7 @@ class BlendModel : public BaseModel<Blend> {
   QString nameCache_;
   TransformModel* pre_ = nullptr;
   TransformModel* post_ = nullptr;
+  ColoringMethodModel* coloringMethod_ = nullptr;
   QQmlObjectListModel<FormulaModel>* formulas_;
 
   void updatePre();

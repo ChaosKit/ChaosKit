@@ -7,6 +7,7 @@ namespace chaoskit::ui {
 
 class BlendModel;
 class ColorMapModel;
+class ColoringMethodModel;
 class FormulaModel;
 class ProjectModel;
 class SystemModel;
@@ -16,6 +17,7 @@ class ModelFactory {
  public:
   virtual BlendModel* createBlendModel(QObject* parent);
   virtual ColorMapModel* createColorMapModel(QObject* parent);
+  virtual ColoringMethodModel* createColoringMethodModel(QObject* parent);
   virtual FormulaModel* createFormulaModel(QObject* parent);
   virtual ProjectModel* createProjectModel(QObject* parent);
   virtual SystemModel* createSystemModel(QObject* parent);

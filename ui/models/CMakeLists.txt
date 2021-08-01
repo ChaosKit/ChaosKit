@@ -7,6 +7,8 @@ add_library(
   BaseModel.h
   BlendModel.cpp
   BlendModel.h
+  ColoringMethodModel.cpp
+  ColoringMethodModel.h
   ColorMapModel.cpp
   ColorMapModel.h
   FormulaModel.cpp

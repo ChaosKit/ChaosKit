@@ -2,6 +2,7 @@
 
 #include "BlendModel.h"
 #include "ColorMapModel.h"
+#include "ColoringMethodModel.h"
 #include "FormulaModel.h"
 #include "ProjectModel.h"
 #include "SystemModel.h"
@@ -14,6 +15,9 @@ BlendModel* ModelFactory::createBlendModel(QObject* parent) {
 }
 ColorMapModel* ModelFactory::createColorMapModel(QObject* parent) {
   return new ColorMapModel(parent);
+}
+ColoringMethodModel* ModelFactory::createColoringMethodModel(QObject* parent) {
+  return new ColoringMethodModel(parent);
 }
 FormulaModel* ModelFactory::createFormulaModel(QObject* parent) {
   return new FormulaModel(parent);

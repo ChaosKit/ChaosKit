@@ -5,6 +5,10 @@ namespace chaoskit::ui {
 BlendModel::BlendModel(ModelFactory *modelFactory, QObject *parent)
     : BaseModel<Blend>(parent), modelFactory_(modelFactory) {
   setObjectName(QStringLiteral("blend"));
+  coloringMethod_ = modelFactory_->createColoringMethodModel(this);
+  connect(coloringMethod_, &AbstractBaseModel::protoChanged, this,
+          &AbstractBaseModel::protoChanged);
+
   formulas_ = new QQmlObjectListModel<FormulaModel>(this);
   formulas_->setObjectName("formulas");
 }
@@ -15,6 +19,8 @@ void BlendModel::setProto(Blend *proto) {
   updateNameCache();
   updatePre();
   updatePost();
+
+  coloringMethod_->setProto(proto->mutable_coloring_method());
 
   // Clear old formulas
   for (auto *formula : *formulas_) {
