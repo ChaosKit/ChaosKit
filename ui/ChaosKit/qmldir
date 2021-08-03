@@ -18,6 +18,7 @@ ApplicationWindow 1.0 ApplicationWindow.qml
 Button 1.0 Button.qml
 CheckBox 1.0 CheckBox.qml
 ComboBox 1.0 ComboBox.qml
+ItemDelegate 1.0 ItemDelegate.qml
 Label 1.0 Label.qml
 Popup 1.0 Popup.qml
 RadioButton 1.0 RadioButton.qml
