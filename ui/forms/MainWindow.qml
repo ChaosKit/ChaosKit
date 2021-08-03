@@ -1,8 +1,8 @@
-import Qt.labs.platform 1.1
-import QtQml 2.12
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import ChaosKit 1.0
+import Qt.labs.platform
+import QtQml
+import QtQuick
+import QtQuick.Controls
+import ChaosKit
 
 ApplicationWindow {
   height: 768

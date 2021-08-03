@@ -1,6 +1,6 @@
-import QtQuick 2.12
-import QtQuick.Templates 2.12 as T
-import ChaosKit 1.0
+import QtQuick
+import QtQuick.Templates as T
+import ChaosKit
 
 T.TabBar {
   id: control

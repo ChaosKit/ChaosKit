@@ -1,7 +1,7 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import ChaosKit 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import ChaosKit
 
 Column {
   id: root
@@ -19,7 +19,7 @@ Column {
       formula: model.self
       width: parent.width
 
-      onDeleteClicked: {
+      onDeleteClicked: () => {
         blend.deleteFormulaAt(index);
       }
     }
@@ -43,7 +43,7 @@ Column {
       FormulaPopup {
         id: formulaPopup
 
-        onFormulaPicked: {
+        onFormulaPicked: (formulaType) => {
           blend.addFormula(formulaType);
         }
       }

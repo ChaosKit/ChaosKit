@@ -1,5 +1,5 @@
-import QtQuick 2.12
-import ChaosKit 1.0
+import QtQuick
+import ChaosKit
 
 Rectangle {
   border.color: Theme.onSurfaceMedium

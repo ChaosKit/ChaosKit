@@ -1,7 +1,7 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import ChaosKit 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import ChaosKit
 
 Item {
   id: root
@@ -50,7 +50,7 @@ Item {
         innerOffset: 0
         rotation: open ? 0 : -90
 
-        onClicked: {
+        onClicked: () => {
           open = !open;
         }
       }
@@ -70,7 +70,7 @@ Item {
         visible: allowDelete &&
             (hoverHandler.hovered || selectedItem === blend.self)
 
-        onClicked: {
+        onClicked: () => {
           root.deleteRequested();
         }
       }
@@ -86,10 +86,10 @@ Item {
     offset: Theme.smallIconSize + Theme.smallPadding
     visible: open
 
-    onChildClicked: {
+    onChildClicked: (child) => {
       root.childSelected(child);
     }
-    onDeleteRequested: {
+    onDeleteRequested: (transform) => {
       if (root.selectedItem === transform) {
         root.selected();
       }

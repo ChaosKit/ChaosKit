@@ -8,7 +8,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
+#include <QQuickWindow>
 #include <QRegularExpression>
+#include <QSGRendererInterface>
 #include <QSurfaceFormat>
 #include <QtGui/QTransform>
 #include <magic_enum.hpp>
@@ -99,11 +101,9 @@ QStringList createExportFormatList() {
 int main(int argc, char* argv[]) {
   resources::initialize();
 
-  QQuickStyle::addStylePath(resources::importPath());
-
-  QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication app(argc, argv);
 
+  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
   QSurfaceFormat format;
   format.setMajorVersion(3);
   format.setMinorVersion(2);

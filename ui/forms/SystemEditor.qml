@@ -1,7 +1,7 @@
-import QtQml.Models 2.15
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import ChaosKit 1.0
+import QtQml.Models
+import QtQuick
+import QtQuick.Controls
+import ChaosKit
 
 Item {
   id: root
@@ -32,7 +32,7 @@ Item {
       system: projectModel.system
       width: parent.width
 
-      onSelectionChanged: {
+      onSelectionChanged: (path) => {
         root.selectedPath = path;
       }
     }

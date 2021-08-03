@@ -1,19 +1,19 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Templates 2.12 as T
-import ChaosKit 1.0
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick.Templates as T
+import ChaosKit
 
 T.ApplicationWindow {
     color: Theme.backgroundColor
     font.family: Theme.fontFamily
     font.pointSize: Theme.body1FontSize
 
-    overlay.modal: Rectangle {
+    Overlay.modal: Rectangle {
         color: Color.transparent(window.palette.shadow, 0.5)
     }
 
-    overlay.modeless: Rectangle {
+    Overlay.modeless: Rectangle {
         color: Color.transparent(window.palette.shadow, 0.12)
     }
 }

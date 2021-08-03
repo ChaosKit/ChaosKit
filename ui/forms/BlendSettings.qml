@@ -1,7 +1,7 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import ChaosKit 1.0
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import ChaosKit
 
 ScrollView {
   id: root
@@ -23,11 +23,11 @@ ScrollView {
   clip: true
   contentWidth: availableWidth
 
-  onBlendChanged: {
+  onBlendChanged: () => {
     syncParameterFromBlend();
   }
 
-  Component.onCompleted: {
+  Component.onCompleted: () => {
     // Initial sync from the model.
     colorParameter = blend.coloringMethod.parameter;
   }
@@ -44,7 +44,7 @@ ScrollView {
     id: parameterUpdateDebouncer
     interval: 200
 
-    onTriggered: {
+    onTriggered: () => {
       // Store the local value in the model.
       blend.coloringMethod.parameter = root.colorParameter;
     }
@@ -79,7 +79,7 @@ ScrollView {
         checked: blend.enabled
         visible: !root.isCamera
 
-        onToggled: {
+        onToggled: () => {
           blend.enabled = checked;
         }
       }
@@ -94,7 +94,7 @@ ScrollView {
         placeholderText: 'Untitled Blend'
         visible: !root.isCamera
 
-        onTextEdited: {
+        onTextEdited: () => {
           blend.name = text;
         }
       }
@@ -111,7 +111,7 @@ ScrollView {
         }
         visible: !root.isCamera
 
-        onEditingFinished: {
+        onEditingFinished: () => {
           blend.weight = parseFloat(text);
         }
       }
@@ -124,7 +124,7 @@ ScrollView {
         currentIndex: blend.coloringMethod.typeIndex
         model: blend.coloringMethod.types
 
-        onActivated: {
+        onActivated: (index) => {
           blend.coloringMethod.typeIndex = index;
         }
       }
@@ -155,7 +155,7 @@ ScrollView {
         value: root.colorParameter
         visible: blend.coloringMethod.typeIndex > 0
 
-        onMoved: {
+        onMoved: () => {
           root.colorParameter = value;
           parameterUpdateDebouncer.restart();
         }

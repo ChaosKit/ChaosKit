@@ -1,9 +1,9 @@
-import QtQml 2.12
-import QtQml.Models 2.12
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import QtQuick.Layouts 1.12
-import ChaosKit 1.0
+import QtQml
+import QtQml.Models
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import ChaosKit
 
 Column {
   id: root
@@ -32,7 +32,7 @@ Column {
     }
     TapHandler {
       id: tapHandler
-      onTapped: root.selectionChanged([system])
+      onTapped: () => root.selectionChanged([system])
     }
 
     RowLayout {
@@ -64,13 +64,13 @@ Column {
       selectedItem: getSelectedLeaf()
       width: parent.width
 
-      onSelected: {
+      onSelected: () => {
         root.selectionChanged([system, model.self]);
       }
-      onChildSelected: {
+      onChildSelected: (child) => {
         root.selectionChanged([system, model.self, child]);
       }
-      onDeleteRequested: {
+      onDeleteRequested: () => {
         root.selectionChanged([system]);
         system.deleteBlendAt(index);
       }
@@ -88,7 +88,7 @@ Column {
       anchors.margins: Theme.smallPadding
       text: 'Add blend'
 
-      onClicked: {
+      onClicked: () => {
         system.addBlend();
       }
     }
@@ -101,10 +101,10 @@ Column {
     selectedItem: getSelectedLeaf()
     width: parent.width
 
-    onSelected: {
+    onSelected: () => {
       root.selectionChanged([system, system.cameraBlend]);
     }
-    onChildSelected: {
+    onChildSelected: (child) => {
       root.selectionChanged([system, system.cameraBlend, child]);
     }
   }
