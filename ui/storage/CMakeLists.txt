@@ -13,5 +13,7 @@ target_link_libraries(
   PUBLIC core_interface ui_storage_proto)
 
 add_executable(ui_storage_test conversions_test.cpp)
-target_link_libraries(ui_storage_test PRIVATE gmock gmock_main core ui_storage)
+target_link_libraries(
+  ui_storage_test
+  PRIVATE gmock gmock_main core library ui_storage)
 add_test(NAME ui_storage_test COMMAND ui_storage_test)
