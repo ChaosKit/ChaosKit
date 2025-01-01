@@ -28,6 +28,8 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 ```
 
+The UI executable will then be in `ui/ChaosKit`.
+
 ## Organization
 
 The project is organized like a [monorepo](https://en.wikipedia.org/wiki/Monorepo), mostly because it was easier for me to build it like this. There are multiple subfolders that correspond to different libraries:
