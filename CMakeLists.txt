@@ -28,7 +28,7 @@ find_package(Qt6 COMPONENTS Core Gui)
 add_executable(lol lol.cpp)
 target_link_libraries(lol PRIVATE core flame library Qt::Gui)
 
-# #################################################### Third party dependencies
+# # ################################################### Third party dependencies
 
 include(FetchContent)
 
@@ -110,12 +110,12 @@ if(NOT xxhash_POPULATED)
 endif()
 
 # Qt QML Models by Thomas BOUTROUE
-# (http://gitlab.unique-conception.org/qt-qml-tricks/qt-qml-models)
+# (http://gitlab.unique-conception.org/qt-qml-tricks/qt-qml-models forked into
+# https://github.com/nickdiego/qt-qml-models)
 FetchContent_Declare(
   qt_qml_models
-  GIT_REPOSITORY
-    http://gitlab.unique-conception.org:81/qt-qml-tricks/qt-qml-models.git
-  GIT_TAG abd8617e7b7bae09be81e65da058e76b64b22a4d)
+  GIT_REPOSITORY https://github.com/nickdiego/qt-qml-models.git
+  GIT_TAG 9cb3c2909961fa47f709012c0dbedf7dcb44a82c)
 FetchContent_GetProperties(qt_qml_models)
 if(NOT qt_qml_models_POPULATED)
   FetchContent_Populate(qt_qml_models)
