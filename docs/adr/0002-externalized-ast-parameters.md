@@ -1,0 +1,3 @@
+# Externalized AST Parameters via `TransformIndex`
+
+In `ast/` and `core/`, AST nodes (`ast::Transform`, `ast::Formula`) contain only structural information and parameter slot indices (`ast::Parameter`), while actual floating-point parameter values are stored separately in a side table (`core::TransformParams`) keyed by a 16-level tree path (`core::TransformIndex`). We separated parameter values from the AST so that interactive parameter edits do not mutate the AST structure, avoiding the need to rebuild or recompile the execution program (originally motivated by an OpenCL JIT backend prototype where structural changes required kernel recompilation while parameter changes only updated uniform buffers).

@@ -1,0 +1,3 @@
+# Protobuf-Backed Qt Models for Authoring State
+
+ChaosKit originally represented authored fractal systems with custom C++ structs (`flame/`) managed in a generic compile-time relational store (`state::HierarchicalStore`). We replaced this in the UI with Protocol Buffer messages (`ui/storage/chaoskit.proto`) wrapped directly by `QObject` models (`ui/models/`) and lowered straight to the execution AST, eliminating custom state-store and serialization boilerplate while providing a single schema for both in-memory editing and file persistence. The `flame/` library is deprecated, while `state/` is retained as a standalone compile-time relational store library.
