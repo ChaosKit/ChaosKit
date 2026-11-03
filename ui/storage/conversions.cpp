@@ -144,9 +144,9 @@ core::TransformParams toParams(const System& systemProto) {
 
 core::CameraSystem toCameraSystem(const System& systemProto) {
   std::optional<core::TransformSystem> camera;
-  if (systemProto.has_final_blend() && systemProto.final_blend().enabled()) {
-    camera = core::TransformSystem{toTransform(systemProto.final_blend()),
-                                   toParams(systemProto.final_blend())};
+  if (systemProto.has_camera() && systemProto.camera().enabled()) {
+    camera = core::TransformSystem{toTransform(systemProto.camera()),
+                                   toParams(systemProto.camera())};
   }
   return {{toTransform(systemProto), toParams(systemProto)}, std::move(camera)};
 }

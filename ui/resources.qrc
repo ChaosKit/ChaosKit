@@ -49,7 +49,7 @@
         <file>forms/FormulaParams.qml</file>
         <file>forms/FormulaPopup.qml</file>
         <file>forms/FormulaSettings.qml</file>
-        <file>forms/FinalBlendIndicator.qml</file>
+        <file>forms/CameraIndicator.qml</file>
         <file>forms/ImageEditor.qml</file>
         <file>forms/ImageSizeEditor.qml</file>
         <file>forms/LifetimeEditor.qml</file>

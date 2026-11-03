@@ -17,7 +17,7 @@ message Project {
 
 message System {
   repeated Blend blends = 1;
-  Blend final_blend = 2;
+  Blend camera = 2;
   int32 ttl = 3;
   int32 skip = 6;
   Transform initial_transform = 4;
@@ -31,7 +31,7 @@ message Blend {
   Transform post = 4;
   ColoringMethod coloring_method = 5;
 
-  // Only used in non-final blends
+  // Only used in non-camera blends
   float weight = 6;
   string name = 7;
 }

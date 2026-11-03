@@ -151,8 +151,8 @@ int main(int argc, char* argv[]) {
   formula->add_params(-1.580897020176053e-01f);
   formula->add_params(-1.430070123635232e+00f);
 
-  system->mutable_final_blend()->set_enabled(true);
-  auto* camera = system->mutable_final_blend()->mutable_post();
+  system->mutable_camera()->set_enabled(true);
+  auto* camera = system->mutable_camera()->mutable_post();
   {
     auto cameraTransform = QTransform::fromScale(.5, 1).translate(.5, .5);
     camera->set_m11(cameraTransform.m11());

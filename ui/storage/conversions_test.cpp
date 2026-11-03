@@ -217,12 +217,12 @@ TEST_F(ConversionsTest, ConvertsOnlyIsolatedBlendIfSet) {
               ElementsAre(ast::Transform{ast::AffineTransform{}}));
 }
 
-TEST_F(ConversionsTest, ConvertsFinalBlendToCamera) {
+TEST_F(ConversionsTest, ConvertsCamera) {
   System input;
-  // Just a final blend with a post transform.
-  Blend* finalBlend = input.mutable_final_blend();
-  finalBlend->set_enabled(true);
-  setTransform(finalBlend->mutable_post(), {.5, 0, 0, 0, 1, 0});
+  // Just a camera blend with a post transform.
+  Blend* camera = input.mutable_camera();
+  camera->set_enabled(true);
+  setTransform(camera->mutable_post(), {.5, 0, 0, 0, 1, 0});
 
   core::CameraSystem actualSystem = toCameraSystem(input);
 
@@ -236,19 +236,19 @@ TEST_F(ConversionsTest, ConvertsFinalBlendToCamera) {
   EXPECT_THAT(actualSystem.camera->params, ContainerEq(expectedParams));
 }
 
-TEST_F(ConversionsTest, DoesNotSetCameraIfFinalBlendIsUnset) {
+TEST_F(ConversionsTest, DoesNotSetCameraIfCameraIsUnset) {
   System input;
-  // No final blend.
+  // No camera.
 
   core::CameraSystem actualSystem = toCameraSystem(input);
 
   ASSERT_FALSE(actualSystem.camera.has_value());
 }
 
-TEST_F(ConversionsTest, DoesNotSetCameraIfFinalBlendIsDisabled) {
+TEST_F(ConversionsTest, DoesNotSetCameraIfCameraIsDisabled) {
   System input;
-  // Disabled final blend.
-  input.mutable_final_blend()->set_enabled(false);
+  // Disabled camera.
+  input.mutable_camera()->set_enabled(false);
 
   core::CameraSystem actualSystem = toCameraSystem(input);
 

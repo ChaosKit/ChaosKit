@@ -56,7 +56,7 @@ void SystemModel::setProto(System* proto) {
   blends_->append(newModels);
 
   // Populate the camera blend
-  cameraBlend_->setProto(proto_->mutable_final_blend());
+  cameraBlend_->setProto(proto_->mutable_camera());
 
   emit protoChanged();
 }
