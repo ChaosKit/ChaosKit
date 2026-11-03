@@ -8,27 +8,42 @@ ChaosKit is a set of libraries and tools to generate pictures with [iterated fun
 
 To build ChaosKit, you need the following:
 
--   a C++17 compiler (Clang, GCC, maybe MSVC 2019)
--   CMake 3.6 or newer
+-   a C++17 compiler (Clang, GCC, MSVC 2019+)
+-   CMake 3.20 or newer
+-   [Ninja](https://ninja-build.org/) (recommended) or Make
 
 To build the UI, you need additionally the following:
 
--   Qt 6.1
+-   Qt 6
 -   [protobuf](https://github.com/protocolbuffers/protobuf)
+-   [direnv](https://direnv.net/) (optional, recommended for managing local Qt/toolchain paths)
 
-Once you have the above installed, you can run the following commands to download and build ChaosKit:
+### Environment Setup
 
+If Qt or your toolchains are installed in non-standard directories, configure `.envrc`:
+
+```bash
+cp .envrc.sample .envrc
+# Edit .envrc to set your QT_DIR (e.g. ~/Qt/6.12.0/macos)
+direnv allow
 ```
-git clone https://github.com/ChaosKit/ChaosKit.git
-cd ChaosKit
-mkdir build
-cd build
-# Replace Release with Debug for a debug build.
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
-make
+
+### Building with CMake Presets
+
+ChaosKit provides `debug` and `release` presets in `CMakePresets.json`:
+
+```bash
+# Configure (debug or release)
+cmake --preset debug
+
+# Build
+cmake --build --preset debug
+
+# Run tests
+ctest --preset debug
 ```
 
-The UI executable will then be in `ui/ChaosKit`.
+The UI executable will be at `build/debug/ui/ChaosKit` (or `build/release/ui/ChaosKit`).
 
 ## Organization
 

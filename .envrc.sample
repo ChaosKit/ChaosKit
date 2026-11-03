@@ -1,0 +1,17 @@
+# ChaosKit direnv configuration template
+# Copy to .envrc:
+#   cp .envrc.sample .envrc && direnv allow
+
+# 1. Point QT_DIR to your Qt prefix (adjust for your OS and installed Qt version)
+# macOS (official Qt installer example):
+export QT_DIR="${HOME}/Qt/6.12.0/macos"
+# Linux example:
+# export QT_DIR="/opt/Qt/6.12.0/gcc_64"
+# Homebrew example:
+# export QT_DIR="/opt/homebrew/opt/qt6"
+
+# 2. Add Qt to CMAKE_PREFIX_PATH and PATH
+if [ -n "$QT_DIR" ]; then
+  export CMAKE_PREFIX_PATH="${QT_DIR}${CMAKE_PREFIX_PATH:+:${CMAKE_PREFIX_PATH}}"
+  export PATH="${QT_DIR}/bin:$PATH"
+fi

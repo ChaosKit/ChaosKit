@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -eu
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+exec make lint DIFF_RANGE="${1:---cached}"

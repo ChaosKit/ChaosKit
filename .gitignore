@@ -4,6 +4,10 @@
 # Build directory
 build/
 
+# Local environment & user presets
+.envrc
+CMakeUserPresets.json
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Qt template
 # C++ objects and libs
@@ -135,6 +139,7 @@ CMakeCache.txt
 CMakeFiles
 CMakeScripts
 Makefile
+!/Makefile
 cmake_install.cmake
 install_manifest.txt
 compile_commands.json
