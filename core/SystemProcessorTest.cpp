@@ -50,6 +50,39 @@ TEST_F(SystemProcessorTest, CreatesParticleWithRandomLifetime) {
   ASSERT_EQ(expected, actual);
 }
 
+TEST_F(SystemProcessorTest, CreatesParticleWithRandomLifetimeAndWarmUp) {
+  // (output.x, output.y) = (1, 2)
+  TransformSystem system = {ast::Transform(ast::Formula{1.f, 2.f})};
+  ON_CALL(*rng, randomFloat(_, _)).WillByDefault(Return(.5f));
+  EXPECT_CALL(*rng, randomInt(11, 30)).WillOnce(Return(20));
+
+  SystemProcessor processor(system, rng);
+  processor.setSkip(10);
+  processor.setParticleLifetime(30);
+  SystemParticle actual = processor.createParticle();
+
+  SystemParticle expected = createParticle(.5f, .5f, .5f);
+  expected.ttl = 20;
+  expected.skip = 10;
+  ASSERT_EQ(expected, actual);
+}
+
+TEST_F(SystemProcessorTest, CreatesParticleWhenWarmUpEqualsMaxLifetime) {
+  TransformSystem system = {ast::Transform(ast::Formula{1.f, 2.f})};
+  ON_CALL(*rng, randomFloat(_, _)).WillByDefault(Return(.5f));
+  EXPECT_CALL(*rng, randomInt(30, 30)).WillOnce(Return(30));
+
+  SystemProcessor processor(system, rng);
+  processor.setSkip(30);
+  processor.setParticleLifetime(30);
+  SystemParticle actual = processor.createParticle();
+
+  SystemParticle expected = createParticle(.5f, .5f, .5f);
+  expected.ttl = 30;
+  expected.skip = 30;
+  ASSERT_EQ(expected, actual);
+}
+
 TEST_F(SystemProcessorTest, CreatesParticleWithSkipping) {
   // (output.x, output.y) = (1, 2)
   TransformSystem system{ast::Transform(ast::Formula{1.f, 2.f})};
@@ -103,6 +136,28 @@ TEST_F(SystemProcessorTest, RevivesDeadParticle) {
 
   SystemParticle expected = createParticle(.5f, .5f, .5f);
   expected.ttl = 29;
+  ASSERT_EQ(expected, actual);
+}
+
+TEST_F(SystemProcessorTest, RevivesDeadParticleWithWarmUp) {
+  // (output.x, output.y) = (input.x + 1, input.y + 1)
+  TransformSystem system = {ast::Transform(
+      ast::Formula{ast::BinaryFunction(ast::BinaryFunction::ADD,
+                                       ast::Input(ast::Input::X), 1.f),
+                   ast::BinaryFunction(ast::BinaryFunction::ADD,
+                                       ast::Input(ast::Input::Y), 1.f)})};
+  EXPECT_CALL(*rng, randomFloat(_, _)).Times(3).WillRepeatedly(Return(.5f));
+  SystemParticle input = createParticle();
+  input.ttl = 0;
+
+  SystemProcessor processor(system, rng);
+  processor.setParticleLifetime(30);
+  processor.setSkip(2);
+  SystemParticle actual = processor.process(input);
+
+  SystemParticle expected = createParticle(3.5f, 3.5f, .5f);
+  expected.ttl = 27;
+  expected.skip = 0;
   ASSERT_EQ(expected, actual);
 }
 

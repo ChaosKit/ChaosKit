@@ -51,6 +51,7 @@ class SystemProcessor {
   int skip_ = 0;
 
   void reviveParticle(Particle &particle) const;
+  void stepParticle(SystemParticle &particle) const;
 };
 
 }  // namespace chaoskit::core
