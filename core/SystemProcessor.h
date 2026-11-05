@@ -37,6 +37,11 @@ class SystemProcessor {
   void setSkip(int skip) { skip_ = skip; }
 
   [[nodiscard]] SystemParticle createParticle() const;
+  /**
+   * Advances the particle through the system.
+   * If particle.skip > 0, executes that many unplotted warm-up iterations
+   * before performing and returning a single plotted iteration.
+   */
   [[nodiscard]] SystemParticle process() const;
   [[nodiscard]] SystemParticle process(SystemParticle input) const;
 
