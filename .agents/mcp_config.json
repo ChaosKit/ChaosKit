@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "qt-docs": {
+      "serverUrl": "https://qt-docs-mcp.qt.io/mcp",
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    }
+  }
+}
