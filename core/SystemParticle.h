@@ -8,24 +8,25 @@
 namespace chaoskit::core {
 
 struct SystemParticle : public Particle {
-  static const int32_t IMMORTAL = -1;
+  static constexpr int32_t INFINITE_LIFETIME = -1;
 
   SystemParticle() : Particle() {}
   SystemParticle(const SystemParticle&) = default;
   explicit SystemParticle(Point point) : Particle(point) {}
   SystemParticle(float x, float y) : Particle(x, y) {}
-  SystemParticle(Point point, float color, int32_t ttl = 0, int32_t skip = 0)
-      : Particle(point, color), ttl(ttl), skip(skip) {}
-  SystemParticle(float x, float y, float color, int32_t ttl = 0,
-                 int32_t skip = 0)
-      : Particle(x, y, color), ttl(ttl), skip(skip) {}
+  SystemParticle(Point point, float color, int32_t lifetime = 0,
+                 int32_t warmup = 0)
+      : Particle(point, color), lifetime(lifetime), warmup(warmup) {}
+  SystemParticle(float x, float y, float color, int32_t lifetime = 0,
+                 int32_t warmup = 0)
+      : Particle(x, y, color), lifetime(lifetime), warmup(warmup) {}
 
-  int32_t ttl = 0;
-  int32_t skip = 0;
+  int32_t lifetime = 0;
+  int32_t warmup = 0;
 
   bool operator==(const SystemParticle& other) const {
-    return Particle::operator==(other) && ttl == other.ttl &&
-           skip == other.skip;
+    return Particle::operator==(other) && lifetime == other.lifetime &&
+           warmup == other.warmup;
   }
 
   Particle& asParticle() { return static_cast<Particle&>(*this); }

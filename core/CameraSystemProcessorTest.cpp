@@ -16,7 +16,8 @@ class CameraSystemProcessorTest : public Test {
 namespace {
 
 SystemParticle createParticle(float x = 0.f, float y = 0.f, float color = 0.f) {
-  return SystemParticle{Point(x, y), color, SystemParticle::IMMORTAL, 0};
+  return SystemParticle{Point(x, y), color, SystemParticle::INFINITE_LIFETIME,
+                        0};
 }
 
 }  // namespace

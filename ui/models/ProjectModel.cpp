@@ -126,8 +126,8 @@ void ProjectModel::reset() {
   project->set_height(1024);
 
   auto* system = project->mutable_system();
-  system->set_ttl(30);
-  system->set_skip(0);
+  system->set_max_lifetime(30);
+  system->set_min_lifetime(0);
   system->mutable_camera()->set_enabled(true);
 
   auto* blend = system->add_blends();

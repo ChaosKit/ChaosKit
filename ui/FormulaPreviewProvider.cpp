@@ -98,7 +98,8 @@ QVector<QPointF> generateGrid(library::FormulaType type, int width,
       // Convert the point to be in [-1; 1]
       core::SystemParticle particle((float)(x * 2) / (float)(width - 1) - 1.f,
                                     (float)(y * 2) / (float)(height - 1) - 1.f,
-                                    0.f, core::SystemParticle::IMMORTAL);
+                                    0.f,
+                                    core::SystemParticle::INFINITE_LIFETIME);
 
       int index = y * width + x;
       for (int i = 0; i < ITERATIONS; i++) {

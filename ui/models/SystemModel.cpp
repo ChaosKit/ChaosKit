@@ -62,42 +62,45 @@ void SystemModel::setProto(System* proto) {
 }
 
 void SystemModel::setMinLifetime(int min) {
-  if (min == proto_->skip()) return;
+  if (min == proto_->min_lifetime()) return;
 
   // Min lifetime can't be larger that max lifetime.
-  if (min > proto_->ttl()) return;
+  if (min > proto_->max_lifetime()) return;
 
-  proto_->set_skip(min);
+  proto_->set_min_lifetime(min);
   emit protoChanged();
   emit visuallyChanged();
   emit minLifetimeChanged();
 }
 
 void SystemModel::setMaxLifetime(int max) {
-  if (max == proto_->ttl()) return;
+  if (max == proto_->max_lifetime()) return;
 
-  auto immortalChanged = (max == -1) != (proto_->ttl() == -1);
+  auto infiniteChanged =
+      (max == core::SystemParticle::INFINITE_LIFETIME) !=
+      (proto_->max_lifetime() == core::SystemParticle::INFINITE_LIFETIME);
 
   // Adjust min lifetime if it would be larger due to this update.
-  if (max != -1 && proto_->skip() > max) {
-    proto_->set_skip(max);
+  if (max != core::SystemParticle::INFINITE_LIFETIME &&
+      proto_->min_lifetime() > max) {
+    proto_->set_min_lifetime(max);
     emit minLifetimeChanged();
   }
 
-  proto_->set_ttl(max);
+  proto_->set_max_lifetime(max);
   emit protoChanged();
   emit visuallyChanged();
   emit maxLifetimeChanged();
 
-  if (immortalChanged) {
-    emit isImmortalChanged();
+  if (infiniteChanged) {
+    emit isInfiniteLifetimeChanged();
   }
 }
 
-void SystemModel::setImmortal(bool immortal) {
-  if (immortal == isImmortal()) return;
+void SystemModel::setInfiniteLifetime(bool infinite) {
+  if (infinite == isInfiniteLifetime()) return;
 
-  setMaxLifetime(immortal ? -1 : 20);
+  setMaxLifetime(infinite ? core::SystemParticle::INFINITE_LIFETIME : 20);
 }
 
 void SystemModel::addBlend() {

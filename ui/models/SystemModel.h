@@ -7,6 +7,7 @@
 #include "BaseModel.h"
 #include "BlendModel.h"
 #include "ModelFactory.h"
+#include "core/SystemParticle.h"
 
 namespace chaoskit::ui {
 
@@ -18,8 +19,9 @@ class SystemModel : public BaseModel<System> {
                  minLifetimeChanged);
   Q_PROPERTY(int maxLifetime READ maxLifetime WRITE setMaxLifetime NOTIFY
                  maxLifetimeChanged);
-  Q_PROPERTY(bool isImmortal READ isImmortal WRITE setImmortal NOTIFY
-                 isImmortalChanged STORED false);
+  Q_PROPERTY(
+      bool isInfiniteLifetime READ isInfiniteLifetime WRITE setInfiniteLifetime
+          NOTIFY isInfiniteLifetimeChanged STORED false);
   Q_PROPERTY(const QString& astSource READ astSource NOTIFY visuallyChanged);
   Q_PROPERTY(const QString& modelSource READ modelSource NOTIFY protoChanged);
 
@@ -28,14 +30,16 @@ class SystemModel : public BaseModel<System> {
 
   void setProto(System* proto) override;
 
-  [[nodiscard]] int minLifetime() const { return proto_->skip(); }
+  [[nodiscard]] int minLifetime() const { return proto_->min_lifetime(); }
   void setMinLifetime(int min);
 
-  [[nodiscard]] int maxLifetime() const { return proto_->ttl(); }
+  [[nodiscard]] int maxLifetime() const { return proto_->max_lifetime(); }
   void setMaxLifetime(int max);
 
-  [[nodiscard]] bool isImmortal() const { return proto_->ttl() == -1; }
-  void setImmortal(bool immortal);
+  [[nodiscard]] bool isInfiniteLifetime() const {
+    return proto_->max_lifetime() == core::SystemParticle::INFINITE_LIFETIME;
+  }
+  void setInfiniteLifetime(bool infinite);
 
   [[nodiscard]] QQmlObjectListModel<BlendModel>* blends() const {
     return blends_;
@@ -52,7 +56,7 @@ class SystemModel : public BaseModel<System> {
  signals:
   void minLifetimeChanged();
   void maxLifetimeChanged();
-  void isImmortalChanged();
+  void isInfiniteLifetimeChanged();
   void visuallyChanged();
 
  private:

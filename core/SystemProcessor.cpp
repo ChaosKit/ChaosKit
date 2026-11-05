@@ -7,11 +7,12 @@ namespace chaoskit::core {
 SystemParticle SystemProcessor::createParticle() const {
   SystemParticle particle;
   reviveParticle(particle);
-  particle.ttl =
-      (lifetime_ == SystemParticle::IMMORTAL)
-          ? SystemParticle::IMMORTAL
-          : rng_->randomInt((std::min)(skip_ + 1, lifetime_), lifetime_);
-  particle.skip = skip_;
+  particle.lifetime =
+      (max_lifetime_ == SystemParticle::INFINITE_LIFETIME)
+          ? SystemParticle::INFINITE_LIFETIME
+          : rng_->randomInt((std::min)(min_lifetime_ + 1, max_lifetime_),
+                            max_lifetime_);
+  particle.warmup = min_lifetime_;
   return particle;
 }
 
@@ -22,25 +23,25 @@ SystemParticle SystemProcessor::process() const {
 SystemParticle SystemProcessor::process(SystemParticle input) const {
   SystemParticle output = input;
 
-  if (output.ttl == 0) {
+  if (output.lifetime == 0) {
     reviveParticle(output);
-    output.ttl = lifetime_;
-    output.skip = skip_;
+    output.lifetime = max_lifetime_;
+    output.warmup = min_lifetime_;
   }
 
-  for (; output.skip > 0; --output.skip) {
+  for (; output.warmup > 0; --output.warmup) {
     stepParticle(output);
 
-    if (output.ttl == 0) {
+    if (output.lifetime == 0) {
       break;
     }
   }
 
-  if (output.ttl != 0) {
+  if (output.lifetime != 0) {
     stepParticle(output);
   }
 
-  output.skip = 0;
+  output.warmup = 0;
 
   return output;
 }
@@ -49,8 +50,8 @@ void SystemProcessor::stepParticle(SystemParticle &particle) const {
   particle.applyParticle(interpreter_.interpret(
       particle.asParticle(), system_.transform, system_.params));
 
-  if (particle.ttl != SystemParticle::IMMORTAL) {
-    --particle.ttl;
+  if (particle.lifetime != SystemParticle::INFINITE_LIFETIME) {
+    --particle.lifetime;
   }
 }
 

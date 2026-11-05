@@ -16,7 +16,7 @@ GridLayout {
   rowSpacing: Theme.smallPadding
 
   function updateLocalState() {
-    if (!system.isImmortal) {
+    if (!system.isInfiniteLifetime) {
       localMaxLifetime = system.maxLifetime;
     }
   }
@@ -46,11 +46,11 @@ GridLayout {
     Layout.fillWidth: true
     editable: true
     from: 0
-    to: system.isImmortal ? 2147483647 : localMaxLifetime
-    value: system.minLifetime
+    to: root.system.isInfiniteLifetime ? 2147483647 : root.localMaxLifetime
+    value: root.system.minLifetime
 
     onValueModified: {
-      system.minLifetime = value;
+      root.system.minLifetime = value;
     }
   }
 
@@ -63,10 +63,10 @@ GridLayout {
   }
   RadioButton {
     id: finiteRadio
-    checked: !system.isImmortal
+    checked: !root.system.isInfiniteLifetime
 
     onClicked: {
-      system.maxLifetime = localMaxLifetime;
+      root.system.maxLifetime = root.localMaxLifetime;
     }
   }
   SpinBox {
@@ -74,27 +74,27 @@ GridLayout {
 
     Layout.fillWidth: true
     editable: true
-    from: system.isImmortal ? 0 : system.minLifetime
+    from: root.system.isInfiniteLifetime ? 0 : root.system.minLifetime
     to: 2147483647
-    value: localMaxLifetime
+    value: root.localMaxLifetime
 
     onValueModified: {
-      system.maxLifetime = value;
+      root.system.maxLifetime = value;
     }
   }
 
   RadioButton {
     id: infiniteRadio
 
+    checked: root.system.isInfiniteLifetime
+    text: 'Infinite'
     Layout.column: 1
     Layout.columnSpan: 2
     Layout.leftMargin: 2
     Layout.row: 3
-    checked: system.isImmortal
-    text: 'Infinite'
 
     onClicked: {
-      system.isImmortal = true;
+      root.system.isInfiniteLifetime = true;
     }
   }
 }

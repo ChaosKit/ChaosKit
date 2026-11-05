@@ -135,8 +135,8 @@ int main(int argc, char* argv[]) {
   project->mutable_color_map()->set_name("BGR");
 
   auto* system = project->mutable_system();
-  system->set_ttl(30);
-  system->set_skip(0);
+  system->set_max_lifetime(30);
+  system->set_min_lifetime(0);
 
   auto* blend = system->add_blends();
   blend->set_enabled(true);

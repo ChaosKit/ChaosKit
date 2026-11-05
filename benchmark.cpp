@@ -31,15 +31,15 @@ void handwritten(int iterations) {
   SystemParticle particle;
   particle.point = Point(rng.randomFloat(-2, 2), rng.randomFloat(-2, 2));
   particle.color = rng.randomFloat(0, 1);
-  particle.skip = 0;
-  particle.ttl = rng.randomInt(1, 30);
+  particle.warmup = 0;
+  particle.lifetime = rng.randomInt(1, 30);
 
   while (iterations--) {
-    if (particle.ttl == 0) {
+    if (particle.lifetime == 0) {
       particle.point = Point(rng.randomFloat(-2, 2), rng.randomFloat(-2, 2));
       particle.color = rng.randomFloat(0, 1);
-      particle.skip = 0;
-      particle.ttl = 30;
+      particle.warmup = 0;
+      particle.lifetime = 30;
     }
 
     Point output{sinf(9.379666578024626e-01f * particle.y()) -
@@ -52,7 +52,7 @@ void handwritten(int iterations) {
     auto distance = sqrtf(dx * dx + dy * dy);
     particle.point = output;
     particle.color = modff(distance * .2f, &dx);
-    --particle.ttl;
+    --particle.lifetime;
   }
 }
 
@@ -82,7 +82,7 @@ void interpreted(int iterations) {
 
   core::SystemProcessor processor({transform, params}, rng);
   processor.setBounds({-2.f, 2.f, -2.f, 2.f});
-  processor.setParticleLifetime(30);
+  processor.setMaxLifetime(30);
 
   auto particle = processor.createParticle();
   while (iterations--) {

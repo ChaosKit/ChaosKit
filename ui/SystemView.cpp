@@ -107,18 +107,19 @@ void SystemView::setModel(ProjectModel *projectModel) {
 void SystemView::updateSystem() {
   const System &systemProto = model_->proto()->system();
 
-  if (systemProto.skip() < 0) {
-    qCWarning(systemViewLog, "Particle skip is less than 0 (%d)",
-              systemProto.skip());
+  if (systemProto.min_lifetime() < 0) {
+    qCWarning(systemViewLog, "Particle min lifetime is less than 0 (%d)",
+              systemProto.min_lifetime());
   }
-  if (systemProto.ttl() < 1 &&
-      systemProto.ttl() != core::SystemParticle::IMMORTAL) {
-    qCWarning(systemViewLog, "Particle lifetime is 0 or less (%d)",
-              systemProto.ttl());
+  if (systemProto.max_lifetime() < 1 &&
+      systemProto.max_lifetime() != core::SystemParticle::INFINITE_LIFETIME) {
+    qCWarning(systemViewLog, "Particle max lifetime is 0 or less (%d)",
+              systemProto.max_lifetime());
   }
 
   generator_->setSystem(toCameraSystem(systemProto));
-  generator_->setLifetimeRange(systemProto.skip(), systemProto.ttl());
+  generator_->setLifetimeRange(systemProto.min_lifetime(),
+                               systemProto.max_lifetime());
   update();
 }
 

@@ -39,7 +39,7 @@ A point in 2D space carrying a color coordinate and remaining iteration counters
 
 **Lifetime**:
 The range of iterations (`[Min, Max]`, or `Infinite`) during which a particle is plotted before being re-randomized, with iterations prior to `Min` executed as unplotted warm-up steps.
-_Avoid_: TTL, Skip
+_Avoid_: TTL, Skip, Immortal
 
 **Color Coordinate**:
 The scalar value in $[0, 1]$ carried by a particle and transformed on each iteration before being mapped to an RGBA color.

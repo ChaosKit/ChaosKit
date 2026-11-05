@@ -33,13 +33,17 @@ class SystemProcessor {
 
   void setSystem(TransformSystem system) { system_ = std::move(system); }
   void setBounds(Bounds bounds) { bounds_ = bounds; }
-  void setParticleLifetime(int lifetime) { lifetime_ = lifetime; }
-  void setSkip(int skip) { skip_ = skip; }
+  void setMinLifetime(int32_t min) { min_lifetime_ = min; }
+  void setMaxLifetime(int32_t max) { max_lifetime_ = max; }
+  void setLifetimeRange(int32_t min, int32_t max) {
+    min_lifetime_ = min;
+    max_lifetime_ = max;
+  }
 
   [[nodiscard]] SystemParticle createParticle() const;
   /**
    * Advances the particle through the system.
-   * If particle.skip > 0, executes that many unplotted warm-up iterations
+   * If particle.warmup > 0, executes that many unplotted warm-up iterations
    * before performing and returning a single plotted iteration.
    */
   [[nodiscard]] SystemParticle process() const;
@@ -52,8 +56,8 @@ class SystemProcessor {
   TransformSystem system_;
   std::shared_ptr<Rng> rng_;
   Bounds bounds_ = {-1, 1, -1, 1};
-  int lifetime_ = SystemParticle::IMMORTAL;
-  int skip_ = 0;
+  int32_t max_lifetime_ = SystemParticle::INFINITE_LIFETIME;
+  int32_t min_lifetime_ = 0;
 
   void reviveParticle(Particle &particle) const;
   void stepParticle(SystemParticle &particle) const;
