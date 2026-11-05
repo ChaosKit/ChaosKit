@@ -45,24 +45,24 @@ lint-qml:
 format-check:
 	@RANGE=$$($(resolve_diff_range)); \
 	if command -v clang-format >/dev/null 2>&1; then \
-		FILES=$$(git diff --name-only --diff-filter=ACMR "$$RANGE" -- '*.cpp' '*.h' '*.hpp' ':!.agents/'); \
+		FILES=$$(git diff --name-only --diff-filter=ACMR "$$RANGE" -- '*.cpp' '*.h' '*.hpp' ':!.agents/' ':!.idea/'); \
 		if [ -n "$$FILES" ]; then clang-format --dry-run --Werror $$FILES; fi; \
 	fi; \
 	if command -v cmake-format >/dev/null 2>&1; then \
-		FILES=$$(git diff --name-only --diff-filter=ACMR "$$RANGE" -- 'CMakeLists.txt' '**/CMakeLists.txt' '*.cmake' ':!.agents/'); \
+		FILES=$$(git diff --name-only --diff-filter=ACMR "$$RANGE" -- 'CMakeLists.txt' '**/CMakeLists.txt' '*.cmake' ':!.agents/' ':!.idea/'); \
 		if [ -n "$$FILES" ]; then cmake-format --check $$FILES; fi; \
 	fi
 
 format:
 	@if command -v clang-format >/dev/null 2>&1; then \
-		git ls-files '*.cpp' '*.h' '*.hpp' ':!.agents/' | xargs clang-format -i; \
+		git ls-files -z '*.cpp' '*.h' '*.hpp' ':!.agents/' ':!.idea/' | xargs -0 clang-format -i; \
 	else \
 		echo "clang-format not found on PATH" >&2; exit 1; \
 	fi
 	@if command -v cmake-format >/dev/null 2>&1; then \
-		git ls-files 'CMakeLists.txt' '**/CMakeLists.txt' '*.cmake' ':!.agents/' | xargs cmake-format -i; \
+		git ls-files -z 'CMakeLists.txt' '**/CMakeLists.txt' '*.cmake' ':!.agents/' ':!.idea/' | xargs -0 cmake-format -i; \
 	else \
-		echo "cmake-format not found on PATH" >&2; exit 1; \
+		echo "cmake-format not found on PATH (skipping CMake formatting)" >&2; \
 	fi
 
 hooks:
