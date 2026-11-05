@@ -51,7 +51,6 @@ The project is organized like a [monorepo](https://en.wikipedia.org/wiki/Monorep
 
 -   `ast` — internal [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree) representation of function systems and helpers to define them in C++ code
 -   `core` — everything you need to evaluate the AST and gather the outputs in a buffer to eventually turn into a picture
--   `flame` — *(deprecated)* legacy C++ structures to build Fractal Flames and translate them into ChaosKit ASTs (superseded by `ui/storage` and `ui/models`)
 -   `library` — definitions of various formulas (non-linear transformations) and coloring methods expressed in the AST
 -   `state` — a standalone state management library, loosely inspired by [Redux](https://redux.js.org/), but turned out nothing like it. Supports compile-time validation of has-one and has-many relationships between structures.
 -   `stdx` — exports `std::optional` for older Apple Clang compilers

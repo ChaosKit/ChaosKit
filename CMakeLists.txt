@@ -16,17 +16,12 @@ enable_testing()
 add_subdirectory(stdx)
 add_subdirectory(ast)
 add_subdirectory(core)
-add_subdirectory(flame)
 add_subdirectory(state)
 add_subdirectory(library)
 add_subdirectory(ui)
 
 add_executable(benchmark benchmark.cpp)
 target_link_libraries(benchmark PRIVATE ast core pcg_random)
-
-find_package(Qt6 COMPONENTS Core Gui)
-add_executable(lol lol.cpp)
-target_link_libraries(lol PRIVATE core flame library Qt::Gui)
 
 # # ################################################### Third party dependencies
 
@@ -119,6 +114,7 @@ FetchContent_Declare(
 FetchContent_GetProperties(qt_qml_models)
 if(NOT qt_qml_models_POPULATED)
   FetchContent_Populate(qt_qml_models)
+  find_package(Qt6 COMPONENTS Core)
   add_library(
     qt_qml_models
     ${qt_qml_models_SOURCE_DIR}/QtQmlTricksPlugin_SmartDataModels.h
