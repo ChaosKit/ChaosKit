@@ -1,0 +1,3 @@
+# Initial vs. Revived Particle Lifetime Assignment
+
+When `core::SystemProcessor` creates a new **Particle** (`createParticle()`), it assigns a random **Lifetime** drawn uniformly from `[min(min_lifetime + 1, max_lifetime), max_lifetime]` (when finite), whereas when a dead **Particle** (`lifetime == 0`) is revived during `process()`, it is assigned the deterministic full `max_lifetime`. We retain this distinction intentionally: initial randomization staggers the first generation of **Particles** to smooth startup transients, while deterministic `max_lifetime` on revival keeps the visual effect of adjusting the **Lifetime** range predictable during authoring.
