@@ -27,6 +27,16 @@ ApplicationWindow {
     }
   }
 
+  // qmllint disable incompatible-type unqualified
+  Connections {
+    target: systemPreview
+
+    function onWarningEmitted(warning) {
+      openSnackbar(warning);
+    }
+  }
+  // qmllint enable incompatible-type unqualified
+
   FileDialog {
     id: openDialog
 

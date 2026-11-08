@@ -4,6 +4,7 @@
 #include <QOpenGLFramebufferObjectFormat>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <vector>
 #include "GLToneMapper.h"
 #include "core/Renderer.h"
 #include "ui/storage/conversions.h"
@@ -107,19 +108,12 @@ void SystemView::setModel(ProjectModel *projectModel) {
 void SystemView::updateSystem() {
   const System &systemProto = model_->proto()->system();
 
-  if (systemProto.min_lifetime() < 0) {
-    qCWarning(systemViewLog, "Particle min lifetime is less than 0 (%d)",
-              systemProto.min_lifetime());
+  std::vector<QString> warnings;
+  generator_->setSystem(toCameraSystem(systemProto, warnings));
+  for (const auto &warning : warnings) {
+    qCWarning(systemViewLog, "%s", qUtf8Printable(warning));
+    emit warningEmitted(warning);
   }
-  if (systemProto.max_lifetime() < 1 &&
-      systemProto.max_lifetime() != core::SystemParticle::INFINITE_LIFETIME) {
-    qCWarning(systemViewLog, "Particle max lifetime is 0 or less (%d)",
-              systemProto.max_lifetime());
-  }
-
-  generator_->setSystem(toCameraSystem(systemProto));
-  generator_->setLifetimeRange(systemProto.min_lifetime(),
-                               systemProto.max_lifetime());
   update();
 }
 

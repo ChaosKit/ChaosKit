@@ -15,13 +15,6 @@ void BlenderTask::setSystem(const core::CameraSystem *system) {
   particle_ = processor_->createParticle();
 }
 
-void BlenderTask::setLifetimeRange(int32_t min, int32_t max) {
-  processor_->setLifetimeRange(min, max);
-
-  // Reset the particle.
-  particle_ = processor_->createParticle();
-}
-
 void BlenderTask::start() {
   if (!processor_ || running_) {
     return;

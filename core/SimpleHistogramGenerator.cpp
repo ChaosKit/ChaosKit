@@ -36,10 +36,6 @@ void SimpleHistogramGenerator::setColorMap(const ColorMap *color_map) {
   color_map_ = color_map;
 }
 
-void SimpleHistogramGenerator::setLifetimeRange(int32_t min, int32_t max) {
-  system_processor_.setLifetimeRange(min, max);
-}
-
 void SimpleHistogramGenerator::reset() { buffer_.clear(); }
 
 void SimpleHistogramGenerator::synchronizeResult(Renderer *renderer) {

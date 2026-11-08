@@ -34,6 +34,7 @@ class SystemView : public QQuickFramebufferObject {
  signals:
   void runningChanged();
   void modelChanged();
+  void warningEmitted(const QString &warning);
 
  private:
   HistogramGenerator *generator_;

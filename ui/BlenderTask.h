@@ -15,7 +15,6 @@ class BlenderTask : public QObject {
 
  public slots:
   void setSystem(const chaoskit::core::CameraSystem *system);
-  void setLifetimeRange(int32_t min, int32_t max);
   void start();
   void stop();
 
