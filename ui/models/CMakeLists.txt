@@ -26,3 +26,10 @@ target_link_libraries(
   ui_models
   PUBLIC core library ui_colormapregistry ui_storage Qt::Core Qt::Gui qt_qml_models
   PRIVATE magic_enum)
+
+add_executable(ui_models_test SystemModelTest.cpp)
+set_target_properties(ui_models_test PROPERTIES AUTOMOC ON)
+target_link_libraries(
+  ui_models_test
+  PRIVATE gmock gmock_main ui_models Qt::Core Qt::Test)
+add_test(NAME ui_models_test COMMAND ui_models_test)
