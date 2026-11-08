@@ -8,13 +8,13 @@
 #include <magic_enum.hpp>
 #include <memory>
 #include <unordered_set>
-#include "ast/transforms.h"
 #include "ast/util.h"
 #include "core/SystemParticle.h"
 #include "core/SystemProcessor.h"
 #include "core/ThreadLocalRng.h"
 #include "library/FormulaType.h"
 #include "library/util.h"
+#include "ui/storage/conversions.h"
 
 namespace chaoskit::ui {
 
@@ -74,17 +74,25 @@ bool requiresScatterplot(library::FormulaType type) {
 core::SystemProcessor createProcessor(library::FormulaType type) {
   auto libraryFormula = library::createFormula(type);
 
-  ast::MultiStepTransform transform{ast::AffineTransform{},
-                                    libraryFormula->source()};
+  Blend blend;
+  auto* pre = blend.mutable_pre();
+  const auto preParams = libraryFormula->examplePreTransform();
+  pre->set_m11(preParams[0]);
+  pre->set_m21(preParams[1]);
+  pre->set_m31(preParams[2]);
+  pre->set_m12(preParams[3]);
+  pre->set_m22(preParams[4]);
+  pre->set_m32(preParams[5]);
 
-  auto preParamsArray = libraryFormula->examplePreTransform();
-  core::TransformParams params{
-      {core::TransformIndex{0},
-       std::vector<float>(preParamsArray.begin(), preParamsArray.end())},
-      {core::TransformIndex{1}, libraryFormula->exampleParams()}};
+  auto* formula = blend.add_formulas();
+  formula->set_type(std::string(magic_enum::enum_name(type)));
+  formula->mutable_weight()->set_x(1.f);
+  for (float param : libraryFormula->exampleParams()) {
+    formula->add_params(param);
+  }
 
-  return core::SystemProcessor(ast::Transform(std::move(transform)),
-                               std::move(params),
+  auto transformSystem = toTransformSystem(blend);
+  return core::SystemProcessor(std::move(transformSystem),
                                std::make_shared<core::ThreadLocalRng>());
 }
 
