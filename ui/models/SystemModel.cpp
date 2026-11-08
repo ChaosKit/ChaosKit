@@ -62,10 +62,10 @@ void SystemModel::setProto(System* proto) {
 }
 
 void SystemModel::setMinLifetime(int min) {
-  if (min == proto_->min_lifetime()) return;
+  if (min < 0 || min == proto_->min_lifetime()) return;
 
-  // Min lifetime can't be larger that max lifetime.
-  if (min > proto_->max_lifetime()) return;
+  // Min lifetime can't be larger than max lifetime unless lifetime is infinite.
+  if (!isInfiniteLifetime() && min > proto_->max_lifetime()) return;
 
   proto_->set_min_lifetime(min);
   emit protoChanged();
@@ -74,6 +74,7 @@ void SystemModel::setMinLifetime(int min) {
 }
 
 void SystemModel::setMaxLifetime(int max) {
+  if (max != core::SystemParticle::INFINITE_LIFETIME && max < 1) return;
   if (max == proto_->max_lifetime()) return;
 
   auto infiniteChanged =
