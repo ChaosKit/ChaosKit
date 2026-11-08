@@ -15,7 +15,9 @@ class CameraSystemProcessor : public SystemProcessor {
   CameraSystemProcessor(const CameraSystem& cameraSystem,
                         std::shared_ptr<Rng> rng)
       : SystemProcessor(cameraSystem.system, std::move(rng)),
-        camera_(cameraSystem.camera) {}
+        camera_(cameraSystem.camera) {
+    setLifetime(cameraSystem.lifetime);
+  }
 
   void setCamera(stdx::optional<TransformSystem> camera) {
     camera_ = std::move(camera);

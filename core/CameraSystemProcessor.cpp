@@ -5,6 +5,7 @@ namespace chaoskit::core {
 void CameraSystemProcessor::setCameraSystem(const CameraSystem& cameraSystem) {
   setSystem(cameraSystem.system);
   setCamera(cameraSystem.camera);
+  setLifetime(cameraSystem.lifetime);
 }
 
 SystemParticle CameraSystemProcessor::processCamera(

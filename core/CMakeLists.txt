@@ -36,6 +36,8 @@ add_library(
   Color.h
   ColorMap.h
   Generator.h
+  Lifetime.cpp
+  Lifetime.h
   Particle.h
   Point.h
   Renderer.h
@@ -54,6 +56,7 @@ add_executable(
   core_test
   CameraSystemProcessorTest.cpp
   ExpressionInterpreterTest.cpp
+  LifetimeTest.cpp
   SystemProcessorTest.cpp
   testing/MockRng.h
   testing/StaticRng.h

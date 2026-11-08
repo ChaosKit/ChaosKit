@@ -7,12 +7,8 @@ namespace chaoskit::core {
 SystemParticle SystemProcessor::createParticle() const {
   SystemParticle particle;
   reviveParticle(particle);
-  particle.lifetime =
-      (max_lifetime_ == SystemParticle::INFINITE_LIFETIME)
-          ? SystemParticle::INFINITE_LIFETIME
-          : rng_->randomInt((std::min)(min_lifetime_ + 1, max_lifetime_),
-                            max_lifetime_);
-  particle.warmup = min_lifetime_;
+  particle.lifetime = lifetime_.generateInitialLifetime(*rng_);
+  particle.warmup = lifetime_.min();
   return particle;
 }
 
@@ -25,8 +21,8 @@ SystemParticle SystemProcessor::process(SystemParticle input) const {
 
   if (output.lifetime == 0) {
     reviveParticle(output);
-    output.lifetime = max_lifetime_;
-    output.warmup = min_lifetime_;
+    output.lifetime = lifetime_.revivedLifetime();
+    output.warmup = lifetime_.min();
   }
 
   for (; output.warmup > 0; --output.warmup) {

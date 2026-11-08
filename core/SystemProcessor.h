@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_CORE_SYSTEMPROCESSOR_H
 #define CHAOSKIT_CORE_SYSTEMPROCESSOR_H
 
+#include "Lifetime.h"
 #include "Rng.h"
 #include "SystemParticle.h"
 #include "TransformInterpreter.h"
@@ -33,11 +34,16 @@ class SystemProcessor {
 
   void setSystem(TransformSystem system) { system_ = std::move(system); }
   void setBounds(Bounds bounds) { bounds_ = bounds; }
-  void setMinLifetime(int32_t min) { min_lifetime_ = min; }
-  void setMaxLifetime(int32_t max) { max_lifetime_ = max; }
+  void setLifetime(Lifetime lifetime) { lifetime_ = lifetime; }
+  [[nodiscard]] const Lifetime &lifetime() const { return lifetime_; }
+  void setMinLifetime(int32_t min) {
+    lifetime_ = Lifetime(min, lifetime_.max());
+  }
+  void setMaxLifetime(int32_t max) {
+    lifetime_ = Lifetime(lifetime_.min(), max);
+  }
   void setLifetimeRange(int32_t min, int32_t max) {
-    min_lifetime_ = min;
-    max_lifetime_ = max;
+    lifetime_ = Lifetime(min, max);
   }
 
   [[nodiscard]] SystemParticle createParticle() const;
@@ -56,8 +62,7 @@ class SystemProcessor {
   TransformSystem system_;
   std::shared_ptr<Rng> rng_;
   Bounds bounds_ = {-1, 1, -1, 1};
-  int32_t max_lifetime_ = SystemParticle::INFINITE_LIFETIME;
-  int32_t min_lifetime_ = 0;
+  Lifetime lifetime_ = Lifetime();
 
   void reviveParticle(Particle &particle) const;
   void stepParticle(SystemParticle &particle) const;

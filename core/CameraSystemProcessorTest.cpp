@@ -56,4 +56,25 @@ TEST_F(CameraSystemProcessorTest, ReturnsInputWhenCameraIsUnset) {
   ASSERT_EQ(expected, actual);
 }
 
+TEST_F(CameraSystemProcessorTest, AppliesLifetimeFromCameraSystem) {
+  TransformSystem system = {ast::Transform(ast::Formula{1.f, 2.f})};
+  ON_CALL(*rng, randomFloat(_, _)).WillByDefault(Return(.5f));
+  EXPECT_CALL(*rng, randomInt(6, 20)).WillOnce(Return(12));
+
+  CameraSystem cameraSystem = {system, stdx::nullopt, Lifetime(5, 20)};
+  CameraSystemProcessor processor(cameraSystem, rng);
+
+  SystemParticle created = processor.createParticle();
+  EXPECT_EQ(12, created.lifetime);
+  EXPECT_EQ(5, created.warmup);
+
+  EXPECT_CALL(*rng, randomInt(11, 40)).WillOnce(Return(25));
+  processor.setCameraSystem(
+      CameraSystem{system, stdx::nullopt, Lifetime(10, 40)});
+
+  SystemParticle updated = processor.createParticle();
+  EXPECT_EQ(25, updated.lifetime);
+  EXPECT_EQ(10, updated.warmup);
+}
+
 }  // namespace chaoskit::core
