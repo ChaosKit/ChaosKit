@@ -304,8 +304,8 @@ TEST_F(ConversionsTest, ConvertsSingleBlendToTransformSystem) {
   setTransform(blend.mutable_post(), {7.f, 8.f, 9.f, 10.f, 11.f, 12.f});
   blend.mutable_coloring_method()->set_single_color(0.5f);
 
-  std::vector<QString> warnings;
-  core::TransformSystem actual = toTransformSystem(blend, warnings);
+  std::vector<std::string> warnings;
+  core::TransformSystem actual = toTransformSystem(blend, &warnings);
 
   EXPECT_THAT(warnings, IsEmpty());
 
@@ -347,12 +347,11 @@ TEST_F(ConversionsTest, SkipsUnknownFormulaAndRecordsWarning) {
   validFormula->mutable_weight()->set_x(1.5f);
   setFormulaParams(validFormula, {1.f, 2.f, 3.f, 4.f});
 
-  std::vector<QString> warnings;
-  core::TransformSystem actual = toTransformSystem(blend, warnings);
+  std::vector<std::string> warnings;
+  core::TransformSystem actual = toTransformSystem(blend, &warnings);
 
   EXPECT_THAT(warnings,
-              ElementsAre(QString(
-                  "Unrecognized formula type: NonExistentFormulaType")));
+              ElementsAre("Unrecognized formula type: NonExistentFormulaType"));
 
   ASSERT_TRUE(actual.transform.variant().is<ast::MultiStepTransform>());
   const auto& actualMultiStep =
@@ -371,6 +370,45 @@ TEST_F(ConversionsTest, SkipsUnknownFormulaAndRecordsWarning) {
   EXPECT_THAT(actual.params, ContainerEq(expectedParams));
 }
 
+TEST_F(ConversionsTest,
+       SkipsInvalidFormulaEnumAndRecordsWarningWithoutThrowing) {
+  Blend blend;
+  blend.set_enabled(true);
+
+  Formula* invalidFormula = blend.add_formulas();
+  invalidFormula->set_type("Invalid");
+  invalidFormula->mutable_weight()->set_x(1.f);
+  setFormulaParams(invalidFormula, {99.f});
+
+  Formula* validFormula = blend.add_formulas();
+  validFormula->set_type("DeJong");
+  validFormula->mutable_weight()->set_x(1.5f);
+  setFormulaParams(validFormula, {1.f, 2.f, 3.f, 4.f});
+
+  std::vector<std::string> warnings;
+  stdx::optional<core::TransformSystem> actual;
+  EXPECT_NO_THROW({ actual = toTransformSystem(blend, &warnings); });
+  ASSERT_TRUE(actual.has_value());
+
+  EXPECT_THAT(warnings, ElementsAre("Unrecognized formula type: Invalid"));
+
+  ASSERT_TRUE(actual->transform.variant().is<ast::MultiStepTransform>());
+  const auto& actualMultiStep =
+      actual->transform.variant().get_unchecked<ast::MultiStepTransform>();
+  ASSERT_THAT(actualMultiStep.transforms(), SizeIs(1));
+
+  const auto& sumTransform = actualMultiStep.transforms()[0]
+                                 .variant()
+                                 .get<ast::WeightedSumTransform>();
+  EXPECT_THAT(sumTransform.transforms(),
+              ElementsAre(IsFormula(FormulaType::DeJong)));
+  EXPECT_THAT(sumTransform.weights(), ElementsAre(1.5));
+
+  core::TransformParams expectedParams;
+  expectedParams[core::TransformIndex{0, 0}] = {1.f, 2.f, 3.f, 4.f};
+  EXPECT_THAT(actual->params, ContainerEq(expectedParams));
+}
+
 TEST_F(ConversionsTest, OmitsWeightedSumWhenAllFormulasAreUnknown) {
   Blend blend;
   blend.set_enabled(true);
@@ -384,12 +422,11 @@ TEST_F(ConversionsTest, OmitsWeightedSumWhenAllFormulasAreUnknown) {
   setTransform(blend.mutable_post(), {7.f, 8.f, 9.f, 10.f, 11.f, 12.f});
   blend.mutable_coloring_method()->set_single_color(0.25f);
 
-  std::vector<QString> warnings;
-  core::TransformSystem actual = toTransformSystem(blend, warnings);
+  std::vector<std::string> warnings;
+  core::TransformSystem actual = toTransformSystem(blend, &warnings);
 
-  EXPECT_THAT(warnings,
-              ElementsAre(QString("Unrecognized formula type: Unknown1"),
-                          QString("Unrecognized formula type: Unknown2")));
+  EXPECT_THAT(warnings, ElementsAre("Unrecognized formula type: Unknown1",
+                                    "Unrecognized formula type: Unknown2"));
 
   ASSERT_TRUE(actual.transform.variant().is<ast::MultiStepTransform>());
   const auto& actualMultiStep =
@@ -423,11 +460,10 @@ TEST_F(ConversionsTest, FallsBackToEnabledBlendsWhenIsolatedIndexIsOutOfRange) {
 
   input.mutable_isolated_blend()->set_index(99);
 
-  std::vector<QString> warnings;
-  core::CameraSystem actualSystem = toCameraSystem(input, warnings);
+  std::vector<std::string> warnings;
+  core::CameraSystem actualSystem = toCameraSystem(input, &warnings);
 
-  EXPECT_THAT(warnings,
-              ElementsAre(QString("Isolated blend index 99 is out of range")));
+  EXPECT_THAT(warnings, ElementsAre("Isolated blend index 99 is out of range"));
 
   ASSERT_TRUE(
       actualSystem.system.transform.variant().is<ast::RandomChoiceTransform>());
@@ -445,23 +481,37 @@ TEST_F(ConversionsTest, NormalizesInvalidLifetimeAndRecordsWarning) {
   input.set_min_lifetime(-10);
   input.set_max_lifetime(0);
 
-  std::vector<QString> warnings;
-  core::CameraSystem actualSystem = toCameraSystem(input, warnings);
+  std::vector<std::string> warnings;
+  core::CameraSystem actualSystem = toCameraSystem(input, &warnings);
 
   EXPECT_EQ(actualSystem.lifetime, core::Lifetime(0, 1));
-  EXPECT_THAT(warnings,
-              ElementsAre(QString(
-                  "Particle lifetime [-10, 0] was normalized to [0, 1]")));
+  EXPECT_THAT(
+      warnings,
+      ElementsAre("Particle lifetime [-10, 0] was normalized to [0, 1]"));
 
   // Valid lifetime records no warning
   System validInput;
   validInput.set_min_lifetime(5);
   validInput.set_max_lifetime(20);
 
-  std::vector<QString> noWarnings;
-  core::CameraSystem validSystem = toCameraSystem(validInput, noWarnings);
+  std::vector<std::string> noWarnings;
+  core::CameraSystem validSystem = toCameraSystem(validInput, &noWarnings);
   EXPECT_EQ(validSystem.lifetime, core::Lifetime(5, 20));
   EXPECT_THAT(noWarnings, IsEmpty());
+
+  // Infinite lifetime normalization formats "Infinite"
+  System infiniteInput;
+  infiniteInput.set_min_lifetime(-5);
+  infiniteInput.set_max_lifetime(core::Lifetime::INFINITE);
+
+  std::vector<std::string> infiniteWarnings;
+  core::CameraSystem infiniteSystem =
+      toCameraSystem(infiniteInput, &infiniteWarnings);
+  EXPECT_EQ(infiniteSystem.lifetime,
+            core::Lifetime(0, core::Lifetime::INFINITE));
+  EXPECT_THAT(infiniteWarnings,
+              ElementsAre("Particle lifetime [-5, Infinite] was normalized to "
+                          "[0, Infinite]"));
 }
 
 TEST_F(ConversionsTest, BehavioralRoundTripThroughCameraSystemProcessor) {
@@ -474,7 +524,7 @@ TEST_F(ConversionsTest, BehavioralRoundTripThroughCameraSystemProcessor) {
   blend->set_weight(1.f);
 
   // Pre: scale x by 2, shift x by 1, y identity: x' = 2x + 1, y' = y
-  // Matrix params: [m11, m21, m31, m12, m22, m32]
+  // Affine transform params: [m11, m21, m31, m12, m22, m32]
   setTransform(blend->mutable_pre(), {2.f, 0.f, 1.f, 0.f, 1.f, 0.f});
 
   // Formula: DeJong with params [0, 0, 0, 0]
@@ -499,8 +549,8 @@ TEST_F(ConversionsTest, BehavioralRoundTripThroughCameraSystemProcessor) {
   camera->set_enabled(true);
   setTransform(camera->mutable_post(), {2.f, 0.f, 0.f, 0.f, 2.f, 0.f});
 
-  std::vector<QString> warnings;
-  core::CameraSystem cameraSystem = toCameraSystem(input, warnings);
+  std::vector<std::string> warnings;
+  core::CameraSystem cameraSystem = toCameraSystem(input, &warnings);
   EXPECT_THAT(warnings, IsEmpty());
 
   auto rng = std::make_shared<NiceMock<MockRng>>();

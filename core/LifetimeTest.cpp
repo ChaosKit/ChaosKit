@@ -1,4 +1,5 @@
 #include <gmock/gmock.h>
+#include <sstream>
 #include "Lifetime.h"
 #include "testing/MockRng.h"
 
@@ -101,6 +102,31 @@ TEST(LifetimeTest, RevivedLifetimeReturnsMax) {
 
   Lifetime infinite(5, Lifetime::INFINITE);
   EXPECT_EQ(Lifetime::INFINITE, infinite.revivedLifetime());
+}
+
+TEST(LifetimeTest, WarmupCountReturnsMin) {
+  Lifetime defaultLifetime;
+  EXPECT_EQ(0, defaultLifetime.warmupCount());
+
+  Lifetime finite(10, 30);
+  EXPECT_EQ(10, finite.warmupCount());
+
+  Lifetime infinite(15, Lifetime::INFINITE);
+  EXPECT_EQ(15, infinite.warmupCount());
+}
+
+TEST(LifetimeTest, StreamOperatorFormatsCorrectly) {
+  std::ostringstream finiteStream;
+  finiteStream << Lifetime(10, 30);
+  EXPECT_EQ("[10, 30]", finiteStream.str());
+
+  std::ostringstream infiniteStream;
+  infiniteStream << Lifetime(0, Lifetime::INFINITE);
+  EXPECT_EQ("[0, Infinite]", infiniteStream.str());
+
+  std::ostringstream infiniteWarmupStream;
+  infiniteWarmupStream << Lifetime(15, Lifetime::INFINITE);
+  EXPECT_EQ("[15, Infinite]", infiniteWarmupStream.str());
 }
 
 }  // namespace chaoskit::core

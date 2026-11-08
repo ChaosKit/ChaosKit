@@ -10,7 +10,7 @@ add_library(ui_storage conversions.cpp conversions.h)
 target_link_libraries(
   ui_storage
   PRIVATE library magic_enum
-  PUBLIC core_interface ui_storage_proto Qt::Core)
+  PUBLIC core_interface ui_storage_proto)
 
 add_executable(ui_storage_test conversions_test.cpp)
 target_link_libraries(

@@ -1,5 +1,7 @@
 #include "conversions.h"
 #include <magic_enum.hpp>
+#include <string>
+#include <vector>
 #include "ast/transforms.h"
 #include "library/util.h"
 
@@ -15,7 +17,7 @@ std::vector<float> toAffineParams(const Transform& transformProto) {
 ast::Transform lowerBlend(const Blend& blendProto,
                           const core::TransformIndex& parentIndex,
                           core::TransformParams& params,
-                          std::vector<QString>& warnings) {
+                          std::vector<std::string>* warnings) {
   std::vector<ast::Transform> steps;
   core::TransformIndex stepIndex = parentIndex.firstChild();
 
@@ -33,9 +35,10 @@ ast::Transform lowerBlend(const Blend& blendProto,
     for (const auto& formula : blendProto.formulas()) {
       auto formulaType =
           magic_enum::enum_cast<library::FormulaType>(formula.type());
-      if (!formulaType) {
-        warnings.push_back(QString("Unrecognized formula type: %1")
-                               .arg(QString::fromStdString(formula.type())));
+      if (!formulaType || *formulaType == library::FormulaType::Invalid) {
+        if (warnings != nullptr) {
+          warnings->push_back("Unrecognized formula type: " + formula.type());
+        }
         continue;
       }
 
@@ -87,7 +90,7 @@ ast::Transform lowerBlend(const Blend& blendProto,
 }  // namespace
 
 core::TransformSystem toTransformSystem(const Blend& blendProto,
-                                        std::vector<QString>& warnings) {
+                                        std::vector<std::string>* warnings) {
   core::TransformParams params;
   core::TransformIndex rootIndex;
   ast::Transform transform =
@@ -95,24 +98,24 @@ core::TransformSystem toTransformSystem(const Blend& blendProto,
   return {std::move(transform), std::move(params)};
 }
 
-core::TransformSystem toTransformSystem(const Blend& blendProto) {
-  std::vector<QString> warnings;
-  return toTransformSystem(blendProto, warnings);
-}
-
 core::CameraSystem toCameraSystem(const System& systemProto,
-                                  std::vector<QString>& warnings) {
+                                  std::vector<std::string>* warnings) {
   bool lifetimeAdjusted = false;
   core::Lifetime normalizedLifetime =
       core::Lifetime::normalize(systemProto.min_lifetime(),
                                 systemProto.max_lifetime(), &lifetimeAdjusted);
-  if (lifetimeAdjusted) {
-    warnings.push_back(
-        QString("Particle lifetime [%1, %2] was normalized to [%3, %4]")
-            .arg(systemProto.min_lifetime())
-            .arg(systemProto.max_lifetime())
-            .arg(normalizedLifetime.min())
-            .arg(normalizedLifetime.max()));
+  if (lifetimeAdjusted && warnings != nullptr) {
+    std::string origMaxStr =
+        (systemProto.max_lifetime() == core::Lifetime::INFINITE)
+            ? "Infinite"
+            : std::to_string(systemProto.max_lifetime());
+    std::string normMaxStr = normalizedLifetime.isInfinite()
+                                 ? "Infinite"
+                                 : std::to_string(normalizedLifetime.max());
+    warnings->push_back(
+        "Particle lifetime [" + std::to_string(systemProto.min_lifetime()) +
+        ", " + origMaxStr + "] was normalized to [" +
+        std::to_string(normalizedLifetime.min()) + ", " + normMaxStr + "]");
   }
 
   stdx::optional<core::TransformSystem> system;
@@ -121,8 +124,10 @@ core::CameraSystem toCameraSystem(const System& systemProto,
     if (isolatedIndex < static_cast<uint32_t>(systemProto.blends_size())) {
       system = toTransformSystem(systemProto.blends(isolatedIndex), warnings);
     } else {
-      warnings.push_back(QString("Isolated blend index %1 is out of range")
-                             .arg(isolatedIndex));
+      if (warnings != nullptr) {
+        warnings->push_back("Isolated blend index " +
+                            std::to_string(isolatedIndex) + " is out of range");
+      }
     }
   }
 
@@ -153,11 +158,6 @@ core::CameraSystem toCameraSystem(const System& systemProto,
 
   return core::CameraSystem{std::move(*system), std::move(camera),
                             normalizedLifetime};
-}
-
-core::CameraSystem toCameraSystem(const System& systemProto) {
-  std::vector<QString> warnings;
-  return toCameraSystem(systemProto, warnings);
 }
 
 }  // namespace chaoskit::ui

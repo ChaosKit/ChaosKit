@@ -108,11 +108,11 @@ void SystemView::setModel(ProjectModel *projectModel) {
 void SystemView::updateSystem() {
   const System &systemProto = model_->proto()->system();
 
-  std::vector<QString> warnings;
-  generator_->setSystem(toCameraSystem(systemProto, warnings));
+  std::vector<std::string> warnings;
+  generator_->setSystem(toCameraSystem(systemProto, &warnings));
   for (const auto &warning : warnings) {
-    qCWarning(systemViewLog, "%s", qUtf8Printable(warning));
-    emit warningEmitted(warning);
+    qCWarning(systemViewLog, "%s", warning.c_str());
+    emit warningEmitted(QString::fromStdString(warning));
   }
   update();
 }

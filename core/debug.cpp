@@ -32,11 +32,18 @@ std::ostream& operator<<(std::ostream& stream, const TransformSystem& system) {
                 << system.params;
 }
 
-std::ostream& operator<<(std::ostream& stream, const CameraSystem& system) {
-  stream << system.system << std::endl;
-  if (system.camera) {
-    stream << "Camera " << *system.camera;
+template <typename T>
+std::ostream& operator<<(std::ostream& stream, const stdx::optional<T>& opt) {
+  if (opt) {
+    return stream << *opt;
   }
+  return stream << "nullopt";
+}
+
+std::ostream& operator<<(std::ostream& stream,
+                         const CameraSystem& cameraSystem) {
+  stream << "CameraSystem(" << cameraSystem.system << ", "
+         << cameraSystem.camera << ", " << cameraSystem.lifetime << ")";
   return stream;
 }
 

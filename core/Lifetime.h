@@ -2,6 +2,7 @@
 #define CHAOSKIT_CORE_LIFETIME_H
 
 #include <cstdint>
+#include <ostream>
 #include "SystemParticle.h"
 
 namespace chaoskit::core {
@@ -19,6 +20,7 @@ class Lifetime {
 
   [[nodiscard]] constexpr int32_t min() const { return min_; }
   [[nodiscard]] constexpr int32_t max() const { return max_; }
+  [[nodiscard]] constexpr int32_t warmupCount() const { return min_; }
   [[nodiscard]] constexpr bool isInfinite() const { return max_ == INFINITE; }
 
   [[nodiscard]] int32_t generateInitialLifetime(Rng& rng) const;
@@ -35,6 +37,8 @@ class Lifetime {
   int32_t min_ = 0;
   int32_t max_ = INFINITE;
 };
+
+std::ostream& operator<<(std::ostream& stream, const Lifetime& lifetime);
 
 }  // namespace chaoskit::core
 

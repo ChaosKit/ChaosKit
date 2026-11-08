@@ -44,4 +44,13 @@ int32_t Lifetime::generateInitialLifetime(Rng& rng) const {
   return rng.randomInt((std::min)(min_ + 1, max_), max_);
 }
 
+std::ostream& operator<<(std::ostream& stream, const Lifetime& lifetime) {
+  if (lifetime.isInfinite()) {
+    stream << "[" << lifetime.min() << ", Infinite]";
+  } else {
+    stream << "[" << lifetime.min() << ", " << lifetime.max() << "]";
+  }
+  return stream;
+}
+
 }  // namespace chaoskit::core
