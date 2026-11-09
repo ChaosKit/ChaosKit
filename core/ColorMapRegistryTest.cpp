@@ -18,6 +18,7 @@ TEST_F(ColorMapRegistryTest, ContainsDefaultColorMaps) {
 
   EXPECT_THAT(registry.names(),
               UnorderedElementsAre("BlackWhite", "Rainbow", "BGR"));
+  EXPECT_EQ(registry.defaultName(), "BGR");
 }
 
 TEST_F(ColorMapRegistryTest, ReturnsValidColorMaps) {

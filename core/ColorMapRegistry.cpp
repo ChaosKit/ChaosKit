@@ -32,4 +32,12 @@ const ColorMap* ColorMapRegistry::get(const std::string& name) const {
   }
 }
 
+const std::string& ColorMapRegistry::defaultName() const {
+  static const std::string empty;
+  if (names_.empty()) {
+    return empty;
+  }
+  return *names_.begin();
+}
+
 }  // namespace chaoskit::core
