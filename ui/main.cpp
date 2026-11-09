@@ -23,13 +23,11 @@
 #include "SystemView.h"
 #include "Utilities.h"
 #include "chaoskit.pb.h"
-#include "core/PaletteColorMap.h"
 #include "library/FormulaType.h"
 #include "models/ColorMapRegistry.h"
 #include "models/ModelFactory.h"
 #include "resources.h"
 
-using chaoskit::core::Color;
 using chaoskit::core::ColorMap;
 using chaoskit::core::HistogramBuffer;
 using chaoskit::core::Point;
@@ -117,13 +115,6 @@ int main(int argc, char* argv[]) {
 
   // Set up color maps
   auto* colorMapRegistry = new ColorMapRegistry(&app);
-  colorMapRegistry->add(
-      "BGR",
-      std::make_unique<chaoskit::core::PaletteColorMap>(std::vector<Color>{
-          Color{0.f, 0.f, 1.f},
-          Color{0.f, 1.f, 0.f},
-          Color{1.f, 0.f, 0.f},
-      }));
 
   // Set up the project
   auto* project = new chaoskit::Project();

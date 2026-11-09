@@ -30,6 +30,10 @@ const core::ColorMap* ColorMapRegistry::get(const std::string& name) const {
 }
 
 const QString& ColorMapRegistry::defaultName() const {
+  static const QString empty;
+  if (nameCache_.isEmpty()) {
+    return empty;
+  }
   return nameCache_.front();
 }
 

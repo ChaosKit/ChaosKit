@@ -55,6 +55,7 @@ target_link_libraries(
 add_executable(
   core_test
   CameraSystemProcessorTest.cpp
+  ColorMapRegistryTest.cpp
   ExpressionInterpreterTest.cpp
   LifetimeTest.cpp
   SystemProcessorTest.cpp

@@ -38,6 +38,10 @@ float logmap(float x) {
 void main()
 {
     vec4 point = texture(histogram, uv);
+    if (point.w <= 0.0) {
+        outColor = vec4(0.0, 0.0, 0.0, 1.0);
+        return;
+    }
     float intensity = point.w * pow(E, -exposure + 1.0);
 
     float scale = logmap(intensity) / intensity;
