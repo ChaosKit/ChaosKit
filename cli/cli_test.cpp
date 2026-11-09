@@ -223,5 +223,121 @@ TEST_F(CliTest, GoldenImageVerification) {
   EXPECT_LE(rmse, 0.05);
 }
 
+TEST_F(CliTest, ErrorWhenBothIppAndIterationsPassed) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString outPath = tempDir_.filePath("out.png");
+
+  // Passing --ipp and --iterations
+  RunResult res1 = runChaoskitRender(
+      {inputPath, outPath, "--ipp", "100", "--iterations", "1000"});
+  EXPECT_NE(res1.exitCode, 0);
+  EXPECT_FALSE(res1.stdErr.isEmpty());
+
+  // Passing --iterations-per-pixel and --iterations
+  RunResult res2 =
+      runChaoskitRender({inputPath, outPath, "--iterations-per-pixel", "100",
+                         "--iterations", "1000"});
+  EXPECT_NE(res2.exitCode, 0);
+  EXPECT_FALSE(res2.stdErr.isEmpty());
+}
+
+TEST_F(CliTest, ErrorWhenSeedAndThreadsGreaterThanOnePassed) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString outPath = tempDir_.filePath("out.png");
+
+  RunResult res =
+      runChaoskitRender({inputPath, outPath, "--seed", "42", "--threads", "2"});
+  EXPECT_NE(res.exitCode, 0);
+  EXPECT_FALSE(res.stdErr.isEmpty());
+
+  // --seed with --threads 1 is allowed
+  RunResult resSingle =
+      runChaoskitRender({inputPath, outPath, "--seed", "42", "--threads", "1"});
+  EXPECT_EQ(resSingle.exitCode, 0);
+}
+
+TEST_F(CliTest, ErrorOnInvalidWorkloadOrConcurrencyFlags) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString outPath = tempDir_.filePath("out.png");
+
+  // Invalid --threads
+  for (const QString& val : {"0", "-1", "foo", "1.5"}) {
+    RunResult res = runChaoskitRender({inputPath, outPath, "--threads", val});
+    EXPECT_NE(res.exitCode, 0)
+        << "Expected failure for --threads " << val.toStdString();
+    EXPECT_FALSE(res.stdErr.isEmpty());
+  }
+
+  // Invalid --ipp
+  for (const QString& val : {"0", "-5", "bar", "2.5"}) {
+    RunResult res = runChaoskitRender({inputPath, outPath, "--ipp", val});
+    EXPECT_NE(res.exitCode, 0)
+        << "Expected failure for --ipp " << val.toStdString();
+    EXPECT_FALSE(res.stdErr.isEmpty());
+  }
+
+  // Invalid --iterations-per-pixel
+  {
+    RunResult res =
+        runChaoskitRender({inputPath, outPath, "--iterations-per-pixel", "0"});
+    EXPECT_NE(res.exitCode, 0);
+    EXPECT_FALSE(res.stdErr.isEmpty());
+  }
+
+  // Invalid --iterations
+  for (const QString& val : {"0", "-10", "baz", "3.14"}) {
+    RunResult res =
+        runChaoskitRender({inputPath, outPath, "--iterations", val});
+    EXPECT_NE(res.exitCode, 0)
+        << "Expected failure for --iterations " << val.toStdString();
+    EXPECT_FALSE(res.stdErr.isEmpty());
+  }
+}
+
+TEST_F(CliTest, WorkloadFlagsExecution) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString outPathIpp = tempDir_.filePath("out_ipp.png");
+  QString outPathIppLong = tempDir_.filePath("out_ipp_long.png");
+  QString outPathIter = tempDir_.filePath("out_iter.png");
+
+  RunResult resIpp =
+      runChaoskitRender({inputPath, outPathIpp, "--seed", "42", "--ipp", "50"});
+  EXPECT_EQ(resIpp.exitCode, 0);
+  QImage imgIpp(outPathIpp);
+  EXPECT_FALSE(imgIpp.isNull());
+
+  RunResult resIppLong =
+      runChaoskitRender({inputPath, outPathIppLong, "--seed", "42",
+                         "--iterations-per-pixel", "50"});
+  EXPECT_EQ(resIppLong.exitCode, 0);
+  QImage imgIppLong(outPathIppLong);
+  EXPECT_FALSE(imgIppLong.isNull());
+
+  RunResult resIter = runChaoskitRender(
+      {inputPath, outPathIter, "--seed", "42", "--iterations", "10000"});
+  EXPECT_EQ(resIter.exitCode, 0);
+  QImage imgIter(outPathIter);
+  EXPECT_FALSE(imgIter.isNull());
+}
+
+TEST_F(CliTest, MultiThreadedRenderingWithoutSeedMatchesGoldenImage) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString actualPath = tempDir_.filePath("simple_multithreaded.png");
+  QString goldenPath = testDataDir_ + "/simple_golden.png";
+
+  RunResult res = runChaoskitRender({inputPath, actualPath, "--threads", "2"});
+  EXPECT_EQ(res.exitCode, 0);
+
+  QImage actualImage(actualPath);
+  ASSERT_FALSE(actualImage.isNull());
+
+  QImage goldenImage(goldenPath);
+  ASSERT_FALSE(goldenImage.isNull());
+
+  QImage diffImage;
+  double rmse = calculateNormalizedRmse(actualImage, goldenImage, &diffImage);
+  EXPECT_LE(rmse, 0.05);
+}
+
 }  // namespace
 }  // namespace chaoskit::cli

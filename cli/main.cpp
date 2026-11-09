@@ -10,9 +10,13 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFunctions>
 #include <QSurfaceFormat>
+#include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "SeededRng.h"
@@ -30,18 +34,35 @@ using namespace chaoskit;
 
 namespace {
 
-class ToneMapperAdapter : public core::Renderer {
+class BufferExtractAdapter : public core::Renderer {
  public:
-  explicit ToneMapperAdapter(ui::GLToneMapper* toneMapper)
-      : toneMapper_(toneMapper) {}
-
   void updateHistogramBuffer(const core::HistogramBuffer& buffer) override {
-    toneMapper_->syncBuffer(buffer);
+    buffer_ = buffer;
   }
 
- private:
-  ui::GLToneMapper* toneMapper_;
+  core::HistogramBuffer buffer_;
 };
+
+bool parsePositiveInt64(const QString& str, int64_t* out) {
+  QString trimmed = str.trimmed();
+  if (trimmed.isEmpty()) {
+    return false;
+  }
+  for (int i = 0; i < trimmed.size(); ++i) {
+    if (!trimmed.at(i).isDigit()) {
+      return false;
+    }
+  }
+  bool ok = false;
+  qlonglong val = trimmed.toLongLong(&ok);
+  if (!ok || val <= 0) {
+    return false;
+  }
+  if (out != nullptr) {
+    *out = val;
+  }
+  return true;
+}
 
 }  // namespace
 
@@ -66,14 +87,77 @@ int main(int argc, char* argv[]) {
       "seed", "Random number generator seed (64-bit integer)", "uint64");
   parser.addOption(seedOption);
 
+  QCommandLineOption threadsOption(
+      "threads", "Number of worker threads (default: hardware concurrency)",
+      "count");
+  parser.addOption(threadsOption);
+
+  QCommandLineOption ippOption({"ipp", "iterations-per-pixel"},
+                               "Iterations per pixel (default: 100)", "count");
+  parser.addOption(ippOption);
+
+  QCommandLineOption iterationsOption(
+      "iterations", "Exact total plotted step budget", "count");
+  parser.addOption(iterationsOption);
+
   parser.process(app);
 
   const QStringList positionalArgs = parser.positionalArguments();
   if (positionalArgs.size() != 2) {
     std::cerr << "Usage: chaoskit-render <input-project> <output-image> "
-                 "[--seed <uint64>]"
+                 "[--seed <uint64>] [--threads <count>] "
+                 "[--ipp <count>] [--iterations <count>]"
               << std::endl;
     return 1;
+  }
+
+  if (parser.isSet(ippOption) && parser.isSet(iterationsOption)) {
+    std::cerr
+        << "Error: cannot specify both --ipp (--iterations-per-pixel) and "
+           "--iterations"
+        << std::endl;
+    return 1;
+  }
+
+  size_t threads = (std::max)(1u, std::thread::hardware_concurrency());
+  if (parser.isSet(threadsOption)) {
+    int64_t val = 0;
+    if (!parsePositiveInt64(parser.value(threadsOption), &val)) {
+      std::cerr << "Invalid --threads: "
+                << parser.value(threadsOption).toStdString() << std::endl;
+      return 1;
+    }
+    threads = static_cast<size_t>(val);
+  }
+
+  if (parser.isSet(seedOption) && parser.isSet(threadsOption) && threads > 1) {
+    std::cerr
+        << "Error: cannot specify --threads > 1 with --seed (deterministic "
+           "mode is single-threaded)"
+        << std::endl;
+    return 1;
+  }
+
+  uint64_t ipp = 100;
+  if (parser.isSet(ippOption)) {
+    int64_t val = 0;
+    if (!parsePositiveInt64(parser.value(ippOption), &val)) {
+      std::cerr << "Invalid --ipp / --iterations-per-pixel: "
+                << parser.value(ippOption).toStdString() << std::endl;
+      return 1;
+    }
+    ipp = static_cast<uint64_t>(val);
+  }
+
+  std::optional<uint64_t> exactIterations = std::nullopt;
+  if (parser.isSet(iterationsOption)) {
+    int64_t val = 0;
+    if (!parsePositiveInt64(parser.value(iterationsOption), &val)) {
+      std::cerr << "Invalid --iterations: "
+                << parser.value(iterationsOption).toStdString() << std::endl;
+      return 1;
+    }
+    exactIterations = static_cast<uint64_t>(val);
   }
 
   const QString inputPath = positionalArgs.at(0);
@@ -145,22 +229,78 @@ int main(int argc, char* argv[]) {
       return 1;
     }
     rng = std::make_shared<cli::SeededRng>(seed);
-  } else {
-    rng = std::make_shared<core::ThreadLocalRng>();
   }
 
-  // Particle stepping
-  core::CameraSystemProcessor processor(cameraSystem, rng);
-  ui::GathererTask gatherer;
-  gatherer.setSize(QSize(static_cast<int>(width), static_cast<int>(height)));
-  gatherer.setColorMap(colorMap);
+  uint64_t totalBudget = 0;
+  if (exactIterations.has_value()) {
+    totalBudget = *exactIterations;
+  } else {
+    totalBudget = ipp * static_cast<uint64_t>(width) * height;
+  }
 
-  size_t budget = static_cast<size_t>(100) * width * height;
-  auto particle = processor.createParticle();
-  for (size_t i = 0; i < budget; ++i) {
-    particle = processor.process(particle);
-    auto output = processor.processCamera(particle);
-    gatherer.addPoint(output.point, output.color);
+  // Particle stepping & gathering
+  core::HistogramBuffer combinedBuffer(width, height);
+  combinedBuffer.clear();
+
+  if (parser.isSet(seedOption)) {
+    core::CameraSystemProcessor processor(cameraSystem, rng);
+    ui::GathererTask gatherer;
+    gatherer.setSize(QSize(static_cast<int>(width), static_cast<int>(height)));
+    gatherer.setColorMap(colorMap);
+
+    auto particle = processor.createParticle();
+    for (uint64_t i = 0; i < totalBudget; ++i) {
+      particle = processor.process(particle);
+      auto output = processor.processCamera(particle);
+      gatherer.addPoint(output.point, output.color);
+    }
+
+    BufferExtractAdapter adapter;
+    gatherer.synchronizeResult(&adapter);
+    combinedBuffer = std::move(adapter.buffer_);
+  } else {
+    size_t threadCount = threads;
+    std::vector<core::HistogramBuffer> threadBuffers(threadCount);
+    std::vector<std::thread> workerThreads;
+    workerThreads.reserve(threadCount);
+
+    uint64_t share = totalBudget / threadCount;
+    uint64_t remainder = totalBudget % threadCount;
+
+    for (size_t i = 0; i < threadCount; ++i) {
+      uint64_t threadBudget = share + (i < remainder ? 1 : 0);
+      workerThreads.emplace_back([&, i, threadBudget]() {
+        core::CameraSystemProcessor processor(
+            cameraSystem, std::make_shared<core::ThreadLocalRng>());
+        ui::GathererTask gatherer;
+        gatherer.setSize(
+            QSize(static_cast<int>(width), static_cast<int>(height)));
+        gatherer.setColorMap(colorMap);
+
+        auto particle = processor.createParticle();
+        for (uint64_t step = 0; step < threadBudget; ++step) {
+          particle = processor.process(particle);
+          auto output = processor.processCamera(particle);
+          gatherer.addPoint(output.point, output.color);
+        }
+
+        BufferExtractAdapter adapter;
+        gatherer.synchronizeResult(&adapter);
+        threadBuffers[i] = std::move(adapter.buffer_);
+      });
+    }
+
+    for (size_t i = 0; i < workerThreads.size(); ++i) {
+      workerThreads[i].join();
+    }
+
+    auto* dst = combinedBuffer.data();
+    for (const auto& tb : threadBuffers) {
+      const auto* src = tb.data();
+      for (size_t idx = 0; idx < combinedBuffer.size(); ++idx) {
+        dst[idx] += src[idx];
+      }
+    }
   }
 
   // OpenGL offscreen setup
@@ -207,8 +347,7 @@ int main(int argc, char* argv[]) {
   toneMapper.setExposure(exposure);
   toneMapper.setVibrancy(vibrancy);
 
-  ToneMapperAdapter adapter(&toneMapper);
-  gatherer.synchronizeResult(&adapter);
+  toneMapper.syncBuffer(combinedBuffer);
 
   toneMapper.map();
 
