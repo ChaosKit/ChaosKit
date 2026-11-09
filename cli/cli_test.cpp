@@ -1,4 +1,5 @@
 #include <gmock/gmock.h>
+#include <google/protobuf/text_format.h>
 #include <gtest/gtest.h>
 #include <QCoreApplication>
 #include <QDir>
@@ -11,6 +12,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+
+#include "chaoskit.pb.h"
 
 #ifndef CHAOSKIT_RENDER_BIN
 #error "CHAOSKIT_RENDER_BIN must be defined"
@@ -501,6 +504,193 @@ system {
   ASSERT_FALSE(rainbowImg.isNull());
 
   EXPECT_GT(calculateNormalizedRmse(bgrImg, rainbowImg, nullptr), 0.05);
+}
+
+TEST_F(CliTest, BinaryProjectFileRendering) {
+  QString inputPath = testDataDir_ + "/simple.ck";
+  QString actualPath = tempDir_.filePath("simple_ck_actual.png");
+  QString goldenPath = testDataDir_ + "/simple_golden.png";
+
+  RunResult res = runChaoskitRender({inputPath, actualPath, "--seed", "42"});
+  EXPECT_EQ(res.exitCode, 0);
+
+  QImage actualImage(actualPath);
+  ASSERT_FALSE(actualImage.isNull());
+
+  QImage goldenImage(goldenPath);
+  ASSERT_FALSE(goldenImage.isNull());
+
+  QImage diffImage;
+  double rmse = calculateNormalizedRmse(actualImage, goldenImage, &diffImage);
+  EXPECT_LE(rmse, 0.05);
+
+  // Bitwise determinism between .ck and .pbtxt with same seed
+  QString pbtxtActualPath = tempDir_.filePath("simple_pbtxt_actual.png");
+  RunResult resPbtxt = runChaoskitRender(
+      {testDataDir_ + "/simple.pbtxt", pbtxtActualPath, "--seed", "42"});
+  EXPECT_EQ(resPbtxt.exitCode, 0);
+
+  QFile fileCk(actualPath);
+  bool ckOpened = fileCk.open(QIODevice::ReadOnly);
+  ASSERT_TRUE(ckOpened);
+  QFile filePbtxt(pbtxtActualPath);
+  bool pbtxtOpened = filePbtxt.open(QIODevice::ReadOnly);
+  ASSERT_TRUE(pbtxtOpened);
+  EXPECT_EQ(fileCk.readAll(), filePbtxt.readAll());
+}
+
+TEST_F(CliTest, ExtensionBasedDispatchAndFallback) {
+  // Read a valid project text proto
+  QFile pbtxtFile(testDataDir_ + "/simple.pbtxt");
+  bool pbtxtReadOpened = pbtxtFile.open(QIODevice::ReadOnly | QIODevice::Text);
+  ASSERT_TRUE(pbtxtReadOpened);
+  QByteArray textProto = pbtxtFile.readAll();
+  pbtxtFile.close();
+
+  // Read a valid binary project proto
+  QFile ckFile(testDataDir_ + "/simple.ck");
+  bool ckReadOpened = ckFile.open(QIODevice::ReadOnly);
+  ASSERT_TRUE(ckReadOpened);
+  QByteArray binaryProto = ckFile.readAll();
+  ckFile.close();
+
+  // 1. Text proto saved as .pbtxt (primary dispatch succeeds)
+  {
+    QString path = tempDir_.filePath("test_valid.pbtxt");
+    QFile f(path);
+    bool opened = f.open(QIODevice::WriteOnly);
+    ASSERT_TRUE(opened);
+    f.write(textProto);
+    f.close();
+    QString out = tempDir_.filePath("out_valid_pbtxt.png");
+    RunResult res = runChaoskitRender({path, out, "--seed", "42"});
+    EXPECT_EQ(res.exitCode, 0);
+  }
+
+  // 2. Text proto saved as .cktxt (primary dispatch succeeds)
+  {
+    QString path = tempDir_.filePath("test_valid.cktxt");
+    QFile f(path);
+    bool opened = f.open(QIODevice::WriteOnly);
+    ASSERT_TRUE(opened);
+    f.write(textProto);
+    f.close();
+    QString out = tempDir_.filePath("out_valid_cktxt.png");
+    RunResult res = runChaoskitRender({path, out, "--seed", "42"});
+    EXPECT_EQ(res.exitCode, 0);
+  }
+
+  // 3. Binary proto saved as .ck (primary dispatch succeeds)
+  {
+    QString path = tempDir_.filePath("test_valid.ck");
+    QFile f(path);
+    bool opened = f.open(QIODevice::WriteOnly);
+    ASSERT_TRUE(opened);
+    f.write(binaryProto);
+    f.close();
+    QString out = tempDir_.filePath("out_valid_ck.png");
+    RunResult res = runChaoskitRender({path, out, "--seed", "42"});
+    EXPECT_EQ(res.exitCode, 0);
+  }
+
+  // 4. Binary proto saved with .pbtxt extension (fallback: text fails, binary
+  // succeeds)
+  {
+    QString path = tempDir_.filePath("binary_named.pbtxt");
+    QFile f(path);
+    bool opened = f.open(QIODevice::WriteOnly);
+    ASSERT_TRUE(opened);
+    f.write(binaryProto);
+    f.close();
+    QString out = tempDir_.filePath("out_bin_as_pbtxt.png");
+    RunResult res = runChaoskitRender({path, out, "--seed", "42"});
+    EXPECT_EQ(res.exitCode, 0);
+  }
+
+  // 5. Binary proto saved with .cktxt extension (fallback: text fails, binary
+  // succeeds)
+  {
+    QString path = tempDir_.filePath("binary_named.cktxt");
+    QFile f(path);
+    bool opened = f.open(QIODevice::WriteOnly);
+    ASSERT_TRUE(opened);
+    f.write(binaryProto);
+    f.close();
+    QString out = tempDir_.filePath("out_bin_as_cktxt.png");
+    RunResult res = runChaoskitRender({path, out, "--seed", "42"});
+    EXPECT_EQ(res.exitCode, 0);
+  }
+
+  // 6. Text proto saved with .ck extension (fallback: binary fails, text
+  // succeeds)
+  {
+    QString path = tempDir_.filePath("text_named.ck");
+    QFile f(path);
+    bool opened = f.open(QIODevice::WriteOnly);
+    ASSERT_TRUE(opened);
+    f.write(textProto);
+    f.close();
+    QString out = tempDir_.filePath("out_text_as_ck.png");
+    RunResult res = runChaoskitRender({path, out, "--seed", "42"});
+    EXPECT_EQ(res.exitCode, 0);
+  }
+
+  // 7. Text proto saved with arbitrary extension .foo (fallback: binary fails,
+  // text succeeds)
+  {
+    QString path = tempDir_.filePath("text_named.foo");
+    QFile f(path);
+    bool opened = f.open(QIODevice::WriteOnly);
+    ASSERT_TRUE(opened);
+    f.write(textProto);
+    f.close();
+    QString out = tempDir_.filePath("out_text_as_foo.png");
+    RunResult res = runChaoskitRender({path, out, "--seed", "42"});
+    EXPECT_EQ(res.exitCode, 0);
+  }
+
+  // 8. Corrupt file with .pbtxt extension (both fail -> returns 1 with error)
+  {
+    QString path = tempDir_.filePath("corrupt.pbtxt");
+    QFile f(path);
+    bool opened = f.open(QIODevice::WriteOnly);
+    ASSERT_TRUE(opened);
+    f.write("not a valid proto text or binary data");
+    f.close();
+    QString out = tempDir_.filePath("out_corrupt_pbtxt.png");
+    RunResult res = runChaoskitRender({path, out});
+    EXPECT_NE(res.exitCode, 0);
+    EXPECT_THAT(res.stdErr.toStdString(),
+                HasSubstr("Failed to parse project file"));
+  }
+
+  // 9. Corrupt file with .ck extension (both fail -> returns 1 with error)
+  {
+    QString path = tempDir_.filePath("corrupt.ck");
+    QFile f(path);
+    bool opened = f.open(QIODevice::WriteOnly);
+    ASSERT_TRUE(opened);
+    f.write("not a valid proto text or binary data");
+    f.close();
+    QString out = tempDir_.filePath("out_corrupt_ck.png");
+    RunResult res = runChaoskitRender({path, out});
+    EXPECT_NE(res.exitCode, 0);
+    EXPECT_THAT(res.stdErr.toStdString(),
+                HasSubstr("Failed to parse project file"));
+  }
+}
+
+TEST_F(CliTest, MultiBlendAndCameraRendering) {
+  QString inputPath = testDataDir_ + "/multi_blend_camera.pbtxt";
+  QString outPath = tempDir_.filePath("multi_blend_out.png");
+
+  RunResult res = runChaoskitRender({inputPath, outPath, "--seed", "42"});
+  EXPECT_EQ(res.exitCode, 0);
+
+  QImage image(outPath);
+  ASSERT_FALSE(image.isNull());
+  EXPECT_EQ(image.width(), 64);
+  EXPECT_EQ(image.height(), 64);
 }
 
 }  // namespace

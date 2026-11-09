@@ -18,6 +18,6 @@ target_compile_definitions(
   cli_test
   PRIVATE CHAOSKIT_RENDER_BIN="$<TARGET_FILE:chaoskit-render>"
           CHAOSKIT_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/testdata")
-target_link_libraries(cli_test PRIVATE gmock gmock_main Qt::Core Qt::Gui)
+target_link_libraries(cli_test PRIVATE gmock gmock_main Qt::Core Qt::Gui ui_storage_proto)
 
 add_test(NAME cli_test COMMAND cli_test)

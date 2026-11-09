@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QGuiApplication>
 #include <QImage>
+#include <QImageWriter>
 #include <QOffscreenSurface>
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObject>
@@ -63,6 +64,38 @@ bool parsePositiveInt64(const QString& str, int64_t* out) {
     *out = val;
   }
   return true;
+}
+
+bool parseFloat(const QString& value, const QString& flagName, float& out,
+                bool mustBePositive = false) {
+  bool ok = false;
+  float val = value.toFloat(&ok);
+  if (!ok || !std::isfinite(val) || (mustBePositive && val <= 0.0f)) {
+    std::cerr << "Invalid " << flagName.toStdString() << ": "
+              << value.toStdString() << std::endl;
+    return false;
+  }
+  out = val;
+  return true;
+}
+
+void stepParticles(uint64_t budget, core::CameraSystemProcessor& processor,
+                   const core::ColorMap* colorMap, uint32_t width,
+                   uint32_t height, core::HistogramBuffer& bufferOut) {
+  ui::GathererTask gatherer;
+  gatherer.setSize(QSize(static_cast<int>(width), static_cast<int>(height)));
+  gatherer.setColorMap(colorMap);
+
+  auto particle = processor.createParticle();
+  for (uint64_t step = 0; step < budget; ++step) {
+    particle = processor.process(particle);
+    auto output = processor.processCamera(particle);
+    gatherer.addPoint(output.point, output.color);
+  }
+
+  BufferExtractAdapter adapter;
+  gatherer.synchronizeResult(&adapter);
+  bufferOut = std::move(adapter.buffer_);
 }
 
 }  // namespace
@@ -204,9 +237,19 @@ int main(int argc, char* argv[]) {
   // Parse project (binary .ck or text protobuf)
   chaoskit::Project project;
   std::string dataStr(fileData.constData(), fileData.size());
-  bool parsed = project.ParseFromString(dataStr);
-  if (!parsed) {
+  bool isTextFormat = inputPath.endsWith(".pbtxt", Qt::CaseInsensitive) ||
+                      inputPath.endsWith(".cktxt", Qt::CaseInsensitive);
+  bool parsed = false;
+  if (isTextFormat) {
     parsed = google::protobuf::TextFormat::ParseFromString(dataStr, &project);
+    if (!parsed) {
+      parsed = project.ParseFromString(dataStr);
+    }
+  } else {
+    parsed = project.ParseFromString(dataStr);
+    if (!parsed) {
+      parsed = google::protobuf::TextFormat::ParseFromString(dataStr, &project);
+    }
   }
   if (!parsed) {
     std::cerr << "Failed to parse project file: " << inputPath.toStdString()
@@ -245,36 +288,22 @@ int main(int argc, char* argv[]) {
   }
 
   if (parser.isSet(gammaOption)) {
-    bool ok = false;
-    float val = parser.value(gammaOption).toFloat(&ok);
-    if (!ok || !std::isfinite(val) || val <= 0.0f) {
-      std::cerr << "Invalid gamma: " << parser.value(gammaOption).toStdString()
-                << std::endl;
+    if (!parseFloat(parser.value(gammaOption), "gamma", gamma,
+                    /*mustBePositive=*/true)) {
       return 1;
     }
-    gamma = val;
   }
 
   if (parser.isSet(exposureOption)) {
-    bool ok = false;
-    float val = parser.value(exposureOption).toFloat(&ok);
-    if (!ok || !std::isfinite(val)) {
-      std::cerr << "Invalid exposure: "
-                << parser.value(exposureOption).toStdString() << std::endl;
+    if (!parseFloat(parser.value(exposureOption), "exposure", exposure)) {
       return 1;
     }
-    exposure = val;
   }
 
   if (parser.isSet(vibrancyOption)) {
-    bool ok = false;
-    float val = parser.value(vibrancyOption).toFloat(&ok);
-    if (!ok || !std::isfinite(val)) {
-      std::cerr << "Invalid vibrancy: "
-                << parser.value(vibrancyOption).toStdString() << std::endl;
+    if (!parseFloat(parser.value(vibrancyOption), "vibrancy", vibrancy)) {
       return 1;
     }
-    vibrancy = val;
   }
 
   core::ColorMapRegistry colorMapRegistry;
@@ -331,20 +360,13 @@ int main(int argc, char* argv[]) {
 
   if (parser.isSet(seedOption)) {
     core::CameraSystemProcessor processor(cameraSystem, rng);
-    ui::GathererTask gatherer;
-    gatherer.setSize(QSize(static_cast<int>(width), static_cast<int>(height)));
-    gatherer.setColorMap(colorMap);
-
-    auto particle = processor.createParticle();
-    for (uint64_t i = 0; i < totalBudget; ++i) {
-      particle = processor.process(particle);
-      auto output = processor.processCamera(particle);
-      gatherer.addPoint(output.point, output.color);
-    }
-
-    BufferExtractAdapter adapter;
-    gatherer.synchronizeResult(&adapter);
-    combinedBuffer = std::move(adapter.buffer_);
+    stepParticles(totalBudget, processor, colorMap, width, height,
+                  combinedBuffer);
+  } else if (threads == 1) {
+    core::CameraSystemProcessor processor(
+        cameraSystem, std::make_shared<core::ThreadLocalRng>());
+    stepParticles(totalBudget, processor, colorMap, width, height,
+                  combinedBuffer);
   } else {
     size_t threadCount = threads;
     std::vector<core::HistogramBuffer> threadBuffers(threadCount);
@@ -359,21 +381,8 @@ int main(int argc, char* argv[]) {
       workerThreads.emplace_back([&, i, threadBudget]() {
         core::CameraSystemProcessor processor(
             cameraSystem, std::make_shared<core::ThreadLocalRng>());
-        ui::GathererTask gatherer;
-        gatherer.setSize(
-            QSize(static_cast<int>(width), static_cast<int>(height)));
-        gatherer.setColorMap(colorMap);
-
-        auto particle = processor.createParticle();
-        for (uint64_t step = 0; step < threadBudget; ++step) {
-          particle = processor.process(particle);
-          auto output = processor.processCamera(particle);
-          gatherer.addPoint(output.point, output.color);
-        }
-
-        BufferExtractAdapter adapter;
-        gatherer.synchronizeResult(&adapter);
-        threadBuffers[i] = std::move(adapter.buffer_);
+        stepParticles(threadBudget, processor, colorMap, width, height,
+                      threadBuffers[i]);
       });
     }
 
@@ -441,9 +450,10 @@ int main(int argc, char* argv[]) {
   QImage image = fbo.toImage();
   fbo.release();
 
-  if (!image.save(outputPath)) {
-    std::cerr << "Failed to save image to " << outputPath.toStdString()
-              << std::endl;
+  QImageWriter writer(outputPath);
+  if (!writer.write(image)) {
+    std::cerr << "Failed to write image: " << writer.errorString().toStdString()
+              << '\n';
     return 1;
   }
 
