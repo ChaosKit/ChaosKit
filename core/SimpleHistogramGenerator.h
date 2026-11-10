@@ -2,6 +2,8 @@
 #define CHAOSKIT_CORE_SIMPLEHISTOGRAMGENERATOR_H
 
 #include <stdx/optional.h>
+#include <cstdint>
+#include <memory>
 #include <vector>
 
 #include "CameraSystem.h"

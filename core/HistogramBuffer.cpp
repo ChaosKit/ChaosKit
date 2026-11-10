@@ -1,4 +1,5 @@
 #include "HistogramBuffer.h"
+#include <algorithm>
 
 namespace chaoskit::core {
 

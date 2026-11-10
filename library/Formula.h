@@ -2,6 +2,10 @@
 #define CHAOSKIT_LIBRARY_FORMULA_H
 
 #include <array>
+#include <cstdint>
+#include <string>
+#include <utility>
+#include <vector>
 #include "ast/Formula.h"
 #include "ast/helpers.h"
 

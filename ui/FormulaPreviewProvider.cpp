@@ -5,9 +5,12 @@
 #include <QQuickImageResponse>
 #include <QRunnable>
 #include <QSize>
+#include <limits>
 #include <magic_enum.hpp>
 #include <memory>
+#include <string>
 #include <unordered_set>
+#include <utility>
 #include "ast/util.h"
 #include "core/SystemParticle.h"
 #include "core/SystemProcessor.h"

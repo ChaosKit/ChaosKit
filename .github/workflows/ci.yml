@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang-format
-          pip install cmakelang
+          pip install "cmakelang[yaml]"
 
       - name: Run lint checks on diff
         run: |
@@ -50,7 +50,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build protobuf-compiler libprotobuf-dev libgl1-mesa-dev
+          sudo apt-get install -y ninja-build protobuf-compiler libprotobuf-dev libgl1-mesa-dev libgl1-mesa-dri libegl1-mesa-dev libxkbcommon-x11-0 xvfb
 
       - name: Install system dependencies (macOS)
         if: runner.os == 'macOS'
@@ -69,4 +69,9 @@ jobs:
         run: make build
 
       - name: Run CTest
-        run: make test
+        run: |
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            xvfb-run -a make test
+          else
+            make test
+          fi

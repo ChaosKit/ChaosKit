@@ -1,7 +1,10 @@
 #ifndef CHAOSKIT_STATE_HIERARCHY_H
 #define CHAOSKIT_STATE_HIERARCHY_H
 
+#include <algorithm>
+#include <cstddef>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 /**

@@ -1,4 +1,5 @@
 #include "ColorMapModel.h"
+#include <algorithm>
 
 namespace chaoskit::ui {
 

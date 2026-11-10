@@ -1,7 +1,11 @@
 #include "ExpressionInterpreter.h"
 
 #include <cmath>
+#include <functional>
+#include <memory>
+#include <stdexcept>
 #include <unordered_map>
+#include <utility>
 
 #include "ThreadLocalRng.h"
 #include "ast/util.h"
@@ -54,7 +58,7 @@ const std::unordered_map<char, std::function<float(float, float)>>
         {BinaryFn::GREATER_THAN_OR_EQUAL, std::greater_equal<>()},
         {BinaryFn::DISTANCE, [](float a, float b) { return std::abs(a - b); }},
         {BinaryFn::ATAN2, atan2f},
-    };
+};
 
 class InterpreterVisitor {
  public:

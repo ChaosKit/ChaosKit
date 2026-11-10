@@ -1,6 +1,8 @@
 #ifndef CHAOSKIT_STATE_HIERARCHICALSTORE_H
 #define CHAOSKIT_STATE_HIERARCHICALSTORE_H
 
+#include <algorithm>
+#include <cstddef>
 #include <unordered_map>
 #include <utility>
 #include <vector>

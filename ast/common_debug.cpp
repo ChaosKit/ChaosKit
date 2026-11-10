@@ -1,4 +1,7 @@
 #include "common_debug.h"
+#include <algorithm>
+#include <cstddef>
+#include <string>
 
 namespace chaoskit::ast {
 

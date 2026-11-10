@@ -25,6 +25,9 @@ target_link_libraries(benchmark PRIVATE ast core pcg_random)
 
 # # ################################################### Third party dependencies
 
+set(CMAKE_POLICY_VERSION_MINIMUM
+    3.5
+    CACHE STRING "Minimum CMake policy version for third-party dependencies")
 include(FetchContent)
 
 # Mapbox Variant (https://github.com/mapbox/variant)

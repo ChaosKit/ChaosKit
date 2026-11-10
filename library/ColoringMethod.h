@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_LIBRARY_COLORINGMETHOD_H
 #define CHAOSKIT_LIBRARY_COLORINGMETHOD_H
 
+#include <cstdint>
 #include "ast/Expression.h"
 #include "ast/helpers.h"
 

@@ -1,10 +1,14 @@
 #ifndef CHAOSKIT_STATE_STORE_H
 #define CHAOSKIT_STATE_STORE_H
 
+#include <cstddef>
+#include <cstdint>
+#include <memory>
 #include <stdexcept>
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <mapbox/variant.hpp>

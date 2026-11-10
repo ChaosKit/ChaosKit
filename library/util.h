@@ -1,6 +1,8 @@
 #ifndef CHAOSKIT_LIBRARY_UTIL_H
 #define CHAOSKIT_LIBRARY_UTIL_H
 
+#include <array>
+#include <cstdint>
 #include <memory>
 #include <vector>
 #include "ColoringMethod.h"

@@ -1,6 +1,9 @@
 #ifndef CHAOSKIT_CORE_SYSTEMPROCESSOR_H
 #define CHAOSKIT_CORE_SYSTEMPROCESSOR_H
 
+#include <cstdint>
+#include <memory>
+#include <utility>
 #include "Lifetime.h"
 #include "Rng.h"
 #include "SystemParticle.h"

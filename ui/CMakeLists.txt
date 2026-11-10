@@ -1,6 +1,12 @@
 find_package(
   Qt6 REQUIRED
-  COMPONENTS Core Gui Qml OpenGL Quick QuickControls2 Test
+  COMPONENTS Core
+             Gui
+             Qml
+             OpenGL
+             Quick
+             QuickControls2
+             Test
   OPTIONAL_COMPONENTS Widgets)
 
 add_subdirectory(models)

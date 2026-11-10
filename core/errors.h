@@ -1,7 +1,9 @@
 #ifndef CHAOSKIT_CORE_ERRORS_H
 #define CHAOSKIT_CORE_ERRORS_H
 
+#include <cstddef>
 #include <stdexcept>
+#include <string>
 
 namespace chaoskit::core {
 
