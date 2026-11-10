@@ -1,6 +1,7 @@
 #ifndef CHAOSKIT_CLI_SEEDEDRNG_H
 #define CHAOSKIT_CLI_SEEDEDRNG_H
 
+#include <cstdint>
 #include <pcg_random.hpp>
 #include <random>
 #include "core/Rng.h"
