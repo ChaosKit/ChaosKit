@@ -105,7 +105,11 @@ class CliTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() {
 #if !defined(Q_OS_MACOS)
-    qputenv("QT_QPA_PLATFORM", "offscreen");
+    if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM") &&
+        !qEnvironmentVariableIsSet("DISPLAY") &&
+        !qEnvironmentVariableIsSet("WAYLAND_DISPLAY")) {
+      qputenv("QT_QPA_PLATFORM", "offscreen");
+    }
 #endif
     if (QCoreApplication::instance() == nullptr) {
       static int argc = 1;

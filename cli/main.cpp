@@ -109,7 +109,11 @@ int main(int argc, char* argv[]) {
   // QOffscreenSurface without showing a window.
   qunsetenv("QT_QPA_PLATFORM");
 #else
-  qputenv("QT_QPA_PLATFORM", "offscreen");
+  if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM") &&
+      !qEnvironmentVariableIsSet("DISPLAY") &&
+      !qEnvironmentVariableIsSet("WAYLAND_DISPLAY")) {
+    qputenv("QT_QPA_PLATFORM", "offscreen");
+  }
 #endif
   QGuiApplication app(argc, argv);
 
@@ -416,7 +420,7 @@ int main(int argc, char* argv[]) {
   }
 
   QOffscreenSurface surface;
-  surface.setFormat(format);
+  surface.setFormat(context.format());
   surface.create();
   if (!surface.isValid()) {
     std::cerr << "Failed to create offscreen surface" << std::endl;
