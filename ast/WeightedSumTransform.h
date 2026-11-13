@@ -1,6 +1,12 @@
 #ifndef CHAOSKIT_AST_WEIGHTEDSUMTRANSFORM_H
 #define CHAOSKIT_AST_WEIGHTEDSUMTRANSFORM_H
 
+#include <cassert>
+#include <initializer_list>
+#include <iterator>
+#include <utility>
+#include <vector>
+
 #include "BaseMultiTransform.h"
 #include "TransformWithWeight.h"
 
@@ -8,11 +14,7 @@ namespace chaoskit::ast {
 
 class WeightedSumTransform : public BaseMultiTransform {
  public:
-  using BaseMultiTransform::BaseMultiTransform;
-
   WeightedSumTransform() = default;
-
-  WeightedSumTransform(std::vector<Transform> transforms) = delete;
 
   WeightedSumTransform(const std::vector<Transform>& transforms,
                        std::vector<double> weights)

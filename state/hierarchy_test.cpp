@@ -214,26 +214,11 @@ class MockFn {
   template <typename T>
   void operator()(T) {}
 
-  template <>
-  void operator()(One*) {
-    callOne();
-  }
-  template <>
-  void operator()(HasOne*) {
-    callHasOne();
-  }
-  template <>
-  void operator()(HasMany*) {
-    callHasMany();
-  }
-  template <>
-  void operator()(Two*) {
-    callTwo();
-  }
-  template <>
-  void operator()(Top*) {
-    callTop();
-  }
+  void operator()(One*) { callOne(); }
+  void operator()(HasOne*) { callHasOne(); }
+  void operator()(HasMany*) { callHasMany(); }
+  void operator()(Two*) { callTwo(); }
+  void operator()(Top*) { callTop(); }
 };
 
 TEST_F(HierarchyTest, ForEachWorksForOneChild) {

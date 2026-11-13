@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 #include <QSignalSpy>
+#include <memory>
 #include "ModelFactory.h"
 #include "SystemModel.h"
 #include "core/SystemParticle.h"

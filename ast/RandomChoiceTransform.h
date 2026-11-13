@@ -1,7 +1,11 @@
 #ifndef CHAOSKIT_AST_RANDOMCHOICETRANSFORM_H
 #define CHAOSKIT_AST_RANDOMCHOICETRANSFORM_H
 
+#include <cassert>
+#include <initializer_list>
+#include <iterator>
 #include <utility>
+#include <vector>
 
 #include "BaseMultiTransform.h"
 #include "TransformWithWeight.h"
@@ -10,11 +14,7 @@ namespace chaoskit::ast {
 
 class RandomChoiceTransform : public BaseMultiTransform {
  public:
-  using BaseMultiTransform::BaseMultiTransform;
-
   RandomChoiceTransform() = default;
-
-  RandomChoiceTransform(std::vector<Transform> transforms) = delete;
 
   RandomChoiceTransform(const std::vector<Transform>& transforms,
                         std::vector<double> weights)

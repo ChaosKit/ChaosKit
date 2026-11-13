@@ -4,6 +4,7 @@
 #include <QOpenGLFramebufferObjectFormat>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <string>
 #include <vector>
 #include "GLToneMapper.h"
 #include "core/Renderer.h"

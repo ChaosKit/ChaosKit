@@ -1,6 +1,11 @@
 #ifndef CHAOSKIT_AST_BASEMULTITRANSFORM_H
 #define CHAOSKIT_AST_BASEMULTITRANSFORM_H
 
+#include <cstddef>
+#include <initializer_list>
+#include <utility>
+#include <vector>
+
 #include "Transform.h"
 
 namespace chaoskit::ast {
