@@ -2,6 +2,7 @@
 #include <QRandomGenerator64>
 #include <algorithm>
 #include <magic_enum.hpp>
+#include <random>
 #include "library/util.h"
 
 namespace chaoskit::ui {

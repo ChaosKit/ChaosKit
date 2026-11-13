@@ -1,5 +1,6 @@
 #include "GathererTask.h"
 #include <QRectF>
+#include <cstddef>
 
 namespace chaoskit::ui {
 

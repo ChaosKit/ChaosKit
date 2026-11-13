@@ -1,5 +1,8 @@
 #include <gmock/gmock.h>
 #include <cmath>
+#include <memory>
+#include <utility>
+#include <vector>
 
 #include "ExpressionInterpreter.h"
 #include "SystemParticle.h"
@@ -151,7 +154,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretSqrt) {
 
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::SQRT, GetParam()), state),
-              testing::NanSensitiveFloatEq(sqrt(GetParam())));
+              testing::NanSensitiveFloatEq(std::sqrt(GetParam())));
 }
 
 TEST_P(UnaryFnInterpreterTest, InterpretAtan) {
@@ -160,7 +163,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretAtan) {
 
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::ATAN, GetParam()), state),
-              testing::FloatEq(atan(GetParam())));
+              testing::FloatEq(std::atan(GetParam())));
 }
 
 TEST_P(UnaryFnInterpreterTest, InterpretTrunc) {
@@ -169,7 +172,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretTrunc) {
 
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::TRUNC, GetParam()), state),
-              testing::FloatEq(trunc(GetParam())));
+              testing::FloatEq(std::trunc(GetParam())));
 }
 
 TEST_P(UnaryFnInterpreterTest, InterpretExp) {
@@ -178,7 +181,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretExp) {
 
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::EXP, GetParam()), state),
-              testing::FloatEq(exp(GetParam())));
+              testing::FloatEq(std::exp(GetParam())));
 }
 
 TEST_P(UnaryFnInterpreterTest, InterpretFloor) {
@@ -187,7 +190,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretFloor) {
 
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::FLOOR, GetParam()), state),
-              testing::FloatEq(floor(GetParam())));
+              testing::FloatEq(std::floor(GetParam())));
 }
 
 TEST_P(UnaryFnInterpreterTest, InterpretCeil) {
@@ -196,7 +199,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretCeil) {
 
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::CEIL, GetParam()), state),
-              testing::FloatEq(ceil(GetParam())));
+              testing::FloatEq(std::ceil(GetParam())));
 }
 
 TEST_P(UnaryFnInterpreterTest, InterpretSignum) {
@@ -215,7 +218,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretAbs) {
 
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::ABS, GetParam()), state),
-              testing::FloatEq(abs(GetParam())));
+              testing::FloatEq(std::abs(GetParam())));
 }
 
 TEST_P(UnaryFnInterpreterTest, InterpretNot) {
@@ -234,7 +237,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretFrac) {
   float unused;
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::FRAC, GetParam()), state),
-              testing::FloatEq(modf(GetParam(), &unused)));
+              testing::FloatEq(std::modf(GetParam(), &unused)));
 }
 
 TEST_P(UnaryFnInterpreterTest, InterpretSinh) {
@@ -243,7 +246,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretSinh) {
 
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::SINH, GetParam()), state),
-              testing::FloatEq(sinh(GetParam())));
+              testing::FloatEq(std::sinh(GetParam())));
 }
 
 TEST_P(UnaryFnInterpreterTest, InterpretCosh) {
@@ -252,7 +255,7 @@ TEST_P(UnaryFnInterpreterTest, InterpretCosh) {
 
   ASSERT_THAT(interpreter.interpret(
                   UnaryFunction(UnaryFunction::COSH, GetParam()), state),
-              testing::FloatEq(cosh(GetParam())));
+              testing::FloatEq(std::cosh(GetParam())));
 }
 
 class BinaryFnInterpreterTest
@@ -313,7 +316,7 @@ TEST_P(BinaryFnInterpreterTest, InterpretPower) {
   auto [first, second] = GetParam();
   ASSERT_THAT(interpreter.interpret(
                   BinaryFunction(BinaryFunction::POWER, first, second), state),
-              testing::FloatEq(pow(first, second)));
+              testing::FloatEq(std::pow(first, second)));
 }
 
 TEST_P(BinaryFnInterpreterTest, InterpretModulo) {
@@ -323,7 +326,7 @@ TEST_P(BinaryFnInterpreterTest, InterpretModulo) {
   auto [first, second] = GetParam();
   ASSERT_THAT(interpreter.interpret(
                   BinaryFunction(BinaryFunction::MODULO, first, second), state),
-              testing::FloatEq(fmod(first, second)));
+              testing::FloatEq(std::fmod(first, second)));
 }
 
 TEST_P(BinaryFnInterpreterTest, InterpretAnd) {
@@ -407,7 +410,7 @@ TEST_P(BinaryFnInterpreterTest, InterpretDistance) {
   State state;
 
   auto [first, second] = GetParam();
-  float expected = abs(first - second);
+  float expected = std::abs(first - second);
   ASSERT_THAT(
       interpreter.interpret(
           BinaryFunction(BinaryFunction::DISTANCE, first, second), state),
@@ -421,7 +424,7 @@ TEST_P(BinaryFnInterpreterTest, InterpretAtan2) {
   auto [first, second] = GetParam();
   ASSERT_THAT(interpreter.interpret(
                   BinaryFunction(BinaryFunction::ATAN2, first, second), state),
-              testing::FloatEq(atan2(first, second)));
+              testing::FloatEq(std::atan2(first, second)));
 }
 
 }  // namespace chaoskit::core

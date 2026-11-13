@@ -1,6 +1,7 @@
 #include "Store.h"
 
 #include <gmock/gmock.h>
+#include <cstddef>
 
 #include "Id.h"
 

@@ -1,4 +1,6 @@
 #include <gmock/gmock.h>
+#include <cmath>
+#include <memory>
 
 #include "TransformInterpreter.h"
 #include "ast/helpers.h"

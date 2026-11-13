@@ -2,6 +2,9 @@
 #define CHAOSKIT_UI_COLORMAPREGISTRY_H
 
 #include <QObject>
+#include <QStringList>
+#include <memory>
+#include <string>
 #include "core/ColorMapRegistry.h"
 #include "ui/ColorMap.h"
 

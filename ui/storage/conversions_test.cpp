@@ -1,4 +1,9 @@
 #include <gmock/gmock.h>
+#include <array>
+#include <initializer_list>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <chaoskit.pb.h>
 #include "ast/transform_debug.h"

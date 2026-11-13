@@ -1,5 +1,7 @@
 #include "ColorMapRegistry.h"
 #include <algorithm>
+#include <iterator>
+#include <utility>
 
 namespace chaoskit::ui {
 

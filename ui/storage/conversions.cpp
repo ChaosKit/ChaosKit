@@ -1,4 +1,5 @@
 #include "conversions.h"
+#include <cstdint>
 #include <magic_enum.hpp>
 #include <string>
 #include <vector>
