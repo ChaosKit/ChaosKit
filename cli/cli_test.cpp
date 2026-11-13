@@ -339,5 +339,169 @@ TEST_F(CliTest, MultiThreadedRenderingWithoutSeedMatchesGoldenImage) {
   EXPECT_LE(rmse, 0.05);
 }
 
+TEST_F(CliTest, ErrorOnInvalidWidthOrHeight) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString outPath = tempDir_.filePath("out.png");
+
+  for (const char* val : {"0", "abc", "-10"}) {
+    RunResult resWidth =
+        runChaoskitRender({inputPath, outPath, "--width", val});
+    EXPECT_NE(resWidth.exitCode, 0) << "Expected failure for --width " << val;
+    EXPECT_THAT(resWidth.stdErr.toStdString(), HasSubstr("width"));
+
+    RunResult resHeight =
+        runChaoskitRender({inputPath, outPath, "--height", val});
+    EXPECT_NE(resHeight.exitCode, 0) << "Expected failure for --height " << val;
+    EXPECT_THAT(resHeight.stdErr.toStdString(), HasSubstr("height"));
+  }
+}
+
+TEST_F(CliTest, ErrorOnNonPositiveGamma) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString outPath = tempDir_.filePath("out.png");
+
+  for (const char* val : {"0", "0.0", "-1.0", "abc"}) {
+    RunResult res = runChaoskitRender({inputPath, outPath, "--gamma", val});
+    EXPECT_NE(res.exitCode, 0) << "Expected failure for --gamma " << val;
+    EXPECT_THAT(res.stdErr.toStdString(), HasSubstr("gamma"));
+  }
+}
+
+TEST_F(CliTest, ErrorOnMalformedExposureOrVibrancy) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString outPath = tempDir_.filePath("out.png");
+
+  RunResult resExp =
+      runChaoskitRender({inputPath, outPath, "--exposure", "abc"});
+  EXPECT_NE(resExp.exitCode, 0);
+  EXPECT_THAT(resExp.stdErr.toStdString(), HasSubstr("exposure"));
+
+  RunResult resVib =
+      runChaoskitRender({inputPath, outPath, "--vibrancy", "abc"});
+  EXPECT_NE(resVib.exitCode, 0);
+  EXPECT_THAT(resVib.stdErr.toStdString(), HasSubstr("vibrancy"));
+}
+
+TEST_F(CliTest, ErrorOnUnregisteredColorMapOverride) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString outPath = tempDir_.filePath("out.png");
+
+  RunResult res =
+      runChaoskitRender({inputPath, outPath, "--color-map", "NonExistentMap"});
+  EXPECT_NE(res.exitCode, 0);
+  EXPECT_THAT(res.stdErr.toStdString(), HasSubstr("NonExistentMap"));
+}
+
+TEST_F(CliTest, OverrideDimensions) {
+  QString inputPath = tempDir_.filePath("dim_test.pbtxt");
+  QFile file(inputPath);
+  bool opened = file.open(QIODevice::WriteOnly | QIODevice::Text);
+  ASSERT_TRUE(opened);
+  file.write("width: 64\nheight: 64\n");
+  file.close();
+
+  QString outPath = tempDir_.filePath("out_dim.png");
+
+  RunResult res = runChaoskitRender({inputPath, outPath, "--width", "512",
+                                     "--height", "256", "--seed", "42"});
+  EXPECT_EQ(res.exitCode, 0);
+
+  QImage image(outPath);
+  ASSERT_FALSE(image.isNull());
+  EXPECT_EQ(image.width(), 512);
+  EXPECT_EQ(image.height(), 256);
+}
+
+TEST_F(CliTest, OverrideToneMappingParameters) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString basePath = tempDir_.filePath("base.png");
+  QString gammaPath = tempDir_.filePath("gamma.png");
+  QString exposurePath = tempDir_.filePath("exposure.png");
+  QString vibrancyPath = tempDir_.filePath("vibrancy.png");
+
+  RunResult resBase = runChaoskitRender({inputPath, basePath, "--seed", "42"});
+  ASSERT_EQ(resBase.exitCode, 0);
+  QImage baseImg(basePath);
+  ASSERT_FALSE(baseImg.isNull());
+
+  // Test --gamma override
+  RunResult resGamma = runChaoskitRender(
+      {inputPath, gammaPath, "--seed", "42", "--gamma", "1.0"});
+  ASSERT_EQ(resGamma.exitCode, 0);
+  QImage gammaImg(gammaPath);
+  ASSERT_FALSE(gammaImg.isNull());
+  EXPECT_GT(calculateNormalizedRmse(baseImg, gammaImg, nullptr), 0.01);
+
+  // Test --exposure override
+  RunResult resExp = runChaoskitRender(
+      {inputPath, exposurePath, "--seed", "42", "--exposure", "2.0"});
+  ASSERT_EQ(resExp.exitCode, 0);
+  QImage expImg(exposurePath);
+  ASSERT_FALSE(expImg.isNull());
+  EXPECT_GT(calculateNormalizedRmse(baseImg, expImg, nullptr), 0.01);
+
+  // Test --vibrancy override
+  RunResult resVib = runChaoskitRender(
+      {inputPath, vibrancyPath, "--seed", "42", "--vibrancy", "1.0"});
+  ASSERT_EQ(resVib.exitCode, 0);
+  QImage vibImg(vibrancyPath);
+  ASSERT_FALSE(vibImg.isNull());
+  EXPECT_GT(calculateNormalizedRmse(baseImg, vibImg, nullptr), 0.01);
+}
+
+TEST_F(CliTest, OverrideColorMap) {
+  // Create a project without color_map specified (defaults to BGR)
+  QString bgrProjectPath = tempDir_.filePath("default_bgr.pbtxt");
+  QFile bgrFile(bgrProjectPath);
+  bool bgrOpened = bgrFile.open(QIODevice::WriteOnly | QIODevice::Text);
+  ASSERT_TRUE(bgrOpened);
+  bgrFile.write(R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+system {
+  min_lifetime: 1
+  max_lifetime: 10
+  blends {
+    enabled: true
+    weight: 1.0
+    formulas {
+      type: "DeJong"
+      params: -1.9292302
+      params: -1.7559409
+      params: -1.8413773
+      params: -1.9726439
+      weight {
+        x: 1.0
+      }
+    }
+    coloring_method {
+      single_color: 0.5
+    }
+  }
+}
+)");
+  bgrFile.close();
+
+  QString bgrOut = tempDir_.filePath("bgr.png");
+  QString rainbowOut = tempDir_.filePath("rainbow.png");
+
+  RunResult resBgr =
+      runChaoskitRender({bgrProjectPath, bgrOut, "--seed", "42"});
+  ASSERT_EQ(resBgr.exitCode, 0);
+  QImage bgrImg(bgrOut);
+  ASSERT_FALSE(bgrImg.isNull());
+
+  RunResult resRainbow = runChaoskitRender(
+      {bgrProjectPath, rainbowOut, "--seed", "42", "--color-map", "Rainbow"});
+  ASSERT_EQ(resRainbow.exitCode, 0);
+  QImage rainbowImg(rainbowOut);
+  ASSERT_FALSE(rainbowImg.isNull());
+
+  EXPECT_GT(calculateNormalizedRmse(bgrImg, rainbowImg, nullptr), 0.05);
+}
+
 }  // namespace
 }  // namespace chaoskit::cli

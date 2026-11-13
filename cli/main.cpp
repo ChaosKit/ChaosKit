@@ -11,6 +11,7 @@
 #include <QOpenGLFunctions>
 #include <QSurfaceFormat>
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -100,13 +101,40 @@ int main(int argc, char* argv[]) {
       "iterations", "Exact total plotted step budget", "count");
   parser.addOption(iterationsOption);
 
+  QCommandLineOption widthOption(
+      "width", "Override image width in pixels (must be > 0)", "uint");
+  parser.addOption(widthOption);
+
+  QCommandLineOption heightOption(
+      "height", "Override image height in pixels (must be > 0)", "uint");
+  parser.addOption(heightOption);
+
+  QCommandLineOption gammaOption(
+      "gamma", "Override gamma correction factor (must be > 0)", "float");
+  parser.addOption(gammaOption);
+
+  QCommandLineOption exposureOption("exposure", "Override exposure adjustment",
+                                    "float");
+  parser.addOption(exposureOption);
+
+  QCommandLineOption vibrancyOption(
+      "vibrancy", "Override color vibrancy adjustment", "float");
+  parser.addOption(vibrancyOption);
+
+  QCommandLineOption colorMapOption("color-map", "Override color map by name",
+                                    "name");
+  parser.addOption(colorMapOption);
+
   parser.process(app);
 
   const QStringList positionalArgs = parser.positionalArguments();
   if (positionalArgs.size() != 2) {
     std::cerr << "Usage: chaoskit-render <input-project> <output-image> "
                  "[--seed <uint64>] [--threads <count>] "
-                 "[--ipp <count>] [--iterations <count>]"
+                 "[--ipp <count>] [--iterations <count>] "
+                 "[--width <uint>] [--height <uint>] "
+                 "[--gamma <float>] [--exposure <float>] [--vibrancy <float>] "
+                 "[--color-map <name>]"
               << std::endl;
     return 1;
   }
@@ -193,8 +221,67 @@ int main(int argc, char* argv[]) {
   float exposure = project.exposure();
   float vibrancy = project.vibrancy();
 
+  // CLI overrides
+  if (parser.isSet(widthOption)) {
+    bool ok = false;
+    uint32_t val = parser.value(widthOption).toUInt(&ok);
+    if (!ok || val == 0) {
+      std::cerr << "Invalid width: " << parser.value(widthOption).toStdString()
+                << std::endl;
+      return 1;
+    }
+    width = val;
+  }
+
+  if (parser.isSet(heightOption)) {
+    bool ok = false;
+    uint32_t val = parser.value(heightOption).toUInt(&ok);
+    if (!ok || val == 0) {
+      std::cerr << "Invalid height: "
+                << parser.value(heightOption).toStdString() << std::endl;
+      return 1;
+    }
+    height = val;
+  }
+
+  if (parser.isSet(gammaOption)) {
+    bool ok = false;
+    float val = parser.value(gammaOption).toFloat(&ok);
+    if (!ok || !std::isfinite(val) || val <= 0.0f) {
+      std::cerr << "Invalid gamma: " << parser.value(gammaOption).toStdString()
+                << std::endl;
+      return 1;
+    }
+    gamma = val;
+  }
+
+  if (parser.isSet(exposureOption)) {
+    bool ok = false;
+    float val = parser.value(exposureOption).toFloat(&ok);
+    if (!ok || !std::isfinite(val)) {
+      std::cerr << "Invalid exposure: "
+                << parser.value(exposureOption).toStdString() << std::endl;
+      return 1;
+    }
+    exposure = val;
+  }
+
+  if (parser.isSet(vibrancyOption)) {
+    bool ok = false;
+    float val = parser.value(vibrancyOption).toFloat(&ok);
+    if (!ok || !std::isfinite(val)) {
+      std::cerr << "Invalid vibrancy: "
+                << parser.value(vibrancyOption).toStdString() << std::endl;
+      return 1;
+    }
+    vibrancy = val;
+  }
+
   core::ColorMapRegistry colorMapRegistry;
   std::string colorMapName = project.color_map().name();
+  if (parser.isSet(colorMapOption)) {
+    colorMapName = parser.value(colorMapOption).toStdString();
+  }
   if (colorMapName.empty()) {
     colorMapName = colorMapRegistry.defaultName();
   }
