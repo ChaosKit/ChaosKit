@@ -33,7 +33,7 @@ target_link_libraries(
          qt_qml_models
   PRIVATE magic_enum)
 
-add_executable(ui_models_test SystemModelTest.cpp)
+add_executable(ui_models_test ColorMapRegistryTest.cpp SystemModelTest.cpp)
 set_target_properties(ui_models_test PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_models_test PRIVATE gmock gmock_main ui_models
                                              Qt::Core Qt::Test)
