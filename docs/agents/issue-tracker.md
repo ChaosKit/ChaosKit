@@ -59,3 +59,17 @@ Create an issue via `br create --actor "$ACTOR" ...`.
 ## When a skill says "fetch the relevant ticket"
 
 Read it via `br show <id> --json`.
+
+## Triage & Graph Queries (`bv`)
+
+`bv` analyzes `.beads/issues.jsonl` for graph-aware triage (rankings, blockers, execution tracks); `br` owns creating, claiming, modifying, closing, and flushing issues (`br sync --flush-only` refreshes `.beads/issues.jsonl` after mutations).
+
+**CRITICAL: Always pass `--robot-*` flags. Bare `bv` launches an interactive TUI that blocks the session.**
+
+- **Triage summary**: `bv --robot-triage` (ranked recommendations, quick wins, blockers to clear, project health)
+- **Top pick**: `bv --robot-next` (single highest-impact item + claim command)
+- **Parallel tracks**: `bv --robot-plan` (supports `--label <label>` and `--recipe actionable`)
+- **Graph metrics & hygiene**: `bv --robot-insights`, `bv --robot-priority`, `bv --robot-alerts`, `bv --robot-suggest`
+- **History & graph export**: `bv --robot-diff --diff-since <ref>`, `bv --robot-graph [--graph-format=json|dot|mermaid]`
+
+Because `bv` reads a snapshot and does not reserve work, verify live issue state with `br show <id> --json` before claiming via `br update --actor "$ACTOR" <id> --status in_progress --claim`.

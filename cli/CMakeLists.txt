@@ -22,3 +22,4 @@ target_link_libraries(cli_test PRIVATE gmock gmock_main Qt::Core Qt::Gui
                                        ui_storage_proto)
 
 add_test(NAME cli_test COMMAND cli_test)
+set_tests_properties(cli_test PROPERTIES LABELS "gpu")
