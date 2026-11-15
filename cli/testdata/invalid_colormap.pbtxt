@@ -1,0 +1,11 @@
+width: 64
+height: 64
+color_map {
+  name: "NonExistentColorMap"
+}
+system {
+  blends {
+    enabled: true
+    weight: 1.0
+  }
+}

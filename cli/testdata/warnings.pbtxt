@@ -1,0 +1,19 @@
+width: 64
+height: 64
+system {
+  min_lifetime: -5
+  max_lifetime: 10
+  isolated_blend {
+    index: 0
+  }
+  blends {
+    enabled: true
+    weight: 1.0
+    formulas {
+      type: "NonExistentFormulaType"
+      weight {
+        x: 1.0
+      }
+    }
+  }
+}

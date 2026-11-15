@@ -1,0 +1,57 @@
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map {
+  name: "Rainbow"
+}
+system {
+  min_lifetime: 1
+  max_lifetime: 10
+  blends {
+    enabled: true
+    weight: 1.0
+    formulas {
+      type: "DeJong"
+      params: -1.9292302
+      params: -1.7559409
+      params: -1.8413773
+      params: -1.9726439
+      weight {
+        x: 1.0
+      }
+    }
+    coloring_method {
+      single_color: 0.2
+    }
+  }
+  blends {
+    enabled: true
+    weight: 0.5
+    formulas {
+      type: "Linear"
+      weight {
+        x: 1.0
+        y: 1.0
+      }
+    }
+    coloring_method {
+      single_color: 0.8
+    }
+  }
+  camera {
+    enabled: true
+    formulas {
+      type: "Linear"
+      weight {
+        x: 1.0
+        y: 1.0
+      }
+    }
+    pre {
+      m11: 1.0
+      m22: 1.0
+    }
+  }
+}

@@ -19,6 +19,7 @@ add_subdirectory(core)
 add_subdirectory(state)
 add_subdirectory(library)
 add_subdirectory(ui)
+add_subdirectory(cli)
 
 add_executable(benchmark benchmark.cpp)
 target_link_libraries(benchmark PRIVATE ast core pcg_random)
