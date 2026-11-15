@@ -55,5 +55,16 @@ _Avoid_: Palette, Gradient
 **Histogram**:
 A 2D accumulation grid of RGBA color sums and hit counts produced by plotting particles over time.
 
+**Accumulation**:
+The stage that steps particles through a system and optional camera, maps their color coordinates through the color map, and sums the resulting colors and hit counts into the histogram.
+_Avoid_: Gathering, Blending, Generation
+
+**Iterations Per Pixel**:
+A resolution-independent measure of accumulation density defined as total plotted particle iterations divided by image pixel count.
+_Avoid_: Samples Per Pixel, Quality
+
 **Tone Mapping**:
 The post-processing stage that converts accumulated histogram densities and colors into a displayable image using logarithmic scaling, exposure, gamma, and vibrancy.
+
+**Rendering**:
+The end-to-end process of producing a displayable image from a project, comprising accumulation followed by tone mapping.
