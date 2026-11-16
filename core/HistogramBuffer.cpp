@@ -8,8 +8,7 @@ void HistogramBuffer::clear() {
 }
 
 void HistogramBuffer::resize(size_t width, size_t height) {
-  clear();
-  buffer_.resize(width * height);
+  buffer_.assign(width * height, Color::zero());
   width_ = width;
   height_ = height;
 }

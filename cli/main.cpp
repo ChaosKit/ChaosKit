@@ -25,27 +25,18 @@
 
 #include "SeededRng.h"
 #include "chaoskit.pb.h"
-#include "core/CameraSystemProcessor.h"
+#include "core/ColorMap.h"
 #include "core/ColorMapRegistry.h"
-#include "core/Renderer.h"
+#include "core/CpuAccumulator.h"
+#include "core/Rng.h"
 #include "core/ThreadLocalRng.h"
 #include "core/errors.h"
 #include "ui/GLToneMapper.h"
-#include "ui/GathererTask.h"
 #include "ui/storage/conversions.h"
 
 using namespace chaoskit;
 
 namespace {
-
-class BufferExtractAdapter : public core::Renderer {
- public:
-  void updateHistogramBuffer(const core::HistogramBuffer& buffer) override {
-    buffer_ = buffer;
-  }
-
-  core::HistogramBuffer buffer_;
-};
 
 bool parsePositiveInt64(const QString& str, int64_t* out) {
   QString trimmed = str.trimmed();
@@ -79,25 +70,6 @@ bool parseFloat(const QString& value, const QString& flagName, float& out,
   }
   out = val;
   return true;
-}
-
-void stepParticles(uint64_t budget, core::CameraSystemProcessor& processor,
-                   const core::ColorMap* colorMap, uint32_t width,
-                   uint32_t height, core::HistogramBuffer& bufferOut) {
-  ui::GathererTask gatherer;
-  gatherer.setSize(QSize(static_cast<int>(width), static_cast<int>(height)));
-  gatherer.setColorMap(colorMap);
-
-  auto particle = processor.createParticle();
-  for (uint64_t step = 0; step < budget; ++step) {
-    particle = processor.process(particle);
-    auto output = processor.processCamera(particle);
-    gatherer.addPoint(output.point, output.color);
-  }
-
-  BufferExtractAdapter adapter;
-  gatherer.synchronizeResult(&adapter);
-  bufferOut = std::move(adapter.buffer_);
 }
 
 }  // namespace
@@ -360,35 +332,35 @@ int main(int argc, char* argv[]) {
     totalBudget = ipp * static_cast<uint64_t>(width) * height;
   }
 
-  // Particle stepping & gathering
-  core::HistogramBuffer combinedBuffer(width, height);
-  combinedBuffer.clear();
+  // Particle stepping & gathering via shared Qt-free CpuAccumulator
+  std::shared_ptr<core::Rng> singleRng =
+      rng ? rng : std::make_shared<core::ThreadLocalRng>();
+  core::CpuAccumulator accumulator(cameraSystem, width, height, colorMap,
+                                   singleRng);
 
-  if (parser.isSet(seedOption)) {
-    core::CameraSystemProcessor processor(cameraSystem, rng);
-    stepParticles(totalBudget, processor, colorMap, width, height,
-                  combinedBuffer);
-  } else if (threads == 1) {
-    core::CameraSystemProcessor processor(
-        cameraSystem, std::make_shared<core::ThreadLocalRng>());
-    stepParticles(totalBudget, processor, colorMap, width, height,
-                  combinedBuffer);
+  if (parser.isSet(seedOption) || threads == 1) {
+    accumulator.accumulatePlotted(totalBudget);
   } else {
-    size_t threadCount = threads;
-    std::vector<core::HistogramBuffer> threadBuffers(threadCount);
+    const size_t threadCount = threads;
+    std::vector<std::unique_ptr<core::CpuAccumulator>> workerAccumulators;
+    workerAccumulators.reserve(threadCount);
+    for (size_t i = 0; i < threadCount; ++i) {
+      workerAccumulators.push_back(std::make_unique<core::CpuAccumulator>(
+          cameraSystem, width, height, colorMap,
+          std::make_shared<core::ThreadLocalRng>()));
+    }
+
     std::vector<std::thread> workerThreads;
     workerThreads.reserve(threadCount);
 
-    uint64_t share = totalBudget / threadCount;
-    uint64_t remainder = totalBudget % threadCount;
+    const uint64_t share = totalBudget / threadCount;
+    const uint64_t remainder = totalBudget % threadCount;
 
     for (size_t i = 0; i < threadCount; ++i) {
-      uint64_t threadBudget = share + (i < remainder ? 1 : 0);
-      workerThreads.emplace_back([&, i, threadBudget]() {
-        core::CameraSystemProcessor processor(
-            cameraSystem, std::make_shared<core::ThreadLocalRng>());
-        stepParticles(threadBudget, processor, colorMap, width, height,
-                      threadBuffers[i]);
+      const uint64_t threadBudget = share + (i < remainder ? 1 : 0);
+      auto* workerAcc = workerAccumulators[i].get();
+      workerThreads.emplace_back([workerAcc, threadBudget]() {
+        workerAcc->accumulatePlotted(threadBudget);
       });
     }
 
@@ -396,12 +368,8 @@ int main(int argc, char* argv[]) {
       workerThreads[i].join();
     }
 
-    auto* dst = combinedBuffer.data();
-    for (const auto& tb : threadBuffers) {
-      const auto* src = tb.data();
-      for (size_t idx = 0; idx < combinedBuffer.size(); ++idx) {
-        dst[idx] += src[idx];
-      }
+    for (const auto& workerAcc : workerAccumulators) {
+      accumulator.merge(*workerAcc);
     }
   }
 
@@ -449,7 +417,7 @@ int main(int argc, char* argv[]) {
   toneMapper.setExposure(exposure);
   toneMapper.setVibrancy(vibrancy);
 
-  toneMapper.syncBuffer(combinedBuffer);
+  toneMapper.syncBuffer(accumulator.histogram());
 
   toneMapper.map();
 

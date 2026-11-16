@@ -18,8 +18,6 @@
 #include "ColorMapPreviewProvider.h"
 #include "EngineManager.h"
 #include "FormulaPreviewProvider.h"
-#include "HistogramBuffer.h"
-#include "Point.h"
 #include "SystemView.h"
 #include "Utilities.h"
 #include "chaoskit.pb.h"
@@ -29,8 +27,6 @@
 #include "resources.h"
 
 using chaoskit::core::ColorMap;
-using chaoskit::core::HistogramBuffer;
-using chaoskit::core::Point;
 using chaoskit::library::FormulaType;
 using chaoskit::ui::ColorMapPreviewProvider;
 using chaoskit::ui::ColorMapRegistry;
@@ -110,8 +106,6 @@ int main(int argc, char* argv[]) {
 
   // Register types
   qRegisterMetaType<ColorMap*>();
-  qRegisterMetaType<HistogramBuffer>();
-  qRegisterMetaType<Point>();
 
   // Set up color maps
   auto* colorMapRegistry = new ColorMapRegistry(&app);

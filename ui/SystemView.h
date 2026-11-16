@@ -2,8 +2,9 @@
 #define CHAOSKIT_UI_SYSTEMVIEW_H
 
 #include <QQuickFramebufferObject>
-#include "HistogramGenerator.h"
-#include "models/ColorMapRegistry.h"
+#include <QString>
+#include <QtGlobal>
+#include "CpuAccumulatorDriver.h"
 #include "models/ProjectModel.h"
 
 namespace chaoskit::ui {
@@ -18,13 +19,12 @@ class SystemView : public QQuickFramebufferObject {
 
   [[nodiscard]] Renderer *createRenderer() const override;
 
-  void synchronizeResult(core::Renderer *renderer) const {
-    generator_->synchronizeResult(renderer);
-  }
-
+  [[nodiscard]] CpuAccumulatorDriver *driver() const { return driver_; }
   [[nodiscard]] ProjectModel *model() const { return model_; }
-
-  [[nodiscard]] bool running() const { return generator_->isEnabled(); }
+  [[nodiscard]] bool running() const { return driver_->isRunning(); }
+  [[nodiscard]] quint64 plottedIterations() const {
+    return static_cast<quint64>(driver_->plottedIterations());
+  }
 
  public slots:
   void clear();
@@ -37,7 +37,7 @@ class SystemView : public QQuickFramebufferObject {
   void warningEmitted(const QString &warning);
 
  private:
-  HistogramGenerator *generator_;
+  CpuAccumulatorDriver *driver_;
   ProjectModel *model_ = nullptr;
 
  private slots:

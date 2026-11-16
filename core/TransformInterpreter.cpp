@@ -1,6 +1,8 @@
 #include "TransformInterpreter.h"
 
-#include <numeric>
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <utility>
 
 #include "ExpressionInterpreter.h"
@@ -73,28 +75,45 @@ class TransformVisitor {
       return input_;
     }
 
-    // Calculate the upper bound of weights. std::reduce uses + as the default
-    // operation.
-    double max = std::reduce(transform.weights().begin(),
-                             transform.weights().end(), 0.0);
-
-    // Choose a number smaller between the bounds.
-    double choice = rng_->randomDouble(0, max);
-
-    // Find the right transform and apply it.
-    double sum = 0.f;
-    index_ = index_.firstChild();
-    for (int i = 0; i < transform.size(); ++i) {
-      sum += transform.weights()[i];
-      if (choice <= sum) {
-        Particle output = applyTransform(transform.transforms()[i]);
-        index_ = index_.parent();
-        return output;
+    const auto& weights = transform.weights();
+    const size_t count = transform.size();
+    double total = 0.0;
+    size_t lastPositive = count;
+    for (size_t i = 0; i < count; ++i) {
+      const double w = (std::max)(0.0, weights[i]);
+      if (w > 0.0) {
+        total += w;
+        lastPositive = i;
       }
-      index_ = index_.nextSibling();
     }
 
-    throw std::out_of_range("Random choice went out of range");
+    if (total <= 0.0 || lastPositive == count || !std::isfinite(total)) {
+      return input_;
+    }
+
+    const double choice = rng_->randomDouble(0.0, total);
+
+    double sum = 0.0;
+    size_t selected = lastPositive;
+    for (size_t i = 0; i < count; ++i) {
+      const double w = (std::max)(0.0, weights[i]);
+      if (w <= 0.0) {
+        continue;
+      }
+      sum += w;
+      if (choice <= sum) {
+        selected = i;
+        break;
+      }
+    }
+
+    index_ = index_.firstChild();
+    for (size_t i = 0; i < selected; ++i) {
+      index_ = index_.nextSibling();
+    }
+    Particle output = applyTransform(transform.transforms()[selected]);
+    index_ = index_.parent();
+    return output;
   }
 
   Particle operator()(const ast::WeightedSumTransform& transform) {

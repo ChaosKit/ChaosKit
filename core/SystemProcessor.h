@@ -50,6 +50,10 @@ class SystemProcessor {
   }
 
   [[nodiscard]] SystemParticle createParticle() const;
+  // Executes a single tick on `particle`, reviving it first if expired.
+  // Returns true if this tick produced a finite non-warmup particle to plot;
+  // returns false for warmup ticks or non-finite steps (marking expired).
+  bool step(SystemParticle &particle) const;
   /**
    * Advances the particle through the system.
    * If particle.warmup > 0, executes that many unplotted warm-up iterations
@@ -68,7 +72,7 @@ class SystemProcessor {
   Lifetime lifetime_ = Lifetime();
 
   void reviveParticle(Particle &particle) const;
-  void stepParticle(SystemParticle &particle) const;
+  bool stepParticle(SystemParticle &particle) const;
 };
 
 }  // namespace chaoskit::core

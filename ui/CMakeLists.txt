@@ -13,21 +13,16 @@ add_subdirectory(models)
 add_subdirectory(storage)
 
 # Library that deals with interfacing with the core.
-add_library(
-  ui_core
-  BlenderTask.cpp
-  BlenderTask.h
-  GathererTask.cpp
-  GathererTask.h
-  GLToneMapper.cpp
-  GLToneMapper.h
-  HistogramBuffer.h
-  HistogramGenerator.cpp
-  HistogramGenerator.h
-  Particle.h
-  Point.h)
+add_library(ui_core CpuAccumulatorDriver.cpp CpuAccumulatorDriver.h
+                    GLToneMapper.cpp GLToneMapper.h)
 set_target_properties(ui_core PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_core PUBLIC core Qt::Core Qt::Gui Qt::OpenGL)
+
+add_executable(ui_driver_test CpuAccumulatorDriverTest.cpp)
+set_target_properties(ui_driver_test PROPERTIES AUTOMOC ON)
+target_link_libraries(ui_driver_test PRIVATE gmock gmock_main ui_core Qt::Core
+                                             Qt::Test)
+add_test(NAME ui_driver_test COMMAND ui_driver_test)
 
 # --- Static resource management ---
 
