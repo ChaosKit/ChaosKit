@@ -22,8 +22,12 @@ class RhiToneMapper {
   RhiToneMapper() = default;
   ~RhiToneMapper();
 
+  // Non-copyable and non-movable: owns GPU buffers, textures, and pipeline
+  // handles.
   RhiToneMapper(const RhiToneMapper&) = delete;
   RhiToneMapper& operator=(const RhiToneMapper&) = delete;
+  RhiToneMapper(RhiToneMapper&&) = delete;
+  RhiToneMapper& operator=(RhiToneMapper&&) = delete;
 
   bool initialize(QRhi* rhi, QRhiRenderPassDescriptor* renderPassDesc,
                   int sampleCount = 1, QString* errorMessage = nullptr);
@@ -36,18 +40,22 @@ class RhiToneMapper {
   // Records a histogram upload (if `histogramToUpload != nullptr`), updates the
   // tone-mapping uniform buffer with `100.0 / currentIpp` scaling, and executes
   // the full-screen tone-mapping render pass.
-  void render(QRhiCommandBuffer* cb, QRhiRenderTarget* renderTarget,
-              const core::HistogramBuffer* histogramToUpload,
-              uint64_t plottedIterations,
-              QRhiResourceUpdateBatch* endPassUpdates = nullptr);
+  [[nodiscard]] bool render(QRhiCommandBuffer* cb,
+                            QRhiRenderTarget* renderTarget,
+                            const core::HistogramBuffer* histogramToUpload,
+                            uint64_t plottedIterations,
+                            QRhiResourceUpdateBatch* endPassUpdates = nullptr,
+                            QString* errorMessage = nullptr);
 
   // Executes the full-screen tone-mapping render pass directly from
   // GPU-resident Q40.24 fixed-point HistogramSSBO and 64-bit CounterSSBO
   // buffers without any CPU histogram round-trips.
-  void renderFromSsbo(QRhiCommandBuffer* cb, QRhiRenderTarget* renderTarget,
-                      QRhiBuffer* histogramBuffer, QRhiBuffer* counterBuffer,
-                      const QSize& histogramSize,
-                      QRhiResourceUpdateBatch* endPassUpdates = nullptr);
+  [[nodiscard]] bool renderFromSsbo(
+      QRhiCommandBuffer* cb, QRhiRenderTarget* renderTarget,
+      QRhiBuffer* histogramBuffer, QRhiBuffer* counterBuffer,
+      const QSize& histogramSize,
+      QRhiResourceUpdateBatch* endPassUpdates = nullptr,
+      QString* errorMessage = nullptr);
 
   [[nodiscard]] static QShader bakeSsboVertexShader(
       QString* errorMessage = nullptr);
@@ -63,9 +71,16 @@ class RhiToneMapper {
   bool ensureSsboResources(QRhiRenderPassDescriptor* renderPassDesc,
                            int sampleCount, QRhiBuffer* histogramBuffer,
                            QRhiBuffer* counterBuffer, QString* errorMessage);
-  bool recreateHistogramTexture(const QSize& size);
+  bool recreateHistogramTexture(const QSize& size,
+                                QString* errorMessage = nullptr);
   bool updateHistogramTexture(const core::HistogramBuffer* histogramToUpload,
-                              QRhiResourceUpdateBatch* updates);
+                              QRhiResourceUpdateBatch* updates,
+                              QString* errorMessage = nullptr);
+  void submitQuadPass(QRhiCommandBuffer* cb, QRhiRenderTarget* renderTarget,
+                      QRhiGraphicsPipeline* pipeline,
+                      QRhiShaderResourceBindings* srb,
+                      QRhiResourceUpdateBatch* updates,
+                      QRhiResourceUpdateBatch* endPassUpdates);
 
   QRhi* rhi_ = nullptr;
   QShader vertexShader_;

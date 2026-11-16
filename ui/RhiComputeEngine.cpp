@@ -3,11 +3,13 @@
 #include <QByteArray>
 #include <QSize>
 #include <QString>
+#include <QtGlobal>
 
 #include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <exception>
 #include <limits>
 #include <memory>
@@ -84,95 +86,6 @@ void main() {
 }
 )GLSL";
 
-constexpr char kInitComputeShader[] = R"GLSL(#version 450
-
-layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
-
-struct GpuParticle {
-    vec4 posColor;
-    ivec4 lifeWarmupRng;
-};
-
-layout(std140, binding = 0) uniform InitParams {
-    uint width;
-    uint height;
-    int minLifetime;
-    int maxLifetime;
-    uint particleCount;
-    uint ticksPerInvocation;
-    uint seededMode;
-    uint reserved0;
-    uint seedLo;
-    uint seedHi;
-    uint tickOffsetLo;
-    uint tickOffsetHi;
-    float halfMax;
-    float halfWidth;
-    float halfHeight;
-    float reserved1;
-} u;
-
-layout(std430, binding = 1) buffer ParticleBuffer {
-    GpuParticle particles[];
-} particlePool;
-
-void ck_umul32(uint a, uint b, out uint hi, out uint lo) {
-    uint a0 = a & 0xffffu;
-    uint a1 = a >> 16u;
-    uint b0 = b & 0xffffu;
-    uint b1 = b >> 16u;
-    uint p00 = a0 * b0;
-    uint p01 = a0 * b1;
-    uint p10 = a1 * b0;
-    uint p11 = a1 * b1;
-    uint mid = (p00 >> 16u) + (p01 & 0xffffu) + (p10 & 0xffffu);
-    lo = (p00 & 0xffffu) | ((mid & 0xffffu) << 16u);
-    hi = p11 + (p01 >> 16u) + (p10 >> 16u) + (mid >> 16u);
-}
-
-uvec4 ck_philox4x32(uvec4 ctr, uvec2 key) {
-    for (int r = 0; r < 10; ++r) {
-        uint hi0;
-        uint lo0;
-        uint hi1;
-        uint lo1;
-        ck_umul32(0xd2511f53u, ctr.x, hi0, lo0);
-        ck_umul32(0xcd9e8d57u, ctr.z, hi1, lo1);
-        ctr = uvec4(hi1 ^ ctr.y ^ key.x, lo1, hi0 ^ ctr.w ^ key.y, lo0);
-        key.x += 0x9e3779b9u;
-        key.y += 0xbb67ae85u;
-    }
-    return ctr;
-}
-
-void main() {
-    uint gid = gl_GlobalInvocationID.x;
-    if (gid >= u.particleCount) {
-        return;
-    }
-
-    uvec4 r = ck_philox4x32(
-        uvec4(gid, 0xffffffffu, 0xffffffffu, 0u),
-        uvec2(u.seedLo, u.seedHi));
-
-    float x = (float(r.x >> 8u) * 5.9604644775390625e-8) * 2.0 - 1.0;
-    float y = (float(r.y >> 8u) * 5.9604644775390625e-8) * 2.0 - 1.0;
-    float color = float(r.z >> 8u) * 5.9604644775390625e-8;
-
-    int lifetime = -1;
-    if (u.maxLifetime >= 0) {
-        int minInit = min(u.minLifetime + 1, u.maxLifetime);
-        int span = max(1, u.maxLifetime - minInit + 1);
-        float u01 = float(r.w >> 8u) * 5.9604644775390625e-8;
-        lifetime = minInit + clamp(int(floor(u01 * float(span))), 0, span - 1);
-    }
-
-    particlePool.particles[gid].posColor = vec4(x, y, color, 0.0);
-    particlePool.particles[gid].lifeWarmupRng =
-        ivec4(lifetime, u.minLifetime, 0, 0);
-}
-)GLSL";
-
 uint64_t generateEntropySeed() {
   std::random_device rd;
   const uint64_t lo = static_cast<uint64_t>(rd());
@@ -206,7 +119,17 @@ QByteArray RhiComputeEngine::clearShaderSource() {
 }
 
 QByteArray RhiComputeEngine::initShaderSource() {
-  return QByteArray(kInitComputeShader);
+  return QByteArray::fromStdString(core::GpuSystemCompiler::initShaderSource());
+}
+
+uint64_t RhiComputeEngine::decodePlottedCounter(const QByteArray& counterData) {
+  if (counterData.size() < static_cast<qsizetype>(2 * sizeof(uint32_t))) {
+    return 0;
+  }
+  uint32_t words[2] = {0, 0};
+  std::memcpy(words, counterData.constData(), sizeof(words));
+  return (static_cast<uint64_t>(words[1]) << 32u) |
+         static_cast<uint64_t>(words[0]);
 }
 
 bool RhiComputeEngine::initialize(QRhi* rhi, QString* errorMessage) {

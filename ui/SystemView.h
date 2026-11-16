@@ -22,18 +22,19 @@ class SystemView : public QQuickRhiItem {
   Q_PROPERTY(chaoskit::ui::ProjectModel *model READ model WRITE setModel NOTIFY
                  modelChanged)
   Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
+  Q_PROPERTY(double targetIterationsPerPixel READ targetIterationsPerPixel WRITE
+                 setTargetIterationsPerPixel NOTIFY
+                     targetIterationsPerPixelChanged FINAL)
   Q_PROPERTY(
-      double targetIterationsPerPixel READ targetIterationsPerPixel WRITE
-          setTargetIterationsPerPixel NOTIFY targetIterationsPerPixelChanged)
-  Q_PROPERTY(bool infiniteAccumulation READ infiniteAccumulation WRITE
-                 setInfiniteAccumulation NOTIFY infiniteAccumulationChanged)
+      bool infiniteAccumulation READ infiniteAccumulation WRITE
+          setInfiniteAccumulation NOTIFY infiniteAccumulationChanged FINAL)
   Q_PROPERTY(double currentIterationsPerPixel READ currentIterationsPerPixel
-                 NOTIFY currentIterationsPerPixelChanged)
-  Q_PROPERTY(bool converged READ converged NOTIFY convergedChanged)
+                 NOTIFY currentIterationsPerPixelChanged FINAL)
+  Q_PROPERTY(bool converged READ converged NOTIFY convergedChanged FINAL)
   Q_PROPERTY(quint64 compiledPipelineCount READ compiledPipelineCount NOTIFY
-                 compiledPipelineCountChanged)
+                 compiledPipelineCountChanged FINAL)
   Q_PROPERTY(bool gpuComputeActive READ gpuComputeActive NOTIFY
-                 gpuComputeActiveChanged)
+                 gpuComputeActiveChanged FINAL)
  public:
   explicit SystemView(QQuickItem *parent = nullptr);
 
@@ -82,6 +83,13 @@ class SystemView : public QQuickRhiItem {
   void imageExportSucceeded(const QString &filePath);
   void imageExportFailed(const QString &filePath, const QString &error);
 
+ private slots:
+  void handleBatchCompleted();
+  void handleProjectChanged();
+  void updateColorMap();
+  void updateSystem();
+  void updateBufferSize();
+
  private:
   class HistogramRenderer;
 
@@ -119,13 +127,6 @@ class SystemView : public QQuickRhiItem {
   uint64_t sizeVersion_ = 0;
   uint64_t editGeneration_ = 1;
   std::vector<ExportRequest> pendingExports_;
-
- private slots:
-  void handleBatchCompleted();
-  void handleProjectChanged();
-  void updateColorMap();
-  void updateSystem();
-  void updateBufferSize();
 };
 
 }  // namespace chaoskit::ui

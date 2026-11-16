@@ -20,8 +20,12 @@ class RhiOffscreenContext {
  public:
   ~RhiOffscreenContext();
 
+  // Non-copyable and non-movable: owns GPU/QRhi device and native surface
+  // handles.
   RhiOffscreenContext(const RhiOffscreenContext&) = delete;
   RhiOffscreenContext& operator=(const RhiOffscreenContext&) = delete;
+  RhiOffscreenContext(RhiOffscreenContext&&) = delete;
+  RhiOffscreenContext& operator=(RhiOffscreenContext&&) = delete;
 
   static std::unique_ptr<RhiOffscreenContext> create(
       QString* errorMessage = nullptr);

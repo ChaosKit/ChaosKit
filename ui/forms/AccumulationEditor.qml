@@ -26,8 +26,6 @@ GridLayout {
     text: "Target IPP"
   }
   SpinBox {
-    id: targetIppField
-
     editable: true
     enabled: root.systemView !== null && !root.systemView.infiniteAccumulation
     from: 1
@@ -52,8 +50,6 @@ GridLayout {
     text: "Infinite"
   }
   Switch {
-    id: infiniteSwitch
-
     checked: root.systemView !== null && root.systemView.infiniteAccumulation
     enabled: root.systemView !== null
 
@@ -72,8 +68,6 @@ GridLayout {
     text: "Current IPP"
   }
   Label {
-    id: currentIppLabel
-
     horizontalAlignment: Text.AlignRight
     text: root.systemView !== null
           ? root.systemView.currentIterationsPerPixel.toFixed(1)
@@ -89,8 +83,6 @@ GridLayout {
     text: "Status"
   }
   Label {
-    id: statusLabel
-
     color: root.systemView !== null && root.systemView.converged
            ? Theme.primaryColor
            : Theme.onSurfaceMedium

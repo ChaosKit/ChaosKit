@@ -71,12 +71,13 @@ std::string formatHexUint32(uint32_t value) {
   return std::string(buf);
 }
 
-std::string formatGlslFloat(float value) {
-  if (!std::isfinite(value)) {
-    uint32_t bits = 0;
-    std::memcpy(&bits, &value, sizeof(bits));
-    return "uintBitsToFloat(0x" + formatHexUint32(bits) + "u)";
-  }
+std::string formatNonFiniteGlslFloat(float value) {
+  uint32_t bits = 0;
+  std::memcpy(&bits, &value, sizeof(bits));
+  return "uintBitsToFloat(0x" + formatHexUint32(bits) + "u)";
+}
+
+std::string formatFiniteGlslFloat(float value) {
   char buf[32];
   std::snprintf(buf, sizeof(buf), "%.9g", static_cast<double>(value));
   std::string out(buf);
@@ -88,9 +89,16 @@ std::string formatGlslFloat(float value) {
     out += ".0";
   }
   if (!out.empty() && out.front() == '-') {
-    return "(" + out + ")";
+    out = "(" + out + ")";
   }
   return out;
+}
+
+std::string formatGlslFloat(float value) {
+  if (!std::isfinite(value)) {
+    return formatNonFiniteGlslFloat(value);
+  }
+  return formatFiniteGlslFloat(value);
 }
 
 std::string uniformFloatExpr(uint32_t floatIndex) {
@@ -210,22 +218,20 @@ void appendTransformStructure(const ast::Transform& transform,
 }
 
 struct ParamKey {
-  bool isCamera;
-  TransformIndex index;
-  size_t paramIndex;
+  TransformTarget target;
+  size_t paramIndex = 0;
 
   bool operator==(const ParamKey& other) const {
-    return isCamera == other.isCamera && index == other.index &&
-           paramIndex == other.paramIndex;
+    return target == other.target && paramIndex == other.paramIndex;
   }
 };
 
 struct ParamKeyHash {
   size_t operator()(const ParamKey& key) const noexcept {
-    size_t h = key.index.hash();
+    size_t h = key.target.index.hash();
     h ^= std::hash<size_t>{}(key.paramIndex) + 0x9e3779b9U + (h << 6U) +
          (h >> 2U);
-    if (key.isCamera) {
+    if (key.target.scope == TransformScope::Camera) {
       h ^= 0x517cc1b727220a95ULL;
     }
     return h;
@@ -236,44 +242,40 @@ class ShaderBuilder {
  public:
   explicit ShaderBuilder(UniformLayout& layout) : layout_(layout) {}
 
-  uint32_t allocAffine(bool isCamera, const TransformIndex& index) {
+  uint32_t allocAffine(const TransformTarget& target) {
     const uint32_t offset = layout_.packedFloatCount;
-    layout_.affineSlots.push_back({index, offset, isCamera});
+    layout_.affineSlots.push_back({target, offset});
     layout_.packedFloatCount += 6u;
     return offset;
   }
 
-  uint32_t allocParam(bool isCamera, const TransformIndex& index,
-                      size_t paramIndex) {
-    const ParamKey key{isCamera, index, paramIndex};
+  uint32_t allocParam(const TransformTarget& target, size_t paramIndex) {
+    const ParamKey key{target, paramIndex};
     auto it = paramMap_.find(key);
     if (it != paramMap_.end()) {
       return it->second;
     }
     const uint32_t offset = layout_.packedFloatCount;
-    layout_.paramSlots.push_back({index, paramIndex, offset, isCamera});
+    layout_.paramSlots.push_back({target, paramIndex, offset});
     paramMap_.emplace(key, offset);
     layout_.packedFloatCount += 1u;
     return offset;
   }
 
-  uint32_t allocRandomChoice(bool isCamera, const TransformIndex& index,
+  uint32_t allocRandomChoice(const TransformTarget& target,
                              size_t branchCount) {
     const uint32_t offset = layout_.packedFloatCount;
     if (branchCount > 0) {
-      layout_.randomChoiceSlots.push_back(
-          {index, branchCount, offset, isCamera});
+      layout_.randomChoiceSlots.push_back({target, branchCount, offset});
       layout_.packedFloatCount += static_cast<uint32_t>(branchCount);
     }
     return offset;
   }
 
-  uint32_t allocWeightedSum(bool isCamera, const TransformIndex& index,
-                            size_t branchCount) {
+  uint32_t allocWeightedSum(const TransformTarget& target, size_t branchCount) {
     const uint32_t offset = layout_.packedFloatCount;
     if (branchCount > 0) {
-      layout_.weightedSumSlots.push_back(
-          {index, branchCount, offset, isCamera});
+      layout_.weightedSumSlots.push_back({target, branchCount, offset});
       layout_.packedFloatCount += static_cast<uint32_t>(branchCount);
     }
     return offset;
@@ -285,13 +287,11 @@ class ShaderBuilder {
 
   void emitTransform(std::ostringstream& code, const std::string& indent,
                      const ast::Transform& transform, const std::string& pIn,
-                     const std::string& pOut, const TransformIndex& index,
-                     bool isCamera);
+                     const std::string& pOut, const TransformTarget& target);
 
  private:
   struct ExprContext {
-    const TransformIndex& index;
-    bool isCamera;
+    const TransformTarget& target;
     bool allowOutput;
     const std::string& pIn;
     const std::string& pOut;
@@ -345,8 +345,7 @@ class ShaderBuilder {
     }
 
     std::string operator()(const ast::Parameter& param) const {
-      const uint32_t slot =
-          builder_.allocParam(ctx_.isCamera, ctx_.index, param.index());
+      const uint32_t slot = builder_.allocParam(ctx_.target, param.index());
       return uniformFloatExpr(slot);
     }
 
@@ -499,18 +498,16 @@ class ShaderBuilder {
    public:
     TransformVisitor(ShaderBuilder& builder, std::ostringstream& code,
                      const std::string& indent, const std::string& pIn,
-                     const std::string& varOut, const TransformIndex& index,
-                     bool isCamera)
+                     const std::string& varOut, const TransformTarget& target)
         : builder_(builder),
           code_(code),
           indent_(indent),
           pIn_(pIn),
           varOut_(varOut),
-          index_(index),
-          isCamera_(isCamera) {}
+          target_(target) {}
 
     void operator()(const ast::AffineTransform&) const {
-      const uint32_t base = builder_.allocAffine(isCamera_, index_);
+      const uint32_t base = builder_.allocAffine(target_);
       code_ << indent_ << varOut_ << " = vec3(\n"
             << indent_ << "    " << uniformFloatExpr(base + 0u) << " * " << pIn_
             << ".x + " << uniformFloatExpr(base + 1u) << " * " << pIn_
@@ -524,10 +521,11 @@ class ShaderBuilder {
     void operator()(const ast::Formula& formula) const {
       std::unordered_map<std::string, std::string> variables;
       const std::string emptyOut;
-      const std::string validVar = isCamera_ ? "camValid" : "sysValid";
+      const std::string validVar =
+          target_.scope == TransformScope::Camera ? "camValid" : "sysValid";
       const std::string rngVar = "rng";
-      ExprContext ctx = {index_,   isCamera_, false,  pIn_,
-                         emptyOut, validVar,  rngVar, variables};
+      ExprContext ctx = {target_,  false,  pIn_,     emptyOut,
+                         validVar, rngVar, variables};
 
       for (const auto& decl : formula.variables()) {
         const std::string defExpr =
@@ -554,12 +552,12 @@ class ShaderBuilder {
 
       std::string cur = builder_.nextTemp("msCur");
       code_ << indent_ << "vec3 " << cur << " = " << pIn_ << ";\n";
-      TransformIndex childIndex = index_.firstChild();
+      TransformIndex childIndex = target_.index.firstChild();
       for (const auto& step : children) {
         const std::string stepOut = builder_.nextTemp("msOut");
         code_ << indent_ << "vec3 " << stepOut << ";\n";
-        builder_.emitTransform(code_, indent_, step, cur, stepOut, childIndex,
-                               isCamera_);
+        builder_.emitTransform(code_, indent_, step, cur, stepOut,
+                               TransformTarget{target_.scope, childIndex});
         cur = stepOut;
         childIndex = childIndex.nextSibling();
       }
@@ -573,8 +571,7 @@ class ShaderBuilder {
         return;
       }
 
-      const uint32_t base =
-          builder_.allocRandomChoice(isCamera_, index_, count);
+      const uint32_t base = builder_.allocRandomChoice(target_, count);
       code_ << indent_ << varOut_ << " = " << pIn_ << ";\n";
       code_ << indent_ << "if (";
       for (size_t i = 0; i < count; ++i) {
@@ -591,13 +588,14 @@ class ShaderBuilder {
       const std::string rollVar = builder_.nextTemp("rcRoll");
       code_ << innerIndent << "float " << rollVar << " = ck_rand01(rng);\n";
 
-      TransformIndex childIndex = index_.firstChild();
+      TransformIndex childIndex = target_.index.firstChild();
       for (size_t i = 0; i < count; ++i) {
         code_ << innerIndent << (i == 0 ? "if (" : "else if (") << rollVar
               << " <= " << uniformFloatExpr(base + static_cast<uint32_t>(i))
               << ") {\n";
         builder_.emitTransform(code_, branchIndent, transform.transforms()[i],
-                               pIn_, varOut_, childIndex, isCamera_);
+                               pIn_, varOut_,
+                               TransformTarget{target_.scope, childIndex});
         code_ << innerIndent << "}\n";
         childIndex = childIndex.nextSibling();
       }
@@ -611,16 +609,17 @@ class ShaderBuilder {
         return;
       }
 
-      const uint32_t base = builder_.allocWeightedSum(isCamera_, index_, count);
+      const uint32_t base = builder_.allocWeightedSum(target_, count);
       code_ << indent_ << varOut_ << " = vec3(0.0, 0.0, 0.0);\n";
       const std::string branchIndent = indent_ + "    ";
-      TransformIndex childIndex = index_.firstChild();
+      TransformIndex childIndex = target_.index.firstChild();
       for (size_t i = 0; i < count; ++i) {
         const std::string branchOut = builder_.nextTemp("wsOut");
         code_ << indent_ << "{\n";
         code_ << branchIndent << "vec3 " << branchOut << ";\n";
         builder_.emitTransform(code_, branchIndent, transform.transforms()[i],
-                               pIn_, branchOut, childIndex, isCamera_);
+                               pIn_, branchOut,
+                               TransformTarget{target_.scope, childIndex});
         code_ << branchIndent << varOut_ << " += " << branchOut << " * "
               << uniformFloatExpr(base + static_cast<uint32_t>(i)) << ";\n";
         code_ << indent_ << "}\n";
@@ -634,8 +633,7 @@ class ShaderBuilder {
     const std::string& indent_;
     const std::string& pIn_;
     const std::string& varOut_;
-    const TransformIndex& index_;
-    bool isCamera_;
+    const TransformTarget& target_;
   };
 };
 
@@ -651,12 +649,11 @@ void ShaderBuilder::emitTransform(std::ostringstream& code,
                                   const ast::Transform& transform,
                                   const std::string& pIn,
                                   const std::string& pOut,
-                                  const TransformIndex& index, bool isCamera) {
+                                  const TransformTarget& target) {
   const std::string varOut = nextTemp("vout");
   code << indent << "vec3 " << varOut << ";\n";
-  ast::apply_visitor(
-      TransformVisitor(*this, code, indent, pIn, varOut, index, isCamera),
-      transform.variant());
+  ast::apply_visitor(TransformVisitor(*this, code, indent, pIn, varOut, target),
+                     transform.variant());
 
   const auto* outColor = transform.color().match(
       [](const ast::Output& o) -> const ast::Output* { return &o; },
@@ -667,10 +664,11 @@ void ShaderBuilder::emitTransform(std::ostringstream& code,
   }
 
   const std::unordered_map<std::string, std::string> emptyVars;
-  const std::string validVar = isCamera ? "camValid" : "sysValid";
+  const std::string validVar =
+      target.scope == TransformScope::Camera ? "camValid" : "sysValid";
   const std::string rngVar = "rng";
-  ExprContext colorCtx = {index,  isCamera, true,   pIn,
-                          varOut, validVar, rngVar, emptyVars};
+  ExprContext colorCtx = {target,   true,   pIn,      varOut,
+                          validVar, rngVar, emptyVars};
   const std::string colorExpr =
       emitExpression(code, indent, transform.color(), colorCtx);
   code << indent << pOut << " = vec3(" << varOut << ".x, " << varOut << ".y, "
@@ -679,9 +677,10 @@ void ShaderBuilder::emitTransform(std::ostringstream& code,
 
 class WeightCollector {
  public:
-  WeightCollector(bool isCamera, const UniformLayout& layout, size_t& rcCursor,
-                  size_t& wsCursor, std::vector<float>& packed)
-      : isCamera_(isCamera),
+  WeightCollector(TransformScope scope, const UniformLayout& layout,
+                  size_t& rcCursor, size_t& wsCursor,
+                  std::vector<float>& packed)
+      : scope_(scope),
         layout_(layout),
         rcCursor_(rcCursor),
         wsCursor_(wsCursor),
@@ -706,8 +705,8 @@ class WeightCollector {
                   "UniformLayout RandomChoiceSlot count mismatch");
             }
             const auto& slot = layout_.randomChoiceSlots[rcCursor_++];
-            if (slot.isCamera != isCamera_ || slot.index != index ||
-                slot.branchCount != count) {
+            const TransformTarget expected{scope_, index};
+            if (slot.target != expected || slot.branchCount != count) {
               throw std::invalid_argument(
                   "UniformLayout RandomChoiceSlot mismatch");
             }
@@ -727,8 +726,8 @@ class WeightCollector {
                   "UniformLayout WeightedSumSlot count mismatch");
             }
             const auto& slot = layout_.weightedSumSlots[wsCursor_++];
-            if (slot.isCamera != isCamera_ || slot.index != index ||
-                slot.branchCount != count) {
+            const TransformTarget expected{scope_, index};
+            if (slot.target != expected || slot.branchCount != count) {
               throw std::invalid_argument(
                   "UniformLayout WeightedSumSlot mismatch");
             }
@@ -779,14 +778,14 @@ class WeightCollector {
     }
   }
 
-  bool isCamera_;
+  TransformScope scope_;
   const UniformLayout& layout_;
   size_t& rcCursor_;
   size_t& wsCursor_;
   std::vector<float>& packed_;
 };
 
-constexpr char kShaderPreamble[] = R"GLSL(#version 450
+constexpr char kParticleAndInitHeader[] = R"GLSL(#version 450
 
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
@@ -797,11 +796,97 @@ struct GpuParticle {
 
 )GLSL";
 
-constexpr char kShaderHelpers[] = R"GLSL(
+constexpr char kUniformHeaderFields[] = R"GLSL(    uint width;
+    uint height;
+    int minLifetime;
+    int maxLifetime;
+    uint particleCount;
+    uint ticksPerInvocation;
+    uint seededMode;
+    uint reserved0;
+    uint seedLo;
+    uint seedHi;
+    uint tickOffsetLo;
+    uint tickOffsetHi;
+    float halfMax;
+    float halfWidth;
+    float halfHeight;
+    float reserved1;
+)GLSL";
+
+constexpr char kParticleBufferAndPhilox[] = R"GLSL(
 layout(std430, binding = 1) buffer ParticleBuffer {
     GpuParticle particles[];
 } particlePool;
 
+void ck_umul32(uint a, uint b, out uint hi, out uint lo) {
+    uint a0 = a & 0xffffu;
+    uint a1 = a >> 16u;
+    uint b0 = b & 0xffffu;
+    uint b1 = b >> 16u;
+    uint p00 = a0 * b0;
+    uint p01 = a0 * b1;
+    uint p10 = a1 * b0;
+    uint p11 = a1 * b1;
+    uint mid = (p00 >> 16u) + (p01 & 0xffffu) + (p10 & 0xffffu);
+    lo = (p00 & 0xffffu) | ((mid & 0xffffu) << 16u);
+    hi = p11 + (p01 >> 16u) + (p10 >> 16u) + (mid >> 16u);
+}
+
+uvec4 ck_philox4x32(uvec4 ctr, uvec2 key) {
+    for (int r = 0; r < 10; ++r) {
+        uint hi0;
+        uint lo0;
+        uint hi1;
+        uint lo1;
+        ck_umul32(0xd2511f53u, ctr.x, hi0, lo0);
+        ck_umul32(0xcd9e8d57u, ctr.z, hi1, lo1);
+        ctr = uvec4(hi1 ^ ctr.y ^ key.x, lo1, hi0 ^ ctr.w ^ key.y, lo0);
+        key.x += 0x9e3779b9u;
+        key.y += 0xbb67ae85u;
+    }
+    return ctr;
+}
+)GLSL";
+
+constexpr char kInitComputeMain[] = R"GLSL(
+void main() {
+    uint gid = gl_GlobalInvocationID.x;
+    if (gid >= u.particleCount) {
+        return;
+    }
+
+    uvec4 r = ck_philox4x32(
+        uvec4(gid, 0xffffffffu, 0xffffffffu, 0u),
+        uvec2(u.seedLo, u.seedHi));
+
+    float x = (float(r.x >> 8u) * 5.9604644775390625e-8) * 2.0 - 1.0;
+    float y = (float(r.y >> 8u) * 5.9604644775390625e-8) * 2.0 - 1.0;
+    float color = float(r.z >> 8u) * 5.9604644775390625e-8;
+
+    int lifetime = -1;
+    if (u.maxLifetime >= 0) {
+        int minInit = min(u.minLifetime + 1, u.maxLifetime);
+        int span = max(1, u.maxLifetime - minInit + 1);
+        float u01 = float(r.w >> 8u) * 5.9604644775390625e-8;
+        lifetime = minInit + clamp(int(floor(u01 * float(span))), 0, span - 1);
+    }
+
+    particlePool.particles[gid].posColor = vec4(x, y, color, 0.0);
+    particlePool.particles[gid].lifeWarmupRng =
+        ivec4(lifetime, u.minLifetime, 0, 0);
+}
+)GLSL";
+
+void appendComputeHeader(std::ostringstream& out, const char* uniformBlockName,
+                         const std::string& extraUniformFields) {
+  out << kParticleAndInitHeader;
+  out << "layout(std140, binding = 0) uniform " << uniformBlockName << " {\n"
+      << kUniformHeaderFields << extraUniformFields << "} u;\n";
+  out << kParticleBufferAndPhilox;
+}
+
+constexpr char kShaderHelpers[] = R"GLSL(
 layout(std430, binding = 2) buffer HistogramBuffer {
     uint words[];
 } histogram;
@@ -909,35 +994,6 @@ float ck_pow(float base, float exponent, inout bool valid) {
     return res;
 }
 
-void ck_umul32(uint a, uint b, out uint hi, out uint lo) {
-    uint a0 = a & 0xffffu;
-    uint a1 = a >> 16u;
-    uint b0 = b & 0xffffu;
-    uint b1 = b >> 16u;
-    uint p00 = a0 * b0;
-    uint p01 = a0 * b1;
-    uint p10 = a1 * b0;
-    uint p11 = a1 * b1;
-    uint mid = (p00 >> 16u) + (p01 & 0xffffu) + (p10 & 0xffffu);
-    lo = (p00 & 0xffffu) | ((mid & 0xffffu) << 16u);
-    hi = p11 + (p01 >> 16u) + (p10 >> 16u) + (mid >> 16u);
-}
-
-uvec4 ck_philox4x32(uvec4 ctr, uvec2 key) {
-    for (int r = 0; r < 10; ++r) {
-        uint hi0;
-        uint lo0;
-        uint hi1;
-        uint lo1;
-        ck_umul32(0xd2511f53u, ctr.x, hi0, lo0);
-        ck_umul32(0xcd9e8d57u, ctr.z, hi1, lo1);
-        ctr = uvec4(hi1 ^ ctr.y ^ key.x, lo1, hi0 ^ ctr.w ^ key.y, lo0);
-        key.x += 0x9e3779b9u;
-        key.y += 0xbb67ae85u;
-    }
-    return ctr;
-}
-
 struct CkRng {
     uvec4 ctr;
     uvec2 key;
@@ -1021,12 +1077,13 @@ CompiledGpuSystem GpuSystemCompiler::compile(const CameraSystem& cameraSystem) {
   std::ostringstream cameraCode;
   ShaderBuilder builder(compiled.layout);
 
-  builder.emitTransform(systemCode, "        ", cameraSystem.system.transform,
-                        "sysIn", "sysOut", TransformIndex(), false);
+  builder.emitTransform(
+      systemCode, "        ", cameraSystem.system.transform, "sysIn", "sysOut",
+      TransformTarget{TransformScope::System, TransformIndex()});
   if (cameraSystem.camera) {
-    builder.emitTransform(cameraCode, "        ",
-                          cameraSystem.camera->transform, "camIn", "camOut",
-                          TransformIndex(), true);
+    builder.emitTransform(
+        cameraCode, "        ", cameraSystem.camera->transform, "camIn",
+        "camOut", TransformTarget{TransformScope::Camera, TransformIndex()});
   }
 
   const uint32_t packedVec4Count =
@@ -1035,26 +1092,9 @@ CompiledGpuSystem GpuSystemCompiler::compile(const CameraSystem& cameraSystem) {
   compiled.layout.uniformBufferSize = kHeaderByteSize + packedVec4Count * 16u;
 
   std::ostringstream shader;
-  shader << kShaderPreamble;
-  shader << "layout(std140, binding = 0) uniform SystemParams {\n"
-         << "    uint width;\n"
-         << "    uint height;\n"
-         << "    int minLifetime;\n"
-         << "    int maxLifetime;\n"
-         << "    uint particleCount;\n"
-         << "    uint ticksPerInvocation;\n"
-         << "    uint seededMode;\n"
-         << "    uint reserved0;\n"
-         << "    uint seedLo;\n"
-         << "    uint seedHi;\n"
-         << "    uint tickOffsetLo;\n"
-         << "    uint tickOffsetHi;\n"
-         << "    float halfMax;\n"
-         << "    float halfWidth;\n"
-         << "    float halfHeight;\n"
-         << "    float reserved1;\n"
-         << "    vec4 packedFloats[" << packedVec4Count << "];\n"
-         << "} u;\n\n";
+  appendComputeHeader(
+      shader, "SystemParams",
+      "    vec4 packedFloats[" + std::to_string(packedVec4Count) + "];\n");
   shader << kShaderHelpers << "\n";
 
   shader << R"GLSL(void main() {
@@ -1191,6 +1231,13 @@ CompiledGpuSystem GpuSystemCompiler::compile(const CameraSystem& cameraSystem) {
   return compiled;
 }
 
+std::string GpuSystemCompiler::initShaderSource() {
+  std::ostringstream shader;
+  appendComputeHeader(shader, "InitParams", "");
+  shader << kInitComputeMain;
+  return shader.str();
+}
+
 std::vector<uint8_t> GpuSystemCompiler::packUniforms(
     const UniformLayout& layout, const CameraSystem& cameraSystem,
     const GpuDispatchConfig& config) {
@@ -1225,8 +1272,8 @@ std::vector<uint8_t> GpuSystemCompiler::packUniforms(
 
   std::vector<float> packed(static_cast<size_t>(vec4Count) * 4u, 0.0f);
 
-  const auto paramsFor = [&](bool isCamera) -> const TransformParams& {
-    if (isCamera) {
+  const auto paramsFor = [&](TransformScope scope) -> const TransformParams& {
+    if (scope == TransformScope::Camera) {
       if (!cameraSystem.camera) {
         throw std::invalid_argument(
             "UniformLayout expects camera transform params");
@@ -1237,8 +1284,8 @@ std::vector<uint8_t> GpuSystemCompiler::packUniforms(
   };
 
   for (const auto& slot : layout.affineSlots) {
-    const auto& params = paramsFor(slot.isCamera);
-    auto it = params.find(slot.index);
+    const auto& params = paramsFor(slot.target.scope);
+    auto it = params.find(slot.target.index);
     if (it == params.end() || it->second.size() < 6u) {
       throw MissingParameterError(it == params.end() ? 0 : it->second.size());
     }
@@ -1248,8 +1295,8 @@ std::vector<uint8_t> GpuSystemCompiler::packUniforms(
   }
 
   for (const auto& slot : layout.paramSlots) {
-    const auto& params = paramsFor(slot.isCamera);
-    auto it = params.find(slot.index);
+    const auto& params = paramsFor(slot.target.scope);
+    auto it = params.find(slot.target.index);
     if (it == params.end() || slot.paramIndex >= it->second.size()) {
       throw MissingParameterError(slot.paramIndex);
     }
@@ -1258,10 +1305,12 @@ std::vector<uint8_t> GpuSystemCompiler::packUniforms(
 
   size_t rcCursor = 0;
   size_t wsCursor = 0;
-  WeightCollector sysWeights(false, layout, rcCursor, wsCursor, packed);
+  WeightCollector sysWeights(TransformScope::System, layout, rcCursor, wsCursor,
+                             packed);
   sysWeights.collectTransform(cameraSystem.system.transform, TransformIndex());
   if (cameraSystem.camera) {
-    WeightCollector camWeights(true, layout, rcCursor, wsCursor, packed);
+    WeightCollector camWeights(TransformScope::Camera, layout, rcCursor,
+                               wsCursor, packed);
     camWeights.collectTransform(cameraSystem.camera->transform,
                                 TransformIndex());
   }

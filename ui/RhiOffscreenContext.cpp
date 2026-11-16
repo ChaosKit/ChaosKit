@@ -128,31 +128,11 @@ bool tryCreateOpenGL(std::unique_ptr<QOffscreenSurface>& surfaceOut,
 }
 #endif
 
-}  // namespace
-
-QImage imageFromRhiReadback(const QRhi* rhi, const QRhiReadbackResult& result) {
-  if (result.pixelSize.isEmpty() || result.data.isEmpty()) {
-    return QImage();
-  }
-
+QImage copyConvertedReadback(const QRhi* rhi, const QRhiReadbackResult& result,
+                             bool swapRedBlue) {
   const int width = result.pixelSize.width();
   const int height = result.pixelSize.height();
   const qsizetype bytesPerLine = static_cast<qsizetype>(width) * 4;
-  if (result.data.size() < bytesPerLine * height) {
-    return QImage();
-  }
-
-  bool swapRedBlue = false;
-  switch (result.format) {
-    case QRhiTexture::RGBA8:
-      break;
-    case QRhiTexture::BGRA8:
-      swapRedBlue = true;
-      break;
-    default:
-      return QImage();
-  }
-
   const QImage view(reinterpret_cast<const uchar*>(result.data.constData()),
                     width, height, static_cast<int>(bytesPerLine),
                     QImage::Format_RGBA8888);
@@ -163,6 +143,34 @@ QImage imageFromRhiReadback(const QRhi* rhi, const QRhiReadbackResult& result) {
     image = std::move(image).rgbSwapped();
   }
   return image;
+}
+
+}  // namespace
+
+QImage imageFromRhiReadback(const QRhi* rhi, const QRhiReadbackResult& result) {
+  if (result.pixelSize.isEmpty() || result.data.isEmpty()) {
+    return {};
+  }
+
+  const qsizetype width = result.pixelSize.width();
+  const qsizetype height = result.pixelSize.height();
+  const qsizetype bytesPerLine = width * 4;
+  if (result.data.size() < bytesPerLine * height) {
+    return {};
+  }
+
+  bool swapRedBlue = false;
+  switch (result.format) {
+    case QRhiTexture::RGBA8:
+      break;
+    case QRhiTexture::BGRA8:
+      swapRedBlue = true;
+      break;
+    default:
+      return {};
+  }
+
+  return copyConvertedReadback(rhi, result, swapRedBlue);
 }
 
 RhiOffscreenContext::RhiOffscreenContext()

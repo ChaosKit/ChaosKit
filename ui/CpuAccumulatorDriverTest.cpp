@@ -211,5 +211,59 @@ TEST_F(CpuAccumulatorDriverTest, StopsAndEmitsErrorOnInvalidSystem) {
   EXPECT_FALSE(driver.isRunning());
 }
 
+TEST_F(CpuAccumulatorDriverTest,
+       MultiThreadedDriverSumsHistogramsAndPlottedIterationsAcrossWorkers) {
+  core::ColorMapRegistry registry;
+  const core::ColorMap* bgr = registry.get("BGR");
+  ASSERT_NE(bgr, nullptr);
+
+  CpuAccumulatorDriver defaultDriver;
+  EXPECT_GE(defaultDriver.threadCount(), 1u);
+
+  CpuAccumulatorDriver driver(nullptr, 4);
+  EXPECT_EQ(driver.threadCount(), 4u);
+
+  driver.setSize(16, 16);
+  driver.setColorMap(bgr);
+  driver.setSystem(makeConstantSystem(0.0f, 0.0f, 0.5f));
+
+  QSignalSpy spy(&driver, &CpuAccumulatorDriver::batchCompleted);
+  driver.setRunning(true);
+  ASSERT_TRUE(QTest::qWaitFor(
+      [&]() { return spy.size() >= 3 && driver.plottedIterations() >= 8192u; },
+      2000));
+
+  driver.clear();
+  {
+    core::HistogramBuffer cleared;
+    uint64_t clearedPlotted = 999;
+    driver.snapshot(cleared, &clearedPlotted);
+    EXPECT_EQ(clearedPlotted, 0u);
+    EXPECT_FLOAT_EQ(cleared(8, 8)->a, 0.0f);
+  }
+
+  spy.clear();
+  ASSERT_TRUE(QTest::qWaitFor(
+      [&]() { return spy.size() >= 2 && driver.plottedIterations() >= 4096u; },
+      2000));
+  driver.setRunning(false);
+
+  core::HistogramBuffer buffer;
+  uint64_t plotted = 0;
+  driver.snapshot(buffer, &plotted);
+  EXPECT_GE(plotted, 4096u);
+
+  const core::Color* hit = buffer(8, 8);
+  EXPECT_FLOAT_EQ(hit->r, 0.0f);
+  EXPECT_FLOAT_EQ(hit->g, static_cast<float>(plotted));
+  EXPECT_FLOAT_EQ(hit->b, 0.0f);
+  EXPECT_FLOAT_EQ(hit->a, static_cast<float>(plotted));
+
+  // Verify ~CpuAccumulatorDriver joins all workers cleanly while running.
+  driver.setRunning(true);
+  ASSERT_TRUE(QTest::qWaitFor(
+      [&]() { return driver.plottedIterations() > plotted; }, 2000));
+}
+
 }  // namespace
 }  // namespace chaoskit::ui

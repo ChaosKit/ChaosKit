@@ -13,7 +13,6 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -416,7 +415,8 @@ int main(int argc, char* argv[]) {
     const uint64_t minWarmup =
         static_cast<uint64_t>((std::max)(0, cameraSystem.lifetime.min()));
     const uint64_t maxConsecutiveZero =
-        (std::max)(uint64_t{65536}, (minWarmup + 2) * uint64_t{1024});
+        core::CpuAccumulator::maxConsecutiveZeroTicks(
+            cameraSystem.lifetime.min());
     constexpr uint32_t kMaxTicksPerDispatch = 512u;
 
     if (totalBudget > 0 &&
@@ -471,12 +471,8 @@ int main(int argc, char* argv[]) {
           return 1;
         }
 
-        uint32_t counterWords[2] = {0, 0};
-        std::memcpy(counterWords, counterReadback.data.constData(),
-                    sizeof(counterWords));
         const uint64_t newTotalPlotted =
-            (static_cast<uint64_t>(counterWords[1]) << 32u) |
-            static_cast<uint64_t>(counterWords[0]);
+            ui::RhiComputeEngine::decodePlottedCounter(counterReadback.data);
         const uint64_t batchTicks =
             static_cast<uint64_t>(particleCount) * ticksPerInvocation;
         totalTicksDispatched += batchTicks;
@@ -512,7 +508,7 @@ int main(int argc, char* argv[]) {
       }
     }
   } else {
-    // Particle stepping & gathering via shared Qt-free CpuAccumulator
+    // Particle stepping & accumulation via shared Qt-free CpuAccumulator
     std::shared_ptr<core::Rng> singleRng =
         seed.has_value() ? std::static_pointer_cast<core::Rng>(
                                std::make_shared<cli::SeededRng>(*seed))
@@ -598,13 +594,21 @@ int main(int argc, char* argv[]) {
   readbackBatch->readBackTexture(QRhiReadbackDescription(colorTexture.get()),
                                  &readbackResult);
 
+  bool toneMapped = false;
   if (useGpu) {
-    toneMapper.renderFromSsbo(
+    toneMapped = toneMapper.renderFromSsbo(
         cb, renderTarget.get(), computeEngine.histogramBuffer(),
-        computeEngine.counterBuffer(), outputSize, readbackBatch);
+        computeEngine.counterBuffer(), outputSize, readbackBatch, &rhiError);
   } else {
-    toneMapper.render(cb, renderTarget.get(), &cpuAccumulator->histogram(),
-                      cpuAccumulator->plottedIterations(), readbackBatch);
+    toneMapped = toneMapper.render(
+        cb, renderTarget.get(), &cpuAccumulator->histogram(),
+        cpuAccumulator->plottedIterations(), readbackBatch, &rhiError);
+  }
+  if (!toneMapped) {
+    rhi->endOffscreenFrame();
+    std::cerr << "Failed to execute tone mapping: " << rhiError.toStdString()
+              << std::endl;
+    return 1;
   }
 
   if (rhi->endOffscreenFrame() != QRhi::FrameOpSuccess) {
