@@ -8,10 +8,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
-#include <QQuickWindow>
 #include <QRegularExpression>
-#include <QSGRendererInterface>
-#include <QSurfaceFormat>
 #include <QtGui/QTransform>
 #include <magic_enum.hpp>
 #include "ColorMap.h"
@@ -96,13 +93,6 @@ int main(int argc, char* argv[]) {
   resources::initialize();
 
   QGuiApplication app(argc, argv);
-
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-  QSurfaceFormat format;
-  format.setMajorVersion(3);
-  format.setMinorVersion(2);
-  format.setProfile(QSurfaceFormat::CoreProfile);
-  QSurfaceFormat::setDefaultFormat(format);
 
   // Register types
   qRegisterMetaType<ColorMap*>();

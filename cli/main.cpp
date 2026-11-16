@@ -1,4 +1,5 @@
 #include <google/protobuf/text_format.h>
+#include <rhi/qrhi.h>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QCoreApplication>
@@ -6,11 +7,8 @@
 #include <QGuiApplication>
 #include <QImage>
 #include <QImageWriter>
-#include <QOffscreenSurface>
-#include <QOpenGLContext>
-#include <QOpenGLFramebufferObject>
-#include <QOpenGLFunctions>
-#include <QSurfaceFormat>
+#include <QSize>
+
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -31,7 +29,8 @@
 #include "core/Rng.h"
 #include "core/ThreadLocalRng.h"
 #include "core/errors.h"
-#include "ui/GLToneMapper.h"
+#include "ui/RhiOffscreenContext.h"
+#include "ui/RhiToneMapper.h"
 #include "ui/storage/conversions.h"
 
 using namespace chaoskit;
@@ -76,9 +75,8 @@ bool parseFloat(const QString& value, const QString& flagName, float& out,
 
 int main(int argc, char* argv[]) {
 #if defined(Q_OS_MACOS)
-  // On macOS, Qt's offscreen QPA platform plugin does not support OpenGL
-  // context creation. Cocoa platform supports offscreen rendering via
-  // QOffscreenSurface without showing a window.
+  // Prefer Cocoa over Qt's minimal offscreen QPA plugin on macOS while keeping
+  // rendering windowless via swapchain-free QRhi.
   qunsetenv("QT_QPA_PLATFORM");
 #else
   if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM") &&
@@ -373,56 +371,70 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  // OpenGL offscreen setup
-  QSurfaceFormat format;
-  format.setMajorVersion(3);
-  format.setMinorVersion(2);
-  format.setProfile(QSurfaceFormat::CoreProfile);
-  QSurfaceFormat::setDefaultFormat(format);
+  // Swapchain-free offscreen QRhi tone mapping & readback
+  QString rhiError;
+  auto rhiContext = ui::RhiOffscreenContext::create(&rhiError);
+  if (!rhiContext) {
+    std::cerr << "Failed to initialize offscreen QRhi context: "
+              << rhiError.toStdString() << std::endl;
+    return 1;
+  }
+  QRhi* rhi = rhiContext->rhi();
 
-  QOpenGLContext context;
-  context.setFormat(format);
-  if (!context.create()) {
-    std::cerr << "Failed to create OpenGL context" << std::endl;
+  const QSize outputSize(static_cast<int>(width), static_cast<int>(height));
+  std::unique_ptr<QRhiTexture> colorTexture(rhi->newTexture(
+      QRhiTexture::RGBA8, outputSize, 1,
+      QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
+  if (!colorTexture || !colorTexture->create()) {
+    std::cerr << "Failed to create offscreen output texture" << std::endl;
     return 1;
   }
 
-  QOffscreenSurface surface;
-  surface.setFormat(context.format());
-  surface.create();
-  if (!surface.isValid()) {
-    std::cerr << "Failed to create offscreen surface" << std::endl;
+  std::unique_ptr<QRhiTextureRenderTarget> renderTarget(
+      rhi->newTextureRenderTarget(
+          QRhiTextureRenderTargetDescription(colorTexture.get())));
+  std::unique_ptr<QRhiRenderPassDescriptor> renderPassDesc(
+      renderTarget->newCompatibleRenderPassDescriptor());
+  renderTarget->setRenderPassDescriptor(renderPassDesc.get());
+  if (!renderTarget->create()) {
+    std::cerr << "Failed to create offscreen render target" << std::endl;
     return 1;
   }
 
-  if (!context.makeCurrent(&surface)) {
-    std::cerr << "Failed to make OpenGL context current" << std::endl;
+  ui::RhiToneMapper toneMapper;
+  if (!toneMapper.initialize(rhi, renderPassDesc.get(), 1, &rhiError)) {
+    std::cerr << "Failed to initialize RhiToneMapper: "
+              << rhiError.toStdString() << std::endl;
     return 1;
   }
-
-  QOpenGLFramebufferObject fbo(static_cast<int>(width),
-                               static_cast<int>(height));
-  if (!fbo.isValid() || !fbo.bind()) {
-    std::cerr << "Failed to bind framebuffer object" << std::endl;
-    return 1;
-  }
-
-  auto* gl = context.functions();
-  gl->glViewport(0, 0, static_cast<GLsizei>(width),
-                 static_cast<GLsizei>(height));
-
-  ui::GLToneMapper toneMapper;
-  toneMapper.initializeGL();
   toneMapper.setGamma(gamma);
   toneMapper.setExposure(exposure);
   toneMapper.setVibrancy(vibrancy);
 
-  toneMapper.syncBuffer(accumulator.histogram());
+  QRhiCommandBuffer* cb = nullptr;
+  if (rhi->beginOffscreenFrame(&cb) != QRhi::FrameOpSuccess) {
+    std::cerr << "Failed to begin offscreen QRhi frame" << std::endl;
+    return 1;
+  }
 
-  toneMapper.map();
+  QRhiReadbackResult readbackResult;
+  QRhiResourceUpdateBatch* readbackBatch = rhi->nextResourceUpdateBatch();
+  readbackBatch->readBackTexture(QRhiReadbackDescription(colorTexture.get()),
+                                 &readbackResult);
 
-  QImage image = fbo.toImage();
-  fbo.release();
+  toneMapper.render(cb, renderTarget.get(), &accumulator.histogram(),
+                    accumulator.plottedIterations(), readbackBatch);
+
+  if (rhi->endOffscreenFrame() != QRhi::FrameOpSuccess) {
+    std::cerr << "Failed to end offscreen QRhi frame" << std::endl;
+    return 1;
+  }
+
+  QImage image = ui::imageFromRhiReadback(rhi, readbackResult);
+  if (image.isNull()) {
+    std::cerr << "Failed to convert RHI readback to QImage" << std::endl;
+    return 1;
+  }
 
   QImageWriter writer(outputPath);
   if (!writer.write(image)) {

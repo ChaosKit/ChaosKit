@@ -1,15 +1,16 @@
 #ifndef CHAOSKIT_UI_SYSTEMVIEW_H
 #define CHAOSKIT_UI_SYSTEMVIEW_H
 
-#include <QQuickFramebufferObject>
+#include <QQuickRhiItem>
 #include <QString>
 #include <QtGlobal>
+
 #include "CpuAccumulatorDriver.h"
 #include "models/ProjectModel.h"
 
 namespace chaoskit::ui {
 
-class SystemView : public QQuickFramebufferObject {
+class SystemView : public QQuickRhiItem {
   Q_OBJECT
   Q_PROPERTY(chaoskit::ui::ProjectModel *model READ model WRITE setModel NOTIFY
                  modelChanged)
@@ -17,7 +18,7 @@ class SystemView : public QQuickFramebufferObject {
  public:
   explicit SystemView(QQuickItem *parent = nullptr);
 
-  [[nodiscard]] Renderer *createRenderer() const override;
+  [[nodiscard]] QQuickRhiItemRenderer *createRenderer() override;
 
   [[nodiscard]] CpuAccumulatorDriver *driver() const { return driver_; }
   [[nodiscard]] ProjectModel *model() const { return model_; }

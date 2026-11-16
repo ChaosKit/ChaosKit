@@ -1,13 +1,16 @@
 #include "SystemView.h"
-#include <QDebug>
+
+#include <rhi/qrhi.h>
 #include <QLoggingCategory>
 #include <QQuickItem>
-#include <QQuickWindow>
+#include <QString>
+
 #include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "GLToneMapper.h"
+
+#include "RhiToneMapper.h"
 #include "core/HistogramBuffer.h"
 #include "ui/storage/conversions.h"
 
@@ -19,32 +22,40 @@ Q_LOGGING_CATEGORY(systemViewLog, "SystemView");
 
 namespace {
 
-class HistogramRenderer : public QQuickFramebufferObject::Renderer {
+class HistogramRenderer : public QQuickRhiItemRenderer {
  public:
-  explicit HistogramRenderer(const SystemView *view) : driver_(view->driver()) {
-    if (auto *win = view->window()) {
-      win->beginExternalCommands();
-      toneMapper_.initializeGL();
-      win->endExternalCommands();
-      initialized_ = true;
-    }
-  }
+  explicit HistogramRenderer(const SystemView *view)
+      : driver_(view->driver()) {}
+  ~HistogramRenderer() override { toneMapper_.releaseResources(); }
 
  protected:
-  void synchronize(QQuickFramebufferObject *object) override {
-    auto *view = qobject_cast<SystemView *>(object);
+  void initialize(QRhiCommandBuffer * /*cb*/) override {
+    if (rhi_ != rhi()) {
+      toneMapper_.releaseResources();
+      rhi_ = rhi();
+      initialized_ = false;
+      histogramDirty_ = true;
+    }
+
+    if (rhi_ == nullptr || renderTarget() == nullptr) {
+      return;
+    }
+
+    QString error;
+    if (!toneMapper_.initialize(rhi_, renderTarget()->renderPassDescriptor(),
+                                renderTarget()->sampleCount(), &error)) {
+      qCWarning(systemViewLog, "Failed to initialize RhiToneMapper: %s",
+                qPrintable(error));
+      initialized_ = false;
+      return;
+    }
+    initialized_ = true;
+  }
+
+  void synchronize(QQuickRhiItem *item) override {
+    auto *view = qobject_cast<SystemView *>(item);
     if (view == nullptr) {
       return;
-    }
-    window_ = view->window();
-    if (window_ == nullptr) {
-      return;
-    }
-    if (!initialized_) {
-      window_->beginExternalCommands();
-      toneMapper_.initializeGL();
-      window_->endExternalCommands();
-      initialized_ = true;
     }
 
     if (const auto *model = view->model()) {
@@ -53,41 +64,37 @@ class HistogramRenderer : public QQuickFramebufferObject::Renderer {
       toneMapper_.setVibrancy(model->vibrancy());
     }
 
-    if (driver_->syncSnapshotIfChanged(lastSnapshotVersion_, histogramCopy_)) {
-      window_->beginExternalCommands();
-      if (histogramCopy_.width() > 0 && histogramCopy_.height() > 0) {
-        toneMapper_.syncBuffer(histogramCopy_);
-      } else {
-        static const HistogramBuffer emptyBuffer(1, 1);
-        toneMapper_.syncBuffer(emptyBuffer);
-      }
-      window_->endExternalCommands();
-      hasTexture_ = true;
+    if (driver_->syncSnapshotIfChanged(lastSnapshotVersion_, histogramCopy_,
+                                       &plottedIterations_)) {
+      histogramDirty_ = true;
     }
   }
 
-  void render() override {
-    if (window_ == nullptr || !initialized_ || !hasTexture_) {
+  void render(QRhiCommandBuffer *cb) override {
+    if (!initialized_ || renderTarget() == nullptr) {
       return;
     }
-    window_->beginExternalCommands();
-    toneMapper_.map();
-    window_->endExternalCommands();
+
+    toneMapper_.render(cb, renderTarget(),
+                       histogramDirty_ ? &histogramCopy_ : nullptr,
+                       plottedIterations_);
+    histogramDirty_ = false;
   }
 
  private:
-  GLToneMapper toneMapper_;
+  RhiToneMapper toneMapper_;
   CpuAccumulatorDriver *driver_;
-  QQuickWindow *window_ = nullptr;
+  QRhi *rhi_ = nullptr;
   HistogramBuffer histogramCopy_;
+  uint64_t plottedIterations_ = 0;
   uint64_t lastSnapshotVersion_ = 0;
   bool initialized_ = false;
-  bool hasTexture_ = false;
+  bool histogramDirty_ = true;
 };
 
 }  // namespace
 
-SystemView::SystemView(QQuickItem *parent) : QQuickFramebufferObject(parent) {
+SystemView::SystemView(QQuickItem *parent) : QQuickRhiItem(parent) {
   driver_ = new CpuAccumulatorDriver(this);
   connect(driver_, &CpuAccumulatorDriver::batchCompleted, this,
           &QQuickItem::update);
@@ -99,12 +106,14 @@ SystemView::SystemView(QQuickItem *parent) : QQuickFramebufferObject(parent) {
             emit warningEmitted(message);
           });
 
-  connect(this, &QQuickItem::widthChanged, this, &SystemView::updateBufferSize);
-  connect(this, &QQuickItem::heightChanged, this,
-          &SystemView::updateBufferSize);
+  setColorBufferFormat(QQuickRhiItem::TextureFormat::RGBA8);
+  setAlphaBlending(false);
+  setMirrorVertically(false);
+  setFixedColorBufferWidth(1);
+  setFixedColorBufferHeight(1);
 }
 
-QQuickFramebufferObject::Renderer *SystemView::createRenderer() const {
+QQuickRhiItemRenderer *SystemView::createRenderer() {
   return new HistogramRenderer(this);
 }
 
@@ -128,6 +137,7 @@ void SystemView::setModel(ProjectModel *projectModel) {
   model_ = projectModel;
   if (model_ == nullptr) {
     driver_->clearSystem();
+    updateBufferSize();
     emit modelChanged();
     update();
     return;
@@ -136,6 +146,10 @@ void SystemView::setModel(ProjectModel *projectModel) {
   connect(model_, &ProjectModel::gammaChanged, this, &QQuickItem::update);
   connect(model_, &ProjectModel::exposureChanged, this, &QQuickItem::update);
   connect(model_, &ProjectModel::vibrancyChanged, this, &QQuickItem::update);
+  connect(model_, &ProjectModel::widthChanged, this,
+          &SystemView::updateBufferSize);
+  connect(model_, &ProjectModel::heightChanged, this,
+          &SystemView::updateBufferSize);
   connect(model_->system(), &SystemModel::visuallyChanged, this,
           &SystemView::updateSystem);
   connect(model_->colorMap(), &ColorMapModel::nameChanged, this,
@@ -171,9 +185,20 @@ void SystemView::updateColorMap() {
 }
 
 void SystemView::updateBufferSize() {
-  const auto w = static_cast<uint32_t>((std::max)(0.0, width()));
-  const auto h = static_cast<uint32_t>((std::max)(0.0, height()));
-  driver_->setSize(w, h);
+  const uint32_t w =
+      model_ != nullptr ? (std::max)(1u, static_cast<uint32_t>(model_->width()))
+                        : 1u;
+  const uint32_t h =
+      model_ != nullptr
+          ? (std::max)(1u, static_cast<uint32_t>(model_->height()))
+          : 1u;
+  setFixedColorBufferWidth(static_cast<int>(w));
+  setFixedColorBufferHeight(static_cast<int>(h));
+  if (model_ != nullptr) {
+    driver_->setSize(w, h);
+  } else {
+    driver_->setSize(0, 0);
+  }
   update();
 }
 

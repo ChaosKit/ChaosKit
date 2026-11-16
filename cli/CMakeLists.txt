@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Core Gui OpenGL)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui)
 
 add_executable(chaoskit-render main.cpp)
 target_link_libraries(
@@ -10,8 +10,7 @@ target_link_libraries(
           ui_core
           ui_storage
           Qt::Core
-          Qt::Gui
-          Qt::OpenGL)
+          Qt::Gui)
 
 add_executable(cli_test cli_test.cpp)
 target_compile_definitions(

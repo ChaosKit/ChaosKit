@@ -2,10 +2,12 @@ find_package(
   Qt6 REQUIRED
   COMPONENTS Core
              Gui
+             GuiPrivate
              Qml
-             OpenGL
              Quick
              QuickControls2
+             ShaderTools
+             ShaderToolsPrivate
              Test
   OPTIONAL_COMPONENTS Widgets)
 
@@ -13,10 +15,19 @@ add_subdirectory(models)
 add_subdirectory(storage)
 
 # Library that deals with interfacing with the core.
-add_library(ui_core CpuAccumulatorDriver.cpp CpuAccumulatorDriver.h
-                    GLToneMapper.cpp GLToneMapper.h)
+add_library(
+  ui_core
+  CpuAccumulatorDriver.cpp
+  CpuAccumulatorDriver.h
+  RhiOffscreenContext.cpp
+  RhiOffscreenContext.h
+  RhiShaderBaker.cpp
+  RhiShaderBaker.h
+  RhiToneMapper.cpp
+  RhiToneMapper.h)
 set_target_properties(ui_core PROPERTIES AUTOMOC ON)
-target_link_libraries(ui_core PUBLIC core Qt::Core Qt::Gui Qt::OpenGL)
+target_link_libraries(ui_core PUBLIC core Qt::Core Qt::Gui Qt6::GuiPrivate
+                                     Qt6::ShaderToolsPrivate)
 
 add_executable(ui_driver_test CpuAccumulatorDriverTest.cpp)
 set_target_properties(ui_driver_test PROPERTIES AUTOMOC ON)
