@@ -112,6 +112,9 @@ ApplicationWindow {
 
   ProjectEditor {
     id: projectEditor
+    // qmllint disable incompatible-type unqualified
+    systemView: systemPreview
+    // qmllint enable incompatible-type unqualified
     anchors.top: parent.top
     anchors.right: parent.right
     anchors.bottom: parent.bottom

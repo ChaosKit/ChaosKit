@@ -33,6 +33,7 @@
         <file>ChaosKit/TextLabel.qml</file>
         <file>ChaosKit/Theme.qml</file>
         <file>ChaosKit/ToolTip.qml</file>
+        <file>forms/AccumulationEditor.qml</file>
         <file>forms/AstInspector.qml</file>
         <file>forms/BlendContents.qml</file>
         <file>forms/BlendItem.qml</file>

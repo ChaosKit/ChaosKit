@@ -6,6 +6,7 @@
 #include <QString>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -97,12 +98,14 @@ class HistogramRenderer : public QQuickRhiItemRenderer {
 SystemView::SystemView(QQuickItem *parent) : QQuickRhiItem(parent) {
   driver_ = new CpuAccumulatorDriver(this);
   connect(driver_, &CpuAccumulatorDriver::batchCompleted, this,
-          &QQuickItem::update);
-  connect(driver_, &CpuAccumulatorDriver::runningChanged, this,
-          &SystemView::runningChanged);
+          &SystemView::handleBatchCompleted);
   connect(driver_, &CpuAccumulatorDriver::errorOccurred, this,
           [this](const QString &message) {
             qCWarning(systemViewLog, "%s", qPrintable(message));
+            if (running_) {
+              running_ = false;
+              emit runningChanged();
+            }
             emit warningEmitted(message);
           });
 
@@ -119,10 +122,97 @@ QQuickRhiItemRenderer *SystemView::createRenderer() {
 
 void SystemView::clear() {
   driver_->clear();
+  resetConvergenceState();
+  syncDriverRunning();
   update();
 }
 
-void SystemView::setRunning(bool running) { driver_->setRunning(running); }
+void SystemView::setRunning(bool running) {
+  if (running_ == running) {
+    return;
+  }
+  running_ = running;
+  syncDriverRunning();
+  emit runningChanged();
+}
+
+void SystemView::setTargetIterationsPerPixel(double targetIterationsPerPixel) {
+  if (!std::isfinite(targetIterationsPerPixel) ||
+      targetIterationsPerPixel <= 0.0 ||
+      targetIterationsPerPixel == targetIterationsPerPixel_) {
+    return;
+  }
+  targetIterationsPerPixel_ = targetIterationsPerPixel;
+  emit targetIterationsPerPixelChanged();
+  evaluateConvergence();
+}
+
+void SystemView::setInfiniteAccumulation(bool infiniteAccumulation) {
+  if (infiniteAccumulation_ == infiniteAccumulation) {
+    return;
+  }
+  infiniteAccumulation_ = infiniteAccumulation;
+  emit infiniteAccumulationChanged();
+  evaluateConvergence();
+}
+
+double SystemView::computeIterationsPerPixel(uint64_t plotted) const {
+  const uint32_t w =
+      model_ != nullptr ? (std::max)(1u, static_cast<uint32_t>(model_->width()))
+                        : 1u;
+  const uint32_t h =
+      model_ != nullptr
+          ? (std::max)(1u, static_cast<uint32_t>(model_->height()))
+          : 1u;
+  const double pixelCount = static_cast<double>(w) * static_cast<double>(h);
+  return static_cast<double>(plotted) / pixelCount;
+}
+
+void SystemView::evaluateConvergence() {
+  const bool nextConverged =
+      !infiniteAccumulation_ &&
+      currentIterationsPerPixel_ >= targetIterationsPerPixel_;
+  if (nextConverged == converged_) {
+    return;
+  }
+  converged_ = nextConverged;
+  syncDriverRunning();
+  emit convergedChanged();
+  update();
+}
+
+void SystemView::resetConvergenceState() {
+  const bool ippChanged =
+      plottedIterations_ != 0 || currentIterationsPerPixel_ != 0.0;
+  plottedIterations_ = 0;
+  currentIterationsPerPixel_ = 0.0;
+  if (ippChanged) {
+    emit currentIterationsPerPixelChanged();
+  }
+  if (converged_) {
+    converged_ = false;
+    emit convergedChanged();
+  }
+}
+
+void SystemView::syncDriverRunning() {
+  driver_->setRunning(running_ && !converged_);
+}
+
+void SystemView::handleBatchCompleted() {
+  if (!running_ || converged_) {
+    return;
+  }
+  const uint64_t plotted = driver_->plottedIterations();
+  const double ipp = computeIterationsPerPixel(plotted);
+  if (plotted != plottedIterations_ || ipp != currentIterationsPerPixel_) {
+    plottedIterations_ = plotted;
+    currentIterationsPerPixel_ = ipp;
+    emit currentIterationsPerPixelChanged();
+  }
+  evaluateConvergence();
+  update();
+}
 
 void SystemView::setModel(ProjectModel *projectModel) {
   if (projectModel == model_) {
@@ -143,6 +233,8 @@ void SystemView::setModel(ProjectModel *projectModel) {
     return;
   }
 
+  connect(model_, &ProjectModel::projectChanged, this,
+          &SystemView::handleProjectChanged);
   connect(model_, &ProjectModel::gammaChanged, this, &QQuickItem::update);
   connect(model_, &ProjectModel::exposureChanged, this, &QQuickItem::update);
   connect(model_, &ProjectModel::vibrancyChanged, this, &QQuickItem::update);
@@ -155,10 +247,14 @@ void SystemView::setModel(ProjectModel *projectModel) {
   connect(model_->colorMap(), &ColorMapModel::nameChanged, this,
           &SystemView::updateColorMap);
 
+  handleProjectChanged();
+  emit modelChanged();
+}
+
+void SystemView::handleProjectChanged() {
   updateSystem();
   updateColorMap();
   updateBufferSize();
-  emit modelChanged();
 }
 
 void SystemView::updateSystem() {
@@ -173,6 +269,8 @@ void SystemView::updateSystem() {
     qCWarning(systemViewLog, "%s", warning.c_str());
     emit warningEmitted(QString::fromStdString(warning));
   }
+  resetConvergenceState();
+  syncDriverRunning();
   update();
 }
 
@@ -181,6 +279,8 @@ void SystemView::updateColorMap() {
     return;
   }
   driver_->setColorMap(model_->colorMap()->coreColorMap());
+  resetConvergenceState();
+  syncDriverRunning();
   update();
 }
 
@@ -199,6 +299,8 @@ void SystemView::updateBufferSize() {
   } else {
     driver_->setSize(0, 0);
   }
+  resetConvergenceState();
+  syncDriverRunning();
   update();
 }
 
