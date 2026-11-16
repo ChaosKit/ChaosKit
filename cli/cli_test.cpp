@@ -701,5 +701,196 @@ TEST_F(CliTest, MultiBlendAndCameraRendering) {
   EXPECT_EQ(image.height(), 64);
 }
 
+struct LuminanceStats {
+  double meanLuminance = 0.0;
+  double whiteFraction = 0.0;
+  size_t opaqueBlackPixels = 0;
+  bool allOpaque = true;
+};
+
+LuminanceStats analyzeLuminance(const QImage& img) {
+  QImage rgba = img.convertToFormat(QImage::Format_RGBA8888);
+  const int width = rgba.width();
+  const int height = rgba.height();
+  const size_t pixelCount = static_cast<size_t>(width) * height;
+  if (pixelCount == 0) {
+    return {};
+  }
+
+  double lumSum = 0.0;
+  size_t whiteCount = 0;
+  LuminanceStats stats;
+  for (int y = 0; y < height; ++y) {
+    const uchar* line = rgba.constScanLine(y);
+    for (int x = 0; x < width; ++x) {
+      const int idx = x * 4;
+      const uchar r = line[idx + 0];
+      const uchar g = line[idx + 1];
+      const uchar b = line[idx + 2];
+      const uchar a = line[idx + 3];
+      if (a != 255) {
+        stats.allOpaque = false;
+      }
+      if (r == 0 && g == 0 && b == 0 && a == 255) {
+        ++stats.opaqueBlackPixels;
+      }
+      if (r >= 250 && g >= 250 && b >= 250) {
+        ++whiteCount;
+      }
+      const double nr = static_cast<double>(r) / 255.0;
+      const double ng = static_cast<double>(g) / 255.0;
+      const double nb = static_cast<double>(b) / 255.0;
+      lumSum += 0.2126 * nr + 0.7152 * ng + 0.0722 * nb;
+    }
+  }
+  stats.meanLuminance = lumSum / static_cast<double>(pixelCount);
+  stats.whiteFraction =
+      static_cast<double>(whiteCount) / static_cast<double>(pixelCount);
+  return stats;
+}
+
+TEST_F(CliTest, DensityNormalizedLuminanceAcrossSampleDensities) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString out5Path = tempDir_.filePath("ipp_5.png");
+  QString out100Path = tempDir_.filePath("ipp_100.png");
+  QString out2000Path = tempDir_.filePath("ipp_2000.png");
+
+  ASSERT_EQ(runChaoskitRender({inputPath, out5Path, "--width", "32", "--height",
+                               "32", "--seed", "42", "--ipp", "5"})
+                .exitCode,
+            0);
+  ASSERT_EQ(
+      runChaoskitRender({inputPath, out100Path, "--width", "32", "--height",
+                         "32", "--seed", "42", "--ipp", "100"})
+          .exitCode,
+      0);
+  ASSERT_EQ(
+      runChaoskitRender({inputPath, out2000Path, "--width", "32", "--height",
+                         "32", "--seed", "42", "--ipp", "2000"})
+          .exitCode,
+      0);
+
+  QImage img5(out5Path);
+  QImage img100(out100Path);
+  QImage img2000(out2000Path);
+  ASSERT_FALSE(img5.isNull());
+  ASSERT_FALSE(img100.isNull());
+  ASSERT_FALSE(img2000.isNull());
+
+  const LuminanceStats stats5 = analyzeLuminance(img5);
+  const LuminanceStats stats100 = analyzeLuminance(img100);
+  const LuminanceStats stats2000 = analyzeLuminance(img2000);
+
+  EXPECT_TRUE(stats5.allOpaque);
+  EXPECT_TRUE(stats100.allOpaque);
+  EXPECT_TRUE(stats2000.allOpaque);
+
+  // Baseline 100 IPP should have meaningful brightness without clipping white.
+  EXPECT_GT(stats100.meanLuminance, 0.02);
+  EXPECT_LT(stats100.meanLuminance, 0.70);
+
+  // Low density (5 IPP) should preserve overall brightness without blacking
+  // out.
+  EXPECT_GE(stats5.meanLuminance, 0.35 * stats100.meanLuminance);
+  EXPECT_LE(stats5.meanLuminance, 1.50 * stats100.meanLuminance);
+
+  // Deep density (2000 IPP) should maintain consistent brightness without
+  // blowing out to white.
+  EXPECT_GE(stats2000.meanLuminance, 0.85 * stats100.meanLuminance);
+  EXPECT_LE(stats2000.meanLuminance, 1.15 * stats100.meanLuminance);
+  EXPECT_LE(stats2000.whiteFraction, stats100.whiteFraction + 0.01);
+  EXPECT_LE(calculateNormalizedRmse(img100, img2000, nullptr), 0.08);
+}
+
+TEST_F(CliTest, OpaqueBlackWhenZeroPlottedOrZeroHits) {
+  // 1. Degenerate zero-scaled Spherical system hits 0/0 = NaN every tick,
+  // producing plottedIterations == 0 (currentIpp == 0.0).
+  {
+    QString zeroIppPath = tempDir_.filePath("zero_ipp.pbtxt");
+    QFile file(zeroIppPath);
+    bool opened = file.open(QIODevice::WriteOnly | QIODevice::Text);
+    ASSERT_TRUE(opened);
+    file.write(R"(
+width: 32
+height: 32
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "BGR" }
+system {
+  min_lifetime: 0
+  max_lifetime: 1
+  blends {
+    enabled: true
+    weight: 1.0
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Spherical"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.5 }
+  }
+}
+)");
+    file.close();
+
+    QString outPath = tempDir_.filePath("zero_ipp.png");
+    RunResult res =
+        runChaoskitRender({zeroIppPath, outPath, "--iterations", "10"});
+    ASSERT_EQ(res.exitCode, 0);
+
+    QImage img(outPath);
+    ASSERT_FALSE(img.isNull());
+    EXPECT_EQ(img.width(), 32);
+    EXPECT_EQ(img.height(), 32);
+    const LuminanceStats stats = analyzeLuminance(img);
+    EXPECT_TRUE(stats.allOpaque);
+    EXPECT_EQ(stats.opaqueBlackPixels, 32u * 32u);
+  }
+
+  // 2. Finite points translated off-canvas yield currentIpp > 0 with zero hits
+  // in every pixel.
+  {
+    QString zeroHitsPath = tempDir_.filePath("zero_hits.pbtxt");
+    QFile file(zeroHitsPath);
+    bool opened = file.open(QIODevice::WriteOnly | QIODevice::Text);
+    ASSERT_TRUE(opened);
+    file.write(R"(
+width: 32
+height: 32
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "BGR" }
+system {
+  min_lifetime: 0
+  max_lifetime: 5
+  blends {
+    enabled: true
+    weight: 1.0
+    formulas {
+      type: "Linear"
+      weight { x: 1.0 y: 1.0 }
+    }
+    post { m11: 1.0 m22: 1.0 m31: 100.0 }
+    coloring_method { single_color: 0.5 }
+  }
+}
+)");
+    file.close();
+
+    QString outPath = tempDir_.filePath("zero_hits.png");
+    RunResult res = runChaoskitRender(
+        {zeroHitsPath, outPath, "--seed", "42", "--ipp", "10"});
+    ASSERT_EQ(res.exitCode, 0);
+
+    QImage img(outPath);
+    ASSERT_FALSE(img.isNull());
+    const LuminanceStats stats = analyzeLuminance(img);
+    EXPECT_TRUE(stats.allOpaque);
+    EXPECT_EQ(stats.opaqueBlackPixels, 32u * 32u);
+  }
+}
+
 }  // namespace
 }  // namespace chaoskit::cli
