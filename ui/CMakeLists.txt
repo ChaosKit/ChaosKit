@@ -19,6 +19,8 @@ add_library(
   ui_core
   CpuAccumulatorDriver.cpp
   CpuAccumulatorDriver.h
+  RhiComputeEngine.cpp
+  RhiComputeEngine.h
   RhiOffscreenContext.cpp
   RhiOffscreenContext.h
   RhiShaderBaker.cpp
@@ -34,6 +36,11 @@ set_target_properties(ui_driver_test PROPERTIES AUTOMOC ON)
 target_link_libraries(ui_driver_test PRIVATE gmock gmock_main ui_core Qt::Core
                                              Qt::Test)
 add_test(NAME ui_driver_test COMMAND ui_driver_test)
+
+add_executable(ui_shader_test ShaderBakerTest.cpp)
+target_link_libraries(ui_shader_test PRIVATE gmock gmock_main ui_core library
+                                             magic_enum Qt::Core)
+add_test(NAME ui_shader_test COMMAND ui_shader_test)
 
 # --- Static resource management ---
 
