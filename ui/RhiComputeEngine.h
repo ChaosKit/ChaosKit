@@ -32,8 +32,12 @@ class RhiComputeEngine {
   RhiComputeEngine() = default;
   ~RhiComputeEngine();
 
+  // Non-copyable and non-movable: owns GPU buffers, textures, and pipeline
+  // handles.
   RhiComputeEngine(const RhiComputeEngine&) = delete;
   RhiComputeEngine& operator=(const RhiComputeEngine&) = delete;
+  RhiComputeEngine(RhiComputeEngine&&) = delete;
+  RhiComputeEngine& operator=(RhiComputeEngine&&) = delete;
 
   bool initialize(QRhi* rhi, QString* errorMessage = nullptr);
   void releaseResources();
@@ -74,6 +78,8 @@ class RhiComputeEngine {
 
   [[nodiscard]] static QByteArray clearShaderSource();
   [[nodiscard]] static QByteArray initShaderSource();
+  [[nodiscard]] static uint64_t decodePlottedCounter(
+      const QByteArray& counterData);
 
  private:
   struct CachedPipeline {

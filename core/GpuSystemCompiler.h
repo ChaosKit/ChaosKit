@@ -11,6 +11,20 @@
 
 namespace chaoskit::core {
 
+enum class TransformScope { System, Camera };
+
+struct TransformTarget {
+  TransformScope scope = TransformScope::System;
+  TransformIndex index;
+
+  bool operator==(const TransformTarget& other) const {
+    return scope == other.scope && index == other.index;
+  }
+  bool operator!=(const TransformTarget& other) const {
+    return !(*this == other);
+  }
+};
+
 struct GpuDispatchConfig {
   uint32_t width = 0;
   uint32_t height = 0;
@@ -23,23 +37,20 @@ struct GpuDispatchConfig {
 
 struct UniformLayout {
   struct AffineSlot {
-    TransformIndex index;
+    TransformTarget target;
     uint32_t floatOffset = 0;
-    bool isCamera = false;
   };
 
   struct ParamSlot {
-    TransformIndex index;
+    TransformTarget target;
     size_t paramIndex = 0;
     uint32_t floatOffset = 0;
-    bool isCamera = false;
   };
 
   struct WeightedSlot {
-    TransformIndex index;
+    TransformTarget target;
     size_t branchCount = 0;
     uint32_t floatOffset = 0;
-    bool isCamera = false;
   };
 
   std::string structuralKey;
@@ -71,6 +82,8 @@ class GpuSystemCompiler {
 
   [[nodiscard]] static CompiledGpuSystem compile(
       const CameraSystem& cameraSystem);
+
+  [[nodiscard]] static std::string initShaderSource();
 
   [[nodiscard]] static std::vector<uint8_t> packUniforms(
       const UniformLayout& layout, const CameraSystem& cameraSystem,

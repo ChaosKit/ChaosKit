@@ -39,6 +39,11 @@ class CpuAccumulator {
   // accumulator. Dimensions must match.
   void merge(const CpuAccumulator& other);
 
+  // Computes the maximum consecutive zero-progress ticks before bailing out of
+  // bounded-plotted accumulation for a given `minLifetime`.
+  [[nodiscard]] static uint64_t maxConsecutiveZeroTicks(
+      int minLifetime) noexcept;
+
   [[nodiscard]] const HistogramBuffer& histogram() const { return buffer_; }
   [[nodiscard]] uint64_t plottedIterations() const {
     return plottedIterations_;

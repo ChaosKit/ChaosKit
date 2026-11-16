@@ -107,15 +107,18 @@ uint64_t CpuAccumulator::accumulate(uint64_t stepCount) {
   return batchPlotted;
 }
 
+uint64_t CpuAccumulator::maxConsecutiveZeroTicks(int minLifetime) noexcept {
+  const uint64_t minWarmup = static_cast<uint64_t>((std::max)(0, minLifetime));
+  return (std::max)(uint64_t{65536}, (minWarmup + 2) * uint64_t{1024});
+}
+
 uint64_t CpuAccumulator::accumulatePlotted(uint64_t targetPlotted) {
   if (targetPlotted == 0 || buffer_.width() == 0 || buffer_.height() == 0) {
     return 0;
   }
 
-  const uint64_t minWarmup =
-      static_cast<uint64_t>((std::max)(0, processor_.lifetime().min()));
   const uint64_t maxConsecutiveZero =
-      (std::max)(uint64_t{65536}, (minWarmup + 2) * uint64_t{1024});
+      maxConsecutiveZeroTicks(processor_.lifetime().min());
 
   uint64_t totalPlotted = 0;
   uint64_t consecutiveZero = 0;

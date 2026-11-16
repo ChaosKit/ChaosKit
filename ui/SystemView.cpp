@@ -13,12 +13,12 @@
 #include <QSize>
 #include <QString>
 #include <QThread>
+#include <QtGlobal>
 
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
-#include <cstring>
 #include <memory>
 #include <optional>
 #include <ratio>
@@ -50,6 +50,164 @@ constexpr double kTargetMidMs = 10.0;
 constexpr double kIdleGapThresholdMs = 250.0;
 constexpr double kEmaAlpha = 0.3;
 
+struct ExportImageParams {
+  QRhi *rhi = nullptr;
+  QRhiCommandBuffer *cb = nullptr;
+  RhiToneMapper *toneMapper = nullptr;
+  QString filePath;
+  uint32_t width = 0;
+  uint32_t height = 0;
+  float gamma = 2.2f;
+  float exposure = 0.0f;
+  float vibrancy = 0.0f;
+  bool useGpuCompute = false;
+  QRhiBuffer *histogramBuffer = nullptr;
+  QRhiBuffer *counterBuffer = nullptr;
+  QSize gpuHistogramSize;
+  const HistogramBuffer *cpuHistogram = nullptr;
+  uint64_t cpuPlottedIterations = 0;
+};
+
+void setExportError(QString *errorMessage, const QString &message) {
+  if (errorMessage != nullptr) {
+    *errorMessage = message;
+  }
+}
+
+bool exportRenderedImage(const ExportImageParams &params,
+                         QString *errorMessage) {
+  if (params.rhi == nullptr || params.cb == nullptr ||
+      params.toneMapper == nullptr) {
+    setExportError(errorMessage, QStringLiteral("GPU context is unavailable"));
+    return false;
+  }
+
+  if (params.width == 0 || params.height == 0) {
+    setExportError(errorMessage,
+                   QStringLiteral("Project dimensions must be positive"));
+    return false;
+  }
+
+  const int maxTexSize = params.rhi->resourceLimit(QRhi::TextureSizeMax);
+  if (maxTexSize > 0 && (params.width > static_cast<uint32_t>(maxTexSize) ||
+                         params.height > static_cast<uint32_t>(maxTexSize))) {
+    setExportError(
+        errorMessage,
+        QStringLiteral("Project dimensions exceed GPU texture limit"));
+    return false;
+  }
+
+  const QSize exportSize(static_cast<int>(params.width),
+                         static_cast<int>(params.height));
+  std::unique_ptr<QRhiTexture> exportTexture(params.rhi->newTexture(
+      QRhiTexture::RGBA8, exportSize, 1,
+      QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
+  if (!exportTexture || !exportTexture->create()) {
+    setExportError(errorMessage,
+                   QStringLiteral("Failed to create export GPU texture"));
+    return false;
+  }
+
+  std::unique_ptr<QRhiRenderPassDescriptor> exportPassDesc;
+  std::unique_ptr<QRhiTextureRenderTarget> exportTarget(
+      params.rhi->newTextureRenderTarget(
+          QRhiTextureRenderTargetDescription(exportTexture.get())));
+  if (!exportTarget) {
+    setExportError(errorMessage,
+                   QStringLiteral("Failed to allocate export render target"));
+    return false;
+  }
+
+  exportPassDesc.reset(exportTarget->newCompatibleRenderPassDescriptor());
+  if (!exportPassDesc) {
+    setExportError(
+        errorMessage,
+        QStringLiteral("Failed to create export render pass descriptor"));
+    return false;
+  }
+  exportTarget->setRenderPassDescriptor(exportPassDesc.get());
+  if (!exportTarget->create()) {
+    setExportError(errorMessage,
+                   QStringLiteral("Failed to create export render target"));
+    return false;
+  }
+
+  QString rhiError;
+  if (!params.toneMapper->initialize(params.rhi, exportPassDesc.get(), 1,
+                                     &rhiError)) {
+    params.toneMapper->releaseResources();
+    setExportError(errorMessage,
+                   rhiError.isEmpty()
+                       ? QStringLiteral("Failed to initialize tone mapper")
+                       : rhiError);
+    return false;
+  }
+  params.toneMapper->setGamma(params.gamma);
+  params.toneMapper->setExposure(params.exposure);
+  params.toneMapper->setVibrancy(params.vibrancy);
+
+  QRhiReadbackResult readbackResult;
+  bool readbackCompleted = false;
+  readbackResult.completed = [&readbackCompleted]() {
+    readbackCompleted = true;
+  };
+  QRhiResourceUpdateBatch *readbackBatch =
+      params.rhi->nextResourceUpdateBatch();
+  readbackBatch->readBackTexture(QRhiReadbackDescription(exportTexture.get()),
+                                 &readbackResult);
+
+  bool rendered = false;
+  if (params.useGpuCompute && params.histogramBuffer != nullptr &&
+      params.counterBuffer != nullptr) {
+    rendered = params.toneMapper->renderFromSsbo(
+        params.cb, exportTarget.get(), params.histogramBuffer,
+        params.counterBuffer, params.gpuHistogramSize, readbackBatch,
+        &rhiError);
+  } else {
+    rendered = params.toneMapper->render(
+        params.cb, exportTarget.get(), params.cpuHistogram,
+        params.cpuPlottedIterations, readbackBatch, &rhiError);
+  }
+  if (!rendered) {
+    params.toneMapper->releaseResources();
+    setExportError(errorMessage,
+                   rhiError.isEmpty()
+                       ? QStringLiteral("Failed to execute export tone mapping")
+                       : rhiError);
+    return false;
+  }
+
+  const QRhi::FrameOpResult finishResult = params.rhi->finish();
+  params.toneMapper->releaseResources();
+  exportTarget.reset();
+  exportPassDesc.reset();
+  exportTexture.reset();
+
+  if (finishResult != QRhi::FrameOpSuccess || !readbackCompleted) {
+    setExportError(errorMessage, QStringLiteral("GPU texture readback failed"));
+    return false;
+  }
+
+  const QImage image = imageFromRhiReadback(params.rhi, readbackResult);
+  if (image.isNull()) {
+    setExportError(errorMessage,
+                   QStringLiteral("Failed to convert GPU readback to image"));
+    return false;
+  }
+
+  QImageWriter writer(params.filePath);
+  if (!writer.write(image)) {
+    const QString detail = writer.errorString();
+    setExportError(errorMessage,
+                   detail.isEmpty()
+                       ? QStringLiteral("Failed to write image file")
+                       : detail);
+    return false;
+  }
+
+  return true;
+}
+
 }  // namespace
 
 Q_LOGGING_CATEGORY(systemViewLog, "SystemView");
@@ -76,6 +234,8 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
     toneMapper_.releaseResources();
     exportToneMapper_.releaseResources();
   }
+
+  Q_DISABLE_COPY_MOVE(HistogramRenderer)
 
  protected:
   void initialize(QRhiCommandBuffer * /*cb*/) override {
@@ -196,11 +356,11 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
       pendingSystemUpdate_ = true;
       lastSyncedSystemVersion_ = view->systemVersion_;
     }
-    if (lastSyncedClearGeneration_ != view->editGeneration_) {
+    if (lastSyncedEditGeneration_ != view->editGeneration_) {
       currentGeneration_ = view->editGeneration_;
       pendingClearReset_ = true;
       knownPlottedIterations_ = 0;
-      lastSyncedClearGeneration_ = view->editGeneration_;
+      lastSyncedEditGeneration_ = view->editGeneration_;
     }
 
     if (!useGpuCompute_) {
@@ -229,9 +389,18 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
       return;
     }
 
-    toneMapper_.render(cb, renderTarget(),
-                       histogramDirty_ ? &histogramCopy_ : nullptr,
-                       plottedIterations_);
+    QString toneMapError;
+    if (!toneMapper_.render(cb, renderTarget(),
+                            histogramDirty_ ? &histogramCopy_ : nullptr,
+                            plottedIterations_, nullptr, &toneMapError)) {
+      qCWarning(systemViewLog, "Failed to tone-map CPU histogram: %s",
+                qPrintable(toneMapError));
+      failPendingExports(
+          toneMapError.isEmpty()
+              ? QStringLiteral("Failed to render tone-mapped frame")
+              : toneMapError);
+      return;
+    }
     histogramDirty_ = false;
 
     if (!pendingExports_.empty()) {
@@ -334,6 +503,39 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
     return dispatchTicks;
   }
 
+  static void completeCounterReadback(
+      HistogramRenderer *renderer, const std::weak_ptr<bool> &weakAlive,
+      const std::weak_ptr<CounterReadback> &weakReq) {
+    std::shared_ptr<CounterReadback> lockedReq = weakReq.lock();
+    if (!lockedReq) {
+      return;
+    }
+    // Break self-ownership immediately so req is freed when callback exits.
+    std::shared_ptr<CounterReadback> selfRef = std::move(lockedReq->self);
+
+    std::shared_ptr<bool> alive = weakAlive.lock();
+    if (!alive || !*alive) {
+      return;
+    }
+
+    if (lockedReq->readbackId == renderer->latestReadbackId_) {
+      renderer->readbackInFlight_ = false;
+    }
+    if (lockedReq->generation != renderer->currentGeneration_ ||
+        lockedReq->result.data.size() < 8) {
+      return;
+    }
+
+    const uint64_t plotted =
+        RhiComputeEngine::decodePlottedCounter(lockedReq->result.data);
+
+    renderer->knownPlottedIterations_ = plotted;
+    const uint64_t gen = lockedReq->generation;
+    renderer->invokeOnViewThread([gen, plotted](SystemView *view) {
+      view->handleGpuReadback(gen, plotted);
+    });
+  }
+
   void enqueueCounterReadback(QRhiCommandBuffer *cb, uint32_t ticksDispatched) {
     if (!rhi_->isFeatureSupported(QRhi::ReadBackNonUniformBuffer)) {
       estimatedFallbackPlotted_ +=
@@ -367,37 +569,7 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
     HistogramRenderer *renderer = this;
 
     req->result.completed = [renderer, weakAlive, weakReq]() {
-      std::shared_ptr<CounterReadback> lockedReq = weakReq.lock();
-      if (!lockedReq) {
-        return;
-      }
-      // Break self-ownership immediately so req is freed when callback exits.
-      std::shared_ptr<CounterReadback> selfRef = std::move(lockedReq->self);
-
-      std::shared_ptr<bool> alive = weakAlive.lock();
-      if (!alive || !*alive) {
-        return;
-      }
-
-      if (lockedReq->readbackId == renderer->latestReadbackId_) {
-        renderer->readbackInFlight_ = false;
-      }
-      if (lockedReq->generation != renderer->currentGeneration_ ||
-          lockedReq->result.data.size() < 8) {
-        return;
-      }
-
-      uint32_t counterWords[2] = {0, 0};
-      std::memcpy(counterWords, lockedReq->result.data.constData(),
-                  sizeof(counterWords));
-      const uint64_t plotted = (static_cast<uint64_t>(counterWords[1]) << 32u) |
-                               static_cast<uint64_t>(counterWords[0]);
-
-      renderer->knownPlottedIterations_ = plotted;
-      const uint64_t gen = lockedReq->generation;
-      renderer->invokeOnViewThread([gen, plotted](SystemView *view) {
-        view->handleGpuReadback(gen, plotted);
-      });
+      completeCounterReadback(renderer, weakAlive, weakReq);
     };
 
     QRhiResourceUpdateBatch *counterBatch = rhi_->nextResourceUpdateBatch();
@@ -490,9 +662,18 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
     lastComputeResourceEpoch_ = computeEngine_.resourceEpoch();
     lastToneMapperHistogram_ = histBuf;
 
-    toneMapper_.renderFromSsbo(cb, renderTarget(), histBuf,
-                               computeEngine_.counterBuffer(),
-                               computeEngine_.size());
+    QString toneMapError;
+    if (!toneMapper_.renderFromSsbo(
+            cb, renderTarget(), histBuf, computeEngine_.counterBuffer(),
+            computeEngine_.size(), nullptr, &toneMapError)) {
+      qCWarning(systemViewLog, "Failed to tone-map GPU histogram: %s",
+                qPrintable(toneMapError));
+      failPendingExports(
+          toneMapError.isEmpty()
+              ? QStringLiteral("Failed to render tone-mapped frame")
+              : toneMapError);
+      return;
+    }
 
     if (!pendingExports_.empty()) {
       std::vector<ExportRequest> exports = std::move(pendingExports_);
@@ -547,133 +728,32 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
   }
 
   void executeExport(QRhiCommandBuffer *cb, const ExportRequest &request) {
-    if (rhi_ == nullptr || cb == nullptr) {
-      emitExportFailed(request.filePath,
-                       QStringLiteral("GPU context is unavailable"));
-      return;
-    }
+    ExportImageParams params;
+    params.rhi = rhi_;
+    params.cb = cb;
+    params.toneMapper = &exportToneMapper_;
+    params.filePath = request.filePath;
+    params.width = request.width;
+    params.height = request.height;
+    params.gamma = gamma_;
+    params.exposure = exposure_;
+    params.vibrancy = vibrancy_;
+    params.useGpuCompute = useGpuCompute_ && computeInitialized_;
+    params.histogramBuffer = computeEngine_.histogramBuffer();
+    params.counterBuffer = computeEngine_.counterBuffer();
+    params.gpuHistogramSize = computeEngine_.size();
+    params.cpuHistogram =
+        (histogramCopy_.width() > 0 && histogramCopy_.height() > 0)
+            ? &histogramCopy_
+            : nullptr;
+    params.cpuPlottedIterations = plottedIterations_;
 
-    if (request.width == 0 || request.height == 0) {
-      emitExportFailed(request.filePath,
-                       QStringLiteral("Project dimensions must be positive"));
-      return;
-    }
-
-    const int maxTexSize = rhi_->resourceLimit(QRhi::TextureSizeMax);
-    if (maxTexSize > 0 &&
-        (request.width > static_cast<uint32_t>(maxTexSize) ||
-         request.height > static_cast<uint32_t>(maxTexSize))) {
-      emitExportFailed(
-          request.filePath,
-          QStringLiteral("Project dimensions exceed GPU texture limit"));
-      return;
-    }
-
-    const QSize exportSize(static_cast<int>(request.width),
-                           static_cast<int>(request.height));
-    std::unique_ptr<QRhiTexture> exportTexture(rhi_->newTexture(
-        QRhiTexture::RGBA8, exportSize, 1,
-        QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
-    if (!exportTexture || !exportTexture->create()) {
-      emitExportFailed(request.filePath,
-                       QStringLiteral("Failed to create export GPU texture"));
-      return;
-    }
-
-    std::unique_ptr<QRhiTextureRenderTarget> exportTarget(
-        rhi_->newTextureRenderTarget(
-            QRhiTextureRenderTargetDescription(exportTexture.get())));
-    if (!exportTarget) {
-      emitExportFailed(
-          request.filePath,
-          QStringLiteral("Failed to allocate export render target"));
-      return;
-    }
-
-    std::unique_ptr<QRhiRenderPassDescriptor> exportPassDesc(
-        exportTarget->newCompatibleRenderPassDescriptor());
-    if (!exportPassDesc) {
-      emitExportFailed(
-          request.filePath,
-          QStringLiteral("Failed to create export render pass descriptor"));
-      return;
-    }
-    exportTarget->setRenderPassDescriptor(exportPassDesc.get());
-    if (!exportTarget->create()) {
-      emitExportFailed(request.filePath,
-                       QStringLiteral("Failed to create export render target"));
-      return;
-    }
-
-    QString rhiError;
-    if (!exportToneMapper_.initialize(rhi_, exportPassDesc.get(), 1,
-                                      &rhiError)) {
-      exportToneMapper_.releaseResources();
-      emitExportFailed(request.filePath,
-                       rhiError.isEmpty()
-                           ? QStringLiteral("Failed to initialize tone mapper")
-                           : rhiError);
-      return;
-    }
-    exportToneMapper_.setGamma(gamma_);
-    exportToneMapper_.setExposure(exposure_);
-    exportToneMapper_.setVibrancy(vibrancy_);
-
-    QRhiReadbackResult readbackResult;
-    bool readbackCompleted = false;
-    readbackResult.completed = [&readbackCompleted]() {
-      readbackCompleted = true;
-    };
-    QRhiResourceUpdateBatch *readbackBatch = rhi_->nextResourceUpdateBatch();
-    readbackBatch->readBackTexture(QRhiReadbackDescription(exportTexture.get()),
-                                   &readbackResult);
-
-    if (useGpuCompute_ && computeInitialized_ &&
-        computeEngine_.histogramBuffer() != nullptr &&
-        computeEngine_.counterBuffer() != nullptr) {
-      exportToneMapper_.renderFromSsbo(
-          cb, exportTarget.get(), computeEngine_.histogramBuffer(),
-          computeEngine_.counterBuffer(), computeEngine_.size(), readbackBatch);
+    QString exportError;
+    if (exportRenderedImage(params, &exportError)) {
+      emitExportSucceeded(request.filePath);
     } else {
-      const HistogramBuffer *histogramToUpload =
-          (histogramCopy_.width() > 0 && histogramCopy_.height() > 0)
-              ? &histogramCopy_
-              : nullptr;
-      exportToneMapper_.render(cb, exportTarget.get(), histogramToUpload,
-                               plottedIterations_, readbackBatch);
+      emitExportFailed(request.filePath, exportError);
     }
-
-    const QRhi::FrameOpResult finishResult = rhi_->finish();
-    exportToneMapper_.releaseResources();
-    exportTarget.reset();
-    exportPassDesc.reset();
-    exportTexture.reset();
-
-    if (finishResult != QRhi::FrameOpSuccess || !readbackCompleted) {
-      emitExportFailed(request.filePath,
-                       QStringLiteral("GPU texture readback failed"));
-      return;
-    }
-
-    const QImage image = imageFromRhiReadback(rhi_, readbackResult);
-    if (image.isNull()) {
-      emitExportFailed(
-          request.filePath,
-          QStringLiteral("Failed to convert GPU readback to image"));
-      return;
-    }
-
-    QImageWriter writer(request.filePath);
-    if (!writer.write(image)) {
-      const QString detail = writer.errorString();
-      emitExportFailed(request.filePath,
-                       detail.isEmpty()
-                           ? QStringLiteral("Failed to write image file")
-                           : detail);
-      return;
-    }
-
-    emitExportSucceeded(request.filePath);
   }
 
   RhiComputeEngine computeEngine_;
@@ -695,7 +775,7 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
   uint64_t lastSyncedSystemVersion_ = 0;
   uint64_t lastSyncedColorMapVersion_ = 0;
   uint64_t lastSyncedSizeVersion_ = 0;
-  uint64_t lastSyncedClearGeneration_ = 0;
+  uint64_t lastSyncedEditGeneration_ = 0;
   uint64_t currentGeneration_ = 1;
   uint64_t lastReportedCompileCount_ = 0;
 

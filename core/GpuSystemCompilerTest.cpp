@@ -338,10 +338,11 @@ TEST(GpuSystemCompilerTest,
   bool sawCamParam = false;
   bool sawFormulaParam1 = false;
   for (const auto& pSlot : compiled.layout.paramSlots) {
-    if (pSlot.isCamera && pSlot.paramIndex == 0) {
+    if (pSlot.target.scope == TransformScope::Camera && pSlot.paramIndex == 0) {
       EXPECT_FLOAT_EQ(packed[pSlot.floatOffset], 9.f);
       sawCamParam = true;
-    } else if (!pSlot.isCamera && pSlot.index == TransformIndex{0, 1, 0} &&
+    } else if (pSlot.target.scope == TransformScope::System &&
+               pSlot.target.index == TransformIndex{0, 1, 0} &&
                pSlot.paramIndex == 1) {
       EXPECT_FLOAT_EQ(packed[pSlot.floatOffset], 8.f);
       sawFormulaParam1 = true;
