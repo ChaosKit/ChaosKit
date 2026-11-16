@@ -382,8 +382,7 @@ int main(int argc, char* argv[]) {
   if (backendMode == BackendMode::Gpu) {
     useGpu = true;
   } else if (backendMode == BackendMode::Auto) {
-    useGpu =
-        computeSupported && !parser.isSet(threadsOption) && !seed.has_value();
+    useGpu = computeSupported && !parser.isSet(threadsOption);
   }
 
   const QSize outputSize(static_cast<int>(width), static_cast<int>(height));
