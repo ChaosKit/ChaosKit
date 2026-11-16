@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -29,6 +30,7 @@
 #include "core/Rng.h"
 #include "core/ThreadLocalRng.h"
 #include "core/errors.h"
+#include "ui/RhiComputeEngine.h"
 #include "ui/RhiOffscreenContext.h"
 #include "ui/RhiToneMapper.h"
 #include "ui/storage/conversions.h"
@@ -134,16 +136,44 @@ int main(int argc, char* argv[]) {
                                     "name");
   parser.addOption(colorMapOption);
 
+  QCommandLineOption backendOption(
+      "backend", "Rendering backend: auto, gpu, or cpu (default: auto)", "mode",
+      "auto");
+  parser.addOption(backendOption);
+
   parser.process(app);
 
   const QStringList positionalArgs = parser.positionalArguments();
   if (positionalArgs.size() != 2) {
     std::cerr << "Usage: chaoskit-render <input-project> <output-image> "
-                 "[--seed <uint64>] [--threads <count>] "
-                 "[--ipp <count>] [--iterations <count>] "
+                 "[--backend <auto|gpu|cpu>] [--seed <uint64>] "
+                 "[--threads <count>] [--ipp <count>] [--iterations <count>] "
                  "[--width <uint>] [--height <uint>] "
                  "[--gamma <float>] [--exposure <float>] [--vibrancy <float>] "
                  "[--color-map <name>]"
+              << std::endl;
+    return 1;
+  }
+
+  enum class BackendMode { Auto, Gpu, Cpu };
+  BackendMode backendMode = BackendMode::Auto;
+  if (parser.isSet(backendOption)) {
+    const QString mode = parser.value(backendOption).trimmed();
+    if (mode == QLatin1String("auto")) {
+      backendMode = BackendMode::Auto;
+    } else if (mode == QLatin1String("gpu")) {
+      backendMode = BackendMode::Gpu;
+    } else if (mode == QLatin1String("cpu")) {
+      backendMode = BackendMode::Cpu;
+    } else {
+      std::cerr << "Invalid --backend: " << mode.toStdString()
+                << " (expected auto, gpu, or cpu)" << std::endl;
+      return 1;
+    }
+  }
+
+  if (backendMode == BackendMode::Gpu && parser.isSet(threadsOption)) {
+    std::cerr << "Error: cannot combine --backend gpu with --threads"
               << std::endl;
     return 1;
   }
@@ -310,17 +340,17 @@ int main(int argc, char* argv[]) {
               << project.system().isolated_blend().index() << ")" << std::endl;
   }
 
-  // RNG selection
-  std::shared_ptr<core::Rng> rng;
+  // Seed validation
+  std::optional<uint64_t> seed = std::nullopt;
   if (parser.isSet(seedOption)) {
     bool ok = false;
-    uint64_t seed = parser.value(seedOption).toULongLong(&ok);
+    uint64_t val = parser.value(seedOption).toULongLong(&ok);
     if (!ok) {
       std::cerr << "Invalid seed: " << parser.value(seedOption).toStdString()
                 << std::endl;
       return 1;
     }
-    rng = std::make_shared<cli::SeededRng>(seed);
+    seed = val;
   }
 
   uint64_t totalBudget = 0;
@@ -330,48 +360,7 @@ int main(int argc, char* argv[]) {
     totalBudget = ipp * static_cast<uint64_t>(width) * height;
   }
 
-  // Particle stepping & gathering via shared Qt-free CpuAccumulator
-  std::shared_ptr<core::Rng> singleRng =
-      rng ? rng : std::make_shared<core::ThreadLocalRng>();
-  core::CpuAccumulator accumulator(cameraSystem, width, height, colorMap,
-                                   singleRng);
-
-  if (parser.isSet(seedOption) || threads == 1) {
-    accumulator.accumulatePlotted(totalBudget);
-  } else {
-    const size_t threadCount = threads;
-    std::vector<std::unique_ptr<core::CpuAccumulator>> workerAccumulators;
-    workerAccumulators.reserve(threadCount);
-    for (size_t i = 0; i < threadCount; ++i) {
-      workerAccumulators.push_back(std::make_unique<core::CpuAccumulator>(
-          cameraSystem, width, height, colorMap,
-          std::make_shared<core::ThreadLocalRng>()));
-    }
-
-    std::vector<std::thread> workerThreads;
-    workerThreads.reserve(threadCount);
-
-    const uint64_t share = totalBudget / threadCount;
-    const uint64_t remainder = totalBudget % threadCount;
-
-    for (size_t i = 0; i < threadCount; ++i) {
-      const uint64_t threadBudget = share + (i < remainder ? 1 : 0);
-      auto* workerAcc = workerAccumulators[i].get();
-      workerThreads.emplace_back([workerAcc, threadBudget]() {
-        workerAcc->accumulatePlotted(threadBudget);
-      });
-    }
-
-    for (size_t i = 0; i < workerThreads.size(); ++i) {
-      workerThreads[i].join();
-    }
-
-    for (const auto& workerAcc : workerAccumulators) {
-      accumulator.merge(*workerAcc);
-    }
-  }
-
-  // Swapchain-free offscreen QRhi tone mapping & readback
+  // Initialize swapchain-free offscreen QRhi context
   QString rhiError;
   auto rhiContext = ui::RhiOffscreenContext::create(&rhiError);
   if (!rhiContext) {
@@ -380,8 +369,196 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   QRhi* rhi = rhiContext->rhi();
+  const bool computeSupported = rhi->isFeatureSupported(QRhi::Compute);
+
+  if (backendMode == BackendMode::Gpu && !computeSupported) {
+    std::cerr << "Error: --backend gpu requested, but QRhi backend ("
+              << rhi->backendName() << ") does not support compute shaders"
+              << std::endl;
+    return 1;
+  }
+
+  bool useGpu = false;
+  if (backendMode == BackendMode::Gpu) {
+    useGpu = true;
+  } else if (backendMode == BackendMode::Auto) {
+    useGpu =
+        computeSupported && !parser.isSet(threadsOption) && !seed.has_value();
+  }
 
   const QSize outputSize(static_cast<int>(width), static_cast<int>(height));
+  std::unique_ptr<core::CpuAccumulator> cpuAccumulator;
+  ui::RhiComputeEngine computeEngine;
+
+  if (useGpu) {
+    if (!computeEngine.initialize(rhi, &rhiError)) {
+      std::cerr << "Failed to initialize RhiComputeEngine: "
+                << rhiError.toStdString() << std::endl;
+      return 1;
+    }
+
+    uint32_t particleCount = ui::RhiComputeEngine::kDefaultParticleCount;
+    if (totalBudget < 65536u) {
+      const uint32_t minGroups = static_cast<uint32_t>(
+          (std::max)(uint64_t{1}, (totalBudget + 63u) / 64u));
+      particleCount = (std::min)(uint32_t{4096}, minGroups * 64u);
+    }
+    computeEngine.setParticleCount(particleCount);
+    computeEngine.setSize(outputSize);
+    computeEngine.setColorMap(colorMap);
+    computeEngine.setSeed(seed);
+
+    if (!computeEngine.setSystem(cameraSystem, &rhiError)) {
+      std::cerr << "Failed to compile GPU compute pipeline: "
+                << rhiError.toStdString() << std::endl;
+      return 1;
+    }
+
+    const uint64_t minWarmup =
+        static_cast<uint64_t>((std::max)(0, cameraSystem.lifetime.min()));
+    const uint64_t maxConsecutiveZero =
+        (std::max)(uint64_t{65536}, (minWarmup + 2) * uint64_t{1024});
+    constexpr uint32_t kMaxTicksPerDispatch = 512u;
+
+    if (totalBudget > 0 &&
+        rhi->isFeatureSupported(QRhi::ReadBackNonUniformBuffer)) {
+      uint64_t totalPlotted = 0;
+      uint64_t totalTicksDispatched = 0;
+      uint64_t consecutiveZeroTicks = 0;
+      while (totalPlotted < totalBudget) {
+        const uint64_t remaining = totalBudget - totalPlotted;
+        uint64_t estimatedTicks = 0;
+        if (totalPlotted > 0 && totalTicksDispatched > 0) {
+          const double plotRate = static_cast<double>(totalPlotted) /
+                                  static_cast<double>(totalTicksDispatched);
+          estimatedTicks = static_cast<uint64_t>(
+              std::ceil(static_cast<double>(remaining) / plotRate));
+        } else if (consecutiveZeroTicks > 0) {
+          estimatedTicks = maxConsecutiveZero - consecutiveZeroTicks;
+        } else {
+          estimatedTicks =
+              static_cast<uint64_t>(particleCount) * minWarmup + remaining * 2u;
+        }
+        const uint64_t rawK =
+            (std::max)(uint64_t{1},
+                       (estimatedTicks + particleCount - 1u) / particleCount);
+        const uint32_t ticksPerInvocation = static_cast<uint32_t>(
+            (std::min)(static_cast<uint64_t>(kMaxTicksPerDispatch), rawK));
+
+        QRhiCommandBuffer* stepCb = nullptr;
+        if (rhi->beginOffscreenFrame(&stepCb) != QRhi::FrameOpSuccess) {
+          std::cerr << "Failed to begin GPU compute frame" << std::endl;
+          return 1;
+        }
+        if (!computeEngine.dispatch(stepCb, ticksPerInvocation, &rhiError)) {
+          std::cerr << "Failed to dispatch GPU compute step: "
+                    << rhiError.toStdString() << std::endl;
+          return 1;
+        }
+        QRhiReadbackResult counterReadback;
+        QRhiResourceUpdateBatch* counterBatch = rhi->nextResourceUpdateBatch();
+        counterBatch->readBackBuffer(computeEngine.counterBuffer(), 0, 16,
+                                     &counterReadback);
+        stepCb->resourceUpdate(counterBatch);
+        if (rhi->endOffscreenFrame() != QRhi::FrameOpSuccess) {
+          std::cerr << "Failed to end GPU compute frame" << std::endl;
+          return 1;
+        }
+        if (counterReadback.data.size() < 8) {
+          rhi->finish();
+        }
+        if (counterReadback.data.size() < 8) {
+          std::cerr << "Failed to read back GPU plotted counter" << std::endl;
+          return 1;
+        }
+
+        uint32_t counterWords[2] = {0, 0};
+        std::memcpy(counterWords, counterReadback.data.constData(),
+                    sizeof(counterWords));
+        const uint64_t newTotalPlotted =
+            (static_cast<uint64_t>(counterWords[1]) << 32u) |
+            static_cast<uint64_t>(counterWords[0]);
+        const uint64_t batchTicks =
+            static_cast<uint64_t>(particleCount) * ticksPerInvocation;
+        totalTicksDispatched += batchTicks;
+
+        if (newTotalPlotted == totalPlotted) {
+          consecutiveZeroTicks += batchTicks;
+          if (consecutiveZeroTicks >= maxConsecutiveZero) {
+            break;
+          }
+        } else {
+          consecutiveZeroTicks = 0;
+          totalPlotted = newTotalPlotted;
+        }
+      }
+    } else if (totalBudget > 0) {
+      uint64_t remainingTicks =
+          (static_cast<uint64_t>(particleCount) * minWarmup + totalBudget * 2u +
+           particleCount - 1u) /
+          particleCount;
+      remainingTicks = (std::max)(uint64_t{1}, remainingTicks);
+      while (remainingTicks > 0) {
+        const uint32_t ticksPerInvocation = static_cast<uint32_t>(
+            (std::min)(static_cast<uint64_t>(kMaxTicksPerDispatch),
+                       remainingTicks));
+        QRhiCommandBuffer* stepCb = nullptr;
+        if (rhi->beginOffscreenFrame(&stepCb) != QRhi::FrameOpSuccess ||
+            !computeEngine.dispatch(stepCb, ticksPerInvocation, &rhiError) ||
+            rhi->endOffscreenFrame() != QRhi::FrameOpSuccess) {
+          std::cerr << "Failed to execute GPU compute frame" << std::endl;
+          return 1;
+        }
+        remainingTicks -= ticksPerInvocation;
+      }
+    }
+  } else {
+    // Particle stepping & gathering via shared Qt-free CpuAccumulator
+    std::shared_ptr<core::Rng> singleRng =
+        seed.has_value() ? std::static_pointer_cast<core::Rng>(
+                               std::make_shared<cli::SeededRng>(*seed))
+                         : std::static_pointer_cast<core::Rng>(
+                               std::make_shared<core::ThreadLocalRng>());
+    cpuAccumulator = std::make_unique<core::CpuAccumulator>(
+        cameraSystem, width, height, colorMap, singleRng);
+
+    if (seed.has_value() || threads == 1) {
+      cpuAccumulator->accumulatePlotted(totalBudget);
+    } else {
+      const size_t threadCount = threads;
+      std::vector<std::unique_ptr<core::CpuAccumulator>> workerAccumulators;
+      workerAccumulators.reserve(threadCount);
+      for (size_t i = 0; i < threadCount; ++i) {
+        workerAccumulators.push_back(std::make_unique<core::CpuAccumulator>(
+            cameraSystem, width, height, colorMap,
+            std::make_shared<core::ThreadLocalRng>()));
+      }
+
+      std::vector<std::thread> workerThreads;
+      workerThreads.reserve(threadCount);
+
+      const uint64_t share = totalBudget / threadCount;
+      const uint64_t remainder = totalBudget % threadCount;
+
+      for (size_t i = 0; i < threadCount; ++i) {
+        const uint64_t threadBudget = share + (i < remainder ? 1 : 0);
+        auto* workerAcc = workerAccumulators[i].get();
+        workerThreads.emplace_back([workerAcc, threadBudget]() {
+          workerAcc->accumulatePlotted(threadBudget);
+        });
+      }
+
+      for (size_t i = 0; i < workerThreads.size(); ++i) {
+        workerThreads[i].join();
+      }
+
+      for (const auto& workerAcc : workerAccumulators) {
+        cpuAccumulator->merge(*workerAcc);
+      }
+    }
+  }
+
+  // Swapchain-free offscreen QRhi tone mapping & readback
   std::unique_ptr<QRhiTexture> colorTexture(rhi->newTexture(
       QRhiTexture::RGBA8, outputSize, 1,
       QRhiTexture::RenderTarget | QRhiTexture::UsedAsTransferSource));
@@ -422,8 +599,14 @@ int main(int argc, char* argv[]) {
   readbackBatch->readBackTexture(QRhiReadbackDescription(colorTexture.get()),
                                  &readbackResult);
 
-  toneMapper.render(cb, renderTarget.get(), &accumulator.histogram(),
-                    accumulator.plottedIterations(), readbackBatch);
+  if (useGpu) {
+    toneMapper.renderFromSsbo(
+        cb, renderTarget.get(), computeEngine.histogramBuffer(),
+        computeEngine.counterBuffer(), outputSize, readbackBatch);
+  } else {
+    toneMapper.render(cb, renderTarget.get(), &cpuAccumulator->histogram(),
+                      cpuAccumulator->plottedIterations(), readbackBatch);
+  }
 
   if (rhi->endOffscreenFrame() != QRhi::FrameOpSuccess) {
     std::cerr << "Failed to end offscreen QRhi frame" << std::endl;

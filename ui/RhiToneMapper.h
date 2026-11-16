@@ -41,11 +41,28 @@ class RhiToneMapper {
               uint64_t plottedIterations,
               QRhiResourceUpdateBatch* endPassUpdates = nullptr);
 
+  // Executes the full-screen tone-mapping render pass directly from
+  // GPU-resident Q40.24 fixed-point HistogramSSBO and 64-bit CounterSSBO
+  // buffers without any CPU histogram round-trips.
+  void renderFromSsbo(QRhiCommandBuffer* cb, QRhiRenderTarget* renderTarget,
+                      QRhiBuffer* histogramBuffer, QRhiBuffer* counterBuffer,
+                      const QSize& histogramSize,
+                      QRhiResourceUpdateBatch* endPassUpdates = nullptr);
+
+  [[nodiscard]] static QShader bakeSsboVertexShader(
+      QString* errorMessage = nullptr);
+  [[nodiscard]] static QShader bakeSsboFragmentShader(
+      QString* errorMessage = nullptr);
+
  private:
   bool ensureShadersBaked(QString* errorMessage);
   bool ensureSharedResources(QString* errorMessage);
   bool ensurePipeline(QRhiRenderPassDescriptor* renderPassDesc, int sampleCount,
                       QString* errorMessage);
+  bool ensureSsboShadersBaked(QString* errorMessage);
+  bool ensureSsboResources(QRhiRenderPassDescriptor* renderPassDesc,
+                           int sampleCount, QRhiBuffer* histogramBuffer,
+                           QRhiBuffer* counterBuffer, QString* errorMessage);
   bool recreateHistogramTexture(const QSize& size);
   bool updateHistogramTexture(const core::HistogramBuffer* histogramToUpload,
                               QRhiResourceUpdateBatch* updates);
@@ -53,15 +70,24 @@ class RhiToneMapper {
   QRhi* rhi_ = nullptr;
   QShader vertexShader_;
   QShader fragmentShader_;
+  QShader ssboVertexShader_;
+  QShader ssboFragmentShader_;
 
   std::unique_ptr<QRhiBuffer> vertexBuffer_;
   std::unique_ptr<QRhiBuffer> uniformBuffer_;
+  std::unique_ptr<QRhiBuffer> ssboUniformBuffer_;
   std::unique_ptr<QRhiSampler> sampler_;
   std::unique_ptr<QRhiTexture> histogramTexture_;
   std::unique_ptr<QRhiShaderResourceBindings> srb_;
+  std::unique_ptr<QRhiShaderResourceBindings> ssboSrb_;
   std::unique_ptr<QRhiGraphicsPipeline> pipeline_;
+  std::unique_ptr<QRhiGraphicsPipeline> ssboPipeline_;
+  QRhiBuffer* ssboBoundHistogram_ = nullptr;
+  QRhiBuffer* ssboBoundCounter_ = nullptr;
   QList<quint32> renderPassFormat_;
+  QList<quint32> ssboRenderPassFormat_;
   int sampleCount_ = 1;
+  int ssboSampleCount_ = 1;
   bool vertexBufferUploaded_ = false;
   bool emptyHistogramUploaded_ = false;
 
