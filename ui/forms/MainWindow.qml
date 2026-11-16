@@ -34,6 +34,16 @@ ApplicationWindow {
     function onWarningEmitted(warning) {
       openSnackbar(warning);
     }
+
+    function onImageExportSucceeded(filePath) {
+      openSnackbar("Image exported");
+      console.log("Exported image to", filePath);
+    }
+
+    function onImageExportFailed(filePath, error) {
+      openSnackbar("Failed to export image");
+      console.error("Could not export image to", filePath, error);
+    }
   }
   // qmllint enable incompatible-type unqualified
 
@@ -67,15 +77,7 @@ ApplicationWindow {
     id: exportImageDialog
     onAccepted: {
       const fileName = Utilities.urlToLocalPath(file);
-      systemPreview.grabToImage(result => {
-        if (result.saveToFile(fileName)) {
-          openSnackbar("Image exported");
-          console.log("Exported image to", fileName);
-        } else {
-          openSnackbar("Failed to export image");
-          console.error("Could not export image to", fileName);
-        }
-      });
+      systemPreview.exportImage(fileName);
     }
   }
 

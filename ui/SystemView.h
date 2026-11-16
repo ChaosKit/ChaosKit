@@ -4,7 +4,9 @@
 #include <QQuickRhiItem>
 #include <QString>
 #include <QtGlobal>
+
 #include <cstdint>
+#include <vector>
 
 #include "CpuAccumulatorDriver.h"
 #include "models/ProjectModel.h"
@@ -46,6 +48,8 @@ class SystemView : public QQuickRhiItem {
     return static_cast<quint64>(plottedIterations_);
   }
 
+  Q_INVOKABLE void exportImage(const QString &filePath);
+
  public slots:
   void clear();
   void setRunning(bool running);
@@ -61,8 +65,18 @@ class SystemView : public QQuickRhiItem {
   void currentIterationsPerPixelChanged();
   void convergedChanged();
   void warningEmitted(const QString &warning);
+  void imageExportSucceeded(const QString &filePath);
+  void imageExportFailed(const QString &filePath, const QString &error);
 
  private:
+  class HistogramRenderer;
+
+  struct ExportRequest {
+    QString filePath;
+    uint32_t width = 0;
+    uint32_t height = 0;
+  };
+
   [[nodiscard]] double computeIterationsPerPixel(uint64_t plotted) const;
   void evaluateConvergence();
   void resetConvergenceState();
@@ -76,6 +90,7 @@ class SystemView : public QQuickRhiItem {
   bool converged_ = false;
   bool running_ = false;
   uint64_t plottedIterations_ = 0;
+  std::vector<ExportRequest> pendingExports_;
 
  private slots:
   void handleBatchCompleted();
