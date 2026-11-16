@@ -478,7 +478,7 @@ TEST_F(SystemViewTest,
   QSignalSpy failedSpy(view_, &SystemView::imageExportFailed);
 
   // 1. Export while paused mid-accumulation (below target IPP).
-  view_->setTargetIterationsPerPixel(500.0);
+  view_->setTargetIterationsPerPixel(100000.0);
   view_->setRunning(true);
   ASSERT_TRUE(QTest::qWaitFor(
       [&]() { return view_->currentIterationsPerPixel() >= 1.0; }, 5000));
