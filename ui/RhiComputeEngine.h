@@ -40,11 +40,18 @@ class RhiComputeEngine {
 
   bool setSystem(const core::CameraSystem& system,
                  QString* errorMessage = nullptr);
+  void clearSystem();
   void setColorMap(const core::ColorMap* colorMap);
   void setSize(const QSize& size);
   void setParticleCount(uint32_t particleCount);
   void setSeed(std::optional<uint64_t> seed);
   void reset();
+
+  // Ensures shared buffers exist, applies any pending ColorMap LUT upload, and
+  // executes clear/init passes if needsReset_ is set, without stepping
+  // particles. Works even before a System is assigned (zeros
+  // Histogram/Counter).
+  bool prepareAndClear(QRhiCommandBuffer* cb, QString* errorMessage = nullptr);
 
   // Records any pending clear/init/color-map updates and dispatches one
   // particle accumulation step with `ticksPerInvocation` ticks per particle.
@@ -59,6 +66,7 @@ class RhiComputeEngine {
   }
   [[nodiscard]] QSize size() const { return size_; }
   [[nodiscard]] uint32_t particleCount() const { return particleCount_; }
+  [[nodiscard]] uint64_t resourceEpoch() const { return resourceEpoch_; }
   [[nodiscard]] size_t cachedPipelineCount() const {
     return pipelineCache_.size();
   }
@@ -80,6 +88,10 @@ class RhiComputeEngine {
   bool ensureSharedResources(uint32_t requiredUniformSize,
                              QString* errorMessage);
   bool ensurePipelineBindings(CachedPipeline& entry, QString* errorMessage);
+  bool prepareUpdatesAndReset(QRhiCommandBuffer* cb, CachedPipeline* cached,
+                              uint32_t ticksPerInvocation,
+                              QRhiResourceUpdateBatch*& updatesOut,
+                              QString* errorMessage);
   void refreshActiveSeed();
 
   QRhi* rhi_ = nullptr;

@@ -21,9 +21,14 @@
 #include <memory>
 #include "SystemView.h"
 #include "chaoskit.pb.h"
+#include "models/BlendModel.h"
 #include "models/ColorMapRegistry.h"
+#include "models/ColoringMethodModel.h"
+#include "models/FormulaModel.h"
 #include "models/ModelFactory.h"
 #include "models/ProjectModel.h"
+#include "models/SystemModel.h"
+#include "models/TransformModel.h"
 
 namespace chaoskit::ui {
 namespace {
@@ -120,6 +125,57 @@ TEST_F(SystemViewTest, ExposesConvergenceDefaultsAndRejectsInvalidTargets) {
 
   EXPECT_DOUBLE_EQ(view_->targetIterationsPerPixel(), 1000.0);
   EXPECT_EQ(targetSpy.size(), 0);
+}
+
+TEST_F(SystemViewTest,
+       UsesGpuComputeWhenSupportedAndClearsHistogramWhilePaused) {
+  QTemporaryDir tempDir;
+  ASSERT_TRUE(tempDir.isValid());
+
+#if defined(Q_OS_MACOS)
+  ASSERT_TRUE(
+      QTest::qWaitFor([&]() { return view_->gpuComputeActive(); }, 5000));
+#endif
+
+  view_->setTargetIterationsPerPixel(5.0);
+  view_->setRunning(true);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+
+  if (view_->gpuComputeActive()) {
+    EXPECT_EQ(view_->compiledPipelineCount(), 1u);
+    EXPECT_FALSE(view_->driver()->isRunning());
+    EXPECT_EQ(view_->driver()->plottedIterations(), 0u);
+  } else {
+    EXPECT_EQ(view_->compiledPipelineCount(), 0u);
+  }
+
+  // Pause and clear: the exported frame must become completely black without
+  // advancing accumulation.
+  view_->setRunning(false);
+  view_->clear();
+  EXPECT_EQ(view_->plottedIterations(), 0u);
+  EXPECT_DOUBLE_EQ(view_->currentIterationsPerPixel(), 0.0);
+
+  QSignalSpy succeededSpy(view_, &SystemView::imageExportSucceeded);
+  QSignalSpy failedSpy(view_, &SystemView::imageExportFailed);
+  const QString clearedPath = tempDir.filePath("cleared_paused.png");
+  view_->exportImage(clearedPath);
+  ASSERT_TRUE(
+      QTest::qWaitFor([&]() { return succeededSpy.size() == 1; }, 5000));
+  EXPECT_EQ(failedSpy.size(), 0);
+
+  const QImage clearedImg(clearedPath);
+  ASSERT_FALSE(clearedImg.isNull());
+  EXPECT_EQ(clearedImg.size(), QSize(32, 32));
+  for (int y = 0; y < clearedImg.height(); ++y) {
+    for (int x = 0; x < clearedImg.width(); ++x) {
+      const QColor px = clearedImg.pixelColor(x, y);
+      EXPECT_EQ(px.red(), 0);
+      EXPECT_EQ(px.green(), 0);
+      EXPECT_EQ(px.blue(), 0);
+    }
+  }
+  EXPECT_EQ(view_->plottedIterations(), 0u);
 }
 
 TEST_F(SystemViewTest,
@@ -632,6 +688,384 @@ TEST_F(SystemViewTest,
 
   qmlView->setRunning(false);
   qmlView->setModel(nullptr);
+}
+
+QImage exportProjectImage(SystemView* view, const QString& path) {
+  QSignalSpy succeededSpy(view, &SystemView::imageExportSucceeded);
+  QSignalSpy failedSpy(view, &SystemView::imageExportFailed);
+  view->exportImage(path);
+  if (!QTest::qWaitFor([&]() { return succeededSpy.size() == 1; }, 5000) ||
+      failedSpy.size() != 0) {
+    return QImage();
+  }
+  return QImage(path);
+}
+
+std::unique_ptr<Project> createMultiFeatureProjectProto() {
+  auto project = std::make_unique<Project>();
+  project->set_gamma(2.2f);
+  project->set_exposure(0.f);
+  project->set_vibrancy(0.f);
+  project->set_width(32);
+  project->set_height(32);
+  project->mutable_color_map()->set_name("BGR");
+
+  auto* system = project->mutable_system();
+  system->set_min_lifetime(0);
+  system->set_max_lifetime(20);
+
+  // Blend 0: contractive affine + DeJong + Linear formulas + SingleColor.
+  auto* blend0 = system->add_blends();
+  blend0->set_enabled(true);
+  blend0->set_weight(1.f);
+  blend0->mutable_coloring_method()->set_single_color(0.15f);
+  auto* pre0 = blend0->mutable_pre();
+  pre0->set_m11(0.25f);
+  pre0->set_m22(0.25f);
+  pre0->set_m31(0.f);
+  pre0->set_m32(0.f);
+
+  auto* dejong = blend0->add_formulas();
+  dejong->set_type("DeJong");
+  dejong->mutable_weight()->set_x(1.f);
+  dejong->mutable_weight()->set_y(1.f);
+  dejong->add_params(0.9379667f);
+  dejong->add_params(1.9387093f);
+  dejong->add_params(-0.1580897f);
+  dejong->add_params(-1.4300701f);
+
+  auto* linear0 = blend0->add_formulas();
+  linear0->set_type("Linear");
+  linear0->mutable_weight()->set_x(0.05f);
+  linear0->mutable_weight()->set_y(0.05f);
+
+  // Blend 1: tiny weight initially, located near (-0.5, -0.5).
+  auto* blend1 = system->add_blends();
+  blend1->set_enabled(true);
+  blend1->set_weight(0.01f);
+  blend1->mutable_coloring_method()->set_single_color(0.15f);
+  auto* pre1 = blend1->mutable_pre();
+  pre1->set_m11(0.25f);
+  pre1->set_m22(0.25f);
+  pre1->set_m31(-0.5f);
+  pre1->set_m32(-0.5f);
+
+  auto* linear1 = blend1->add_formulas();
+  linear1->set_type("Linear");
+  linear1->mutable_weight()->set_x(1.f);
+  linear1->mutable_weight()->set_y(1.f);
+
+  return project;
+}
+
+TEST_F(SystemViewTest,
+       ContinuousEditsAndColorMapSwitchUpdateOutputWithoutRecompiling) {
+  QTemporaryDir tempDir;
+  ASSERT_TRUE(tempDir.isValid());
+
+  projectModel_->setProto(createMultiFeatureProjectProto().release());
+  view_->setTargetIterationsPerPixel(25.0);
+  view_->setRunning(true);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+
+  const quint64 baselineCompileCount = view_->compiledPipelineCount();
+  if (view_->gpuComputeActive()) {
+    ASSERT_GE(baselineCompileCount, 1u);
+  }
+
+  QImage prevImg =
+      exportProjectImage(view_, tempDir.filePath("00_baseline.png"));
+  ASSERT_FALSE(prevImg.isNull());
+
+  auto* system = projectModel_->system();
+  auto* blend0 = system->blends()->at(0);
+  auto* blend1 = system->blends()->at(1);
+  auto* dejong = blend0->formulas()->at(0);
+  auto* linear0 = blend0->formulas()->at(1);
+
+  auto verifyContinuousMutation = [&](const char* tag, auto&& mutator,
+                                      bool expectPixelDiff) {
+    SCOPED_TRACE(tag);
+    mutator();
+    EXPECT_FALSE(view_->converged());
+    EXPECT_DOUBLE_EQ(view_->currentIterationsPerPixel(), 0.0);
+    ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+    EXPECT_EQ(view_->compiledPipelineCount(), baselineCompileCount);
+
+    const QImage nextImg =
+        exportProjectImage(view_, tempDir.filePath(QString("%1.png").arg(tag)));
+    ASSERT_FALSE(nextImg.isNull());
+    if (expectPixelDiff) {
+      EXPECT_NE(nextImg, prevImg);
+    }
+    prevImg = nextImg;
+  };
+
+  // 1. Affine Transform mutation
+  verifyContinuousMutation(
+      "01_affine", [&]() { blend0->pre()->setTranslationX(0.35f); }, true);
+
+  // 2. Formula parameter mutation
+  verifyContinuousMutation(
+      "02_formula_param", [&]() { dejong->setParam(0, -1.8f); }, true);
+
+  // 3. Blend weight mutation
+  verifyContinuousMutation(
+      "03_blend_weight", [&]() { blend1->setWeight(25.0f); }, true);
+
+  // Restore blend0 dominance before testing blend0's formula & coloring.
+  blend1->setWeight(0.01f);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  prevImg = exportProjectImage(view_, tempDir.filePath("03b_restored.png"));
+  ASSERT_FALSE(prevImg.isNull());
+  EXPECT_EQ(view_->compiledPipelineCount(), baselineCompileCount);
+
+  // 4. Formula weight mutation (stays contractive: 0.25 * 2.0 = 0.5 < 1.0)
+  verifyContinuousMutation(
+      "04_formula_weight", [&]() { linear0->setWeight(2.0f); }, true);
+
+  // 5. Coloring Method parameter mutation (0.15 -> 0.5 on BGR)
+  verifyContinuousMutation(
+      "05_coloring_param",
+      [&]() { blend0->coloringMethod()->setParameter(0.5f); }, true);
+
+  // 6. Lifetime bounds mutations (finite bounds + infinite toggle)
+  verifyContinuousMutation(
+      "06a_lifetime_max", [&]() { system->setMaxLifetime(1); }, true);
+  verifyContinuousMutation(
+      "06b_lifetime_max_restore", [&]() { system->setMaxLifetime(20); }, true);
+  verifyContinuousMutation(
+      "06c_lifetime_min", [&]() { system->setMinLifetime(12); }, true);
+
+  system->setInfiniteLifetime(true);
+  EXPECT_FALSE(view_->converged());
+  EXPECT_DOUBLE_EQ(view_->currentIterationsPerPixel(), 0.0);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), baselineCompileCount);
+
+  system->setInfiniteLifetime(false);
+  EXPECT_FALSE(view_->converged());
+  EXPECT_DOUBLE_EQ(view_->currentIterationsPerPixel(), 0.0);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), baselineCompileCount);
+
+  // 7. Color Map switch (LUT upload only, zero recompilation)
+  verifyContinuousMutation(
+      "07_colormap", [&]() { projectModel_->colorMap()->setName("Rainbow"); },
+      true);
+}
+
+TEST_F(SystemViewTest,
+       ToneMappingEditsUpdateOutputWithoutClearingOrRecompiling) {
+  QTemporaryDir tempDir;
+  ASSERT_TRUE(tempDir.isValid());
+
+  // Use a non-achromatic color coordinate so vibrancy alters RGB saturation.
+  projectModel_->system()->blends()->at(0)->coloringMethod()->setParameter(
+      0.2f);
+  view_->setTargetIterationsPerPixel(25.0);
+  view_->setRunning(true);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+
+  const quint64 plottedBefore = view_->plottedIterations();
+  const double ippBefore = view_->currentIterationsPerPixel();
+  const quint64 compilesBefore = view_->compiledPipelineCount();
+  ASSERT_GT(plottedBefore, 0u);
+
+  const QImage baseImg =
+      exportProjectImage(view_, tempDir.filePath("base.png"));
+  ASSERT_FALSE(baseImg.isNull());
+
+  projectModel_->setGamma(1.1f);
+  EXPECT_TRUE(view_->converged());
+  EXPECT_EQ(view_->plottedIterations(), plottedBefore);
+  EXPECT_DOUBLE_EQ(view_->currentIterationsPerPixel(), ippBefore);
+  EXPECT_EQ(view_->compiledPipelineCount(), compilesBefore);
+  const QImage gammaImg =
+      exportProjectImage(view_, tempDir.filePath("gamma.png"));
+  ASSERT_FALSE(gammaImg.isNull());
+  EXPECT_NE(gammaImg, baseImg);
+
+  projectModel_->setExposure(1.8f);
+  EXPECT_TRUE(view_->converged());
+  EXPECT_EQ(view_->plottedIterations(), plottedBefore);
+  EXPECT_DOUBLE_EQ(view_->currentIterationsPerPixel(), ippBefore);
+  EXPECT_EQ(view_->compiledPipelineCount(), compilesBefore);
+  const QImage exposureImg =
+      exportProjectImage(view_, tempDir.filePath("exposure.png"));
+  ASSERT_FALSE(exposureImg.isNull());
+  EXPECT_NE(exposureImg, gammaImg);
+
+  projectModel_->setVibrancy(1.0f);
+  EXPECT_TRUE(view_->converged());
+  EXPECT_EQ(view_->plottedIterations(), plottedBefore);
+  EXPECT_DOUBLE_EQ(view_->currentIterationsPerPixel(), ippBefore);
+  EXPECT_EQ(view_->compiledPipelineCount(), compilesBefore);
+  const QImage vibrancyImg =
+      exportProjectImage(view_, tempDir.filePath("vibrancy.png"));
+  ASSERT_FALSE(vibrancyImg.isNull());
+  EXPECT_NE(vibrancyImg, exposureImg);
+}
+
+TEST_F(SystemViewTest,
+       StructuralSystemEditsCompileUnseenAndReuseCachedPipelines) {
+#if defined(Q_OS_MACOS)
+  ASSERT_TRUE(
+      QTest::qWaitFor([&]() { return view_->gpuComputeActive(); }, 5000));
+#endif
+  if (!view_->gpuComputeActive()) {
+    GTEST_SKIP() << "Pipeline compilation test requires QRhi::Compute support";
+  }
+
+  view_->setTargetIterationsPerPixel(5.0);
+  view_->setRunning(true);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+
+  quint64 expectedCompiles = view_->compiledPipelineCount();
+  ASSERT_EQ(expectedCompiles, 1u);
+
+  auto* system = projectModel_->system();
+
+  // 1. Add blend -> compiles unseen pipeline; delete -> reuses initial cache.
+  system->addBlend();
+  EXPECT_FALSE(view_->converged());
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), ++expectedCompiles);
+
+  system->deleteBlendAt(1);
+  EXPECT_FALSE(view_->converged());
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), expectedCompiles);
+
+  // 2. Add formula -> compiles unseen; delete formula -> reuses cached.
+  auto* blend0 = system->blends()->at(0);
+  blend0->addFormula("Sinusoidal");
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), ++expectedCompiles);
+
+  blend0->deleteFormulaAt(1);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), expectedCompiles);
+
+  // 3. Change formula type -> compiles unseen; revert -> reuses cached.
+  auto* formula0 = blend0->formulas()->at(0);
+  formula0->setType("Spherical");
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), ++expectedCompiles);
+
+  formula0->setType("Linear");
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), expectedCompiles);
+
+  // 4. Change Coloring Method type -> compiles unseen; revert -> reuses cached.
+  blend0->coloringMethod()->setTypeIndex(2);  // Distance
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), ++expectedCompiles);
+
+  blend0->coloringMethod()->setTypeIndex(1);  // SingleColor
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), expectedCompiles);
+
+  // 5. Toggle Camera on -> compiles unseen; continuous Camera transform edit
+  // does not recompile; toggle Camera off -> reuses cached.
+  system->cameraBlend()->setEnabled(true);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), ++expectedCompiles);
+
+  system->cameraBlend()->addPre();
+  // Adding a pre-transform to Camera changes AST structure once.
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), ++expectedCompiles);
+
+  system->cameraBlend()->pre()->setTranslationX(0.25f);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), expectedCompiles);
+
+  system->cameraBlend()->removePre();
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+
+  system->cameraBlend()->setEnabled(false);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), expectedCompiles);
+
+  // 6. Toggle Isolated Blend on -> compiles unseen; clear -> reuses cached.
+  {
+    auto isolatedProto = std::make_unique<Project>(*projectModel_->proto());
+    isolatedProto->mutable_system()->mutable_isolated_blend()->set_index(0);
+    projectModel_->setProto(isolatedProto.release());
+  }
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), ++expectedCompiles);
+
+  {
+    auto unisolatedProto = std::make_unique<Project>(*projectModel_->proto());
+    unisolatedProto->mutable_system()->clear_isolated_blend();
+    projectModel_->setProto(unisolatedProto.release());
+  }
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), expectedCompiles);
+
+  // 7. Toggle Blend enabled on a 2-blend structure -> compiles unseen, then
+  // disabling reuses the 1-blend cache and re-enabling reuses the 2-blend
+  // cache.
+  system->addBlend();
+  auto* blend1 = system->blends()->at(1);
+  blend1->addFormula("Swirl");
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), ++expectedCompiles);
+
+  blend1->setEnabled(false);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), expectedCompiles);
+
+  blend1->setEnabled(true);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_EQ(view_->compiledPipelineCount(), expectedCompiles);
+}
+
+TEST_F(
+    SystemViewTest,
+    AdaptiveDispatchAccumulatesWithoutTimerAndPausedColorMapEditClearsBlack) {
+  QTemporaryDir tempDir;
+  ASSERT_TRUE(tempDir.isValid());
+
+  // 64x64 at 150 IPP = 614,400 iterations, requiring multiple adaptive frames
+  // driven solely by QQuickRhiItemRenderer::update() without any QML Timer.
+  projectModel_->setWidth(64);
+  projectModel_->setHeight(64);
+  view_->setTargetIterationsPerPixel(150.0);
+
+  QSignalSpy frameSpy(window_.get(), &QQuickWindow::frameSwapped);
+  const int initialFrames = frameSpy.size();
+
+  view_->setRunning(true);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+  EXPECT_GT(frameSpy.size(), initialFrames);
+  EXPECT_GE(view_->currentIterationsPerPixel(), 150.0);
+
+  const quint64 compilesAfterRun = view_->compiledPipelineCount();
+
+  // Pause and switch ColorMap: must clear HistogramSSBO + CounterSSBO to black
+  // without compiling shaders or stepping particles.
+  view_->setRunning(false);
+  projectModel_->colorMap()->setName("Rainbow");
+  EXPECT_EQ(view_->plottedIterations(), 0u);
+  EXPECT_DOUBLE_EQ(view_->currentIterationsPerPixel(), 0.0);
+
+  const QImage clearedImg =
+      exportProjectImage(view_, tempDir.filePath("paused_colormap_clear.png"));
+  ASSERT_FALSE(clearedImg.isNull());
+  EXPECT_EQ(clearedImg.size(), QSize(64, 64));
+  for (int y = 0; y < clearedImg.height(); ++y) {
+    for (int x = 0; x < clearedImg.width(); ++x) {
+      const QColor px = clearedImg.pixelColor(x, y);
+      EXPECT_EQ(px.red(), 0);
+      EXPECT_EQ(px.green(), 0);
+      EXPECT_EQ(px.blue(), 0);
+    }
+  }
+  EXPECT_EQ(view_->plottedIterations(), 0u);
+  EXPECT_EQ(view_->compiledPipelineCount(), compilesAfterRun);
 }
 
 }  // namespace

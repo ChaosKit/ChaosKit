@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <exception>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <random>
 #include <utility>
@@ -339,6 +340,12 @@ bool RhiComputeEngine::setSystem(const core::CameraSystem& system,
   return true;
 }
 
+void RhiComputeEngine::clearSystem() {
+  system_.reset();
+  activeStructuralKey_.clear();
+  reset();
+}
+
 void RhiComputeEngine::setColorMap(const core::ColorMap* colorMap) {
   if (colorMap_ == colorMap) {
     return;
@@ -566,15 +573,18 @@ bool RhiComputeEngine::ensureSharedResources(uint32_t requiredUniformSize,
   }
   if (!histogramBuffer_ || histogramDirty_ ||
       histogramBuffer_->size() != static_cast<quint32>(histogramBytes)) {
-    histogramBuffer_.reset(
+    std::unique_ptr<QRhiBuffer> newHistogramBuffer(
         rhi_->newBuffer(QRhiBuffer::Static, QRhiBuffer::StorageBuffer,
                         static_cast<quint32>(histogramBytes)));
-    if (!histogramBuffer_ || !histogramBuffer_->create()) {
+    if (!newHistogramBuffer || !newHistogramBuffer->create()) {
       if (errorMessage != nullptr) {
         *errorMessage = QStringLiteral("Failed to create histogram SSBO");
       }
       return false;
     }
+    // Keep the old QRhiBuffer alive until after newHistogramBuffer is allocated
+    // so the new wrapper pointer cannot alias the old one in RhiToneMapper.
+    histogramBuffer_ = std::move(newHistogramBuffer);
     histogramDirty_ = false;
     resourceRecreated = true;
   }
@@ -662,76 +672,72 @@ bool RhiComputeEngine::ensurePipelineBindings(CachedPipeline& entry,
   return true;
 }
 
-bool RhiComputeEngine::dispatch(QRhiCommandBuffer* cb,
-                                uint32_t ticksPerInvocation,
-                                QString* errorMessage) {
-  if (rhi_ == nullptr || cb == nullptr || !system_.has_value()) {
-    if (errorMessage != nullptr) {
-      *errorMessage =
-          QStringLiteral("Compute engine not initialized or system not set");
-    }
-    return false;
-  }
-  if (ticksPerInvocation == 0) {
-    return true;
-  }
+bool RhiComputeEngine::prepareUpdatesAndReset(
+    QRhiCommandBuffer* cb, CachedPipeline* cached, uint32_t ticksPerInvocation,
+    QRhiResourceUpdateBatch*& updatesOut, QString* errorMessage) {
+  updatesOut = nullptr;
 
-  auto cacheIt = pipelineCache_.find(activeStructuralKey_);
-  if (cacheIt == pipelineCache_.end()) {
-    if (errorMessage != nullptr) {
-      *errorMessage =
-          QStringLiteral("Compiled pipeline missing from compute cache");
-    }
-    return false;
-  }
-
-  CachedPipeline& cached = cacheIt->second;
-  if (!ensureSharedResources(cached.layout.uniformBufferSize, errorMessage)) {
+  const uint32_t requiredUniformSize =
+      cached != nullptr ? cached->layout.uniformBufferSize
+                        : core::GpuSystemCompiler::kHeaderByteSize + 16u;
+  if (!ensureSharedResources(requiredUniformSize, errorMessage)) {
     return false;
   }
   if (!ensureBuiltinPipelines(errorMessage)) {
     return false;
   }
-  if (!ensurePipelineBindings(cached, errorMessage)) {
-    return false;
-  }
-  if (!cached.pipeline) {
-    cached.pipeline.reset(rhi_->newComputePipeline());
-    cached.pipeline->setShaderStage({QRhiShaderStage::Compute, cached.shader});
-    cached.pipeline->setShaderResourceBindings(cached.srb.get());
-    if (!cached.pipeline->create()) {
-      cached.pipeline.reset();
-      if (errorMessage != nullptr) {
-        *errorMessage = QStringLiteral("Failed to create compute pipeline");
-      }
+  if (cached != nullptr) {
+    if (!ensurePipelineBindings(*cached, errorMessage)) {
       return false;
+    }
+    if (!cached->pipeline) {
+      cached->pipeline.reset(rhi_->newComputePipeline());
+      cached->pipeline->setShaderStage(
+          {QRhiShaderStage::Compute, cached->shader});
+      cached->pipeline->setShaderResourceBindings(cached->srb.get());
+      if (!cached->pipeline->create()) {
+        cached->pipeline.reset();
+        if (errorMessage != nullptr) {
+          *errorMessage = QStringLiteral("Failed to create compute pipeline");
+        }
+        return false;
+      }
     }
   }
 
-  std::vector<uint8_t> uniformBytes;
-  try {
-    const core::GpuDispatchConfig config{
-        static_cast<uint32_t>(size_.width()),
-        static_cast<uint32_t>(size_.height()),
-        particleCount_,
-        ticksPerInvocation,
-        seededMode_,
-        activeSeed_,
-        tickOffset_,
-    };
-    uniformBytes =
-        core::GpuSystemCompiler::packUniforms(cached.layout, *system_, config);
-  } catch (const std::exception& e) {
-    if (errorMessage != nullptr) {
-      *errorMessage = QString::fromUtf8(e.what());
-    }
-    return false;
+  const bool needUniforms =
+      cached != nullptr && (ticksPerInvocation > 0 || needsReset_);
+  if (!needUniforms && !colorMapDirty_ && !needsReset_) {
+    return true;
   }
 
   QRhiResourceUpdateBatch* updates = rhi_->nextResourceUpdateBatch();
-  updates->updateDynamicBuffer(uniformBuffer_.get(), 0,
-                               static_cast<quint32>(uniformBytes.size()),
-                               uniformBytes.data());
+
+  if (needUniforms) {
+    std::vector<uint8_t> uniformBytes;
+    try {
+      const core::GpuDispatchConfig config{
+          static_cast<uint32_t>(size_.width()),
+          static_cast<uint32_t>(size_.height()),
+          particleCount_,
+          ticksPerInvocation,
+          seededMode_,
+          activeSeed_,
+          tickOffset_,
+      };
+      uniformBytes = core::GpuSystemCompiler::packUniforms(cached->layout,
+                                                           *system_, config);
+    } catch (const std::exception& e) {
+      updates->release();
+      if (errorMessage != nullptr) {
+        *errorMessage = QString::fromUtf8(e.what());
+      }
+      return false;
+    }
+    updates->updateDynamicBuffer(uniformBuffer_.get(), 0,
+                                 static_cast<quint32>(uniformBytes.size()),
+                                 uniformBytes.data());
+  }
 
   if (colorMapDirty_) {
     const std::vector<core::Color> lut = sampleColorMapLut(colorMap_);
@@ -762,20 +768,88 @@ bool RhiComputeEngine::dispatch(QRhiCommandBuffer* cb,
     updates->updateDynamicBuffer(clearUniformBuffer_.get(), 0,
                                  sizeof(clearUniforms), &clearUniforms);
 
-    const int particleGroups =
-        static_cast<int>(particleCount_ / kWorkgroupSize);
     cb->beginComputePass(updates);
     cb->setComputePipeline(clearPipeline_.get());
     cb->setShaderResources(clearSrb_.get());
     cb->dispatch(static_cast<int>(clearGroups), 1, 1);
 
-    cb->setComputePipeline(initPipeline_.get());
-    cb->setShaderResources(initSrb_.get());
-    cb->dispatch(particleGroups, 1, 1);
+    if (cached != nullptr) {
+      const int particleGroups =
+          static_cast<int>(particleCount_ / kWorkgroupSize);
+      cb->setComputePipeline(initPipeline_.get());
+      cb->setShaderResources(initSrb_.get());
+      cb->dispatch(particleGroups, 1, 1);
+    }
     cb->endComputePass();
 
     updates = nullptr;
     needsReset_ = false;
+  }
+
+  updatesOut = updates;
+  return true;
+}
+
+bool RhiComputeEngine::prepareAndClear(QRhiCommandBuffer* cb,
+                                       QString* errorMessage) {
+  if (rhi_ == nullptr || cb == nullptr) {
+    if (errorMessage != nullptr) {
+      *errorMessage = QStringLiteral("Compute engine not initialized");
+    }
+    return false;
+  }
+
+  CachedPipeline* cached = nullptr;
+  if (system_.has_value()) {
+    auto cacheIt = pipelineCache_.find(activeStructuralKey_);
+    if (cacheIt == pipelineCache_.end()) {
+      if (errorMessage != nullptr) {
+        *errorMessage =
+            QStringLiteral("Compiled pipeline missing from compute cache");
+      }
+      return false;
+    }
+    cached = &cacheIt->second;
+  }
+
+  QRhiResourceUpdateBatch* updates = nullptr;
+  if (!prepareUpdatesAndReset(cb, cached, 0u, updates, errorMessage)) {
+    return false;
+  }
+  if (updates != nullptr) {
+    cb->resourceUpdate(updates);
+  }
+  return true;
+}
+
+bool RhiComputeEngine::dispatch(QRhiCommandBuffer* cb,
+                                uint32_t ticksPerInvocation,
+                                QString* errorMessage) {
+  if (rhi_ == nullptr || cb == nullptr || !system_.has_value()) {
+    if (errorMessage != nullptr) {
+      *errorMessage =
+          QStringLiteral("Compute engine not initialized or system not set");
+    }
+    return false;
+  }
+  if (ticksPerInvocation == 0) {
+    return prepareAndClear(cb, errorMessage);
+  }
+
+  auto cacheIt = pipelineCache_.find(activeStructuralKey_);
+  if (cacheIt == pipelineCache_.end()) {
+    if (errorMessage != nullptr) {
+      *errorMessage =
+          QStringLiteral("Compiled pipeline missing from compute cache");
+    }
+    return false;
+  }
+
+  CachedPipeline& cached = cacheIt->second;
+  QRhiResourceUpdateBatch* updates = nullptr;
+  if (!prepareUpdatesAndReset(cb, &cached, ticksPerInvocation, updates,
+                              errorMessage)) {
+    return false;
   }
 
   const int particleGroups = static_cast<int>(particleCount_ / kWorkgroupSize);

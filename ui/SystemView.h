@@ -2,13 +2,17 @@
 #define CHAOSKIT_UI_SYSTEMVIEW_H
 
 #include <QQuickRhiItem>
+#include <QSize>
 #include <QString>
 #include <QtGlobal>
 
 #include <cstdint>
+#include <optional>
 #include <vector>
 
 #include "CpuAccumulatorDriver.h"
+#include "core/CameraSystem.h"
+#include "core/ColorMap.h"
 #include "models/ProjectModel.h"
 
 namespace chaoskit::ui {
@@ -26,6 +30,10 @@ class SystemView : public QQuickRhiItem {
   Q_PROPERTY(double currentIterationsPerPixel READ currentIterationsPerPixel
                  NOTIFY currentIterationsPerPixelChanged)
   Q_PROPERTY(bool converged READ converged NOTIFY convergedChanged)
+  Q_PROPERTY(quint64 compiledPipelineCount READ compiledPipelineCount NOTIFY
+                 compiledPipelineCountChanged)
+  Q_PROPERTY(bool gpuComputeActive READ gpuComputeActive NOTIFY
+                 gpuComputeActiveChanged)
  public:
   explicit SystemView(QQuickItem *parent = nullptr);
 
@@ -47,6 +55,10 @@ class SystemView : public QQuickRhiItem {
   [[nodiscard]] quint64 plottedIterations() const {
     return static_cast<quint64>(plottedIterations_);
   }
+  [[nodiscard]] quint64 compiledPipelineCount() const {
+    return compiledPipelineCount_;
+  }
+  [[nodiscard]] bool gpuComputeActive() const { return gpuComputeActive_; }
 
   Q_INVOKABLE void exportImage(const QString &filePath);
 
@@ -64,6 +76,8 @@ class SystemView : public QQuickRhiItem {
   void infiniteAccumulationChanged();
   void currentIterationsPerPixelChanged();
   void convergedChanged();
+  void compiledPipelineCountChanged();
+  void gpuComputeActiveChanged();
   void warningEmitted(const QString &warning);
   void imageExportSucceeded(const QString &filePath);
   void imageExportFailed(const QString &filePath, const QString &error);
@@ -81,6 +95,10 @@ class SystemView : public QQuickRhiItem {
   void evaluateConvergence();
   void resetConvergenceState();
   void syncDriverRunning();
+  void handleRendererBackendReady(bool gpuActive);
+  void handleGpuCompileCountChanged(quint64 compileCount);
+  void handleGpuReadback(uint64_t generation, uint64_t plottedIterations);
+  void handleGpuError(const QString &message);
 
   CpuAccumulatorDriver *driver_;
   ProjectModel *model_ = nullptr;
@@ -89,7 +107,17 @@ class SystemView : public QQuickRhiItem {
   double currentIterationsPerPixel_ = 0.0;
   bool converged_ = false;
   bool running_ = false;
+  bool backendKnown_ = false;
+  bool gpuComputeActive_ = false;
   uint64_t plottedIterations_ = 0;
+  quint64 compiledPipelineCount_ = 0;
+  std::optional<core::CameraSystem> gpuSystem_ = std::nullopt;
+  const core::ColorMap *colorMapPtr_ = nullptr;
+  QSize bufferSize_ = QSize(1, 1);
+  uint64_t systemVersion_ = 0;
+  uint64_t colorMapVersion_ = 0;
+  uint64_t sizeVersion_ = 0;
+  uint64_t editGeneration_ = 1;
   std::vector<ExportRequest> pendingExports_;
 
  private slots:

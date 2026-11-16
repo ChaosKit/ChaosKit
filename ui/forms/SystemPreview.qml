@@ -6,8 +6,6 @@ import ChaosKit
 SystemView {
   id: systemView
 
-  property bool autoRefresh: true
-  property int refreshInterval: 100
   property real zoom: 1.0
   property real translationX: 0
   property real translationY: 0
@@ -28,15 +26,6 @@ SystemView {
     }
   ]
   width: projectModel.width
-
-  Timer {
-    interval: parent.refreshInterval
-    running: parent.autoRefresh && parent.running
-    repeat: true
-    onTriggered: {
-      systemView.update();
-    }
-  }
 
   // Panning
 
