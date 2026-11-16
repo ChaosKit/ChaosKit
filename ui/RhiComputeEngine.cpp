@@ -181,6 +181,7 @@ void RhiComputeEngine::releaseResources() {
   colorMapDirty_ = true;
   particlesDirty_ = true;
   histogramDirty_ = true;
+  counterDirty_ = true;
   resourceEpoch_ = 0;
   clearBoundEpoch_ = 0;
   initBoundEpoch_ = 0;
@@ -309,6 +310,7 @@ void RhiComputeEngine::setSeed(std::optional<uint64_t> seed) {
 
 void RhiComputeEngine::reset() {
   needsReset_ = true;
+  counterDirty_ = true;
   tickOffset_ = 0;
   refreshActiveSeed();
 }
@@ -512,15 +514,20 @@ bool RhiComputeEngine::ensureSharedResources(uint32_t requiredUniformSize,
     resourceRecreated = true;
   }
 
-  if (!counterBuffer_) {
-    counterBuffer_.reset(rhi_->newBuffer(
+  if (!counterBuffer_ || counterDirty_) {
+    std::shared_ptr<QRhiBuffer> newCounterBuffer(rhi_->newBuffer(
         QRhiBuffer::Static, QRhiBuffer::StorageBuffer, kCounterBytes));
-    if (!counterBuffer_ || !counterBuffer_->create()) {
+    if (!newCounterBuffer || !newCounterBuffer->create()) {
       if (errorMessage != nullptr) {
         *errorMessage = QStringLiteral("Failed to create counter SSBO");
       }
       return false;
     }
+    // Keep old counterBuffer_ alive until after allocation so pointer addresses
+    // never alias in RhiToneMapper, while callers with in-flight readbacks
+    // hold counterBufferHandle() until QRhi completes their readbacks.
+    counterBuffer_ = std::move(newCounterBuffer);
+    counterDirty_ = false;
     resourceRecreated = true;
   }
 

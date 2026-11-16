@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -227,7 +228,8 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
       *aliveToken_ = false;
       aliveToken_.reset();
     }
-    if (rhi_ != nullptr && !rhi_->isRecordingFrame() && readbackInFlight_) {
+    if (rhi_ != nullptr && !rhi_->isRecordingFrame() &&
+        activeReadbackCount_ > 0) {
       rhi_->finish();
     }
     computeEngine_.releaseResources();
@@ -240,7 +242,8 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
  protected:
   void initialize(QRhiCommandBuffer * /*cb*/) override {
     if (rhi_ != rhi()) {
-      if (rhi_ != nullptr && !rhi_->isRecordingFrame() && readbackInFlight_) {
+      if (rhi_ != nullptr && !rhi_->isRecordingFrame() &&
+          activeReadbackCount_ > 0) {
         rhi_->finish();
       }
       if (aliveToken_) {
@@ -248,6 +251,7 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
       }
       aliveToken_ = std::make_shared<bool>(true);
       readbackInFlight_ = false;
+      activeReadbackCount_ = 0;
 
       computeEngine_.releaseResources();
       toneMapper_.releaseResources();
@@ -417,6 +421,7 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
     QRhiReadbackResult result;
     uint64_t generation = 0;
     uint64_t readbackId = 0;
+    std::shared_ptr<QRhiBuffer> counterBufferRef;
     std::shared_ptr<CounterReadback> self;
   };
 
@@ -443,8 +448,7 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
 
         const double vsyncPeriodMs =
             (screenRefreshHz_ > 1.0) ? (1000.0 / screenRefreshHz_) : 16.6667;
-        const bool isVsyncPinned =
-            (vsyncPeriodMs >= 13.0) && (emaFrameMs_ <= vsyncPeriodMs * 1.15);
+        const bool isVsyncPinned = emaFrameMs_ <= vsyncPeriodMs * 1.15;
 
         if (emaFrameMs_ > (std::max)(kTargetHighMs, vsyncPeriodMs * 1.2)) {
           overloadCapTicks_ =
@@ -518,6 +522,9 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
       return;
     }
 
+    if (renderer->activeReadbackCount_ > 0) {
+      --renderer->activeReadbackCount_;
+    }
     if (lockedReq->readbackId == renderer->latestReadbackId_) {
       renderer->readbackInFlight_ = false;
     }
@@ -562,7 +569,9 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
     auto req = std::make_shared<CounterReadback>();
     req->generation = readbackGen;
     req->readbackId = readbackId;
+    req->counterBufferRef = computeEngine_.counterBufferHandle();
     req->self = req;
+    ++activeReadbackCount_;
 
     std::weak_ptr<CounterReadback> weakReq = req;
     std::weak_ptr<bool> weakAlive = aliveToken_;
@@ -573,7 +582,7 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
     };
 
     QRhiResourceUpdateBatch *counterBatch = rhi_->nextResourceUpdateBatch();
-    counterBatch->readBackBuffer(computeEngine_.counterBuffer(), 0, 16,
+    counterBatch->readBackBuffer(req->counterBufferRef.get(), 0, 16,
                                  &req->result);
     cb->resourceUpdate(counterBatch);
   }
@@ -801,6 +810,7 @@ class SystemView::HistogramRenderer : public QQuickRhiItemRenderer {
   uint64_t estimatedFallbackPlotted_ = 0;
 
   bool readbackInFlight_ = false;
+  size_t activeReadbackCount_ = 0;
   uint64_t inFlightGeneration_ = 0;
   uint64_t latestReadbackId_ = 0;
 

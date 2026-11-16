@@ -68,6 +68,9 @@ class RhiComputeEngine {
   [[nodiscard]] QRhiBuffer* counterBuffer() const {
     return counterBuffer_.get();
   }
+  [[nodiscard]] std::shared_ptr<QRhiBuffer> counterBufferHandle() const {
+    return counterBuffer_;
+  }
   [[nodiscard]] QSize size() const { return size_; }
   [[nodiscard]] uint32_t particleCount() const { return particleCount_; }
   [[nodiscard]] uint64_t resourceEpoch() const { return resourceEpoch_; }
@@ -112,7 +115,7 @@ class RhiComputeEngine {
   std::unique_ptr<QRhiBuffer> uniformBuffer_;
   std::unique_ptr<QRhiBuffer> particleBuffer_;
   std::unique_ptr<QRhiBuffer> histogramBuffer_;
-  std::unique_ptr<QRhiBuffer> counterBuffer_;
+  std::shared_ptr<QRhiBuffer> counterBuffer_;
   std::unique_ptr<QRhiTexture> colorMapTexture_;
   std::unique_ptr<QRhiSampler> colorMapSampler_;
 
@@ -132,6 +135,7 @@ class RhiComputeEngine {
   bool colorMapDirty_ = true;
   bool particlesDirty_ = true;
   bool histogramDirty_ = true;
+  bool counterDirty_ = true;
   uint64_t resourceEpoch_ = 0;
   uint64_t clearBoundEpoch_ = 0;
   uint64_t initBoundEpoch_ = 0;

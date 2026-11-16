@@ -1068,6 +1068,158 @@ TEST_F(
   EXPECT_EQ(view_->compiledPipelineCount(), compilesAfterRun);
 }
 
+std::unique_ptr<Project> createQuadraticProjectProto() {
+  auto project = std::make_unique<Project>();
+  project->set_gamma(2.2f);
+  project->set_exposure(0.f);
+  project->set_vibrancy(0.f);
+  project->set_width(1024);
+  project->set_height(1024);
+  project->mutable_color_map()->set_name("Rainbow");
+
+  auto* system = project->mutable_system();
+  system->set_min_lifetime(0);
+  system->set_max_lifetime(-1);
+  system->mutable_initial_transform()->set_m11(0.5f);
+  system->mutable_initial_transform()->set_m22(0.5f);
+
+  auto* blend = system->add_blends();
+  blend->set_enabled(true);
+  blend->set_weight(1.f);
+  blend->mutable_coloring_method()->set_distance(0.2f);
+  blend->mutable_pre()->set_m11(1.f);
+  blend->mutable_pre()->set_m22(1.f);
+  blend->mutable_post()->set_m11(1.f);
+  blend->mutable_post()->set_m22(1.f);
+
+  auto* formula = blend->add_formulas();
+  formula->set_type("Quadratic");
+  formula->mutable_weight()->set_x(1.f);
+  formula->mutable_weight()->set_y(1.f);
+  const float params[] = {-0.3426902f,   0.0111925136f, -0.474016398f,
+                          -0.365768552f, -1.11398947f,  -0.00851197448f,
+                          0.252567828f,  0.220981747f,  -1.53484643f,
+                          0.348529458f,  0.737327933f,  0.599440217f};
+  for (float p : params) {
+    formula->add_params(p);
+  }
+
+  auto* camera = system->mutable_camera();
+  camera->set_enabled(true);
+  camera->mutable_pre()->set_m11(1.f);
+  camera->mutable_pre()->set_m22(1.f);
+  camera->mutable_post()->set_m11(0.4f);
+  camera->mutable_post()->set_m22(0.4f);
+
+  return project;
+}
+
+int countNonBlackPixels(const QImage& image) {
+  int count = 0;
+  for (int y = 0; y < image.height(); ++y) {
+    for (int x = 0; x < image.width(); ++x) {
+      const QColor px = image.pixelColor(x, y);
+      if (px.red() > 0 || px.green() > 0 || px.blue() > 0) {
+        ++count;
+      }
+    }
+  }
+  return count;
+}
+
+TEST_F(SystemViewTest,
+       RapidAndPostConvergenceEditsNeverConvergePrematurelyFromStaleCounter) {
+  QTemporaryDir tempDir;
+  ASSERT_TRUE(tempDir.isValid());
+
+  projectModel_->setProto(createQuadraticProjectProto().release());
+  window_->resize(256, 256);
+  view_->setSize(QSizeF(256, 256));
+  view_->setTargetIterationsPerPixel(200.0);
+  view_->setRunning(true);
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000));
+
+  auto* system = projectModel_->system();
+  auto* blend = system->blends()->at(0);
+  auto* pre = blend->pre();
+
+  const QImage baselineImg =
+      exportProjectImage(view_, tempDir.filePath("baseline.png"));
+  ASSERT_FALSE(baselineImg.isNull());
+  const int baselineNonBlack = countNonBlackPixels(baselineImg);
+  ASSERT_GT(baselineNonBlack, 25000);
+
+  QSignalSpy frameSpy(window_.get(), &QQuickWindow::frameSwapped);
+
+  // Part A: Pure UI edits without exportImage inside the loop.
+  // 1. Post-convergence cycling between maxLifetime 30 and infinite.
+  for (int i = 0; i < 10; ++i) {
+    SCOPED_TRACE(::testing::Message() << "lifetime_cycle=" << i);
+    const int framesAtEdit = frameSpy.size();
+    if (i % 2 == 0) {
+      system->setInfiniteLifetime(false);
+      system->setMaxLifetime(30);
+    } else {
+      system->setInfiniteLifetime(true);
+    }
+    EXPECT_FALSE(view_->converged());
+    EXPECT_DOUBLE_EQ(view_->currentIterationsPerPixel(), 0.0);
+    ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000))
+        << "Stalled waiting for convergence (ipp="
+        << view_->currentIterationsPerPixel()
+        << ", frames=" << (frameSpy.size() - framesAtEdit) << ")";
+    EXPECT_GE(frameSpy.size() - framesAtEdit, 5)
+        << "Premature convergence in too few frames (ipp="
+        << view_->currentIterationsPerPixel() << ")";
+  }
+
+  // 2. Rapid bursts of pre-transform & lifetime edits across in-flight frames.
+  for (int burst = 0; burst < 10; ++burst) {
+    SCOPED_TRACE(::testing::Message() << "burst=" << burst);
+    pre->setScaleX(1.0f + 0.01f * static_cast<float>((burst % 5) + 1));
+    QTest::qWait((burst % 4) * 5);
+    if ((burst % 2) == 0) {
+      system->setMaxLifetime(30);
+    } else {
+      system->setInfiniteLifetime(true);
+    }
+    QTest::qWait((burst % 3) * 4);
+    const int framesAtFinalEdit = frameSpy.size();
+    pre->setScaleX(1.0f);
+
+    EXPECT_FALSE(view_->converged());
+    ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000))
+        << "Stalled after rapid edit (ipp="
+        << view_->currentIterationsPerPixel()
+        << ", frames=" << (frameSpy.size() - framesAtFinalEdit) << ")";
+    EXPECT_GE(frameSpy.size() - framesAtFinalEdit, 5)
+        << "Premature convergence after rapid edit (ipp="
+        << view_->currentIterationsPerPixel() << ")";
+  }
+
+  const QImage partAImg =
+      exportProjectImage(view_, tempDir.filePath("part_a_final.png"));
+  ASSERT_FALSE(partAImg.isNull());
+  EXPECT_GT(countNonBlackPixels(partAImg), baselineNonBlack / 2);
+
+  // Part B: Toggling maxLifetime/infinite directly after exportImage
+  // (burst 9 left isInfiniteLifetime == true, so switch to 30 then infinite).
+  system->setMaxLifetime(30);
+  EXPECT_FALSE(view_->converged());
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000))
+      << "Stalled after exportImage + setMaxLifetime(30) (ipp="
+      << view_->currentIterationsPerPixel() << ")";
+  system->setInfiniteLifetime(true);
+  EXPECT_FALSE(view_->converged());
+  ASSERT_TRUE(QTest::qWaitFor([&]() { return view_->converged(); }, 5000))
+      << "Stalled after exportImage + setInfiniteLifetime(true) (ipp="
+      << view_->currentIterationsPerPixel() << ")";
+  const QImage partBImg =
+      exportProjectImage(view_, tempDir.filePath("part_b_final.png"));
+  ASSERT_FALSE(partBImg.isNull());
+  EXPECT_GT(countNonBlackPixels(partBImg), baselineNonBlack / 2);
+}
+
 }  // namespace
 }  // namespace chaoskit::ui
 
