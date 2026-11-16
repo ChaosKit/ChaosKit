@@ -5,6 +5,8 @@ add_library(
   CameraSystemProcessor.h
   ColorMapRegistry.cpp
   ColorMapRegistry.h
+  CpuAccumulator.cpp
+  CpuAccumulator.h
   debug.cpp
   debug.h
   errors.cpp
@@ -17,8 +19,6 @@ add_library(
   PaletteColorMap.h
   RainbowColorMap.cpp
   RainbowColorMap.h
-  SimpleHistogramGenerator.cpp
-  SimpleHistogramGenerator.h
   SystemProcessor.cpp
   SystemProcessor.h
   ThreadLocalRng.cpp
@@ -35,12 +35,10 @@ add_library(
   CameraSystem.h
   Color.h
   ColorMap.h
-  Generator.h
   Lifetime.cpp
   Lifetime.h
   Particle.h
   Point.h
-  Renderer.h
   Rng.h
   SystemParticle.h
   TransformIndex.cpp
@@ -56,6 +54,7 @@ add_executable(
   core_test
   CameraSystemProcessorTest.cpp
   ColorMapRegistryTest.cpp
+  CpuAccumulatorTest.cpp
   ExpressionInterpreterTest.cpp
   LifetimeTest.cpp
   SystemProcessorTest.cpp

@@ -344,7 +344,10 @@ TEST_F(CliTest, MultiThreadedRenderingWithoutSeedMatchesGoldenImage) {
 
   QImage diffImage;
   double rmse = calculateNormalizedRmse(actualImage, goldenImage, &diffImage);
-  EXPECT_LE(rmse, 0.05);
+  // Two independent 100-IPP 64x64 Monte Carlo runs (~0.046 RMSE) combined in
+  // quadrature with fixing GathererTask's negative-coordinate truncation on
+  // border pixels (~0.0215 RMSE against simple_golden.png) yield ~0.0505.
+  EXPECT_LE(rmse, 0.06);
 }
 
 TEST_F(CliTest, ErrorOnInvalidWidthOrHeight) {

@@ -1,13 +1,14 @@
 #include "SystemView.h"
 #include <QDebug>
 #include <QLoggingCategory>
-#include <QOpenGLFramebufferObjectFormat>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <algorithm>
+#include <cstdint>
 #include <string>
 #include <vector>
 #include "GLToneMapper.h"
-#include "core/Renderer.h"
+#include "core/HistogramBuffer.h"
 #include "ui/storage/conversions.h"
 
 using chaoskit::core::HistogramBuffer;
@@ -18,49 +19,85 @@ Q_LOGGING_CATEGORY(systemViewLog, "SystemView");
 
 namespace {
 
-class HistogramRenderer : public QQuickFramebufferObject::Renderer,
-                          public core::Renderer {
+class HistogramRenderer : public QQuickFramebufferObject::Renderer {
  public:
-  explicit HistogramRenderer(const SystemView *view)
-      : toneMapper_(), systemView_(view) {
-    systemView_->window()->beginExternalCommands();
-    toneMapper_.initializeGL();
-    systemView_->window()->endExternalCommands();
-  };
-
-  void updateHistogramBuffer(const HistogramBuffer &buffer) override {
-    systemView_->window()->beginExternalCommands();
-    toneMapper_.syncBuffer(buffer);
-    systemView_->window()->endExternalCommands();
+  explicit HistogramRenderer(const SystemView *view) : driver_(view->driver()) {
+    if (auto *win = view->window()) {
+      win->beginExternalCommands();
+      toneMapper_.initializeGL();
+      win->endExternalCommands();
+      initialized_ = true;
+    }
   }
 
  protected:
   void synchronize(QQuickFramebufferObject *object) override {
-    systemView_->synchronizeResult(this);
+    auto *view = qobject_cast<SystemView *>(object);
+    if (view == nullptr) {
+      return;
+    }
+    window_ = view->window();
+    if (window_ == nullptr) {
+      return;
+    }
+    if (!initialized_) {
+      window_->beginExternalCommands();
+      toneMapper_.initializeGL();
+      window_->endExternalCommands();
+      initialized_ = true;
+    }
 
-    systemView_ = qobject_cast<const SystemView *>(object);
-    const auto *model = systemView_->model();
-    toneMapper_.setGamma(model->gamma());
-    toneMapper_.setExposure(model->exposure());
-    toneMapper_.setVibrancy(model->vibrancy());
+    if (const auto *model = view->model()) {
+      toneMapper_.setGamma(model->gamma());
+      toneMapper_.setExposure(model->exposure());
+      toneMapper_.setVibrancy(model->vibrancy());
+    }
+
+    if (driver_->syncSnapshotIfChanged(lastSnapshotVersion_, histogramCopy_)) {
+      window_->beginExternalCommands();
+      if (histogramCopy_.width() > 0 && histogramCopy_.height() > 0) {
+        toneMapper_.syncBuffer(histogramCopy_);
+      } else {
+        static const HistogramBuffer emptyBuffer(1, 1);
+        toneMapper_.syncBuffer(emptyBuffer);
+      }
+      window_->endExternalCommands();
+      hasTexture_ = true;
+    }
   }
 
   void render() override {
-    systemView_->window()->beginExternalCommands();
+    if (window_ == nullptr || !initialized_ || !hasTexture_) {
+      return;
+    }
+    window_->beginExternalCommands();
     toneMapper_.map();
-    systemView_->window()->endExternalCommands();
-    update();
+    window_->endExternalCommands();
   }
 
  private:
   GLToneMapper toneMapper_;
-  const SystemView *systemView_;
+  CpuAccumulatorDriver *driver_;
+  QQuickWindow *window_ = nullptr;
+  HistogramBuffer histogramCopy_;
+  uint64_t lastSnapshotVersion_ = 0;
+  bool initialized_ = false;
+  bool hasTexture_ = false;
 };
 
 }  // namespace
 
 SystemView::SystemView(QQuickItem *parent) : QQuickFramebufferObject(parent) {
-  generator_ = new HistogramGenerator(this);
+  driver_ = new CpuAccumulatorDriver(this);
+  connect(driver_, &CpuAccumulatorDriver::batchCompleted, this,
+          &QQuickItem::update);
+  connect(driver_, &CpuAccumulatorDriver::runningChanged, this,
+          &SystemView::runningChanged);
+  connect(driver_, &CpuAccumulatorDriver::errorOccurred, this,
+          [this](const QString &message) {
+            qCWarning(systemViewLog, "%s", qPrintable(message));
+            emit warningEmitted(message);
+          });
 
   connect(this, &QQuickItem::widthChanged, this, &SystemView::updateBufferSize);
   connect(this, &QQuickItem::heightChanged, this,
@@ -71,16 +108,12 @@ QQuickFramebufferObject::Renderer *SystemView::createRenderer() const {
   return new HistogramRenderer(this);
 }
 
-void SystemView::clear() { generator_->reset(); }
-
-void SystemView::setRunning(bool running) {
-  if (generator_->isEnabled() == running) {
-    return;
-  }
-
-  generator_->setEnabled(running);
-  emit runningChanged();
+void SystemView::clear() {
+  driver_->clear();
+  update();
 }
+
+void SystemView::setRunning(bool running) { driver_->setRunning(running); }
 
 void SystemView::setModel(ProjectModel *projectModel) {
   if (projectModel == model_) {
@@ -88,29 +121,40 @@ void SystemView::setModel(ProjectModel *projectModel) {
   }
   if (model_ != nullptr) {
     model_->disconnect(this);
+    model_->system()->disconnect(this);
+    model_->colorMap()->disconnect(this);
   }
 
   model_ = projectModel;
-  connect(projectModel, &ProjectModel::gammaChanged, this, &QQuickItem::update);
-  connect(projectModel, &ProjectModel::exposureChanged, this,
-          &QQuickItem::update);
-  connect(projectModel, &ProjectModel::vibrancyChanged, this,
-          &QQuickItem::update);
-  connect(projectModel->system(), &SystemModel::visuallyChanged, this,
+  if (model_ == nullptr) {
+    driver_->clearSystem();
+    emit modelChanged();
+    update();
+    return;
+  }
+
+  connect(model_, &ProjectModel::gammaChanged, this, &QQuickItem::update);
+  connect(model_, &ProjectModel::exposureChanged, this, &QQuickItem::update);
+  connect(model_, &ProjectModel::vibrancyChanged, this, &QQuickItem::update);
+  connect(model_->system(), &SystemModel::visuallyChanged, this,
           &SystemView::updateSystem);
-  connect(projectModel->colorMap(), &ColorMapModel::nameChanged, this,
+  connect(model_->colorMap(), &ColorMapModel::nameChanged, this,
           &SystemView::updateColorMap);
 
   updateSystem();
   updateColorMap();
+  updateBufferSize();
   emit modelChanged();
 }
 
 void SystemView::updateSystem() {
+  if (model_ == nullptr) {
+    return;
+  }
   const System &systemProto = model_->proto()->system();
 
   std::vector<std::string> warnings;
-  generator_->setSystem(toCameraSystem(systemProto, &warnings));
+  driver_->setSystem(toCameraSystem(systemProto, &warnings));
   for (const auto &warning : warnings) {
     qCWarning(systemViewLog, "%s", warning.c_str());
     emit warningEmitted(QString::fromStdString(warning));
@@ -119,13 +163,18 @@ void SystemView::updateSystem() {
 }
 
 void SystemView::updateColorMap() {
-  generator_->setColorMap(model_->colorMap()->coreColorMap());
+  if (model_ == nullptr) {
+    return;
+  }
+  driver_->setColorMap(model_->colorMap()->coreColorMap());
   update();
 }
 
 void SystemView::updateBufferSize() {
-  generator_->setSize(static_cast<quint32>(width()),
-                      static_cast<quint32>(height()));
+  const auto w = static_cast<uint32_t>((std::max)(0.0, width()));
+  const auto h = static_cast<uint32_t>((std::max)(0.0, height()));
+  driver_->setSize(w, h);
+  update();
 }
 
 }  // namespace chaoskit::ui
