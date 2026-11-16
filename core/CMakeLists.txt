@@ -13,6 +13,8 @@ add_library(
   errors.h
   ExpressionInterpreter.cpp
   ExpressionInterpreter.h
+  GpuSystemCompiler.cpp
+  GpuSystemCompiler.h
   HistogramBuffer.cpp
   HistogramBuffer.h
   PaletteColorMap.cpp
@@ -56,6 +58,7 @@ add_executable(
   ColorMapRegistryTest.cpp
   CpuAccumulatorTest.cpp
   ExpressionInterpreterTest.cpp
+  GpuSystemCompilerTest.cpp
   LifetimeTest.cpp
   SystemProcessorTest.cpp
   testing/MockRng.h
