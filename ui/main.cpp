@@ -8,18 +8,13 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
-#include <QQuickWindow>
 #include <QRegularExpression>
-#include <QSGRendererInterface>
-#include <QSurfaceFormat>
 #include <QtGui/QTransform>
 #include <magic_enum.hpp>
 #include "ColorMap.h"
 #include "ColorMapPreviewProvider.h"
 #include "EngineManager.h"
 #include "FormulaPreviewProvider.h"
-#include "HistogramBuffer.h"
-#include "Point.h"
 #include "SystemView.h"
 #include "Utilities.h"
 #include "chaoskit.pb.h"
@@ -29,8 +24,6 @@
 #include "resources.h"
 
 using chaoskit::core::ColorMap;
-using chaoskit::core::HistogramBuffer;
-using chaoskit::core::Point;
 using chaoskit::library::FormulaType;
 using chaoskit::ui::ColorMapPreviewProvider;
 using chaoskit::ui::ColorMapRegistry;
@@ -101,17 +94,8 @@ int main(int argc, char* argv[]) {
 
   QGuiApplication app(argc, argv);
 
-  QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGLRhi);
-  QSurfaceFormat format;
-  format.setMajorVersion(3);
-  format.setMinorVersion(2);
-  format.setProfile(QSurfaceFormat::CoreProfile);
-  QSurfaceFormat::setDefaultFormat(format);
-
   // Register types
   qRegisterMetaType<ColorMap*>();
-  qRegisterMetaType<HistogramBuffer>();
-  qRegisterMetaType<Point>();
 
   // Set up color maps
   auto* colorMapRegistry = new ColorMapRegistry(&app);

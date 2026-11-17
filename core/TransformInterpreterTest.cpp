@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "TransformInterpreter.h"
+#include "ast/Parameter.h"
 #include "ast/helpers.h"
 #include "ast/transforms.h"
 #include "core/debug.h"  // Debug formatters, keep.
@@ -76,7 +77,7 @@ TEST_F(TransformInterpreterTest, InterpretsRandomChoiceTransform) {
 
   auto rng = std::make_shared<StaticRng>();
   TransformInterpreter interpreter(rng);
-  Particle input{Point{1, 1}, .5f};
+  Particle input(Point(1, 1), .5f);
   ast::Transform first(ast::Formula{ast::Input(ast::Input::X) * 2,
                                     ast::Input(ast::Input::Y) * 2},
                        ast::Input(ast::Input::COLOR) + .25f);
@@ -100,10 +101,68 @@ TEST_F(TransformInterpreterTest, InterpretsRandomChoiceTransform) {
 TEST_F(TransformInterpreterTest, EmptyRandomChoiceReturnsInput) {
   auto rng = std::make_shared<StaticRng>();
   TransformInterpreter interpreter(rng);
-  Particle input{Point{1, 1}, .5f};
+  Particle input(Point(1, 1), .5f);
   ast::TransformVariant transform = ast::RandomChoiceTransform{};
 
   ASSERT_EQ(input, interpreter.interpret(input, transform));
+}
+
+TEST_F(TransformInterpreterTest, ZeroOrNegativeTotalWeightRandomChoiceIsNoOp) {
+  using namespace ast::helpers;
+
+  auto rng = std::make_shared<StaticRng>();
+  TransformInterpreter interpreter(rng);
+  Particle input(Point(1, 2), .25f);
+
+  ast::Transform branch(ast::Formula{10.f, 20.f}, .9f);
+  ast::TransformVariant zeroWeights =
+      ast::RandomChoiceTransform{{branch, 0.0}, {branch, 0.0}};
+  EXPECT_EQ(input, interpreter.interpret(input, zeroWeights));
+
+  ast::TransformVariant negativeWeights =
+      ast::RandomChoiceTransform{{branch, -1.0}, {branch, -0.5}};
+  EXPECT_EQ(input, interpreter.interpret(input, negativeWeights));
+}
+
+TEST_F(TransformInterpreterTest,
+       RandomChoiceSkipsZeroWeightsAndGuardsLastPositiveRounding) {
+  using namespace ast::helpers;
+
+  auto rng = std::make_shared<StaticRng>();
+  TransformInterpreter interpreter(rng);
+  Particle input(Point(1, 1), .5f);
+
+  ast::Transform zeroBranch(
+      ast::Formula{ast::Parameter(0), ast::Parameter(0) + 1.f}, .1f);
+  ast::Transform firstPositive(
+      ast::Formula{ast::Parameter(0), ast::Parameter(0) + 2.f}, .3f);
+  ast::Transform secondPositive(
+      ast::Formula{ast::Parameter(0), ast::Parameter(0) + 3.f}, .7f);
+  ast::Transform trailingZero(
+      ast::Formula{ast::Parameter(0), ast::Parameter(0) + 4.f}, 0.f);
+
+  ast::TransformVariant transform =
+      ast::RandomChoiceTransform{{zeroBranch, 0.0},
+                                 {firstPositive, 0.4},
+                                 {secondPositive, 0.6},
+                                 {trailingZero, 0.0}};
+
+  TransformParams params;
+  params[TransformIndex{0}] = {100.f};
+  params[TransformIndex{1}] = {10.f};
+  params[TransformIndex{2}] = {20.f};
+  params[TransformIndex{3}] = {200.f};
+
+  // choice == 0.0 must skip leading zero-weight branch and pick index 1.
+  rng->setDouble(0.0);
+  EXPECT_EQ(Particle(10.f, 12.f, .3f),
+            interpreter.interpret(input, transform, params));
+
+  // choice slightly above sum due to FP rounding must fall back to last
+  // positive branch (index 2), never trailing zero-weight branch or throwing.
+  rng->setDouble(1.0001);
+  EXPECT_EQ(Particle(20.f, 23.f, .7f),
+            interpreter.interpret(input, transform, params));
 }
 
 TEST_F(TransformInterpreterTest, InterpretsWeightedSumTransform) {
@@ -129,7 +188,7 @@ TEST_F(TransformInterpreterTest, InterpretsWeightedSumTransform) {
 TEST_F(TransformInterpreterTest, EmptyWeightedSumReturnsInput) {
   auto rng = std::make_shared<StaticRng>();
   TransformInterpreter interpreter(rng);
-  Particle input{Point{1, 1}, .5f};
+  Particle input(Point(1, 1), .5f);
   ast::TransformVariant transform = ast::WeightedSumTransform{};
 
   ASSERT_EQ(input, interpreter.interpret(input, transform));

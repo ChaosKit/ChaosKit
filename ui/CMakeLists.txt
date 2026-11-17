@@ -2,10 +2,12 @@ find_package(
   Qt6 REQUIRED
   COMPONENTS Core
              Gui
+             GuiPrivate
              Qml
-             OpenGL
              Quick
              QuickControls2
+             ShaderTools
+             ShaderToolsPrivate
              Test
   OPTIONAL_COMPONENTS Widgets)
 
@@ -15,19 +17,60 @@ add_subdirectory(storage)
 # Library that deals with interfacing with the core.
 add_library(
   ui_core
-  BlenderTask.cpp
-  BlenderTask.h
-  GathererTask.cpp
-  GathererTask.h
-  GLToneMapper.cpp
-  GLToneMapper.h
-  HistogramBuffer.h
-  HistogramGenerator.cpp
-  HistogramGenerator.h
-  Particle.h
-  Point.h)
+  CpuAccumulatorDriver.cpp
+  CpuAccumulatorDriver.h
+  RhiComputeEngine.cpp
+  RhiComputeEngine.h
+  RhiOffscreenContext.cpp
+  RhiOffscreenContext.h
+  RhiShaderBaker.cpp
+  RhiShaderBaker.h
+  RhiToneMapper.cpp
+  RhiToneMapper.h)
 set_target_properties(ui_core PROPERTIES AUTOMOC ON)
-target_link_libraries(ui_core PUBLIC core Qt::Core Qt::Gui Qt::OpenGL)
+target_link_libraries(ui_core PUBLIC core Qt::Core Qt::Gui Qt6::GuiPrivate
+                                     Qt6::ShaderToolsPrivate)
+
+add_library(ui_view SystemView.cpp SystemView.h)
+set_target_properties(ui_view PROPERTIES AUTOMOC ON)
+target_link_libraries(
+  ui_view
+  PUBLIC core
+         ui_core
+         ui_models
+         ui_storage
+         Qt::Core
+         Qt::Gui
+         Qt::Quick)
+
+add_executable(ui_driver_test CpuAccumulatorDriverTest.cpp)
+set_target_properties(ui_driver_test PROPERTIES AUTOMOC ON)
+target_link_libraries(ui_driver_test PRIVATE gmock gmock_main ui_core Qt::Core
+                                             Qt::Test)
+add_test(NAME ui_driver_test COMMAND ui_driver_test)
+
+add_executable(ui_shader_test ShaderBakerTest.cpp)
+target_link_libraries(ui_shader_test PRIVATE gmock gmock_main ui_core library
+                                             magic_enum Qt::Core)
+add_test(NAME ui_shader_test COMMAND ui_shader_test)
+
+add_executable(ui_test SystemViewTest.cpp)
+set_target_properties(ui_test PROPERTIES AUTOMOC ON)
+target_link_libraries(
+  ui_test
+  PRIVATE gmock
+          core
+          library
+          ui_colormapregistry
+          ui_models
+          ui_storage
+          ui_view
+          Qt::Core
+          Qt::Gui
+          Qt::Quick
+          Qt::Test)
+add_test(NAME ui_test COMMAND ui_test)
+set_tests_properties(ui_test PROPERTIES LABELS "gpu")
 
 # --- Static resource management ---
 
@@ -55,8 +98,6 @@ set(ChaosKit_SOURCES
     ColorMapPreviewProvider.h
     EngineManager.cpp
     EngineManager.h
-    SystemView.h
-    SystemView.cpp
     FormulaPreviewProvider.cpp
     FormulaPreviewProvider.h
     Utilities.cpp
@@ -77,6 +118,7 @@ target_link_libraries(
   PRIVATE core
           library
           ui_core
+          ui_view
           ui_colormapregistry
           ui_models
           ui_resources

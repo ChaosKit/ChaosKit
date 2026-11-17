@@ -4,10 +4,13 @@ import QtQuick.Layouts
 import ChaosKit
 
 RowLayout {
-  spacing: 0
+  id: root
 
+  property QtObject systemView: null
   readonly property bool opened: tabs.currentIndex >= 0
   property alias currentIndex: tabs.currentIndex
+
+  spacing: 0
 
   Separator {
     direction: Separator.Direction.Vertical
@@ -24,7 +27,9 @@ RowLayout {
       currentIndex: tabs.currentIndex
 
       SystemEditor {}
-      ImageEditor {}
+      ImageEditor {
+        systemView: root.systemView
+      }
     }
   }
   Separator {

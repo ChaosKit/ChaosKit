@@ -13,6 +13,14 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_compile_definitions(_USE_MATH_DEFINES) # Needed for MSVC
 
 enable_testing()
+
+if(MSVC)
+  set(CHAOSKIT_WARNING_FLAGS /W4)
+else()
+  set(CHAOSKIT_WARNING_FLAGS -Wall -Wextra -Wpedantic)
+endif()
+add_compile_options(${CHAOSKIT_WARNING_FLAGS})
+
 add_subdirectory(stdx)
 add_subdirectory(ast)
 add_subdirectory(core)
@@ -23,6 +31,9 @@ add_subdirectory(cli)
 
 add_executable(benchmark benchmark.cpp)
 target_link_libraries(benchmark PRIVATE ast core pcg_random)
+target_compile_options(benchmark PRIVATE ${CHAOSKIT_WARNING_FLAGS})
+
+set_directory_properties(PROPERTIES COMPILE_OPTIONS "")
 
 # # ################################################### Third party dependencies
 
@@ -41,7 +52,8 @@ if(NOT variant_POPULATED)
   FetchContent_Populate(variant)
 
   add_library(variant INTERFACE)
-  target_include_directories(variant INTERFACE ${variant_SOURCE_DIR}/include)
+  target_include_directories(variant SYSTEM
+                             INTERFACE ${variant_SOURCE_DIR}/include)
   target_sources(
     variant
     INTERFACE ${variant_SOURCE_DIR}/include/mapbox/optional.hpp
@@ -62,7 +74,7 @@ if(NOT pcg_random_POPULATED)
   FetchContent_Populate(pcg_random)
 
   add_library(pcg_random INTERFACE)
-  target_include_directories(pcg_random
+  target_include_directories(pcg_random SYSTEM
                              INTERFACE ${pcg_random_SOURCE_DIR}/include)
   target_sources(
     pcg_random
@@ -126,7 +138,8 @@ if(NOT qt_qml_models_POPULATED)
     ${qt_qml_models_SOURCE_DIR}/QQmlObjectListModel.h
     ${qt_qml_models_SOURCE_DIR}/QQmlVariantListModel.cpp
     ${qt_qml_models_SOURCE_DIR}/QQmlVariantListModel.h)
-  target_include_directories(qt_qml_models PUBLIC ${qt_qml_models_SOURCE_DIR})
+  target_include_directories(qt_qml_models SYSTEM
+                             PUBLIC ${qt_qml_models_SOURCE_DIR})
   set_target_properties(qt_qml_models PROPERTIES AUTOMOC ON)
   target_link_libraries(qt_qml_models PUBLIC Qt::Core)
 endif()

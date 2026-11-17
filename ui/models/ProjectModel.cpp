@@ -29,6 +29,8 @@ ProjectModel::ProjectModel(ModelFactory* modelFactory, QObject* parent)
   connect(this, &ProjectModel::projectChanged, this,
           &ProjectModel::widthChanged);
   connect(this, &ProjectModel::projectChanged, this,
+          &ProjectModel::heightChanged);
+  connect(this, &ProjectModel::projectChanged, this,
           &ProjectModel::colorMapChanged);
   connect(this, &ProjectModel::projectChanged, this,
           &ProjectModel::systemChanged);

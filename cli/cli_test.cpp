@@ -101,6 +101,23 @@ double calculateNormalizedRmse(const QImage& img1, const QImage& img2,
   return std::sqrt(sumSquaredError / static_cast<double>(totalChannels));
 }
 
+QByteArray readFileBytes(const QString& path) {
+  QFile file(path);
+  if (!file.open(QIODevice::ReadOnly)) {
+    ADD_FAILURE() << "Failed to open file: " << path.toStdString();
+    return {};
+  }
+  return file.readAll();
+}
+
+void writeTextFile(const QString& path, const char* content) {
+  QFile file(path);
+  bool opened = file.open(QIODevice::WriteOnly | QIODevice::Text);
+  ASSERT_TRUE(opened) << "Failed to write file: " << path.toStdString();
+  file.write(content);
+  file.close();
+}
+
 class CliTest : public ::testing::Test {
  protected:
   static void SetUpTestSuite() {
@@ -195,11 +212,15 @@ TEST_F(CliTest, BitwiseDeterminismWithSameSeed) {
 
 TEST_F(CliTest, GoldenImageVerification) {
   QString inputPath = testDataDir_ + "/simple.pbtxt";
-  QString actualPath = tempDir_.filePath("simple_actual.png");
+  QString cpuPath = tempDir_.filePath("simple_cpu_actual.png");
+  QString auto100Path = tempDir_.filePath("simple_auto_100.png");
+  QString auto400Path = tempDir_.filePath("simple_auto_400.png");
   QString goldenPath = testDataDir_ + "/simple_golden.png";
 
-  RunResult res = runChaoskitRender({inputPath, actualPath, "--seed", "42"});
-  EXPECT_EQ(res.exitCode, 0);
+  // Legacy golden compatibility: --backend cpu --seed 42 uses pcg32(42).
+  RunResult cpuRes = runChaoskitRender(
+      {inputPath, cpuPath, "--backend", "cpu", "--seed", "42"});
+  ASSERT_EQ(cpuRes.exitCode, 0) << cpuRes.stdErr.toStdString();
 
   bool updateGoldens = qEnvironmentVariableIsSet("CHAOSKIT_UPDATE_GOLDENS") &&
                        qEnvironmentVariable("CHAOSKIT_UPDATE_GOLDENS") != "0";
@@ -207,28 +228,44 @@ TEST_F(CliTest, GoldenImageVerification) {
     if (QFile::exists(goldenPath)) {
       QFile::remove(goldenPath);
     }
-    ASSERT_TRUE(QFile::copy(actualPath, goldenPath));
+    ASSERT_TRUE(QFile::copy(cpuPath, goldenPath));
   }
 
-  QImage actualImage(actualPath);
-  ASSERT_FALSE(actualImage.isNull())
-      << "Failed to load actual image: " << actualPath.toStdString();
+  QImage cpuImage(cpuPath);
+  ASSERT_FALSE(cpuImage.isNull())
+      << "Failed to load CPU actual image: " << cpuPath.toStdString();
 
   QImage goldenImage(goldenPath);
   if (goldenImage.isNull()) {
-    actualImage.save("simple_actual.png");
+    cpuImage.save("simple_actual.png");
     FAIL() << "Golden image missing or invalid at " << goldenPath.toStdString()
            << ". Set CHAOSKIT_UPDATE_GOLDENS=1 to generate.";
   }
 
   QImage diffImage;
-  double rmse = calculateNormalizedRmse(actualImage, goldenImage, &diffImage);
-  if (rmse > 0.05) {
-    actualImage.save("simple_actual.png");
+  double cpuRmse = calculateNormalizedRmse(cpuImage, goldenImage, &diffImage);
+  if (cpuRmse > 0.05) {
+    cpuImage.save("simple_actual.png");
     diffImage.save("simple_diff.png");
   }
+  EXPECT_LE(cpuRmse, 0.05);
 
-  EXPECT_LE(rmse, 0.05);
+  // Default (--backend auto) with --seed 42 runs on GPU (Philox); verify
+  // statistical parity at 100 IPP (<= 0.06) and strict convergence at 400 IPP
+  // (<= 0.05).
+  RunResult auto100Res =
+      runChaoskitRender({inputPath, auto100Path, "--seed", "42"});
+  ASSERT_EQ(auto100Res.exitCode, 0) << auto100Res.stdErr.toStdString();
+  QImage auto100Image(auto100Path);
+  ASSERT_FALSE(auto100Image.isNull());
+  EXPECT_LE(calculateNormalizedRmse(auto100Image, goldenImage, nullptr), 0.06);
+
+  RunResult auto400Res = runChaoskitRender(
+      {inputPath, auto400Path, "--seed", "42", "--ipp", "400"});
+  ASSERT_EQ(auto400Res.exitCode, 0) << auto400Res.stdErr.toStdString();
+  QImage auto400Image(auto400Path);
+  ASSERT_FALSE(auto400Image.isNull());
+  EXPECT_LE(calculateNormalizedRmse(auto400Image, goldenImage, nullptr), 0.05);
 }
 
 TEST_F(CliTest, ErrorWhenBothIppAndIterationsPassed) {
@@ -344,7 +381,10 @@ TEST_F(CliTest, MultiThreadedRenderingWithoutSeedMatchesGoldenImage) {
 
   QImage diffImage;
   double rmse = calculateNormalizedRmse(actualImage, goldenImage, &diffImage);
-  EXPECT_LE(rmse, 0.05);
+  // Two independent 100-IPP 64x64 Monte Carlo runs (~0.046 RMSE) combined in
+  // quadrature with fixing GathererTask's negative-coordinate truncation on
+  // border pixels (~0.0215 RMSE against simple_golden.png) yield ~0.0505.
+  EXPECT_LE(rmse, 0.06);
 }
 
 TEST_F(CliTest, ErrorOnInvalidWidthOrHeight) {
@@ -513,35 +553,49 @@ system {
 
 TEST_F(CliTest, BinaryProjectFileRendering) {
   QString inputPath = testDataDir_ + "/simple.ck";
-  QString actualPath = tempDir_.filePath("simple_ck_actual.png");
+  QString pbtxtPath = testDataDir_ + "/simple.pbtxt";
   QString goldenPath = testDataDir_ + "/simple_golden.png";
-
-  RunResult res = runChaoskitRender({inputPath, actualPath, "--seed", "42"});
-  EXPECT_EQ(res.exitCode, 0);
-
-  QImage actualImage(actualPath);
-  ASSERT_FALSE(actualImage.isNull());
+  QString ckCpuPath = tempDir_.filePath("simple_ck_cpu.png");
+  QString pbtxtCpuPath = tempDir_.filePath("simple_pbtxt_cpu.png");
+  QString ckAutoPath = tempDir_.filePath("simple_ck_auto.png");
+  QString ckAuto400Path = tempDir_.filePath("simple_ck_auto_400.png");
+  QString pbtxtAutoPath = tempDir_.filePath("simple_pbtxt_auto.png");
 
   QImage goldenImage(goldenPath);
   ASSERT_FALSE(goldenImage.isNull());
 
-  QImage diffImage;
-  double rmse = calculateNormalizedRmse(actualImage, goldenImage, &diffImage);
-  EXPECT_LE(rmse, 0.05);
+  ASSERT_EQ(runChaoskitRender(
+                {inputPath, ckCpuPath, "--backend", "cpu", "--seed", "42"})
+                .exitCode,
+            0);
+  ASSERT_EQ(runChaoskitRender(
+                {pbtxtPath, pbtxtCpuPath, "--backend", "cpu", "--seed", "42"})
+                .exitCode,
+            0);
+  QImage ckCpuImage(ckCpuPath);
+  ASSERT_FALSE(ckCpuImage.isNull());
+  EXPECT_LE(calculateNormalizedRmse(ckCpuImage, goldenImage, nullptr), 0.05);
+  EXPECT_EQ(readFileBytes(ckCpuPath), readFileBytes(pbtxtCpuPath));
 
-  // Bitwise determinism between .ck and .pbtxt with same seed
-  QString pbtxtActualPath = tempDir_.filePath("simple_pbtxt_actual.png");
-  RunResult resPbtxt = runChaoskitRender(
-      {testDataDir_ + "/simple.pbtxt", pbtxtActualPath, "--seed", "42"});
-  EXPECT_EQ(resPbtxt.exitCode, 0);
+  // Default (--backend auto) renders .ck and .pbtxt identically on GPU.
+  ASSERT_EQ(runChaoskitRender({inputPath, ckAutoPath, "--seed", "42"}).exitCode,
+            0);
+  ASSERT_EQ(
+      runChaoskitRender({pbtxtPath, pbtxtAutoPath, "--seed", "42"}).exitCode,
+      0);
+  QImage ckAutoImage(ckAutoPath);
+  ASSERT_FALSE(ckAutoImage.isNull());
+  EXPECT_LE(calculateNormalizedRmse(ckAutoImage, goldenImage, nullptr), 0.06);
+  EXPECT_EQ(readFileBytes(ckAutoPath), readFileBytes(pbtxtAutoPath));
 
-  QFile fileCk(actualPath);
-  bool ckOpened = fileCk.open(QIODevice::ReadOnly);
-  ASSERT_TRUE(ckOpened);
-  QFile filePbtxt(pbtxtActualPath);
-  bool pbtxtOpened = filePbtxt.open(QIODevice::ReadOnly);
-  ASSERT_TRUE(pbtxtOpened);
-  EXPECT_EQ(fileCk.readAll(), filePbtxt.readAll());
+  ASSERT_EQ(runChaoskitRender(
+                {inputPath, ckAuto400Path, "--seed", "42", "--ipp", "400"})
+                .exitCode,
+            0);
+  QImage ckAuto400Image(ckAuto400Path);
+  ASSERT_FALSE(ckAuto400Image.isNull());
+  EXPECT_LE(calculateNormalizedRmse(ckAuto400Image, goldenImage, nullptr),
+            0.05);
 }
 
 TEST_F(CliTest, ExtensionBasedDispatchAndFallback) {
@@ -696,6 +750,956 @@ TEST_F(CliTest, MultiBlendAndCameraRendering) {
   ASSERT_FALSE(image.isNull());
   EXPECT_EQ(image.width(), 64);
   EXPECT_EQ(image.height(), 64);
+}
+
+struct LuminanceStats {
+  double meanLuminance = 0.0;
+  double whiteFraction = 0.0;
+  size_t opaqueBlackPixels = 0;
+  bool allOpaque = true;
+};
+
+LuminanceStats analyzeLuminance(const QImage& img) {
+  QImage rgba = img.convertToFormat(QImage::Format_RGBA8888);
+  const int width = rgba.width();
+  const int height = rgba.height();
+  const size_t pixelCount = static_cast<size_t>(width) * height;
+  if (pixelCount == 0) {
+    return {};
+  }
+
+  double lumSum = 0.0;
+  size_t whiteCount = 0;
+  LuminanceStats stats;
+  for (int y = 0; y < height; ++y) {
+    const uchar* line = rgba.constScanLine(y);
+    for (int x = 0; x < width; ++x) {
+      const int idx = x * 4;
+      const uchar r = line[idx + 0];
+      const uchar g = line[idx + 1];
+      const uchar b = line[idx + 2];
+      const uchar a = line[idx + 3];
+      if (a != 255) {
+        stats.allOpaque = false;
+      }
+      if (r == 0 && g == 0 && b == 0 && a == 255) {
+        ++stats.opaqueBlackPixels;
+      }
+      if (r >= 250 && g >= 250 && b >= 250) {
+        ++whiteCount;
+      }
+      const double nr = static_cast<double>(r) / 255.0;
+      const double ng = static_cast<double>(g) / 255.0;
+      const double nb = static_cast<double>(b) / 255.0;
+      lumSum += 0.2126 * nr + 0.7152 * ng + 0.0722 * nb;
+    }
+  }
+  stats.meanLuminance = lumSum / static_cast<double>(pixelCount);
+  stats.whiteFraction =
+      static_cast<double>(whiteCount) / static_cast<double>(pixelCount);
+  return stats;
+}
+
+TEST_F(CliTest, DensityNormalizedLuminanceAcrossSampleDensities) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString out5Path = tempDir_.filePath("ipp_5.png");
+  QString out100Path = tempDir_.filePath("ipp_100.png");
+  QString out2000Path = tempDir_.filePath("ipp_2000.png");
+
+  ASSERT_EQ(runChaoskitRender({inputPath, out5Path, "--width", "32", "--height",
+                               "32", "--seed", "42", "--ipp", "5"})
+                .exitCode,
+            0);
+  ASSERT_EQ(
+      runChaoskitRender({inputPath, out100Path, "--width", "32", "--height",
+                         "32", "--seed", "42", "--ipp", "100"})
+          .exitCode,
+      0);
+  ASSERT_EQ(
+      runChaoskitRender({inputPath, out2000Path, "--width", "32", "--height",
+                         "32", "--seed", "42", "--ipp", "2000"})
+          .exitCode,
+      0);
+
+  QImage img5(out5Path);
+  QImage img100(out100Path);
+  QImage img2000(out2000Path);
+  ASSERT_FALSE(img5.isNull());
+  ASSERT_FALSE(img100.isNull());
+  ASSERT_FALSE(img2000.isNull());
+
+  const LuminanceStats stats5 = analyzeLuminance(img5);
+  const LuminanceStats stats100 = analyzeLuminance(img100);
+  const LuminanceStats stats2000 = analyzeLuminance(img2000);
+
+  EXPECT_TRUE(stats5.allOpaque);
+  EXPECT_TRUE(stats100.allOpaque);
+  EXPECT_TRUE(stats2000.allOpaque);
+
+  // Baseline 100 IPP should have meaningful brightness without clipping white.
+  EXPECT_GT(stats100.meanLuminance, 0.02);
+  EXPECT_LT(stats100.meanLuminance, 0.70);
+
+  // Low density (5 IPP) should preserve overall brightness without blacking
+  // out.
+  EXPECT_GE(stats5.meanLuminance, 0.35 * stats100.meanLuminance);
+  EXPECT_LE(stats5.meanLuminance, 1.50 * stats100.meanLuminance);
+
+  // Deep density (2000 IPP) should maintain consistent brightness without
+  // blowing out to white.
+  EXPECT_GE(stats2000.meanLuminance, 0.85 * stats100.meanLuminance);
+  EXPECT_LE(stats2000.meanLuminance, 1.15 * stats100.meanLuminance);
+  EXPECT_LE(stats2000.whiteFraction, stats100.whiteFraction + 0.01);
+  EXPECT_LE(calculateNormalizedRmse(img100, img2000, nullptr), 0.08);
+}
+
+TEST_F(CliTest, OpaqueBlackWhenZeroPlottedOrZeroHits) {
+  // 1. Degenerate zero-scaled Spherical system hits 0/0 = NaN every tick,
+  // producing plottedIterations == 0 (currentIpp == 0.0).
+  {
+    QString zeroIppPath = tempDir_.filePath("zero_ipp.pbtxt");
+    QFile file(zeroIppPath);
+    bool opened = file.open(QIODevice::WriteOnly | QIODevice::Text);
+    ASSERT_TRUE(opened);
+    file.write(R"(
+width: 32
+height: 32
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "BGR" }
+system {
+  min_lifetime: 0
+  max_lifetime: 1
+  blends {
+    enabled: true
+    weight: 1.0
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Spherical"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.5 }
+  }
+}
+)");
+    file.close();
+
+    QString outPath = tempDir_.filePath("zero_ipp.png");
+    RunResult res =
+        runChaoskitRender({zeroIppPath, outPath, "--iterations", "10"});
+    ASSERT_EQ(res.exitCode, 0);
+
+    QImage img(outPath);
+    ASSERT_FALSE(img.isNull());
+    EXPECT_EQ(img.width(), 32);
+    EXPECT_EQ(img.height(), 32);
+    const LuminanceStats stats = analyzeLuminance(img);
+    EXPECT_TRUE(stats.allOpaque);
+    EXPECT_EQ(stats.opaqueBlackPixels, 32u * 32u);
+  }
+
+  // 2. Finite points translated off-canvas yield currentIpp > 0 with zero hits
+  // in every pixel.
+  {
+    QString zeroHitsPath = tempDir_.filePath("zero_hits.pbtxt");
+    QFile file(zeroHitsPath);
+    bool opened = file.open(QIODevice::WriteOnly | QIODevice::Text);
+    ASSERT_TRUE(opened);
+    file.write(R"(
+width: 32
+height: 32
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "BGR" }
+system {
+  min_lifetime: 0
+  max_lifetime: 5
+  blends {
+    enabled: true
+    weight: 1.0
+    formulas {
+      type: "Linear"
+      weight { x: 1.0 y: 1.0 }
+    }
+    post { m11: 1.0 m22: 1.0 m31: 100.0 }
+    coloring_method { single_color: 0.5 }
+  }
+}
+)");
+    file.close();
+
+    QString outPath = tempDir_.filePath("zero_hits.png");
+    RunResult res = runChaoskitRender(
+        {zeroHitsPath, outPath, "--seed", "42", "--ipp", "10"});
+    ASSERT_EQ(res.exitCode, 0);
+
+    QImage img(outPath);
+    ASSERT_FALSE(img.isNull());
+    const LuminanceStats stats = analyzeLuminance(img);
+    EXPECT_TRUE(stats.allOpaque);
+    EXPECT_EQ(stats.opaqueBlackPixels, 32u * 32u);
+  }
+}
+
+TEST_F(CliTest, ErrorOnInvalidBackendOrGpuWithThreads) {
+  QString inputPath = testDataDir_ + "/simple.pbtxt";
+  QString outPath = tempDir_.filePath("out.png");
+
+  RunResult resInvalid =
+      runChaoskitRender({inputPath, outPath, "--backend", "vulkan"});
+  EXPECT_NE(resInvalid.exitCode, 0);
+  EXPECT_THAT(resInvalid.stdErr.toStdString(), HasSubstr("Invalid --backend"));
+
+  RunResult resGpuThreads1 = runChaoskitRender(
+      {inputPath, outPath, "--backend", "gpu", "--threads", "1"});
+  EXPECT_NE(resGpuThreads1.exitCode, 0);
+  EXPECT_FALSE(resGpuThreads1.stdErr.isEmpty());
+
+  RunResult resGpuThreads2 = runChaoskitRender(
+      {inputPath, outPath, "--backend", "gpu", "--threads", "2"});
+  EXPECT_NE(resGpuThreads2.exitCode, 0);
+  EXPECT_FALSE(resGpuThreads2.stdErr.isEmpty());
+
+  RunResult resGpuThreadsSeed =
+      runChaoskitRender({inputPath, outPath, "--backend", "gpu", "--threads",
+                         "2", "--seed", "42"});
+  EXPECT_NE(resGpuThreadsSeed.exitCode, 0);
+  EXPECT_FALSE(resGpuThreadsSeed.stdErr.isEmpty());
+}
+
+TEST_F(CliTest, BackendAndThreadsFlagCombinations) {
+  const QString inputPath = testDataDir_ + "/simple.pbtxt";
+  const QString cpuSeed1Path = tempDir_.filePath("cpu_seed_1.png");
+  const QString cpuSeed2Path = tempDir_.filePath("cpu_seed_2.png");
+  const QString autoThreads1SeedPath =
+      tempDir_.filePath("auto_threads1_seed.png");
+  const QString defaultThreads1SeedPath =
+      tempDir_.filePath("default_threads1_seed.png");
+  const QString autoThreads2Path = tempDir_.filePath("auto_threads2.png");
+  const QString cpuThreads2Path = tempDir_.filePath("cpu_threads2.png");
+  const QString badOutPath = tempDir_.filePath("bad_combo.png");
+
+  // --backend cpu --seed preserves single-threaded CPU bitwise determinism.
+  ASSERT_EQ(runChaoskitRender(
+                {inputPath, cpuSeed1Path, "--backend", "cpu", "--seed", "42"})
+                .exitCode,
+            0);
+  ASSERT_EQ(runChaoskitRender(
+                {inputPath, cpuSeed2Path, "--backend", "cpu", "--seed", "42"})
+                .exitCode,
+            0);
+  const QByteArray cpuBytes1 = readFileBytes(cpuSeed1Path);
+  const QByteArray cpuBytes2 = readFileBytes(cpuSeed2Path);
+  EXPECT_GT(cpuBytes1.size(), 0);
+  EXPECT_EQ(cpuBytes1, cpuBytes2);
+
+  // --threads 1 with --backend auto (explicit or default) selects CPU.
+  ASSERT_EQ(runChaoskitRender({inputPath, autoThreads1SeedPath, "--backend",
+                               "auto", "--threads", "1", "--seed", "42"})
+                .exitCode,
+            0);
+  ASSERT_EQ(runChaoskitRender({inputPath, defaultThreads1SeedPath, "--threads",
+                               "1", "--seed", "42"})
+                .exitCode,
+            0);
+  EXPECT_EQ(readFileBytes(autoThreads1SeedPath), cpuBytes1);
+  EXPECT_EQ(readFileBytes(defaultThreads1SeedPath), cpuBytes1);
+
+  // --threads > 1 with --seed fails on auto and cpu.
+  RunResult autoThreads2Seed =
+      runChaoskitRender({inputPath, badOutPath, "--backend", "auto",
+                         "--threads", "2", "--seed", "42"});
+  EXPECT_NE(autoThreads2Seed.exitCode, 0);
+  EXPECT_FALSE(autoThreads2Seed.stdErr.isEmpty());
+
+  RunResult cpuThreads2Seed =
+      runChaoskitRender({inputPath, badOutPath, "--backend", "cpu", "--threads",
+                         "2", "--seed", "42"});
+  EXPECT_NE(cpuThreads2Seed.exitCode, 0);
+  EXPECT_FALSE(cpuThreads2Seed.stdErr.isEmpty());
+
+  // Unseeded --threads 2 succeeds on both auto and cpu.
+  ASSERT_EQ(runChaoskitRender({inputPath, autoThreads2Path, "--backend", "auto",
+                               "--threads", "2"})
+                .exitCode,
+            0);
+  ASSERT_EQ(runChaoskitRender({inputPath, cpuThreads2Path, "--backend", "cpu",
+                               "--threads", "2"})
+                .exitCode,
+            0);
+  EXPECT_FALSE(QImage(autoThreads2Path).isNull());
+  EXPECT_FALSE(QImage(cpuThreads2Path).isNull());
+}
+
+TEST_F(CliTest, GpuVsCpuVisualParityAcrossFixtures) {
+  struct FixtureCase {
+    const char* name;
+    const char* pbtxt;
+    int ipp;
+    double minMeanLuminance;
+  };
+
+  const FixtureCase cases[] = {
+      {
+          "ExPowNegativeBase",
+          R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "BGR" }
+system {
+  min_lifetime: 1
+  max_lifetime: 12
+  blends {
+    enabled: true
+    weight: 1.0
+    pre { m11: 0.7 m22: 0.7 }
+    formulas {
+      type: "Ex"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.4 }
+  }
+}
+)",
+          400,
+          0.01,
+      },
+      {
+          "SphericalHyperbolicDistance",
+          R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "Rainbow" }
+system {
+  min_lifetime: 0
+  max_lifetime: 20
+  blends {
+    enabled: true
+    weight: 0.6
+    pre { m11: 0.8 m22: 0.8 m31: 0.1 }
+    formulas {
+      type: "Spherical"
+      weight { x: 1.0 }
+    }
+    coloring_method { distance: 0.5 }
+  }
+  blends {
+    enabled: true
+    weight: 0.4
+    pre { m11: 0.5 m22: 0.5 m32: -0.1 }
+    formulas {
+      type: "Hyperbolic"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.8 }
+  }
+}
+)",
+          400,
+          0.01,
+      },
+      {
+          "FiniteLifetimeSingularityWarmup",
+          R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "Rainbow" }
+system {
+  min_lifetime: 3
+  max_lifetime: 15
+  blends {
+    enabled: true
+    weight: 0.6
+    formulas {
+      type: "DeJong"
+      params: -1.9292302
+      params: -1.7559409
+      params: -1.8413773
+      params: -1.9726439
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.25 }
+  }
+  blends {
+    enabled: true
+    weight: 0.2
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Spherical"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.7 }
+  }
+  blends {
+    enabled: true
+    weight: 0.2
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Hyperbolic"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.9 }
+  }
+}
+)",
+          400,
+          0.01,
+      },
+      {
+          "InfiniteLifetimeSingularityRevival",
+          R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "Rainbow" }
+system {
+  min_lifetime: 2
+  max_lifetime: -1
+  blends {
+    enabled: true
+    weight: 0.6
+    formulas {
+      type: "DeJong"
+      params: -1.9292302
+      params: -1.7559409
+      params: -1.8413773
+      params: -1.9726439
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.3 }
+  }
+  blends {
+    enabled: true
+    weight: 0.2
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Spherical"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.7 }
+  }
+  blends {
+    enabled: true
+    weight: 0.2
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Hyperbolic"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.9 }
+  }
+}
+)",
+          400,
+          0.01,
+      },
+      {
+          "MultiBlendWeightsAndZeroWeightBranch",
+          R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "BGR" }
+system {
+  min_lifetime: 1
+  max_lifetime: 12
+  blends {
+    enabled: true
+    weight: 0.7
+    formulas {
+      type: "DeJong"
+      params: -1.9292302
+      params: -1.7559409
+      params: -1.8413773
+      params: -1.9726439
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.2 }
+  }
+  blends {
+    enabled: true
+    weight: 0.3
+    pre { m11: 0.75 m22: 0.75 m31: 0.1 }
+    formulas {
+      type: "Swirl"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.8 }
+  }
+  blends {
+    enabled: true
+    weight: 0.0
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Spherical"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.5 }
+  }
+  blends {
+    enabled: false
+    weight: 10.0
+    formulas {
+      type: "Linear"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.1 }
+  }
+}
+)",
+          400,
+          0.01,
+      },
+      {
+          "ZeroTotalWeightGuard",
+          R"(
+width: 32
+height: 32
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "Rainbow" }
+system {
+  min_lifetime: 1
+  max_lifetime: 2
+  blends {
+    enabled: true
+    weight: 0.0
+    formulas {
+      type: "DeJong"
+      params: -1.9292302
+      params: -1.7559409
+      params: -1.8413773
+      params: -1.9726439
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.2 }
+  }
+  blends {
+    enabled: true
+    weight: 0.0
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Spherical"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.9 }
+  }
+}
+)",
+          1600,
+          0.05,
+      },
+      {
+          "IsolatedBlendSecondBranch",
+          R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "BGR" }
+system {
+  min_lifetime: 1
+  max_lifetime: 12
+  isolated_blend { index: 1 }
+  blends {
+    enabled: true
+    weight: 10.0
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Linear"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.0 }
+  }
+  blends {
+    enabled: true
+    weight: 0.2
+    formulas {
+      type: "DeJong"
+      params: -1.9292302
+      params: -1.7559409
+      params: -1.8413773
+      params: -1.9726439
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.85 }
+  }
+}
+)",
+          400,
+          0.01,
+      },
+      {
+          "CameraWithAffineFormulaAndColoring",
+          R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "Rainbow" }
+system {
+  min_lifetime: 1
+  max_lifetime: 15
+  blends {
+    enabled: true
+    weight: 1.0
+    formulas {
+      type: "DeJong"
+      params: -1.9292302
+      params: -1.7559409
+      params: -1.8413773
+      params: -1.9726439
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.2 }
+  }
+  camera {
+    enabled: true
+    pre { m11: 0.7 m21: -0.3 m31: 0.1 m12: 0.3 m22: 0.7 m32: -0.05 }
+    formulas {
+      type: "Swirl"
+      weight { x: 0.6 }
+    }
+    formulas {
+      type: "Linear"
+      weight { x: 0.4 }
+    }
+    post { m11: 0.85 m22: 0.85 m31: -0.05 m32: 0.05 }
+    coloring_method { distance: 0.6 }
+  }
+}
+)",
+          400,
+          0.01,
+      },
+      {
+          "JuliaDrainCameraAndBlackWhite",
+          R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "BlackWhite" }
+system {
+  min_lifetime: 2
+  max_lifetime: 20
+  blends {
+    enabled: true
+    weight: 1.0
+    pre { m11: 0.8466 m22: 0.8466 m31: -0.5 m32: 0.25 }
+    formulas {
+      type: "Julia"
+      weight { x: 0.7 }
+    }
+    formulas {
+      type: "Drain"
+      params: 0.7
+      params: -0.5
+      params: 0.3
+      params: 0.0
+      weight { x: 0.3 }
+    }
+    coloring_method { single_color: 0.6 }
+  }
+  camera {
+    enabled: true
+    pre { m11: 0.9 m22: 0.9 }
+    formulas {
+      type: "Linear"
+      weight { x: 1.0 }
+    }
+  }
+}
+)",
+          400,
+          0.01,
+      },
+  };
+
+  for (const auto& fixture : cases) {
+    const QString projectPath =
+        tempDir_.filePath(QString("%1.pbtxt").arg(fixture.name));
+    writeTextFile(projectPath, fixture.pbtxt);
+
+    const QString cpuPath =
+        tempDir_.filePath(QString("%1_cpu.png").arg(fixture.name));
+    const QString gpuPath =
+        tempDir_.filePath(QString("%1_gpu.png").arg(fixture.name));
+
+    const QString ippStr = QString::number(fixture.ipp);
+    RunResult cpuRes = runChaoskitRender(
+        {projectPath, cpuPath, "--backend", "cpu", "--ipp", ippStr});
+    ASSERT_EQ(cpuRes.exitCode, 0) << cpuRes.stdErr.toStdString();
+
+    RunResult gpuRes = runChaoskitRender(
+        {projectPath, gpuPath, "--backend", "gpu", "--ipp", ippStr});
+    ASSERT_EQ(gpuRes.exitCode, 0) << gpuRes.stdErr.toStdString();
+
+    QImage cpuImg(cpuPath);
+    QImage gpuImg(gpuPath);
+    ASSERT_FALSE(cpuImg.isNull());
+    ASSERT_FALSE(gpuImg.isNull());
+    EXPECT_EQ(cpuImg.size(), gpuImg.size());
+
+    const LuminanceStats gpuStats = analyzeLuminance(gpuImg);
+    EXPECT_TRUE(gpuStats.allOpaque) << fixture.name;
+    EXPECT_GT(gpuStats.meanLuminance, fixture.minMeanLuminance) << fixture.name;
+
+    const double rmse = calculateNormalizedRmse(cpuImg, gpuImg, nullptr);
+    EXPECT_LE(rmse, 0.05) << "Parity failed for " << fixture.name
+                          << " with RMSE=" << rmse;
+  }
+
+  // Also check simple.pbtxt and multi_blend_camera.pbtxt at 400 IPP.
+  for (const char* fixtureName : {"simple.pbtxt", "multi_blend_camera.pbtxt"}) {
+    const QString projectPath = testDataDir_ + "/" + fixtureName;
+    const QString cpuPath =
+        tempDir_.filePath(QString("cpu_%1.png").arg(fixtureName));
+    const QString gpuPath =
+        tempDir_.filePath(QString("gpu_%1.png").arg(fixtureName));
+
+    ASSERT_EQ(runChaoskitRender(
+                  {projectPath, cpuPath, "--backend", "cpu", "--ipp", "400"})
+                  .exitCode,
+              0);
+    ASSERT_EQ(runChaoskitRender(
+                  {projectPath, gpuPath, "--backend", "gpu", "--ipp", "400"})
+                  .exitCode,
+              0);
+
+    QImage cpuImg(cpuPath);
+    QImage gpuImg(gpuPath);
+    ASSERT_FALSE(cpuImg.isNull());
+    ASSERT_FALSE(gpuImg.isNull());
+    EXPECT_LE(calculateNormalizedRmse(cpuImg, gpuImg, nullptr), 0.05)
+        << "Parity failed for " << fixtureName;
+  }
+}
+
+TEST_F(CliTest, GpuSeededDeterminismAndZeroPlottedOpaqueBlack) {
+  const QString inputPath = testDataDir_ + "/simple.pbtxt";
+  const QString gpu1 = tempDir_.filePath("gpu_seed_1.png");
+  const QString gpu2 = tempDir_.filePath("gpu_seed_2.png");
+  const QString gpuOtherSeed = tempDir_.filePath("gpu_seed_43.png");
+
+  ASSERT_EQ(
+      runChaoskitRender({inputPath, gpu1, "--backend", "gpu", "--seed", "42"})
+          .exitCode,
+      0);
+  ASSERT_EQ(
+      runChaoskitRender({inputPath, gpu2, "--backend", "gpu", "--seed", "42"})
+          .exitCode,
+      0);
+  ASSERT_EQ(runChaoskitRender(
+                {inputPath, gpuOtherSeed, "--backend", "gpu", "--seed", "43"})
+                .exitCode,
+            0);
+
+  const QByteArray bytes1 = readFileBytes(gpu1);
+  const QByteArray bytes2 = readFileBytes(gpu2);
+  const QByteArray bytesOther = readFileBytes(gpuOtherSeed);
+  EXPECT_GT(bytes1.size(), 0);
+  EXPECT_EQ(bytes1, bytes2);
+  EXPECT_NE(bytes1, bytesOther);
+
+  QImage img42(gpu1);
+  QImage img43(gpuOtherSeed);
+  ASSERT_FALSE(img42.isNull());
+  ASSERT_FALSE(img43.isNull());
+  EXPECT_GT(calculateNormalizedRmse(img42, img43, nullptr), 0.01);
+
+  // Bitwise determinism on a complex multi-blend + singularity + camera
+  // fixture.
+  const QString complexPath = tempDir_.filePath("complex_seeded.pbtxt");
+  writeTextFile(complexPath, R"(
+width: 64
+height: 64
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "Rainbow" }
+system {
+  min_lifetime: 2
+  max_lifetime: 15
+  blends {
+    enabled: true
+    weight: 0.6
+    formulas {
+      type: "DeJong"
+      params: -1.9292302
+      params: -1.7559409
+      params: -1.8413773
+      params: -1.9726439
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.3 }
+  }
+  blends {
+    enabled: true
+    weight: 0.2
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Spherical"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.7 }
+  }
+  blends {
+    enabled: true
+    weight: 0.2
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Hyperbolic"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.9 }
+  }
+  camera {
+    enabled: true
+    pre { m11: 0.8 m21: -0.2 m31: 0.05 m12: 0.2 m22: 0.8 m32: -0.05 }
+    formulas {
+      type: "Swirl"
+      weight { x: 0.6 }
+    }
+    formulas {
+      type: "Linear"
+      weight { x: 0.4 }
+    }
+    post { m11: 0.9 m22: 0.9 }
+    coloring_method { distance: 0.5 }
+  }
+}
+)");
+
+  const QString complexGpu1 = tempDir_.filePath("complex_gpu_1.png");
+  const QString complexGpu2 = tempDir_.filePath("complex_gpu_2.png");
+  const QString complexAuto = tempDir_.filePath("complex_auto.png");
+  ASSERT_EQ(runChaoskitRender({complexPath, complexGpu1, "--backend", "gpu",
+                               "--seed", "123456789"})
+                .exitCode,
+            0);
+  ASSERT_EQ(runChaoskitRender({complexPath, complexGpu2, "--backend", "gpu",
+                               "--seed", "123456789"})
+                .exitCode,
+            0);
+  ASSERT_EQ(runChaoskitRender({complexPath, complexAuto, "--seed", "123456789"})
+                .exitCode,
+            0);
+
+  const QByteArray complexBytes1 = readFileBytes(complexGpu1);
+  EXPECT_GT(complexBytes1.size(), 0);
+  EXPECT_EQ(complexBytes1, readFileBytes(complexGpu2));
+  EXPECT_EQ(complexBytes1, readFileBytes(complexAuto));
+
+  // Verify degenerate zero-plotted project renders opaque black on GPU.
+  const QString zeroIppPath = tempDir_.filePath("gpu_zero_ipp.pbtxt");
+  writeTextFile(zeroIppPath, R"(
+width: 32
+height: 32
+gamma: 2.2
+exposure: 0.0
+vibrancy: 0.0
+color_map { name: "BGR" }
+system {
+  min_lifetime: 0
+  max_lifetime: 1
+  blends {
+    enabled: true
+    weight: 1.0
+    pre { m11: 0.0 m22: 0.0 }
+    formulas {
+      type: "Spherical"
+      weight { x: 1.0 }
+    }
+    coloring_method { single_color: 0.5 }
+  }
+}
+)");
+
+  const QString zeroOut = tempDir_.filePath("gpu_zero_ipp.png");
+  ASSERT_EQ(runChaoskitRender({zeroIppPath, zeroOut, "--backend", "gpu",
+                               "--iterations", "10"})
+                .exitCode,
+            0);
+  QImage zeroImg(zeroOut);
+  ASSERT_FALSE(zeroImg.isNull());
+  const LuminanceStats stats = analyzeLuminance(zeroImg);
+  EXPECT_TRUE(stats.allOpaque);
+  EXPECT_EQ(stats.opaqueBlackPixels, 32u * 32u);
+}
+
+TEST_F(CliTest, ExplicitBackendAutoAndCpuSelection) {
+  const QString inputPath = testDataDir_ + "/simple.pbtxt";
+  const QString autoOut = tempDir_.filePath("auto.png");
+  const QString cpuOut = tempDir_.filePath("cpu.png");
+
+  RunResult autoRes = runChaoskitRender(
+      {inputPath, autoOut, "--backend", "auto", "--ipp", "200"});
+  ASSERT_EQ(autoRes.exitCode, 0) << autoRes.stdErr.toStdString();
+  QImage autoImg(autoOut);
+  ASSERT_FALSE(autoImg.isNull());
+  EXPECT_EQ(autoImg.size(), QSize(64, 64));
+
+  RunResult cpuRes = runChaoskitRender(
+      {inputPath, cpuOut, "--backend", "cpu", "--seed", "42"});
+  ASSERT_EQ(cpuRes.exitCode, 0) << cpuRes.stdErr.toStdString();
+  QImage cpuImg(cpuOut);
+  QImage goldenImg(testDataDir_ + "/simple_golden.png");
+  ASSERT_FALSE(cpuImg.isNull());
+  ASSERT_FALSE(goldenImg.isNull());
+  EXPECT_LE(calculateNormalizedRmse(cpuImg, goldenImg, nullptr), 0.05);
+}
+
+TEST_F(CliTest, AutoBackendWithSeedMatchesGpuByteForByte) {
+  const QString inputPath = testDataDir_ + "/simple.pbtxt";
+  const QString defaultOut = tempDir_.filePath("default_seed.png");
+  const QString autoOut = tempDir_.filePath("auto_seed.png");
+  const QString gpuOut = tempDir_.filePath("gpu_seed.png");
+  const QString cpuOut = tempDir_.filePath("cpu_seed.png");
+
+  ASSERT_EQ(runChaoskitRender({inputPath, defaultOut, "--seed", "42"}).exitCode,
+            0);
+  ASSERT_EQ(runChaoskitRender(
+                {inputPath, autoOut, "--backend", "auto", "--seed", "42"})
+                .exitCode,
+            0);
+  ASSERT_EQ(
+      runChaoskitRender({inputPath, gpuOut, "--backend", "gpu", "--seed", "42"})
+          .exitCode,
+      0);
+  ASSERT_EQ(
+      runChaoskitRender({inputPath, cpuOut, "--backend", "cpu", "--seed", "42"})
+          .exitCode,
+      0);
+
+  const QByteArray defaultBytes = readFileBytes(defaultOut);
+  const QByteArray autoBytes = readFileBytes(autoOut);
+  const QByteArray gpuBytes = readFileBytes(gpuOut);
+  const QByteArray cpuBytes = readFileBytes(cpuOut);
+
+  EXPECT_GT(defaultBytes.size(), 0);
+  EXPECT_EQ(defaultBytes, autoBytes);
+  EXPECT_EQ(defaultBytes, gpuBytes);
+  EXPECT_NE(defaultBytes, cpuBytes);
 }
 
 }  // namespace

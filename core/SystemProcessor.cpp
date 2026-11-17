@@ -1,5 +1,5 @@
 #include "SystemProcessor.h"
-#include <algorithm>
+#include <cmath>
 #include "SystemParticle.h"
 
 namespace chaoskit::core {
@@ -16,6 +16,25 @@ SystemParticle SystemProcessor::process() const {
   return process(createParticle());
 }
 
+bool SystemProcessor::step(SystemParticle &particle) const {
+  if (particle.lifetime == 0) {
+    reviveParticle(particle);
+    particle.lifetime = lifetime_.revivedLifetime();
+    particle.warmup = lifetime_.min();
+  }
+
+  if (!stepParticle(particle)) {
+    return false;
+  }
+
+  if (particle.warmup > 0) {
+    --particle.warmup;
+    return false;
+  }
+
+  return true;
+}
+
 SystemParticle SystemProcessor::process(SystemParticle input) const {
   SystemParticle output = input;
 
@@ -26,9 +45,7 @@ SystemParticle SystemProcessor::process(SystemParticle input) const {
   }
 
   for (; output.warmup > 0; --output.warmup) {
-    stepParticle(output);
-
-    if (output.lifetime == 0) {
+    if (!stepParticle(output) || output.lifetime == 0) {
       break;
     }
   }
@@ -42,13 +59,21 @@ SystemParticle SystemProcessor::process(SystemParticle input) const {
   return output;
 }
 
-void SystemProcessor::stepParticle(SystemParticle &particle) const {
+bool SystemProcessor::stepParticle(SystemParticle &particle) const {
   particle.applyParticle(interpreter_.interpret(
       particle.asParticle(), system_.transform, system_.params));
+
+  if (!std::isfinite(particle.x()) || !std::isfinite(particle.y()) ||
+      !std::isfinite(particle.color)) {
+    particle.lifetime = 0;
+    particle.warmup = 0;
+    return false;
+  }
 
   if (particle.lifetime != SystemParticle::INFINITE_LIFETIME) {
     --particle.lifetime;
   }
+  return true;
 }
 
 void SystemProcessor::reviveParticle(Particle &particle) const {

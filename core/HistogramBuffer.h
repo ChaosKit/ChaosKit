@@ -11,9 +11,14 @@ class HistogramBuffer {
  public:
   HistogramBuffer() : HistogramBuffer(0, 0) {}
   HistogramBuffer(size_t width, size_t height)
-      : width_(width), height_(height), buffer_(width * height) {}
+      : width_(width),
+        height_(height),
+        buffer_(width * height, Color::zero()) {}
 
   Color* operator()(size_t x, size_t y) { return &buffer_[index(x, y)]; }
+  const Color* operator()(size_t x, size_t y) const {
+    return &buffer_[index(x, y)];
+  }
 
   [[nodiscard]] size_t width() const { return width_; }
   [[nodiscard]] size_t height() const { return height_; }
